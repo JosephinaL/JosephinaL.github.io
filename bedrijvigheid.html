@@ -846,7 +846,7 @@ const R=L.canvas({padding:.3,tolerance:3});
 const bLayers=B.map((b,i)=>{ const p=L.polygon(dec(G.b[i]),{renderer:R,weight:.4,fillOpacity:.85});
   p.on("click",e=>{ selectB(b,e.latlng,false); }); p.on("mouseover",()=>p.setStyle({weight:2,color:COL.fg})); p.on("mouseout",()=>{ if(selB!==b) p.setStyle({weight:.4,color:COL.edge}); }); return p; });
 const gLayers=GM.map(([code],k)=>{ const p=L.polygon(dec(G.g[code]),{renderer:R,weight:.6,fillOpacity:.85});
-  p.on("click",()=>{ sel.value=String(k); setGm(k); }); p.bindTooltip(GS[k].naam,{sticky:true}); return p; });
+  p.on("click",()=>{ sel.value=String(k); setGm(k,false); }); p.bindTooltip(GS[k].naam,{sticky:true}); return p; });
 const bGroup=L.layerGroup(bLayers), gGroup=L.layerGroup(gLayers);
 let outline=null;
 
@@ -869,13 +869,16 @@ sel.value=String(gi);
 sel.addEventListener("change",()=>setGm(+sel.value));
 function setGm(k,fit=true){ gi=k; selB=null; map.closePopup();
   if(outline) map.removeLayer(outline); outline=L.polygon(dec(G.g[GM[k][0]]),{renderer:R,fill:false,weight:2.4,color:COL.fg||"#000",interactive:false}).addTo(map);
-  if(fit&&tab!=="ozb"){ const bb=G.bb[GM[k][0]]; map.fitBounds([[bb[1],bb[0]],[bb[3],bb[2]]],{padding:[16,16]}); }
+  if(fit) zoomGm();
   try{ history.replaceState(null,"","#"+GM[k][0].toLowerCase()); }catch(e){}
   render(); }
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{ tab=t.dataset.v; selB=null; map.closePopup();
-  if(tab==="ozb") map.setView([52.15,5.3],7.25); else { const bb=G.bb[GM[gi][0]]; map.fitBounds([[bb[1],bb[0]],[bb[3],bb[2]]],{padding:[16,16]}); }
+  zoomGm();
   render(); }));
 
+function zoomGm(){ const bb=G.bb[GM[gi][0]]; const b=[[bb[1],bb[0]],[bb[3],bb[2]]];
+  if(tab==="ozb"){ map.fitBounds(b,{padding:[16,16]}); map.setZoom(Math.max(7,map.getZoom()-1.5),{animate:false}); map.panTo([(bb[1]+bb[3])/2,(bb[0]+bb[2])/2],{animate:false}); }
+  else map.fitBounds(b,{padding:[16,16]}); }
 /* teksten */
 const pct=v=>nf1.format(v)+"%";
 function render(){
@@ -903,7 +906,7 @@ function render(){
     W.textContent="Waarom het ertoe doet: het laat zien hoeveel de gemeente verdient aan haar bedrijfsruimte, een afweging van tarief en waarde. Verdwijnt werkruimte door transformatie naar wonen, dan verdwijnt ook deze opbrengst.";
     const s=GS.filter(x=>x.epm!=null).sort((a,b)=>b.epm-a.epm);
     document.getElementById("list").innerHTML=`<h3>Positie tussen alle gemeenten</h3><div class="list">${[...s.slice(0,5),null,...s.slice(-5)].map((x,ix)=>x?`<button class="li" data-g="${x.gi}"><span class="r">${s.indexOf(x)+1}</span><span class="t">${x===g?"<b>"+x.naam+"</b>":x.naam}</span><span class="n">€ ${nf2.format(x.epm)}</span></button>`:`<p class="hint" style="padding:4px 0">${g.epm!=null?`… ${g.naam} staat op plaats ${s.indexOf(g)+1}: € ${nf2.format(g.epm)} …`:"…"}</p>`).join("")}</div><p class="hint">Klik op een gemeente op de kaart om die te kiezen.</p>`;
-    document.querySelectorAll("#list .li").forEach(e=>e.addEventListener("click",()=>{ sel.value=e.dataset.g; setGm(+e.dataset.g,false); }));
+    document.querySelectorAll("#list .li").forEach(e=>e.addEventListener("click",()=>{ sel.value=e.dataset.g; setGm(+e.dataset.g); }));
     detail(); paint(); return;
   }
   document.getElementById("list").innerHTML=`<h3>${tab==="meng"?"Gemengde buurten":"Meeste ondernemers aan huis"}</h3>`+
