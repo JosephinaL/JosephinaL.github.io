@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Label C-kantoren</title>
-<meta name="author" content="Josephine Linders, Gemeente Delft">
+<meta name="author" content="Josephine Linders">
 <meta name="description" content="Indicatieve kaart van de energielabel C-verplichting voor kantoren, per Nederlandse gemeente, op basis van open data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -827,12 +827,12 @@ footer { font-size: .8rem; color: var(--muted); }
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <span class="eyebrow">Gemeente Delft · Energielabel C-verplichting kantoren · open data</span>
+      <span class="eyebrow">Josephine Linders · Energielabel C-verplichting kantoren · open data</span>
       <h1 id="title">Label C-kantoren</h1>
       <div class="ladder" aria-label="Energielabels A tot en met G; vanaf D voldoet een kantoor niet">
         <span style="width:30px;background:var(--lbl-A)">A</span><span style="width:30px;background:var(--lbl-B)">B</span><span style="width:30px;background:var(--lbl-C)">C</span><i class="cut"></i><span style="width:30px;background:var(--lbl-D);color:#222">D</span><span style="width:30px;background:var(--lbl-E)">E</span><span style="width:30px;background:var(--lbl-F)">F</span><span style="width:30px;background:var(--lbl-G)">G</span>
       </div>
-      <span class="byline">Ontwikkeld door Josephine Linders, Gemeente Delft</span>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
     </div>
     <form class="picker" id="pickForm">
       <div class="field">
@@ -1268,7 +1268,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.0.1';
+  const VERSIE = '1.1';
   const ORDER = ['voldoet_niet', 'geen_label', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
@@ -1373,7 +1373,7 @@ footer { font-size: .8rem; color: var(--muted); }
     drawMap(); renderAll();
     $('#dossier').innerHTML = '<span class="eyebrow">Pand</span><p class="muted" style="margin:0">Klik een pand op de kaart of in de tabel om te zien waarom het zo is ingedeeld.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM, afgeleid uit EP-Online van RVO), rijksmonumenten (RCE, via PDOK), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<br>Ontwikkeld door Josephine Linders, Gemeente Delft · versie ${VERSIE} · broncode onder EUPL-1.2.`;
+    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM, afgeleid uit EP-Online van RVO), rijksmonumenten (RCE, via PDOK), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · broncode onder EUPL-1.2.`;
   }
 
   function applyEigen(rerender = true) {
