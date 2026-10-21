@@ -92,6 +92,11 @@ nav a:hover { color: var(--accent); }
 .facts span { font-size: .82rem; color: var(--muted); }
 .btn { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: var(--r); }
 .btn:hover { filter: brightness(1.08); }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn-quiet { background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.spread { display: flex; height: 14px; max-width: 320px; border-radius: 3px; overflow: hidden; }
+.spread i { display: block; height: 100%; border-right: 1.5px solid var(--surface); }
+.spread i:last-child { border-right: 0; }
 .product-aside { background: var(--accent-soft); padding: 28px; display: grid; gap: 12px; align-content: start; }
 .product-aside ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: .95rem; }
 
@@ -185,10 +190,11 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
   <section class="section" id="producten" aria-labelledby="h-prod">
     <div class="section-head">
       <span class="eyebrow">Producten</span>
-      <h2 id="h-prod">Label C-kantoren</h2>
+      <h2 id="h-prod">Open data voor elke gemeente</h2>
     </div>
-    <article class="product">
+    <article class="product" aria-labelledby="h-labelc">
       <div class="product-body">
+        <h3 id="h-labelc">Label C-kantoren</h3>
         <div class="ladder" aria-label="Energielabels A tot en met G; vanaf D voldoet een kantoor niet">
           <span style="background:#1a8a3f">A</span><span style="background:#57a83a">B</span><span style="background:#b3c72a">C</span><i class="cut"></i><span style="background:#f2d01c;color:#222">D</span><span style="background:#f0a018">E</span><span style="background:#e4642a">F</span><span style="background:#d22a2a">G</span>
         </div>
@@ -207,6 +213,33 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
           <li>RCE levert de rijksmonumenten, RIVM de labels.</li>
           <li>De toets: meer dan 100 m² en minstens 50% kantoor.</li>
           <li>Eigen uitzonderingen blijven in de browser.</li>
+        </ol>
+      </div>
+    </article>
+    <article class="product" aria-labelledby="h-iv3">
+      <div class="product-body">
+        <h3 id="h-iv3">Iv3-spiegel en Iv3-panorama</h3>
+        <div class="spread" role="img" aria-label="Verdeling van de uitgaven van alle gemeenten samen over negen hoofdgroepen; zorg, werk en inkomen is 44 procent">
+          <i style="flex:43.9;background:#1d5f74"></i><i style="flex:16.2;background:#8a96a0"></i><i style="flex:6.2;background:#2a78d6"></i><i style="flex:8.7;background:#1baf7a"></i><i style="flex:8.3;background:#e87ba4"></i><i style="flex:3.5;background:#d23f3f"></i><i style="flex:4.1;background:#6250d6"></i><i style="flex:7.2;background:#eb6834"></i><i style="flex:1.8;background:#eda100"></i>
+        </div>
+        <p>De financiën van een gemeente, in gewone taal. De spiegel laat per gemeente zien waar het geld heen gaat, waar het vandaan komt en of de gemeente deed wat ze van plan was. Het panorama zet alle gemeenten onder elkaar, zodat je ziet waar een gemeente afwijkt.</p>
+        <div class="facts">
+          <div><b>342</b><span>gemeenten</span></div>
+          <div><b>9</b><span>hoofdgroepen, ruim 60 taakvelden</span></div>
+          <div><b>2025</b><span>begroting en jaarrekening</span></div>
+        </div>
+        <div class="btns">
+          <a class="btn" href="iv3spiegel.html">Open de spiegel <span aria-hidden="true">→</span></a>
+          <a class="btn btn-quiet" href="iv3panorama.html">Bekijk het panorama <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo werkt het</span>
+        <ol>
+          <li>Elke gemeente levert haar cijfers in het vaste Iv3-schema aan het CBS.</li>
+          <li>Het CBS publiceert ze als open data.</li>
+          <li>Bedragen staan per inwoner, zodat ze voor iedereen te plaatsen zijn.</li>
+          <li>Plan (begroting) en werkelijkheid (jaarrekening) staan naast elkaar.</li>
         </ol>
       </div>
     </article>
