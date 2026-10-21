@@ -92,8 +92,19 @@ nav a:hover { color: var(--accent); }
 .facts span { font-size: .82rem; color: var(--muted); }
 .btn { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: var(--r); }
 .btn:hover { filter: brightness(1.08); }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
-.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 10px; }
+.shelves { display: grid; gap: 28px; }
+.shelf { display: grid; gap: 12px; min-width: 0; }
+.shelf-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.shelf-head h3 { font-size: 1.05rem; }
+.shelf-head span { font-size: .88rem; color: var(--muted); }
+.rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(270px, 340px); gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+.rail > .tile { scroll-snap-align: start; }
+.tile h4 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0; }
+.meta { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.tile { transition: border-color .15s ease, transform .15s ease; }
+.tile:hover { border-color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .tile:hover { transform: translateY(-2px); } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; }
 .tile h3 { margin-top: 4px; }
 .tile p { color: var(--muted); font-size: .95rem; }
 .vis { height: 28px; display: flex; flex-direction: column; justify-content: center; }
@@ -205,27 +216,40 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
   <section class="section" id="producten" aria-labelledby="h-prod">
     <div class="section-head">
       <span class="eyebrow">Producten</span>
-      <h2 id="h-prod">Open data voor elke gemeente</h2>
+      <h2 id="h-prod">Van open data naar een bruikbaar informatieproduct, voor elke gemeente</h2>
     </div>
-    <div class="tiles">
+    <div class="shelves">
+      <div class="shelf">
+        <div class="shelf-head"><h3>Fysieke leefomgeving</h3><span>Gebouwen, energie en ruimte</span></div>
+        <div class="rail">
       <article class="tile">
         <div class="vis" aria-hidden="true"><div class="ladder"><span style="background:#1a8a3f">A</span><span style="background:#57a83a">B</span><span style="background:#b3c72a">C</span><i class="cut"></i><span style="background:#f2d01c;color:#222">D</span><span style="background:#f0a018">E</span><span style="background:#e4642a">F</span><span style="background:#d22a2a">G</span></div></div>
-        <h3>Label C-kantoren</h3>
+        <h4>Label C-kantoren</h4>
+        <span class="meta">Kaart · per pand · elke gemeente</span>
         <p>Welke kantoren voldoen aan de label C-plicht? Een kaart per gemeente, pand voor pand.</p>
         <div class="tile-links"><a class="btn btn-sm" href="labelc.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-labelc">Meer weten</button></div>
       </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>Financiën</h3><span>Wat een gemeente uitgeeft en ontvangt</span></div>
+        <div class="rail">
       <article class="tile">
         <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:43.9;background:#1d5f74"></i><i style="flex:16.2;background:#8a96a0"></i><i style="flex:6.2;background:#2a78d6"></i><i style="flex:8.7;background:#1baf7a"></i><i style="flex:8.3;background:#e87ba4"></i><i style="flex:3.5;background:#d23f3f"></i><i style="flex:4.1;background:#6250d6"></i><i style="flex:7.2;background:#eb6834"></i><i style="flex:1.8;background:#eda100"></i></span></div>
-        <h3>Iv3-spiegel</h3>
+        <h4>Iv3-spiegel</h4>
+        <span class="meta">Eén gemeente · 2025</span>
         <p>De financiën van één gemeente in gewone taal: waar het geld heen gaat, waar het vandaan komt, en plan tegenover werkelijkheid.</p>
         <div class="tile-links"><a class="btn btn-sm" href="iv3spiegel.html">Open de spiegel <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-iv3">Meer weten</button></div>
       </article>
       <article class="tile">
         <div class="vis" aria-hidden="true"><span class="stackset"><span class="spread"><i style="flex:60;background:#1d5f74"></i><i style="flex:12;background:#8a96a0"></i><i style="flex:5;background:#2a78d6"></i><i style="flex:8;background:#1baf7a"></i><i style="flex:5;background:#e87ba4"></i><i style="flex:3;background:#d23f3f"></i><i style="flex:4;background:#6250d6"></i><i style="flex:2;background:#eb6834"></i><i style="flex:1;background:#eda100"></i></span><span class="spread"><i style="flex:44;background:#1d5f74"></i><i style="flex:16;background:#8a96a0"></i><i style="flex:6;background:#2a78d6"></i><i style="flex:9;background:#1baf7a"></i><i style="flex:8;background:#e87ba4"></i><i style="flex:4;background:#d23f3f"></i><i style="flex:4;background:#6250d6"></i><i style="flex:7;background:#eb6834"></i><i style="flex:2;background:#eda100"></i></span><span class="spread"><i style="flex:30;background:#1d5f74"></i><i style="flex:22;background:#8a96a0"></i><i style="flex:8;background:#2a78d6"></i><i style="flex:10;background:#1baf7a"></i><i style="flex:11;background:#e87ba4"></i><i style="flex:4;background:#d23f3f"></i><i style="flex:5;background:#6250d6"></i><i style="flex:8;background:#eb6834"></i><i style="flex:2;background:#eda100"></i></span><span class="spread"><i style="flex:38;background:#1d5f74"></i><i style="flex:18;background:#8a96a0"></i><i style="flex:6;background:#2a78d6"></i><i style="flex:8;background:#1baf7a"></i><i style="flex:9;background:#e87ba4"></i><i style="flex:3;background:#d23f3f"></i><i style="flex:5;background:#6250d6"></i><i style="flex:11;background:#eb6834"></i><i style="flex:2;background:#eda100"></i></span></span></div>
-        <h3>Iv3-panorama</h3>
+        <h4>Iv3-panorama</h4>
+        <span class="meta">Alle gemeenten · 2025</span>
         <p>Alle 342 gemeenten onder elkaar, in kleur. Zie in één oogopslag waar een gemeente afwijkt.</p>
-        <div class="tile-links"><a class="btn btn-sm" href="iv3panorama.html">Bekijk het panorama <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-iv3">Meer weten</button></div>
+        <div class="tile-links"><a class="btn btn-sm" href="iv3panorama.html">Open het panorama <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-iv3">Meer weten</button></div>
       </article>
+        </div>
+      </div>
     </div>
     <article class="product" id="info-labelc" aria-labelledby="h-labelc">
       <div class="product-body">
