@@ -18,9 +18,10 @@
   --line: #d6dcdb;
   --accent: #0f5c66;    /* petrol, gedeeld met Label C-kantoren */
   --accent-soft: #d7e8ea;
-  --layer-1: #c9d2d1;   /* skelet: open data */
-  --layer-2: #8fb3b8;   /* verrijking: lokale kennis */
-  --layer-3: #0f5c66;   /* antwoord */
+  --layer-1: #c9d2d1;   /* skelet: BAG en CBS-gebieden */
+  --layer-2: #abc3c5;   /* open domeindata */
+  --layer-3: #86aeb3;   /* verrijking: lokale kennis */
+  --layer-4: #0f5c66;   /* antwoord */
   --ok: #2f8f46;
   --f-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
   --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -30,11 +31,11 @@
 }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0f1617; --surface: #152022; --ink: #e5eded; --muted: #95a7a8; --line: #2a393b;
-  --accent: #62b9c4; --accent-soft: #17343a; --layer-1: #2c3b3d; --layer-2: #3e6f76; --layer-3: #62b9c4; --ok: #4cb865;
+  --accent: #62b9c4; --accent-soft: #17343a; --layer-1: #2c3b3d; --layer-2: #34525a; --layer-3: #3e6f76; --layer-4: #62b9c4; --ok: #4cb865;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0f1617; --surface: #152022; --ink: #e5eded; --muted: #95a7a8; --line: #2a393b;
-  --accent: #62b9c4; --accent-soft: #17343a; --layer-1: #2c3b3d; --layer-2: #3e6f76; --layer-3: #62b9c4; --ok: #4cb865;
+  --accent: #62b9c4; --accent-soft: #17343a; --layer-1: #2c3b3d; --layer-2: #34525a; --layer-3: #3e6f76; --layer-4: #62b9c4; --ok: #4cb865;
   color-scheme: dark; }
 
 * { box-sizing: border-box; }
@@ -67,9 +68,10 @@ nav a:hover { color: var(--accent); }
 .hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 48px; align-items: center; }
 @media (max-width: 820px) { .hero { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
 .hero-text { display: grid; gap: 20px; }
-.strata { width: 100%; max-width: 460px; justify-self: center; }
-.strata text { font-family: var(--f-mono); font-size: 12.5px; fill: var(--muted); }
+.strata { width: 100%; max-width: 490px; justify-self: center; }
+.strata text { font-family: var(--f-mono); font-size: 13px; fill: var(--muted); }
 .strata .t-strong { fill: var(--ink); font-weight: 500; }
+.strata .t-src { font-size: 11.5px; opacity: .8; }
 
 /* werkwijze */
 .principles { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 28px 36px; }
@@ -146,7 +148,9 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
 @media (prefers-reduced-motion: no-preference) {
   .strata .layer { transition: transform .5s ease; }
   .strata:hover .l1 { transform: translateY(6px); }
-  .strata:hover .l3 { transform: translateY(-6px); }
+  .strata:hover .l2 { transform: translateY(2px); }
+  .strata:hover .l3 { transform: translateY(-2px); }
+  .strata:hover .l4 { transform: translateY(-6px); }
 }
 </style>
 </head>
@@ -169,26 +173,34 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h1 id="h-hero">Open data, laag voor laag, tot een antwoord dat een gemeente kan gebruiken.</h1>
       <p class="lead">Gemeentelijke vraagstukken lopen dwars door domeinen heen. Het antwoord ligt vaak al in openbare registraties, verspreid over bronnen die niemand naast elkaar legt. Daar begint het werk.</p>
     </div>
-    <svg class="strata" viewBox="0 0 460 330" role="img" aria-labelledby="strata-t strata-d">
-      <title id="strata-t">Werkwijze in drie lagen</title>
-      <desc id="strata-d">Onderaan open data als skelet, daarboven lokale kennis van de gemeente, bovenaan een navolgbaar antwoord per object.</desc>
+    <svg class="strata" viewBox="0 0 490 345" role="img" aria-labelledby="strata-t strata-d">
+      <title id="strata-t">Werkwijze in vier lagen</title>
+      <desc id="strata-d">Onderaan BAG en CBS-buurten en -wijken als skelet. Daarop open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO) en financiën (Iv3). Daarboven wat alleen de gemeente weet. Bovenaan een navolgbaar antwoord per object.</desc>
+      <line x1="360" y1="82" x2="360" y2="273" stroke="var(--muted)" stroke-dasharray="3 4"/>
       <g class="layer l1">
-        <polygon points="40,250 230,300 420,250 230,200" fill="var(--layer-1)"/>
-        <text x="300" y="312" class="t-strong">1 · skelet</text>
-        <text x="300" y="328">BAG · CBS · PDOK</text>
+        <polygon points="240,305 360,337 480,305 360,273" fill="var(--layer-1)"/>
+        <text x="4" y="302" class="t-strong">1 · skelet</text>
+        <text x="4" y="319">BAG · CBS-buurten en -wijken</text>
       </g>
       <g class="layer l2">
-        <polygon points="40,170 230,220 420,170 230,120" fill="var(--layer-2)" opacity=".92"/>
-        <text x="4" y="214" class="t-strong">2 · verrijking</text>
-        <text x="4" y="230">wat alleen de gemeente weet</text>
+        <polygon points="240,220 360,252 480,220 360,188" fill="var(--layer-2)"/>
+        <text x="4" y="190" class="t-strong">2 · open domeindata</text>
+        <text x="4" y="207">energie</text><text x="96" y="207" class="t-src">RIVM</text>
+        <text x="4" y="224">erfgoed</text><text x="96" y="224" class="t-src">RCE</text>
+        <text x="4" y="241">onderwijs</text><text x="96" y="241" class="t-src">DUO</text>
+        <text x="4" y="258">financiën</text><text x="96" y="258" class="t-src">Iv3</text>
       </g>
       <g class="layer l3">
-        <polygon points="40,90 230,140 420,90 230,40" fill="var(--layer-3)" opacity=".95"/>
-        <circle cx="200" cy="88" r="5" fill="var(--bg)"/><circle cx="252" cy="102" r="5" fill="var(--bg)"/><circle cx="286" cy="80" r="5" fill="var(--bg)"/>
-        <text x="296" y="26" class="t-strong">3 · antwoord</text>
-        <text x="296" y="42">navolgbaar per object</text>
+        <polygon points="240,135 360,167 480,135 360,103" fill="var(--layer-3)"/>
+        <text x="4" y="132" class="t-strong">3 · verrijking</text>
+        <text x="4" y="149">wat alleen de gemeente weet</text>
       </g>
-      <line x1="230" y1="140" x2="230" y2="200" stroke="var(--muted)" stroke-dasharray="3 4"/>
+      <g class="layer l4">
+        <polygon points="240,50 360,82 480,50 360,18" fill="var(--layer-4)"/>
+        <circle cx="341" cy="49" r="4" fill="var(--bg)"/><circle cx="374" cy="58" r="4" fill="var(--bg)"/><circle cx="396" cy="44" r="4" fill="var(--bg)"/>
+        <text x="4" y="47" class="t-strong">4 · antwoord</text>
+        <text x="4" y="64">navolgbaar per object</text>
+      </g>
     </svg>
   </section>
 
@@ -406,7 +418,6 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <p>Gemeenten, omgevingsdiensten en kennisinstellingen zijn welkom met een vraag, een dataset of een toepassing die breder bruikbaar zou kunnen zijn.</p>
     </div>
     <div class="mail">
-      <!-- VUL IN: vervang "e-mailadres volgt" door je openbare e-mailadres -->
       <code id="mailAddr">joselin@live.nl</code>
       <button class="copy" id="copyBtn" type="button">Kopieer</button>
     </div>
