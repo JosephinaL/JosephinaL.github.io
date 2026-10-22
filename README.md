@@ -13,13 +13,14 @@ Informatieproducten voor gemeentelijke vraagstukken, gebouwd op openbare registr
 | Iv3-panorama | [iv3panorama.html](https://josephinal.github.io/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinal.github.io/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
 | Basisonderwijs per buurt | [onderwijs.html](https://josephinal.github.io/onderwijs.html) | Waar krimpen en groeien basisscholen tot 2035? | DUO, BAG/PDOK, CBS |
+| Jeugdzorg per wijk | [jeugdzorg.html](https://josephinal.github.io/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
 
 ## Werkwijze
 
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3).
+2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS).
 3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving.
 4. **Antwoord:** navolgbaar per object.
 
