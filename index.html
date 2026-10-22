@@ -175,10 +175,10 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h1 id="h-hero">Open data, laag voor laag, tot een antwoord dat een gemeente kan gebruiken.</h1>
       <p class="lead">Gemeentelijke vraagstukken lopen dwars door domeinen heen. Het antwoord ligt vaak al in openbare registraties, verspreid over bronnen die niemand naast elkaar legt. Daar begint het werk.</p>
     </div>
-    <svg class="strata" viewBox="0 0 490 345" role="img" aria-labelledby="strata-t strata-d">
+    <svg class="strata" viewBox="0 0 490 362" role="img" aria-labelledby="strata-t strata-d">
       <title id="strata-t">Werkwijze in vier lagen</title>
-      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO) en financiën (Iv3). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
-      <line x1="360" y1="82" x2="360" y2="273" stroke="var(--muted)" stroke-dasharray="3 4"/>
+      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3) en jeugd (CBS). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
+      <line x1="360" y1="82" x2="360" y2="290" stroke="var(--muted)" stroke-dasharray="3 4"/>
       <g class="layer l1">
         <polygon points="240,50 360,82 480,50 360,18" fill="var(--layer-1)"/>
         <text x="4" y="47" class="t-strong">1 · skelet</text>
@@ -191,17 +191,18 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <text x="4" y="139">erfgoed</text><text x="96" y="139" class="t-src">RCE</text>
         <text x="4" y="156">onderwijs</text><text x="96" y="156" class="t-src">DUO</text>
         <text x="4" y="173">financiën</text><text x="96" y="173" class="t-src">Iv3</text>
+        <text x="4" y="190">jeugd</text><text x="96" y="190" class="t-src">CBS</text>
       </g>
       <g class="layer l3">
-        <polygon points="240,220 360,252 480,220 360,188" fill="var(--layer-3)"/>
-        <text x="4" y="217" class="t-strong">3 · verrijking</text>
-        <text x="4" y="234">wat alleen de gemeente weet</text>
+        <polygon points="240,237 360,269 480,237 360,205" fill="var(--layer-3)"/>
+        <text x="4" y="234" class="t-strong">3 · verrijking</text>
+        <text x="4" y="251">wat alleen de gemeente weet</text>
       </g>
       <g class="layer l4">
-        <polygon points="240,305 360,337 480,305 360,273" fill="var(--layer-4)"/>
-        <circle cx="341" cy="304" r="4" fill="var(--bg)"/><circle cx="374" cy="313" r="4" fill="var(--bg)"/><circle cx="396" cy="299" r="4" fill="var(--bg)"/>
-        <text x="4" y="302" class="t-strong">4 · antwoord</text>
-        <text x="4" y="319">navolgbaar per object</text>
+        <polygon points="240,322 360,354 480,322 360,290" fill="var(--layer-4)"/>
+        <circle cx="341" cy="321" r="4" fill="var(--bg)"/><circle cx="374" cy="330" r="4" fill="var(--bg)"/><circle cx="396" cy="316" r="4" fill="var(--bg)"/>
+        <text x="4" y="319" class="t-strong">4 · antwoord</text>
+        <text x="4" y="336">navolgbaar per object</text>
       </g>
     </svg>
   </section>
@@ -285,6 +286,18 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <span class="meta">Kaart · per school en buurt · elke gemeente</span>
         <p>Waar staan de basisscholen, hoeveel leerlingen hebben ze en wat verwacht DUO tot 2035? Krimp en groei per school en per buurt.</p>
         <div class="tile-links"><a class="btn btn-sm" href="onderwijs.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-onderwijs">Meer weten</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>Sociaal domein</h3><span>Jeugdzorg, kosten en verwijzers per wijk</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:35.0;background:#2a78d6"></i><i style="flex:32.8;background:#eb6834"></i><i style="flex:8.3;background:#1baf7a"></i><i style="flex:8.6;background:#eda100"></i><i style="flex:15.3;background:#e87ba4"></i></span></div>
+        <h4>Jeugdzorg per wijk</h4>
+        <span class="meta">Kaart · per wijk · elke gemeente</span>
+        <p>Hoeveel jongeren krijgen jeugdzorg, wat kost het en wie verwijst? De eigen gemeente door de jaren heen en per wijk.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="jeugdzorg.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-jeugd">Meer weten</button></div>
       </article>
         </div>
       </div>
@@ -386,6 +399,31 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
           <li>Het adres wordt via de BAG aan een CBS-buurt gekoppeld.</li>
           <li>Trend: prognose 2030 tegenover de telling van 2025.</li>
           <li>Gesloten en nieuwe scholen staan er apart bij.</li>
+        </ol>
+        <button class="close" type="button" hidden>Sluiten</button>
+      </div>
+    </article>
+    <article class="product" id="info-jeugd" aria-labelledby="h-jeugd">
+      <div class="product-body">
+        <h3 id="h-jeugd">Jeugdzorg per wijk</h3>
+        <div class="spread" role="img" aria-label="Jeugdhulptrajecten in Nederland in 2025 naar verwijzer: gemeentelijke toegang 35 procent, huisarts 33 procent, jeugdarts of medisch specialist 8 procent, rechter of gecertificeerde instelling 9 procent, geen verwijzer of onbekend 15 procent">
+          <i style="flex:35.0;background:#2a78d6"></i><i style="flex:32.8;background:#eb6834"></i><i style="flex:8.3;background:#1baf7a"></i><i style="flex:8.6;background:#eda100"></i><i style="flex:15.3;background:#e87ba4"></i>
+        </div>
+        <p>Jeugdzorg in één gemeente, als spiegel: hoeveel jongeren krijgen jeugdhulp, jeugdbescherming of jeugdreclassering, wat kost dat per inwoner, en wie verwijst ze? Door de jaren heen en per wijk, zonder ranglijst van gemeenten. Voor beleidsmedewerkers jeugd.</p>
+        <div class="facts">
+          <div><b>473.710</b><span>jongeren met jeugdzorg in 2025</span></div>
+          <div><b>10,7%</b><span>van alle jongeren tot 23 jaar</span></div>
+          <div><b>2015</b><span>eerste jaar van de reeks</span></div>
+        </div>
+        <a class="btn" href="jeugdzorg.html">Open de kaart <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo werkt het</span>
+        <ol>
+          <li>Jeugdhulpaanbieders en gecertificeerde instellingen leveren hun gegevens aan het CBS, gemeenten hun kosten.</li>
+          <li>Het CBS publiceert gebruik, kosten en verwijzers per gemeente en wijk.</li>
+          <li>De pagina haalt de cijfers live op zodra je een gemeente kiest.</li>
+          <li>Kleine aantallen en de reeksbreuk van 2021 staan er eerlijk bij.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>
       </div>
