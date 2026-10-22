@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Jeugdzorg per wijk</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Jeugdzorggebruik, kosten en verwijzers per Nederlandse gemeente en wijk, live uit CBS-open data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --vw-1: #2a78d6; --vw-2: #eb6834; --vw-3: #1baf7a; --vw-4: #eda100; --vw-5: #e87ba4;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --vw-1: #3987e5; --vw-2: #d95926; --vw-3: #199e70; --vw-4: #c98500; --vw-5: #d55181; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --vw-1: #3987e5; --vw-2: #d95926; --vw-3: #199e70; --vw-4: #c98500; --vw-5: #d55181; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono, .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: .9rem; }
+.info p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.multiples { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 600px) { .multiples { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1180px) { .multiples { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .val { fill: var(--fg); font: 600 11px var(--f-mono); }
+.chart .brk { fill: var(--muted); font: 10px var(--f-body); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart-kop .laatst { font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.chart-kop .laatst .muted { font-family: var(--f-body); font-weight: 400; font-size: .85rem; }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .tick { display: inline-block; width: 14px; height: 0; border-top: 2px solid var(--fg); vertical-align: middle; margin-right: 6px; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 280px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.kosten { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 12px; }
+@media (max-width: 1060px) { .kosten { grid-template-columns: minmax(0, 1fr); } }
+
+.jaren { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 520px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.dossier ul { margin: 0; padding-left: 1.1em; font-size: .88rem; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 380px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tab:disabled { opacity: .45; cursor: default; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 160px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+.cel-sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+.klein { color: var(--muted); font-style: italic; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Josephine Linders · Jeugdzorg · open data</span>
+      <h1 id="title">Jeugdzorg per wijk</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+
+  <section class="intro" id="intro">
+    <p>Hoeveel jongeren in je gemeente krijgen jeugdzorg, wat kost dat en wie verwijst ze? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen en de verdeling over de wijken. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor.</p>
+    <p class="muted small">De cijfers komen live van het CBS op het moment dat je een gemeente kiest.</p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="top3" id="top3"></div>
+
+      <!-- gebruik -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2>Gebruik van jeugdzorg</h2></div>
+        <div class="seg" role="group" aria-label="Toon percentage of aantal">
+          <button type="button" data-m="pct" aria-pressed="true">Percentage</button>
+          <button type="button" data-m="n" aria-pressed="false">Aantal</button>
+        </div>
+      </div>
+      <div class="multiples" id="multiples"></div>
+      <details class="tabelview" id="trendTabel"><summary>Toon als tabel</summary><div class="scroll" id="trendTabelIn"></div></details>
+
+      <!-- kosten -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2>Kosten van jeugdzorg</h2></div>
+        <p class="small muted">Wat de gemeente uitgaf aan jeugdzorg, inclusief persoonsgebonden budget. Klik op een jaar voor de verdeling.</p>
+      </div>
+      <div class="kosten">
+        <div class="chart" id="kostenChart"></div>
+        <div class="chart" id="kostenVorm"></div>
+      </div>
+
+      <!-- wijken -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Per wijk</span><h2 id="wijkKop">Jeugdzorg per wijk</h2></div>
+        <div class="jaren" id="jaren" role="group" aria-label="Kies een jaar"></div>
+      </div>
+      <div class="info" id="wijkInfo" hidden><p id="wijkInfoTxt"></p><button class="btn linkish" id="wijkInfoBtn" type="button" hidden></button></div>
+      <div class="split">
+        <div class="mapwrap">
+          <div id="map" role="region" aria-label="Kaart van de wijken"></div>
+          <div class="maplegend" id="mapLegend"></div>
+        </div>
+        <aside class="dossier" id="dossier" aria-live="polite"></aside>
+      </div>
+      <div class="panel">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-view="wijk">Wijken</button>
+          <button class="tab" role="tab" aria-selected="false" data-view="buurt">Buurten</button>
+          <button class="tab" role="tab" aria-selected="false" data-view="verwijzer">Verwijzers</button>
+        </div>
+        <div class="tools">
+          <input id="search" type="search" placeholder="Zoek wijk of buurt…">
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvWijk" type="button">CSV wijken en buurten</button>
+        </div>
+        <div class="legend" id="vwLegend" style="padding:0 12px 8px" hidden></div>
+        <div class="scroll" id="tblWrap"></div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Jeugdzorg</b>: jeugdhulp, jeugdbescherming en jeugdreclassering onder de Jeugdwet. Het gaat om jongeren die er op enig moment in het jaar gebruik van maakten.</li>
+            <li><b>In natura</b>: zorg die de gemeente bij een aanbieder inkoopt. Hulp met een persoonsgebonden budget (pgb) telt in de gebruikscijfers en wijkcijfers niet mee, in de kosten wel.</li>
+            <li><b>Percentages</b>: jeugdzorg en jeugdhulp als deel van alle jongeren tot 23 jaar, jeugdbescherming als deel van jongeren tot 18 jaar, jeugdreclassering als deel van jongeren van 12 tot 23 jaar. Zo rekent het CBS.</li>
+            <li><b>Woonplaats</b>: een jongere telt mee in de gemeente en wijk waar hij woont, niet waar de hulp wordt gegeven.</li>
+            <li><b>Kosten</b>: gerealiseerde en begrote kosten zoals de gemeente die aan het CBS opgeeft. Per inwoner is gedeeld door alle inwoners. Per jongere is gedeeld door het aantal jongeren met jeugdzorg (inclusief pgb).</li>
+            <li><b>Verwijzers</b>: wie een jeugdhulptraject startte. Een jongere kan meer trajecten hebben. Jeugdbescherming en jeugdreclassering hebben geen verwijzer en tellen hier niet mee.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Reeksbreuk</b>: tussen 2020 en 2021 is de CBS-reeks herzien. De lijnen lopen daar niet door.</li>
+            <li><b>Kleine aantallen</b>: het CBS rondt af op 5 en laat kleine aantallen weg (–). Woont er in een wijk of buurt minder dan 150 jongeren tot 23 jaar, dan toont deze pagina geen percentage. Een paar jongeren meer of minder verschuift het percentage dan al flink.</li>
+            <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Het CBS stelt ze later nog bij.</li>
+            <li><b>Kosten ontbreken soms</b>: niet elke gemeente levert haar kosten aan het CBS. Gemeenten verdelen de kosten ook niet allemaal op dezelfde manier over de vormen.</li>
+            <li><b>Geen jeugd-ggz apart</b>: jeugdhulp is één begrip. Psychische hulp, opvoedhulp en hulp bij een beperking zijn niet te onderscheiden.</li>
+            <li><b>Geen oordeel</b>: een hoger percentage kan betekenen dat de hulp goed bereikbaar is, of dat er meer nodig is. De cijfers zeggen het verschil, niet de oorzaak.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const CATALOG = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title,Modified';
+  const T = { trendOud: '84134NED', trendNieuw: '85099NED', kosten: '83454NED' };
+  // terugval als de catalogus niet antwoordt; wordt bij het laden aangevuld met nieuwere tabellen
+  const WIJK = { 2025: '86204NED', 2024: '85990NED', 2023: '85685NED', 2022: '85335NED', 2021: '85075NED' };
+  const KWB = { 2025: '86165NED', 2024: '85984NED', 2023: '85618NED', 2022: '85318NED', 2021: '85039NED' };
+  const BREUK = 2021; // eerste jaar van de herziene reeks
+  const MIN_JONG = 150; // ondergrens (jongeren tot 23 jaar) voor een percentage per wijk of buurt
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const nf1 = new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const eur = new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+  const fmt = v => v == null ? '–' : nf.format(v);
+  const fP = v => v == null ? '–' : nf1.format(v) + '%';
+  const fE = v => v == null ? '–' : eur.format(v);
+  const fMln = v => v == null ? '–' : Math.abs(v) < 1000 ? '€ ' + nf.format(Math.round(v) * 1000) : '€ ' + nf1.format(v / 1000) + ' mln'; // v in 1.000 euro
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tr = s => String(s == null ? '' : s).trim();
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+    if (S) { renderTrend(); renderKosten(); if (S.w) { renderKaart(); renderTabel(); } }
+  });
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  function toonTip(e, html) {
+    tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+
+  // ---------- ophalen ----------
+  async function getJSON(u) {
+    let last;
+    for (let i = 0; i < 3; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  const odata = async (t, q) => (await getJSON(CBS + t + '/' + q.replace(/ /g, '%20'))).value;
+  const META = {};
+  async function meta(t) {
+    if (META[t]) return META[t];
+    const dp = await odata(t, 'DataProperties');
+    const m = { keys: dp.map(p => p.Key), geo: null, vorm: null, tijd: null };
+    dp.forEach(p => {
+      if (p.Type === 'GeoDimension' || p.Type === 'GeoDetail') m.geo = p.Key;
+      else if (p.Type === 'TimeDimension') m.tijd = p.Key;
+      else if (p.Type === 'Dimension') m.vorm = p.Key;
+    });
+    m.k = re => m.keys.find(k => re.test(k));
+    return (META[t] = m);
+  }
+  let ontdekt = false;
+  async function ontdek() {
+    if (ontdekt) return; ontdekt = true;
+    try {
+      const f = encodeURIComponent("substringof('jeugdzorgtrajecten in natura; wijken',Title)");
+      (await getJSON(CATALOG + '&$filter=' + f)).value.forEach(x => {
+        const m = x.Title.match(/(\d{4})\s*$/); if (m && +m[1] >= 2021) WIJK[+m[1]] = x.Identifier;
+      });
+      const g = encodeURIComponent("substringof('Kerncijfers wijken en buurten 20',Title)");
+      (await getJSON(CATALOG + '&$filter=' + g)).value.forEach(x => {
+        const m = x.Title.match(/(\d{4})\s*$/); if (m && +m[1] >= 2021) KWB[+m[1]] = x.Identifier;
+      });
+    } catch (e) { void e; }
+  }
+
+  // ---------- staat ----------
+  let S = null;
+  let modus = 'pct';
+  let kostJaar = null;
+  let view = 'wijk', sortKey = null, sortDir = 1, selWijk = null;
+  let map = null, layer = null, gjLayer = null;
+  const fouten = new Set();
+
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Het CBS gaf om ${t} geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#melding').hidden = false;
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = 'Jeugdzorg ' + g.n;
+    S = { g, trend: null, kosten: null, w: null, wJaar: null, opgehaald: null };
+    selWijk = null; kostJaar = null; fouten.clear(); toonMelding();
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
+    $('#top3').innerHTML = ''; $('#multiples').innerHTML = ''; $('#kostenChart').innerHTML = ''; $('#kostenVorm').innerHTML = '';
+    $('#tblWrap').innerHTML = ''; $('#dossier').innerHTML = ''; $('#jaren').innerHTML = '';
+    voortgang(0, 4, 'Tabellen zoeken bij het CBS…');
+    await ontdek();
+    if (S.g !== g) return;
+    voortgang(1, 4, 'Gebruik en kosten ophalen…');
+    await Promise.all([laadTrend(), laadKosten()]);
+    if (S.g !== g) return;
+    renderKern(); renderTrend(); renderKosten();
+    voortgang(3, 4, 'Wijken ophalen…');
+    const jaren = Object.keys(WIJK).map(Number).sort((a, b) => b - a);
+    const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
+    renderJaren(jaren);
+    await kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[0], true);
+    voortgang(4, 4, '');
+  }
+
+  async function laadTrend() {
+    const c = S.g.c;
+    const vormen = ['T001203', 'A045561', 'A042503', 'A027918', 'A027919', 'A027920'];
+    const f = `startswith(RegioS,'GM${c}') and substringof('JJ',Perioden) and (${vormen.map(v => `VormenVanJeugdzorg eq '${v}'`).join(' or ')})&$select=VormenVanJeugdzorg,Perioden,JongerenMetJeugdzorg_1,JongerenMetJeugdzorgRelatief_2`;
+    try {
+      const [a, b] = await Promise.all([odata(T.trendOud, 'TypedDataSet?$filter=' + f), odata(T.trendNieuw, 'TypedDataSet?$filter=' + f)]);
+      const d = {};
+      a.concat(b).forEach(r => {
+        const v = tr(r.VormenVanJeugdzorg), j = +r.Perioden.slice(0, 4);
+        (d[v] = d[v] || {})[j] = { n: r.JongerenMetJeugdzorg_1, p: r.JongerenMetJeugdzorgRelatief_2 };
+      });
+      const jaren = [...new Set(a.concat(b).map(r => +r.Perioden.slice(0, 4)))].sort();
+      S.trend = { d, jaren };
+    } catch (e) { S.trend = null; fouten.add('gebruik door de jaren'); toonMelding(); }
+  }
+  async function laadKosten() {
+    try {
+      const r = await odata(T.kosten, `TypedDataSet?$filter=startswith(Regio,'GM${S.g.c}') and substringof('JJ',Perioden)`);
+      const d = {};
+      r.forEach(x => {
+        const j = +x.Perioden.slice(0, 4);
+        (d[j] = d[j] || {})[tr(x.VormenVanJeugdzorg)] = { b: x.BegroteKosten_1, g: x.GerealiseerdeKosten_2, pi: x.GerealiseerdeKostenPer1000Inwoners_4, bpi: x.BegroteKostenPer1000Inwoners_3 };
+      });
+      const jaren = Object.keys(d).map(Number).filter(j => d[j].A045561 && d[j].A045561.g != null).sort();
+      S.kosten = { d, jaren };
+    } catch (e) { S.kosten = null; fouten.add('kosten'); toonMelding(); }
+  }
+
+  // ---------- kern ----------
+  function renderKern() {
+    const g = S.g;
+    const tz = S.trend && S.trend.d.T001203 || {};
+    const jt = Object.keys(tz).map(Number).filter(j => tz[j].n != null).sort();
+    const laatst = jt[jt.length - 1], eerst = jt[0];
+    if (laatst) {
+      $('#leadBig').textContent = `${g.n}: ${fmt(tz[laatst].n)} jongeren met jeugdzorg in ${laatst}`;
+      $('#leadSub').textContent = `${fP(tz[laatst].p)} van alle jongeren tot 23 jaar · zorg in natura · ${laatst} voorlopig`;
+    } else {
+      $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'geen gebruikscijfers beschikbaar';
+    }
+    const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    let h = '';
+    if (laatst && eerst && eerst < laatst) {
+      const dp = tz[laatst].p != null && tz[eerst].p != null ? tz[laatst].p - tz[eerst].p : null;
+      h += unit(`Sinds ${eerst}`, dp == null ? '–' : (dp > 0 ? '+' : dp < 0 ? '−' : '') + nf1.format(Math.abs(dp)) + ' procentpunt',
+        `${fP(tz[eerst].p)} → ${fP(tz[laatst].p)} van de jongeren, ${fmt(tz[eerst].n)} → ${fmt(tz[laatst].n)}.${eerst < BREUK ? ` Let op de reeksbreuk in ${BREUK}.` : ''}`);
+    }
+    const k = S.kosten, kj = k && k.jaren[k.jaren.length - 1];
+    if (kj) {
+      const t = k.d[kj].A045561;
+      h += unit(`Kosten ${kj}`, fE(t.pi) + ' per inwoner', `${fMln(t.g)} uitgegeven, begroot was ${fMln(t.b)}. ${kj} is voorlopig.`);
+      const jz = S.trend && S.trend.d.A045561 && S.trend.d.A045561[kj];
+      if (jz && jz.n) h += unit(`Per jongere ${kj}`, fE(t.g * 1000 / jz.n), `${fMln(t.g)} gedeeld door ${fmt(jz.n)} jongeren met jeugdzorg, inclusief pgb`);
+    } else {
+      h += unit('Kosten', '–', k ? 'Deze gemeente heeft geen kosten aan het CBS opgegeven.' : 'De kosten konden niet worden opgehaald.');
+    }
+    $('#top3').innerHTML = h;
+  }
+
+  // ---------- gebruik door de jaren ----------
+  const PANELEN = [
+    { k: 'T001203', t: 'Jeugdzorg totaal', noemer: 'van jongeren tot 23 jaar' },
+    { k: 'A027918', t: 'Jeugdhulp met verblijf', noemer: 'van jongeren tot 23 jaar · pleegzorg, gezinshuis, instelling' },
+    { k: 'A027919', t: 'Jeugdbescherming', noemer: 'van jongeren tot 18 jaar · opgelegd door de rechter' },
+    { k: 'A027920', t: 'Jeugdreclassering', noemer: 'van jongeren van 12 tot 23 jaar' }
+  ];
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    modus = b.dataset.m;
+    document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    renderTrend();
+  }));
+  function renderTrend() {
+    const box = $('#multiples');
+    if (!S.trend) { box.innerHTML = '<p class="muted small">Geen gebruikscijfers opgehaald.</p>'; $('#trendTabelIn').innerHTML = ''; return; }
+    const { d, jaren } = S.trend;
+    box.innerHTML = PANELEN.map((p, i) => `<div class="chart" id="pan${i}"></div>`).join('');
+    PANELEN.forEach((p, i) => {
+      const reeks = jaren.map(j => d[p.k] && d[p.k][j] ? d[p.k][j] : null);
+      lijn($('#pan' + i), p, jaren, reeks);
+    });
+    // tabel
+    const rij = [['T001203', 'Jeugdzorg totaal'], ['A042503', 'Jeugdhulp zonder verblijf'], ['A027918', 'Jeugdhulp met verblijf'], ['A027919', 'Jeugdbescherming'], ['A027920', 'Jeugdreclassering']];
+    $('#trendTabelIn').innerHTML = `<table><thead><tr><th>Jaar</th>${rij.map(r => `<th class="r">${r[1]}</th>`).join('')}</tr></thead><tbody>` +
+      jaren.map(j => `<tr><td class="mono">${j}${j === jaren[jaren.length - 1] ? ' <span class="muted">voorlopig</span>' : ''}</td>${rij.map(r => { const x = d[r[0]] && d[r[0]][j]; return `<td class="r">${x ? fmt(x.n) + ' <span class="muted">' + fP(x.p) + '</span>' : '–'}</td>`; }).join('')}</tr>`).join('') + '</tbody></table>';
+  }
+  function lijn(el, p, jaren, reeks) {
+    const W = 360, H = 150, L = 40, R = 14, Tp = 12, B = 24;
+    const sleutel = modus === 'pct' ? 'p' : 'n';
+    const vals = reeks.map(r => r ? r[sleutel] : null);
+    const geldig = vals.filter(v => v != null);
+    const lastI = (() => { for (let i = vals.length - 1; i >= 0; i--) if (vals[i] != null) return i; return -1; })();
+    const kopWaarde = lastI >= 0 ? (modus === 'pct' ? fP(vals[lastI]) : fmt(vals[lastI])) + ` <span class="muted">in ${jaren[lastI]}</span>` : '–';
+    let s = '';
+    if (geldig.length) {
+      const hi = Math.max(...geldig) * 1.18 || 1;
+      const x = j => L + (W - L - R) * (j - jaren[0]) / Math.max(1, jaren[jaren.length - 1] - jaren[0]);
+      const y = v => Tp + (H - Tp - B) * (1 - v / hi);
+      const stap = nice(hi / 3);
+      s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(p.t)} per jaar, ${jaren[0]} tot en met ${jaren[jaren.length - 1]}">`;
+      for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${modus === 'pct' ? nf1.format(t).replace(/,0$/, '') : nf.format(t)}</text>`;
+      jaren.forEach(j => { if (j % 5 === 0 || j === jaren[jaren.length - 1]) s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle">${j}</text>`; });
+      if (jaren.includes(BREUK) && jaren[0] < BREUK) {
+        const bx = x(BREUK - 0.5);
+        s += `<line class="ax" x1="${bx}" x2="${bx}" y1="${Tp}" y2="${H - B}" stroke-dasharray="2 3"/><text class="brk" x="${bx + 3}" y="${Tp + 8}">reeksbreuk</text>`;
+      }
+      // twee segmenten rond de reeksbreuk
+      [[jaren[0], BREUK - 1], [BREUK, jaren[jaren.length - 1]]].forEach(([a, b]) => {
+        const pts = jaren.map((j, i) => (j >= a && j <= b && vals[i] != null) ? [x(j), y(vals[i])] : null).filter(Boolean);
+        if (pts.length > 1) s += `<path d="${pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+        else if (pts.length === 1) s += `<circle cx="${pts[0][0]}" cy="${pts[0][1]}" r="3" fill="var(--accent)"/>`;
+      });
+      if (lastI >= 0) s += `<circle cx="${x(jaren[lastI])}" cy="${y(vals[lastI])}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+      s += `<line class="hl" x1="0" x2="0" y1="${Tp}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/><circle class="hd" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>`;
+      s += `<rect class="hit" x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/></svg>`;
+      el.innerHTML = `<div class="chart-kop"><h3>${esc(p.t)}</h3><span class="laatst">${kopWaarde}</span></div><span class="noemer">${modus === 'pct' ? esc(p.noemer) : 'aantal jongeren, afgerond op 5'}</span>${s}`;
+      const svg = el.querySelector('svg'), hl = svg.querySelector('.hl'), hd = svg.querySelector('.hd');
+      const zet = e => {
+        const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) * W / r.width;
+        let bi = 0, bd = 1e9; jaren.forEach((j, i) => { const dd = Math.abs(x(j) - px); if (dd < bd) { bd = dd; bi = i; } });
+        const rr = reeks[bi];
+        hl.setAttribute('x1', x(jaren[bi])); hl.setAttribute('x2', x(jaren[bi])); hl.setAttribute('visibility', 'visible');
+        if (vals[bi] != null) { hd.setAttribute('cx', x(jaren[bi])); hd.setAttribute('cy', y(vals[bi])); hd.setAttribute('visibility', 'visible'); } else hd.setAttribute('visibility', 'hidden');
+        toonTip(e, `<b>${esc(p.t)} · ${jaren[bi]}</b><br><span class="num">${rr ? fmt(rr.n) : '–'}</span> jongeren · <span class="num">${rr ? fP(rr.p) : '–'}</span>${jaren[bi] === jaren[jaren.length - 1] ? '<br><span class="muted">voorlopig</span>' : ''}`);
+      };
+      const weg = () => { hl.setAttribute('visibility', 'hidden'); hd.setAttribute('visibility', 'hidden'); verbergTip(); };
+      svg.addEventListener('pointermove', zet); svg.addEventListener('pointerdown', zet); svg.addEventListener('pointerleave', weg);
+    } else {
+      el.innerHTML = `<div class="chart-kop"><h3>${esc(p.t)}</h3><span class="laatst">–</span></div><p class="small muted" style="margin:0">Geen cijfers, of door het CBS weggelaten vanwege kleine aantallen.</p>`;
+    }
+  }
+  function nice(v) { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
+
+  // ---------- kosten ----------
+  const KVORM = [
+    ['A047012', 'Jeugdhulp zonder verblijf, door wijk- of jeugdteam'],
+    ['A047013', 'Jeugdhulp zonder verblijf, overig'],
+    ['A047014', 'Jeugdhulp met verblijf'],
+    ['A027919', 'Jeugdbescherming'],
+    ['A027920', 'Jeugdreclassering'],
+    ['A050058', 'Jeugdbescherming en -reclassering samen'],
+    ['A048267', 'Overig of niet in te delen'],
+    ['A045561', 'Totaal jeugdzorg']
+  ];
+  function renderKosten() {
+    const el = $('#kostenChart'), vel = $('#kostenVorm');
+    const k = S.kosten;
+    if (!k || !k.jaren.length) {
+      el.innerHTML = `<h3>Kosten per inwoner</h3><p class="small muted" style="margin:0">${k ? 'Deze gemeente heeft geen kosten voor jeugdzorg aan het CBS opgegeven. De lasten staan wel in de begroting en jaarrekening, onder de Iv3-taakvelden 6.72 en 6.82.' : 'De kosten konden niet worden opgehaald.'}</p>`;
+      vel.innerHTML = ''; return;
+    }
+    const jaren = k.jaren; if (!kostJaar || !jaren.includes(kostJaar)) kostJaar = jaren[jaren.length - 1];
+    const W = 520, H = 220, L = 52, R = 12, Tp = 14, B = 26;
+    const tot = j => k.d[j].A045561;
+    const hi = Math.max(...jaren.map(j => Math.max(tot(j).pi || 0, tot(j).bpi || 0))) * 1.15 || 1;
+    const bw = (W - L - R) / jaren.length;
+    const x = i => L + bw * i + bw * 0.18, w = bw * 0.64;
+    const y = v => Tp + (H - Tp - B) * (1 - v / hi);
+    const stap = nice(hi / 4);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Kosten jeugdzorg per inwoner per jaar">`;
+    for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">€ ${nf.format(t)}</text>`;
+    jaren.forEach((j, i) => {
+      const t = tot(j); const sel = j === kostJaar;
+      if (t.pi != null) {
+        const top = y(t.pi), base = y(0), r = Math.min(4, (base - top) / 2);
+        s += `<path d="M${x(i)} ${base} V${top + r} Q${x(i)} ${top} ${x(i) + r} ${top} H${x(i) + w - r} Q${x(i) + w} ${top} ${x(i) + w} ${top + r} V${base} Z" fill="var(--accent)" opacity="${sel ? 1 : 0.55}"/>`;
+      }
+      if (t.bpi != null) s += `<line x1="${x(i) - 3}" x2="${x(i) + w + 3}" y1="${y(t.bpi)}" y2="${y(t.bpi)}" stroke="var(--fg)" stroke-width="2"/>`;
+      s += `<text class="lbl" x="${x(i) + w / 2}" y="${H - 8}" text-anchor="middle" ${sel ? 'style="fill:var(--fg);font-weight:600"' : ''}>${j}</text>`;
+      s += `<rect class="kb" data-j="${j}" x="${L + bw * i}" y="${Tp}" width="${bw}" height="${H - Tp}" fill="transparent" style="cursor:pointer"/>`;
+    });
+    s += '</svg>';
+    el.innerHTML = `<div class="chart-kop"><h3>Kosten per inwoner</h3><span class="laatst">${fE(tot(kostJaar).pi)} <span class="muted">in ${kostJaar}</span></span></div>${s}
+      <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>Gerealiseerd</span><span><i class="tick"></i>Begroot</span>${jaren[jaren.length - 1] ? `<span>${jaren[jaren.length - 1]} voorlopig</span>` : ''}</div>`;
+    el.querySelectorAll('.kb').forEach(rc => {
+      const j = +rc.dataset.j, t = tot(j);
+      const jz = S.trend && S.trend.d.A045561 && S.trend.d.A045561[j];
+      const html = `<b>${j}</b>${j === jaren[jaren.length - 1] ? ' <span class="muted">voorlopig</span>' : ''}<br>Gerealiseerd <span class="num">${fMln(t.g)}</span> · <span class="num">${fE(t.pi)}</span> per inwoner<br>Begroot <span class="num">${fMln(t.b)}</span>${t.b && t.g ? ` · verschil <span class="num">${(t.g >= t.b ? '+' : '−') + nf1.format(Math.abs(100 * (t.g - t.b) / t.b))}%</span>` : ''}${jz && jz.n ? `<br>Per jongere met jeugdzorg <span class="num">${fE(t.g * 1000 / jz.n)}</span>` : ''}`;
+      rc.addEventListener('pointermove', e => toonTip(e, html));
+      rc.addEventListener('pointerleave', verbergTip);
+      rc.addEventListener('click', () => { kostJaar = j; verbergTip(); renderKosten(); });
+    });
+    // verdeling over vormen
+    const d = k.d[kostJaar];
+    const rows = KVORM.filter(([c]) => d[c] && (d[c].g != null || d[c].b != null));
+    vel.innerHTML = `<div class="chart-kop"><h3>Verdeling ${kostJaar}</h3><span class="muted small">x € 1.000</span></div>
+      <div class="scroll" style="max-height:none"><table><thead><tr><th style="cursor:default">Vorm</th><th class="r" style="cursor:default">Begroot</th><th class="r" style="cursor:default">Gerealiseerd</th><th class="r" style="cursor:default">Per inwoner</th></tr></thead><tbody>
+      ${rows.map(([c, n]) => `<tr class="${c === 'A045561' ? 'gm' : ''}"><td>${n}</td><td class="r">${fmt(d[c].b)}</td><td class="r">${fmt(d[c].g)}</td><td class="r">${fE(d[c].pi)}</td></tr>`).join('')}
+      </tbody></table></div><p class="small muted" style="margin:0">Gemeenten delen hun kosten niet allemaal even fijn in. Een lege regel betekent dat de gemeente die vorm niet apart opgaf.</p>`;
+  }
+
+  // ---------- wijken ----------
+  function renderJaren(jaren) {
+    $('#jaren').innerHTML = jaren.map(j => `<button class="btn linkish" type="button" data-j="${j}" aria-pressed="false">${j}</button>`).join('');
+    $('#jaren').querySelectorAll('button').forEach(b => b.addEventListener('click', () => kiesJaar(+b.dataset.j)));
+  }
+  function markeerJaar(j) {
+    $('#jaren').querySelectorAll('button').forEach(b => {
+      const on = +b.dataset.j === j; b.setAttribute('aria-pressed', on);
+      b.classList.toggle('primary', on);
+    });
+  }
+  async function kiesJaar(j, eerste) {
+    const g = S.g; S.wJaar = j; selWijk = null; markeerJaar(j);
+    try { history.replaceState(null, '', '#gm=' + g.c + '&jaar=' + j); } catch (e) {}
+    $('#wijkKop').textContent = `Jeugdzorg per wijk · ${j}`;
+    $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Wijken ophalen…</p>';
+    fouten.delete('wijken'); fouten.delete('wijkgrenzen');
+    const w = await laadWijk(g.c, j);
+    if (S.g !== g || S.wJaar !== j) return;
+    S.w = w; S.opgehaald = new Date();
+    toonMelding();
+    // hint als er voor dit jaar nog geen percentages zijn
+    const metPct = w && w.heeftPct;
+    if (w && !metPct) {
+      const ouder = Object.keys(KWB).map(Number).filter(y => y < j && WIJK[y]).sort((a, b) => b - a)[0];
+      $('#wijkInfoTxt').textContent = `Voor ${j} heeft het CBS de percentages per wijk en buurt nog niet gepubliceerd. De kaart toont daarom aantallen.${ouder ? ' Kies ' + ouder + ' voor de percentages.' : ''}`;
+      $('#wijkInfoBtn').hidden = !ouder; $('#wijkInfoBtn').textContent = ouder ? 'Toon ' + ouder : '';
+      $('#wijkInfoBtn').onclick = () => kiesJaar(ouder);
+      $('#wijkInfo').hidden = false;
+    } else $('#wijkInfo').hidden = true;
+    document.querySelector('.tab[data-view="buurt"]').disabled = !(w && w.buurten.length);
+    if (view === 'buurt' && !(w && w.buurten.length)) zetView('wijk');
+    S.bounded = false;
+    renderKaart(); renderDossier(null); renderTabel(); renderVoet();
+  }
+
+  async function laadWijk(c, j) {
+    const t = WIJK[j];
+    let res = { jaar: j, wijken: [], gm: null, buurten: [], heeftPct: false, geo: null, perLabel: String(j), tabel: t, kwb: KWB[j] };
+    try {
+      const m = await meta(t);
+      const per = await odata(t, m.tijd);
+      const pk = per.some(p => p.Key === j + 'JJ00') ? j + 'JJ00' : per[per.length - 1].Key;
+      res.perLabel = (per.find(p => p.Key === pk) || {}).Title || String(j);
+      const vk = await odata(t, m.vorm);
+      const tot = (vk.find(v => /^T/.test(v.Key)) || vk[0]).Key;
+      const K = re => m.k(re);
+      const kol = {
+        n: K(/^TotaalJongerenMetJeugdzorg/), a0: K(/^k_0Tot4Jaar/), a4: K(/^k_4Tot12Jaar/), a12: K(/^k_12Tot18Jaar/), a18: K(/^k_18Tot23Jaar/),
+        een: K(/^ThuiswonendKindInEenouder/), paar: K(/^ThuiswonendKindBijEenPaar/), ander: K(/^AnderHuishouden/), traj: K(/^TotaalTrajecten/),
+        toegang: K(/^GemeentelijkeToegang/), huisarts: K(/^Huisarts_/), jeugdarts: K(/^Jeugdarts_/), gi: K(/^GecertificeerdeInstelling/),
+        ms: K(/^MedischSpecialist/), rechter: K(/^RechterOfficier/), geen: K(/^GeenVerwijzer/), onb: K(/^VerwijzerOnbekend/)
+      };
+      const [rows, namen] = await Promise.all([
+        odata(t, `TypedDataSet?$filter=(startswith(${m.geo},'GM${c}') or startswith(${m.geo},'WK${c}')) and ${m.tijd} eq '${pk}' and ${m.vorm} eq '${tot}'`),
+        odata(t, `${m.geo}?$filter=startswith(Key,'WK${c}')&$select=Key,Title`)
+      ]);
+      const naam = new Map(namen.map(x => [tr(x.Key), tr(x.Title)]));
+      rows.forEach(r => {
+        const code = tr(r[m.geo]);
+        const o = { code, naam: naam.get(code) || code };
+        Object.entries(kol).forEach(([k, col]) => { o[k] = col ? r[col] : null; });
+        if (/^GM/.test(code)) { o.naam = S.g.n; res.gm = o; } else res.wijken.push(o);
+      });
+    } catch (e) { fouten.add('wijken'); res.wijken = []; }
+    // percentages uit Kerncijfers wijken en buurten
+    if (KWB[j]) {
+      try {
+        const km = await meta(KWB[j]);
+        const kn = km.k(/^JongerenMetJeugdzorgInNatura/), kp = km.k(/^Percentage.*Jeugdzorg/), ki = km.k(/^AantalInwoners/);
+        if (kn && kp) {
+          const geo = km.geo;
+          const [rows, namen] = await Promise.all([
+            odata(KWB[j], `TypedDataSet?$filter=startswith(${geo},'GM${c}') or startswith(${geo},'WK${c}') or startswith(${geo},'BU${c}')&$select=${geo},${ki},${kn},${kp}`),
+            odata(KWB[j], `${geo}?$filter=startswith(Key,'BU${c}')&$select=Key,Title`)
+          ]);
+          const naam = new Map(namen.map(x => [tr(x.Key), tr(x.Title)]));
+          const perCode = new Map();
+          rows.forEach(r => perCode.set(tr(r[geo]), { inw: r[ki], n: r[kn], p: r[kp] }));
+          let gevuld = 0;
+          const zet = o => { const k = perCode.get(o.code); if (k) { o.pct = k.p; o.inw = k.inw; if (o.n == null) o.n = k.n; o.jongBasis = (k.n != null && k.p) ? k.n / k.p * 100 : null; if (k.p != null) gevuld++; } };
+          res.wijken.forEach(zet); if (res.gm) zet(res.gm);
+          res.buurten = [...perCode.entries()].filter(([k]) => /^BU/.test(k)).map(([code, k]) => ({
+            code, naam: naam.get(code) || code, wijk: 'WK' + code.slice(2, 8), inw: k.inw, n: k.n, pct: k.p, jongBasis: (k.n != null && k.p) ? k.n / k.p * 100 : null
+          }));
+          if (!res.buurten.some(b => b.pct != null)) res.buurten = [];
+          res.heeftPct = gevuld > 0;
+        }
+      } catch (e) { void e; }
+    }
+    // wijkgrenzen
+    try {
+      const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/wijken/items?f=json&gemeentecode=GM${c}&limit=1000`;
+      const gj = await getJSONsnel(u);
+      res.geo = gj && gj.features && gj.features.length ? gj : null;
+    } catch (e) { res.geo = null; }
+    return res;
+  }
+  async function getJSONsnel(u) {
+    const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
+    try { const r = await fetch(u, { signal: ac.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
+    finally { clearTimeout(to); }
+  }
+  const pctTonen = o => o && o.pct != null && o.jongBasis != null && o.jongBasis >= MIN_JONG;
+  const pctTekst = o => !o || o.pct == null ? '–' : pctTonen(o) ? fP(o.pct) : '<span class="klein" title="Minder dan ' + MIN_JONG + ' jongeren tot 23 jaar: geen percentage">klein</span>';
+
+  // ---------- kaart ----------
+  function klassen() {
+    const v = S.w.wijken.filter(pctTonen).map(o => o.pct);
+    if (!v.length) return null;
+    const lo = Math.min(...v), hi = Math.max(...v);
+    const n = Math.min(5, v.length);
+    if (hi - lo < 0.05) return { grenzen: [lo, hi], n: 1 };
+    const g = []; for (let i = 0; i <= n; i++) g.push(lo + (hi - lo) * i / n);
+    return { grenzen: g, n };
+  }
+  function kleurVoor(p, kl) {
+    if (!kl) return css('--sunk');
+    if (kl.n === 1) return css('--seq-3');
+    let i = 0; while (i < kl.n - 1 && p > kl.grenzen[i + 1]) i++;
+    const stap = kl.n === 5 ? i + 1 : Math.round(1 + i * 4 / (kl.n - 1));
+    return css('--seq-' + stap);
+  }
+  function renderKaart() {
+    const w = S.w;
+    if (typeof L === 'undefined') { $('#map').innerHTML = '<p class="small muted" style="padding:12px">De kaartbibliotheek kon niet laden. De tabel werkt wel.</p>'; return; }
+    if (!map) {
+      map = L.map('map', { scrollWheelZoom: false, attributionControl: true });
+      L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT · Wijkgrenzen: CBS' }).addTo(map);
+      map.on('focus', () => map.scrollWheelZoom.enable());
+      map.setView([52.1, 5.3], 7);
+    }
+    if (layer) layer.remove(); layer = null; gjLayer = null;
+    if (!w || !w.geo) {
+      $('#mapLegend').innerHTML = '<span>Voor dit jaar zijn geen wijkgrenzen beschikbaar bij PDOK. De tabel werkt wel.</span>';
+      setTimeout(() => map.invalidateSize(), 50); return;
+    }
+    const byCode = new Map(w.wijken.map(o => [o.code, o]));
+    const kl = w.heeftPct ? klassen() : null;
+    const lijn = css('--surface') || '#fff';
+    layer = L.featureGroup().addTo(map);
+    const gj = gjLayer = L.geoJSON(w.geo, {
+      style: f => {
+        const o = byCode.get(f.properties.wijkcode);
+        const sel = o && o.code === selWijk;
+        const fill = w.heeftPct ? (pctTonen(o) ? kleurVoor(o.pct, kl) : css('--sunk')) : css('--sunk');
+        return { color: sel ? css('--fg') : lijn, weight: sel ? 3 : 1.5, fillColor: fill, fillOpacity: w.heeftPct ? 0.85 : 0.45, dashArray: (w.heeftPct && !pctTonen(o)) ? '3 3' : null };
+      },
+      onEachFeature: (f, ly) => {
+        const o = byCode.get(f.properties.wijkcode);
+        const nm = o ? o.naam : (f.properties.wijknaam || f.properties.wijkcode);
+        ly.bindTooltip(`<b>${esc(nm)}</b><br>${o ? fmt(o.n) : '–'} jongeren met jeugdzorg${w.heeftPct ? ' · ' + (o ? (pctTonen(o) ? fP(o.pct) : 'te klein voor %') : '–') : ''}`, { sticky: true });
+        ly.on('click', () => kiesWijk(f.properties.wijkcode, false));
+      }
+    }).addTo(layer);
+    if (!w.heeftPct) {
+      gj.eachLayer(ly => {
+        const o = byCode.get(ly.feature.properties.wijkcode);
+        if (o && o.n) {
+          const c = ly.getBounds().getCenter();
+          L.circleMarker(c, { radius: 3 + Math.sqrt(o.n) * 0.7, color: lijn, weight: 1, fillColor: css('--accent'), fillOpacity: 0.85, interactive: false }).addTo(layer);
+        }
+      });
+    }
+    const grens = gj.getBounds(), passen = !S.bounded; S.bounded = true;
+    // legenda
+    if (w.heeftPct && kl) {
+      let h = '<span>Jongeren met jeugdzorg, % van jongeren tot 23 jaar:</span>';
+      if (kl.n === 1) h += `<span><i class="sw" style="background:${css('--seq-3')}"></i>${fP(kl.grenzen[0])}</span>`;
+      else for (let i = 0; i < kl.n; i++) h += `<span><i class="sw" style="background:${kleurVoor(kl.grenzen[i] + 1e-9, kl)}"></i>${nf1.format(kl.grenzen[i])}–${nf1.format(kl.grenzen[i + 1])}</span>`;
+      h += `<span><i class="sw" style="background:${css('--sunk')};border-style:dashed"></i>te klein of geen cijfer</span>`;
+      $('#mapLegend').innerHTML = h;
+    } else {
+      $('#mapLegend').innerHTML = '<span><i class="sw" style="background:var(--accent);border-radius:50%"></i>Grootte van de stip: aantal jongeren met jeugdzorg</span>';
+    }
+    setTimeout(() => { map.invalidateSize(); if (passen) map.fitBounds(grens, { padding: [16, 16] }); }, 60);
+  }
+
+  // ---------- dossier ----------
+  const VW = [
+    { k: 'toegang', t: 'Gemeentelijke toegang', cols: ['toegang'], c: '--vw-1' },
+    { k: 'huisarts', t: 'Huisarts', cols: ['huisarts'], c: '--vw-2' },
+    { k: 'medisch', t: 'Jeugdarts of medisch specialist', cols: ['jeugdarts', 'ms'], c: '--vw-3' },
+    { k: 'justitie', t: 'Rechter of gecertificeerde instelling', cols: ['gi', 'rechter'], c: '--vw-4' },
+    { k: 'geen', t: 'Geen verwijzer of onbekend', cols: ['geen', 'onb'], c: '--vw-5' }
+  ];
+  function verwijzers(o) {
+    const delen = VW.map(v => { const s = v.cols.reduce((a, k) => a + (o[k] || 0), 0); return { ...v, n: s }; });
+    const tot = delen.reduce((a, d) => a + d.n, 0);
+    return { delen, tot };
+  }
+  function stapel(o) {
+    const { delen, tot } = verwijzers(o);
+    if (!tot) return '<span class="muted">–</span>';
+    return `<div class="stack" role="img" aria-label="Verdeling over verwijzers">${delen.filter(d => d.n).map(d => `<i style="width:${100 * d.n / tot}%;background:var(${d.c})" data-tip="${esc(d.t)}: ${fmt(d.n)} trajecten (${nf.format(Math.round(100 * d.n / tot))}%)"></i>`).join('')}</div>`;
+  }
+  function bindStapelTips(root) {
+    root.querySelectorAll('.stack i').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, esc(i.dataset.tip))); i.addEventListener('pointerleave', verbergTip); });
+  }
+  function renderDossier(o) {
+    const w = S.w;
+    if (!w || (!w.gm && !w.wijken.length)) { $('#dossier').innerHTML = '<span class="eyebrow">Wijk</span><p class="muted" style="margin:0">Geen wijkcijfers beschikbaar voor dit jaar.</p>'; return; }
+    const x = o || w.gm;
+    if (!x) { $('#dossier').innerHTML = ''; return; }
+    const vw = verwijzers(x);
+    const buurten = o ? w.buurten.filter(b => b.wijk === o.code) : [];
+    $('#dossier').innerHTML = `<span class="eyebrow">${o ? 'Wijk' : 'Hele gemeente'} · ${esc(w.perLabel)}</span><h2>${esc(x.naam)}</h2>
+      <dl>
+        <dt>Jongeren met jeugdzorg</dt><dd>${fmt(x.n)}</dd>
+        <dt>% van jongeren tot 23</dt><dd>${pctTekst(x)}</dd>
+        <dt>0 tot 4 jaar</dt><dd>${fmt(x.a0)}</dd>
+        <dt>4 tot 12 jaar</dt><dd>${fmt(x.a4)}</dd>
+        <dt>12 tot 18 jaar</dt><dd>${fmt(x.a12)}</dd>
+        <dt>18 tot 23 jaar</dt><dd>${fmt(x.a18)}</dd>
+        <dt>Eenouderhuishouden</dt><dd>${fmt(x.een)}</dd>
+        <dt>Bij een paar</dt><dd>${fmt(x.paar)}</dd>
+        <dt>Trajecten</dt><dd>${fmt(x.traj)}</dd>
+      </dl>
+      <span class="eyebrow">Verwijzers jeugdhulp</span>${stapel(x)}
+      <div class="legend">${vw.delen.filter(d => d.n).map(d => `<span><i class="sw" style="background:var(${d.c})"></i>${esc(d.t)} ${fmt(d.n)}</span>`).join('')}</div>
+      ${buurten.length ? `<span class="eyebrow">Buurten in deze wijk</span><ul>${buurten.map(b => `<li>${esc(b.naam)}: ${fmt(b.n)} · ${pctTekst(b)}</li>`).join('')}</ul>` : ''}
+      ${o ? `<button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>` : '<p class="small muted" style="margin:0">Klik een wijk op de kaart of in de tabel.</p>'}`;
+    bindStapelTips($('#dossier'));
+    const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesWijk(null));
+  }
+  function kiesWijk(code, vanTabel) {
+    selWijk = code;
+    const o = code ? S.w.wijken.find(x => x.code === code) : null;
+    renderDossier(o);
+    renderKaart();
+    if (vanTabel && gjLayer && code) gjLayer.eachLayer(l => { if (l.feature && l.feature.properties.wijkcode === code) map.fitBounds(l.getBounds(), { maxZoom: 15, padding: [24, 24] }); });
+    document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', !!code && tr.dataset.code === code));
+  }
+
+  // ---------- tabellen ----------
+  const COLS = {
+    wijk: [
+      { k: 'naam', t: 'Wijk' }, { k: 'n', t: 'Jongeren met jeugdzorg', r: 1 }, { k: 'pct', t: '% van jongeren tot 23', r: 1, pct: 1 },
+      { k: 'a0', t: '0–4 jaar', r: 1 }, { k: 'a4', t: '4–12 jaar', r: 1 }, { k: 'a12', t: '12–18 jaar', r: 1 }, { k: 'a18', t: '18–23 jaar', r: 1 },
+      { k: 'een', t: 'Eenouder', r: 1 }, { k: 'traj', t: 'Trajecten', r: 1 }
+    ],
+    buurt: [
+      { k: 'naam', t: 'Buurt' }, { k: 'wijknaam', t: 'Wijk' }, { k: 'n', t: 'Jongeren met jeugdzorg', r: 1 }, { k: 'pct', t: '% van jongeren tot 23', r: 1, pct: 1 }
+    ],
+    verwijzer: [
+      { k: 'naam', t: 'Wijk' }, { k: 'stack', t: 'Verdeling', nosort: 1 },
+      { k: 'v_toegang', t: 'Gemeentelijke toegang', r: 1, sw: '--vw-1' }, { k: 'v_huisarts', t: 'Huisarts', r: 1, sw: '--vw-2' }, { k: 'v_medisch', t: 'Jeugdarts of specialist', r: 1, sw: '--vw-3' },
+      { k: 'v_justitie', t: 'Rechter of GI', r: 1, sw: '--vw-4' }, { k: 'v_geen', t: 'Geen of onbekend', r: 1, sw: '--vw-5' }, { k: 'v_tot', t: 'Totaal', r: 1 }
+    ]
+  };
+  function zetView(v) {
+    view = v; sortKey = null;
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x.dataset.view === v));
+    renderTabel();
+  }
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { if (!b.disabled) zetView(b.dataset.view); }));
+  $('#search').addEventListener('input', renderTabel);
+  function rijen() {
+    const w = S.w;
+    if (!w) return [];
+    if (view === 'buurt') {
+      const wn = new Map(w.wijken.map(o => [o.code, o.naam]));
+      return w.buurten.map(b => ({ ...b, wijknaam: wn.get(b.wijk) || b.wijk }));
+    }
+    const lijst = (w.gm ? [{ ...w.gm, isGm: true }] : []).concat(w.wijken);
+    if (view === 'verwijzer') return lijst.map(o => { const v = verwijzers(o); const r = { ...o, v_tot: v.tot || null }; v.delen.forEach(d => { r['v_' + d.k] = d.n || null; }); return r; });
+    return lijst;
+  }
+  function renderTabel() {
+    if (!S || !S.w) return;
+    const cols = COLS[view];
+    const q = $('#search').value.trim().toLowerCase();
+    let rs = rijen();
+    if (q) rs = rs.filter(r => r.isGm || [r.naam, r.wijknaam, r.code].join(' ').toLowerCase().includes(q));
+    const gm = rs.filter(r => r.isGm), rest = rs.filter(r => !r.isGm);
+    if (sortKey) rest.sort((a, b) => {
+      let x = a[sortKey], y = b[sortKey];
+      if (sortKey === 'pct') { x = pctTonen(a) ? x : null; y = pctTonen(b) ? y : null; }
+      if (x == null) return 1; if (y == null) return -1;
+      return (typeof x === 'string' ? x.localeCompare(y, 'nl') : x - y) * sortDir;
+    }); else rest.sort((a, b) => a.code.localeCompare(b.code));
+    rs = gm.concat(rest);
+    $('#vwLegend').hidden = view !== 'verwijzer';
+    $('#vwLegend').innerHTML = VW.map(v => `<span><i class="sw" style="background:var(${v.c})"></i>${esc(v.t)}</span>`).join('') + '<span>Aandeel van de jeugdhulptrajecten met een bekende telling.</span>';
+    const cel = (r, c) => {
+      const v = r[c.k];
+      if (c.k === 'stack') return stapel(r);
+      if (c.pct) return pctTekst(r);
+      if (c.r) return fmt(v);
+      return esc(v);
+    };
+    if (!rs.length) { $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Geen cijfers voor dit jaar.</p>'; $('#rowCount').textContent = ''; return; }
+    $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.nosort ? 'style="cursor:default"' : ''} ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.sw ? `<i class="cel-sw" style="background:var(${c.sw})"></i>` : ''}${c.t}</th>`).join('')}</tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : (view !== 'buurt' ? 'klik' : '')} ${r.code === selWijk ? 'sel' : ''}" data-code="${esc(r.code)}">${cols.map(c => `<td class="${c.r ? 'r' : ''}">${cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    $('#rowCount').textContent = `${rs.length - gm.length} ${view === 'buurt' ? 'buurten' : 'wijken'} · ${S.w.perLabel}`;
+    $('#tblWrap').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
+      const k = th.dataset.k; if (k === 'stack') return;
+      if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = (k === 'naam' || k === 'wijknaam') ? 1 : -1; }
+      renderTabel();
+    }));
+    if (view !== 'buurt') $('#tblWrap').querySelectorAll('tbody tr.klik').forEach(tr => tr.addEventListener('click', () => kiesWijk(tr.dataset.code, true)));
+    bindStapelTips($('#tblWrap'));
+  }
+
+  // ---------- CSV ----------
+  function csvDownload(naam, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const komma = v => v == null ? '' : String(v).replace('.', ',');
+  $('#csvWijk').addEventListener('click', () => {
+    if (!S || !S.w) return;
+    const w = S.w;
+    const kop = ['jaar', 'gemeentecode', 'gemeente', 'niveau', 'code', 'naam', 'wijkcode', 'jongeren_met_jeugdzorg', 'pct_jongeren_tot23', 'pct_betrouwbaar', '0_4', '4_12', '12_18', '18_23', 'eenouder', 'bij_paar', 'ander_huishouden', 'trajecten', 'verw_gemeentelijke_toegang', 'verw_huisarts', 'verw_jeugdarts', 'verw_medisch_specialist', 'verw_gecertificeerde_instelling', 'verw_rechter_ovj', 'verw_geen', 'verw_onbekend'];
+    const rij = (niv, o, wk) => [w.jaar, 'GM' + S.g.c, S.g.n, niv, o.code, o.naam, wk, o.n, komma(o.pct), o.pct == null ? '' : (pctTonen(o) ? 'ja' : 'nee'), o.a0, o.a4, o.a12, o.a18, o.een, o.paar, o.ander, o.traj, o.toegang, o.huisarts, o.jeugdarts, o.ms, o.gi, o.rechter, o.geen, o.onb];
+    const rows = (w.gm ? [rij('gemeente', w.gm, '')] : []).concat(w.wijken.map(o => rij('wijk', o, o.code))).concat(w.buurten.map(b => rij('buurt', b, b.wijk)));
+    csvDownload(`jeugdzorg_wijken_${w.jaar}_${S.g.n.replace(/[^\w-]+/g, '_').toLowerCase()}.csv`, kop, rows);
+  });
+
+  // ---------- voet ----------
+  function renderVoet() {
+    const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+    const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
+    const w = S.w || {};
+    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', async () => {
+    const g = S.g; const was = [...fouten]; fouten.clear(); toonMelding();
+    if (was.includes('gebruik door de jaren')) await laadTrend();
+    if (was.includes('kosten')) await laadKosten();
+    if (S.g !== g) return;
+    renderKern(); renderTrend(); renderKosten();
+    if (was.includes('wijken')) await kiesJaar(S.wJaar);
+    toonMelding();
+  });
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  const h = (location.hash.match(/gm=(\d{4})/) || [])[1];
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+</body>
+</html>
