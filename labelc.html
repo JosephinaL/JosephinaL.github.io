@@ -683,7 +683,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 :root {
   --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
   --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff;
-  --st-voldoet: #2f8f46; --st-voldoet_niet: #d2462c; --st-geen_label: #d99a12;
+  --st-voldoet: #2f8f46; --st-voldoet_niet: #d2462c; --st-geen_label: #d99a12; --st-label_onbekend: #5b6b86;
   --st-onzeker_bedrijf: #7656b0; --st-onzeker_gemengd: #3f74c4; --st-monument: #8a6634;
   --st-eigen: #b04d78; --st-buiten: #9aa7aa;
   --lbl-A: #1a8a3f; --lbl-B: #57a83a; --lbl-C: #b3c72a; --lbl-D: #f2d01c; --lbl-E: #f0a018; --lbl-F: #e4642a; --lbl-G: #d22a2a;
@@ -696,13 +696,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416;
-  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a;
+  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a; --st-label_onbekend: #8fa0c2;
   --st-onzeker_bedrijf: #9d82d6; --st-onzeker_gemengd: #6b9be0; --st-monument: #b58d55;
   --st-eigen: #d57aa0; --st-buiten: #6d7b7e; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416;
-  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a;
+  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a; --st-label_onbekend: #8fa0c2;
   --st-onzeker_bedrijf: #9d82d6; --st-onzeker_gemengd: #6b9be0; --st-monument: #b58d55;
   --st-eigen: #d57aa0; --st-buiten: #6d7b7e; color-scheme: dark; }
 
@@ -750,6 +750,8 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
 .err { border-color: var(--st-voldoet_niet) !important; }
 .err p { margin: 0; }
+.melding { background: var(--surface); border: 1px solid var(--st-geen_label); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
 
 /* kernzin + statusband */
 .lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
@@ -854,6 +856,10 @@ footer { font-size: .8rem; color: var(--muted); }
 
   <section id="result" hidden>
     <div class="wrap">
+      <div class="melding" id="labelMelding" role="status" hidden>
+        <p id="labelMeldingTekst"></p>
+        <button class="btn primary" id="labelRetry" type="button">Labels opnieuw ophalen</button>
+      </div>
       <div class="lead">
         <span class="big" id="leadBig"></span>
         <span class="muted" id="leadSub"></span>
@@ -902,7 +908,8 @@ footer { font-size: .8rem; color: var(--muted); }
             <li><b>Plichtig</b>: meer dan 100 m² kantoorfunctie én minstens 50% van de gebruiksoppervlakte van het pand, geen monument.</li>
             <li><b>Onzeker</b>: een verblijfsobject heeft kantoor plus een andere functie. De BAG splitst die oppervlakte niet, dus de 50%- en 100 m²-toets zijn niet te maken. "Bedrijf" als industriefunctie meedoet, anders "gemengd".</li>
             <li><b>Label</b>: dominant label van het pand bij RIVM (afgeleid uit EP-Online). A t/m C voldoet.</li>
-            <li><b>Monument</b>: rijksmonument volgens RCE, ruimtelijk gekoppeld aan het pand.</li>
+            <li><b>Monument</b>: rijksmonument volgens RCE. Rijks-, provinciale en gemeentelijke monumenten zijn uitgezonderd (Bbl art. 3.87 lid 4 met art. 6.28); een beschermd stads- of dorpsgezicht niet. Koppeling, van sterk naar zwak: het monumentenregister noemt het BAG-pand zelf (RCE linked data; vooral recente inschrijvingen), het registerpunt ligt in het pand, of een adres ligt binnen de monumentcontour, of het punt ligt binnen 3 m naast het pand en in geen ander pand. Die laatste koppeling staat in de redenering; controleer haar.</li>
+            <li><b>Grenst aan rijksmonument</b>: het pand raakt een monumentpand. Vormen beide samen één kantoorgebouw, dan geldt de uitzondering voor het geheel. Dat is uit de BAG niet vast te stellen; het pand houdt zijn status en krijgt een vermelding.</li>
           </ul>
         </div>
         <div class="card">
@@ -918,7 +925,8 @@ footer { font-size: .8rem; color: var(--muted); }
         <div class="card">
           <h2>Grenzen van open data</h2>
           <ul class="plain small">
-            <li>Gemeentelijke en provinciale monumenten ontbreken, tenzij je ze hierboven toevoegt.</li>
+            <li>Gemeentelijke en provinciale monumenten ontbreken, tenzij je ze hierboven toevoegt. Dat geldt ook voor panden waarvan de aanwijzing als monument nog in procedure is; die zijn al uitgezonderd.</li>
+            <li>Alleen een klein deel van de rijksmonumenten (in Delft circa 1 op 10) is in het register aan BAG-panden gekoppeld. Voor de rest geldt één punt per monument, zonder type. Een punt in een groot pand kan een onderdeel zijn (poort, gevel); het hele pand wordt dan uitgezonderd.</li>
             <li>Tijdelijk gebruik (maximaal 2 jaar) en de terugverdientijd-uitzondering staan niet in open data.</li>
             <li>Geen label betekent niet dat het pand niet voldoet; het label is alleen niet geregistreerd.</li>
             <li>Een BAG-pand is niet altijd een gebouw in de zin van het Bbl. Labels per pand zijn een benadering bij gemengde panden.</li>
@@ -938,6 +946,7 @@ footer { font-size: .8rem; color: var(--muted); }
   const CBS = 'https://api.pdok.nl/cbs/gebiedsindelingen/ogc/v1/collections';
   const RCE = 'https://api.pdok.nl/rce/beschermde-gebieden-cultuurhistorie/ogc/v1/collections';
   const RIVM = 'https://data.rivm.nl/geo/nl/wfs';
+  const RCE_LD = 'https://api.linkeddata.cultureelerfgoed.nl/datasets/rce/cho/services/cho/sparql';
 
   const VBO_ACTIEF = new Set([
     'Verblijfsobject in gebruik', 'Verblijfsobject in gebruik (niet ingemeten)',
@@ -1044,6 +1053,55 @@ footer { font-size: .8rem; color: var(--muted); }
     for (const poly of ringsOf(geom)) for (const [x, y] of poly[0]) if (x >= t[0] && x <= t[2] && y >= t[1] && y <= t[3]) return true;
     return false;
   }
+  // afstanden in meters, lokale benadering (ruim nauwkeurig genoeg op pandschaal)
+  function dSeg(px, py, ax, ay, bx, by, kx, ky) {
+    const X = (px - ax) * kx, Y = (py - ay) * ky, U = (bx - ax) * kx, V = (by - ay) * ky;
+    const L = U * U + V * V;
+    const t = L ? Math.max(0, Math.min(1, (X * U + Y * V) / L)) : 0;
+    return Math.hypot(X - t * U, Y - t * V);
+  }
+  function distPtGeom(x, y, geom) {
+    if (inGeom(x, y, geom)) return 0;
+    const kx = Math.cos(y * Math.PI / 180) * 111320, ky = 110574;
+    let m = Infinity;
+    for (const poly of ringsOf(geom)) for (const ring of poly) for (let i = 1; i < ring.length; i++) {
+      const d = dSeg(x, y, ring[i - 1][0], ring[i - 1][1], ring[i][0], ring[i][1], kx, ky);
+      if (d < m) m = d;
+    }
+    return m;
+  }
+  function distGeomGeom(a, b) {
+    let m = Infinity;
+    for (const [g, h] of [[a, b], [b, a]]) for (const poly of ringsOf(g)) for (const ring of poly) for (const [x, y] of ring) {
+      const d = distPtGeom(x, y, h);
+      if (d < m) m = d;
+      if (m === 0) return 0;
+    }
+    return m;
+  }
+  // eenvoudig rasterindex op pand-bbox, cel ca. 140 x 220 m
+  const CEL = 0.002;
+  function gridIndex(items) {
+    const g = new Map();
+    for (const p of items) {
+      const b = p.bb;
+      for (let i = Math.floor(b[0] / CEL); i <= Math.floor(b[2] / CEL); i++)
+        for (let j = Math.floor(b[1] / CEL); j <= Math.floor(b[3] / CEL); j++) {
+          const k = i + ':' + j;
+          if (!g.has(k)) g.set(k, []);
+          g.get(k).push(p);
+        }
+    }
+    return g;
+  }
+  function gridNear(g, b) {
+    const out = new Set();
+    for (let i = Math.floor(b[0] / CEL) - 1; i <= Math.floor(b[2] / CEL) + 1; i++)
+      for (let j = Math.floor(b[1] / CEL) - 1; j <= Math.floor(b[3] / CEL) + 1; j++)
+        for (const p of g.get(i + ':' + j) || []) out.add(p);
+    return [...out];
+  }
+
   const r6 = v => Math.round(v * 1e6) / 1e6;
   const bboxParam = t => t.map(r6).join(',');
   const uuidOf = href => href.split('/').pop().split('?')[0];
@@ -1071,6 +1129,36 @@ footer { font-size: .8rem; color: var(--muted); }
     const code4 = gm.code.replace('GM', '');
     const f = await getAllPages(`${BAG}/woonplaats/items?f=json&limit=1000&bronhouder_identificatie=${code4}`);
     return f.filter(x => /aangewezen/i.test(x.properties.status)).map(x => ({ id: x.properties.identificatie, naam: x.properties.woonplaats }));
+  }
+
+  // rijksmonumenten met een BAG-pandkoppeling uit de RCE linked data
+  async function sparql(q, ms = 75000) {
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const t = ctl && setTimeout(() => ctl.abort(), ms);
+    try {
+      const r = await fetch(RCE_LD, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/sparql-results+json' }, body: 'query=' + encodeURIComponent(q), signal: ctl ? ctl.signal : undefined });
+      if (!r.ok) throw new Error('HTTP ' + r.status + ' bij RCE linked data');
+      return (await r.json()).results.bindings;
+    } finally { if (t) clearTimeout(t); }
+  }
+  async function rceBagPanden(gm) {
+    const kop = 'PREFIX ceo:<https://linkeddata.cultureelerfgoed.nl/def/ceo#> PREFIX skos:<http://www.w3.org/2004/02/skos/core#> SELECT DISTINCT ?rmnr ?pand ?status WHERE { ';
+    const staart = ' ?m ceo:heeftBasisregistratieRelatie ?br ; ceo:rijksmonumentnummer ?rmnr . OPTIONAL { ?m ceo:heeftJuridischeStatus ?js . ?js skos:prefLabel ?status FILTER(lang(?status)="nl" || lang(?status)="") } } LIMIT 20000';
+    // eerst op gemeentenaam (snel); levert dat niets op, dan op de gemeentecode in het pand-ID
+    let rows = await sparql(kop + `?br ceo:gemeentenaam ${JSON.stringify(gm.naam)} ; ceo:heeftBAGRelatie ?b . ?b ceo:pandIdentificatie ?pand .` + staart);
+    let route = 'gemeentenaam';
+    if (!rows.length) {
+      rows = await sparql(kop + `?b ceo:pandIdentificatie ?pand . FILTER(STRSTARTS(?pand, "${gm.code.replace('GM', '')}")) ?br ceo:heeftBAGRelatie ?b .` + staart);
+      route = 'gemeentecode';
+    }
+    const map = new Map();
+    for (const b of rows) {
+      const status = b.status ? b.status.value : '';
+      if (/afgevoerd|vervallen/i.test(status)) continue;
+      const pand = b.pand.value, nr = b.rmnr.value;
+      if (!map.has(pand)) map.set(pand, { nr, url: 'https://monumentenregister.cultureelerfgoed.nl/monumenten/' + nr, how: 'bag', afstand: null, status });
+    }
+    return { map, route, volledig: rows.length < 20000 };
   }
 
   function likeUrl(coll, t) {
@@ -1161,32 +1249,92 @@ footer { font-size: .8rem; color: var(--muted); }
     const isRM = x => x.properties.namespace === 'nlps-rijksmonumenten';
     const monPts = mp.filter(isRM), monPoly = mv.filter(isRM);
     log(`${monPts.length} rijksmonumentpunten, ${monPoly.length} monumentvlakken in de omgeving`);
-    for (const p of P.values()) {
-      const pbb = bboxOf(p.geom);
-      for (const m of monPts) {
-        const [x, y] = m.geometry.coordinates;
-        if (x < pbb[0] || x > pbb[2] || y < pbb[1] || y > pbb[3]) continue;
-        if (inGeom(x, y, p.geom)) { p.monument = monRef(m); break; }
-      }
-      if (!p.monument && p.kvbo[0] && p.kvbo[0].xy) {
-        const [x, y] = p.kvbo[0].xy;
-        for (const m of monPoly) if (inGeom(x, y, m.geometry)) { p.monument = monRef(m); break; }
+    const PL = [...P.values()];
+    for (const p of PL) { p.bb = bboxOf(p.geom); p.grenst = []; }
+    const grid = gridIndex(PL);
+
+    // 1. registerpunt ligt in een kantoorpand
+    const vrij = [];
+    for (const m of monPts) {
+      const [x, y] = m.geometry.coordinates;
+      const kand = gridNear(grid, [x, y, x, y]);
+      const hit = kand.find(p => x >= p.bb[0] && x <= p.bb[2] && y >= p.bb[1] && y <= p.bb[3] && inGeom(x, y, p.geom));
+      if (hit) { if (!hit.monument) hit.monument = monRef(m, 'pand'); continue; }
+      const dicht = kand.map(p => [p, distPtGeom(x, y, p.geom)]).filter(([, d]) => d <= MON_BUUR_M);
+      if (dicht.length) vrij.push({ m, x, y, dicht });
+    }
+    // 2. adres ligt binnen een monumentcontour (complexen)
+    for (const p of PL) {
+      if (p.monument) continue;
+      for (const v of p.kvbo) {
+        if (!v.xy) continue;
+        const m = monPoly.find(m => inGeom(v.xy[0], v.xy[1], m.geometry));
+        if (m) { p.monument = monRef(m, 'vlak'); break; }
       }
     }
+    // 3. registerpunt naast een kantoorpand: ligt het in een ander pand, of in geen enkel pand?
+    log(`${vrij.length} monumentpunten naast een kantoorpand nader bekijken`);
+    done = 0;
+    await pool(vrij, conc, async v => {
+      const e = 0.00003;
+      try {
+        const f = await getAllPages(`${BAG}/pand/items?f=json&limit=100&bbox=${bboxParam([v.x - e, v.y - e, v.x + e, v.y + e])}`);
+        v.thuis = f.find(x => !PAND_INACTIEF.has(x.properties.status) && inGeom(v.x, v.y, x.geometry)) || null;
+        v.ok = true;
+      } catch (err) { v.ok = false; }
+      opts.progress && opts.progress(++done / Math.max(1, vrij.length));
+    });
+    let opAfstand = 0, nietBekeken = 0;
+    for (const v of vrij) {
+      if (!v.ok) { nietBekeken++; continue; }
+      if (!v.thuis) {
+        // in geen enkel pand: koppel aan het dichtstbijzijnde kantoorpand binnen de tolerantie
+        const [p, d] = v.dicht.reduce((a, b) => (b[1] < a[1] ? b : a));
+        if (d <= MON_TOL_M && !p.monument) { p.monument = monRef(v.m, 'afstand', d); opAfstand++; }
+      } else if (!P.has(v.thuis.id)) {
+        // monument in een pand zonder kantoorfunctie: buren markeren
+        for (const [p] of v.dicht) if (distGeomGeom(p.geom, v.thuis.geometry) <= MON_RAAK_M) addGrens(p, monRef(v.m, 'pand'));
+      }
+    }
+    // 4. BAG-koppeling uit het monumentenregister: de sterkste koppeling, gaat voor de ruimtelijke
+    let bagInfo = 'BAG-koppeling RCE niet opgehaald';
+    try {
+      const { map, route, volledig } = await rceBagPanden(gm);
+      let bevestigd = 0, extra = 0, anders = 0;
+      for (const p of PL) {
+        const m = map.get(p.id);
+        if (!m) continue;
+        if (!p.monument) extra++;
+        else if (p.monument.nr === m.nr) bevestigd++;
+        else anders++;
+        p.monument = { ...m };
+      }
+      bagInfo = `BAG-koppeling RCE (via ${route}): ${map.size} monumentpanden, bij de kantoorpanden ${bevestigd} bevestigd, ${extra} nieuw, ${anders} met ander nummer` + (volledig ? '' : '; lijst mogelijk onvolledig');
+    } catch (err) { bagInfo += ': ' + (err.name === 'AbortError' ? 'time-out' : err.message) + '; alleen ruimtelijke koppeling gebruikt'; }
+    log(bagInfo);
+
+    // 5. kantoorpanden die raken aan een kantoorpand dat monument is
+    for (const q of PL) {
+      if (!q.monument) continue;
+      for (const p of gridNear(grid, q.bb)) {
+        if (p === q || p.monument) continue;
+        if (p.bb[0] > q.bb[2] + 1e-5 || p.bb[2] < q.bb[0] - 1e-5 || p.bb[1] > q.bb[3] + 1e-5 || p.bb[3] < q.bb[1] - 1e-5) continue;
+        if (distGeomGeom(p.geom, q.geom) <= MON_RAAK_M) addGrens(p, q.monument);
+      }
+    }
+    for (const p of PL) { delete p.bb; if (p.monument) p.grenst = []; }
+    log(`Monumenten gekoppeld; ${opAfstand} op afstand, ${PL.filter(p => p.grenst.length).length} panden grenzen aan een rijksmonument` + (nietBekeken ? `; ${nietBekeken} punten niet te controleren` : '') + '. ' + bagInfo);
 
     step('labels', 'Energielabels ophalen bij RIVM');
     const lijst = [...P.values()];
-    const batches = [];
-    for (let i = 0; i < lijst.length; i += 80) batches.push(lijst.slice(i, i + 80));
-    const labels = new Map();
-    done = 0;
-    await pool(batches, 4, async b => {
-      const flt = encodeURIComponent(`identificatie IN (${b.map(p => `'${p.id}'`).join(',')})`);
-      const d = await getJSON(`${RIVM}?service=WFS&version=2.0.0&request=GetFeature&typeNames=nl:rvo_energielabels&outputFormat=application/json&propertyName=identificatie,dominant_label,hoogste_label,laagste_label,aant_labels,aant_verblijfsobj&CQL_FILTER=${flt}`);
-      for (const f of d.features || []) if (f.properties.dominant_label) labels.set(f.properties.identificatie, f.properties);
-      opts.progress && opts.progress(++done / batches.length);
-    });
-    for (const p of lijst) p.label = labels.get(p.id) || null;
+    // valt RIVM uit, dan loopt de analyse door; panden onder de plicht krijgen 'Label onbekend'
+    let labelsFout = null;
+    try { zetLabels(lijst, await haalLabels(lijst, opts)); }
+    catch (e) {
+      labelsFout = { tijd: new Date().toISOString(), melding: e.message || String(e) };
+      for (const p of lijst) { p.label = null; p.labelOnbekend = true; }
+      log('Energielabels niet beschikbaar: ' + labelsFout.melding);
+    }
 
     step('wijken', 'Wijkgrenzen ophalen');
     let wk = { jaar: null, lijst: [] };
@@ -1201,19 +1349,55 @@ footer { font-size: .8rem; color: var(--muted); }
       classify(p);
     }
     step('klaar', 'Klaar');
-    return { gm: { code: gm.code, naam: gm.naam }, wijkJaar: wk.jaar, woonplaatsen: wps, panden: lijst, opgehaald: new Date().toISOString() };
+    return { gm: { code: gm.code, naam: gm.naam }, wijkJaar: wk.jaar, woonplaatsen: wps, panden: lijst, opgehaald: new Date().toISOString(), labelsFout };
   }
 
-  function monRef(m) {
+  async function haalLabels(lijst, opts = {}) {
+    const batches = [];
+    for (let i = 0; i < lijst.length; i += 80) batches.push(lijst.slice(i, i + 80));
+    const labels = new Map();
+    let done = 0;
+    await pool(batches, 4, async b => {
+      const flt = encodeURIComponent(`identificatie IN (${b.map(p => `'${p.id}'`).join(',')})`);
+      const d = await getJSON(`${RIVM}?service=WFS&version=2.0.0&request=GetFeature&typeNames=nl:rvo_energielabels&outputFormat=application/json&propertyName=identificatie,dominant_label,hoogste_label,laagste_label,aant_labels,aant_verblijfsobj&CQL_FILTER=${flt}`);
+      for (const f of d.features || []) if (f.properties.dominant_label) labels.set(f.properties.identificatie, f.properties);
+      opts.progress && opts.progress(++done / batches.length);
+    });
+    return labels;
+  }
+  function zetLabels(lijst, labels) {
+    for (const p of lijst) { p.label = labels.get(p.id) || null; p.labelOnbekend = false; }
+  }
+  // alleen de labels opnieuw ophalen voor een eerder resultaat; gooit een fout als RIVM nog steeds niet antwoordt
+  async function labelsOpnieuw(res, opts = {}) {
+    try {
+      zetLabels(res.panden, await haalLabels(res.panden, opts));
+      res.labelsFout = null;
+      res.labelsLater = new Date().toISOString();
+    } catch (e) {
+      res.labelsFout = { tijd: new Date().toISOString(), melding: e.message || String(e) };
+      throw e;
+    }
+    return res;
+  }
+
+  // drempels voor de monumentkoppeling, in meters
+  const MON_TOL_M = 3;    // punt buiten elk pand: koppelen aan kantoorpand binnen deze afstand
+  const MON_BUUR_M = 15;  // punten binnen deze afstand van een kantoorpand worden nader bekeken
+  const MON_RAAK_M = 0.5; // panden binnen deze afstand gelden als aangrenzend
+
+  function monRef(m, how, d) {
     const p = m.properties;
     const nr = (p.ci_citation || '').split('/').pop();
-    return { nr, url: p.ci_citation };
+    return { nr, url: p.ci_citation, how, afstand: d == null ? null : Math.round(d * 10) / 10 };
   }
+  function addGrens(p, ref) { if (!p.grenst.some(g => g.nr === ref.nr)) p.grenst.push(ref); }
+  const KOPPELING = { bag: 'pand staat bij het monument in het register', pand: 'punt ligt in het pand', vlak: 'adres ligt binnen de monumentcontour', afstand: 'punt ligt naast het pand' };
   const sum = a => a.reduce((s, v) => s + v, 0);
 
   // ---------- classificatie ----------
   const STATUS = {
-    voldoet: 'Voldoet', voldoet_niet: 'Voldoet niet', geen_label: 'Geen label',
+    voldoet: 'Voldoet', voldoet_niet: 'Voldoet niet', geen_label: 'Geen label', label_onbekend: 'Label onbekend',
     onzeker_bedrijf: 'Onzeker: bedrijf', onzeker_gemengd: 'Onzeker: gemengd',
     monument: 'Monument', eigen: 'Eigen uitzondering', buiten: 'Buiten de plicht'
   };
@@ -1245,22 +1429,32 @@ footer { font-size: .8rem; color: var(--muted); }
         r.push('De BAG verdeelt de oppervlakte van objecten met meerdere functies niet; of de drempels worden gehaald is uit open data niet vast te stellen.');
       }
     }
-    if (p.monument) { p.status = 'monument'; r.push(`Rijksmonument ${p.monument.nr}: uitgezonderd.`); p.redenering = r; return p; }
+    if (p.monument) {
+      p.status = 'monument';
+      const m = p.monument;
+      if (m.how === 'afstand') r.push(`Rijksmonument ${m.nr}: het registerpunt ligt ${String(m.afstand).replace('.', ',')} m buiten de pandcontour en in geen ander pand. Daarom aan dit pand gekoppeld en uitgezonderd; controleren in het monumentenregister.`);
+      else if (m.how === 'bag') r.push(`Het monumentenregister koppelt rijksmonument ${m.nr} aan dit BAG-pand: uitgezonderd.`);
+      else if (m.how === 'vlak') r.push(`Een adres in dit pand ligt binnen de contour van rijksmonument ${m.nr}: uitgezonderd.`);
+      else r.push(`Rijksmonument ${m.nr} ligt in dit pand: uitgezonderd.`);
+      p.redenering = r; return p;
+    }
     if (eigenSet && eigenSet.has(p.id)) { p.status = 'eigen'; r.push('Staat op de eigen uitzonderingenlijst (bijvoorbeeld gemeentelijk monument).'); p.redenering = r; return p; }
     const L = p.label;
     if (p.plicht === 'ja') {
-      if (!L) { p.status = 'geen_label'; r.push('Geen geregistreerd energielabel bij RIVM/EP-Online.'); }
+      if (p.labelOnbekend) { p.status = 'label_onbekend'; r.push('De energielabels konden niet worden opgehaald bij RIVM (bron tijdelijk niet bereikbaar). Of dit pand een label heeft, is nu onbekend.'); }
+      else if (!L) { p.status = 'geen_label'; r.push('Geen geregistreerd energielabel bij RIVM/EP-Online.'); }
       else if (labelOK(L.dominant_label)) { p.status = 'voldoet'; r.push(`Dominant label ${L.dominant_label}: voldoet.`); }
       else { p.status = 'voldoet_niet'; r.push(`Dominant label ${L.dominant_label}: slechter dan C.`); }
     } else if (L) r.push(`Label: dominant ${L.dominant_label}.`);
     if (L && L.hoogste_label !== L.laagste_label) r.push(`Labels in dit pand lopen uiteen van ${L.hoogste_label} tot ${L.laagste_label} (${L.aant_labels} labels).`);
+    if (p.grenst && p.grenst.length) r.push(`Grenst aan rijksmonument ${p.grenst.map(g => g.nr).join(', ')}. Vormen dit pand en het monument samen één kantoorgebouw, dan geldt de uitzondering voor het geheel. Controleren.`);
     p.redenering = r; return p;
   }
   const fmt = n => Math.round(n).toLocaleString('nl-NL');
   const pct = s => Math.round(s * 100) + '%';
   const uniq = a => [...new Set(a)];
 
-  root.LabelC = { analyse, gemeenten, classify, STATUS, inGeom, bboxOf };
+  root.LabelC = { analyse, labelsOpnieuw, gemeenten, classify, STATUS, KOPPELING, inGeom, bboxOf, distPtGeom, distGeomGeom };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1268,8 +1462,8 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.1';
-  const ORDER = ['voldoet_niet', 'geen_label', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
+  const VERSIE = '1.2';
+  const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
   const lblCol = l => l ? css('--lbl-' + l[0]) : null;
@@ -1370,10 +1564,10 @@ footer { font-size: .8rem; color: var(--muted); }
     $('#result').hidden = false;
     $('#tab-wijk').hidden = !res.wijkJaar;
     if (!res.wijkJaar && state.view === 'wijk') state.view = 'panden';
-    drawMap(); renderAll();
+    drawMap(); renderAll(); renderMelding();
     $('#dossier').innerHTML = '<span class="eyebrow">Pand</span><p class="muted" style="margin:0">Klik een pand op de kaart of in de tabel om te zien waarom het zo is ingedeeld.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM, afgeleid uit EP-Online van RVO), rijksmonumenten (RCE, via PDOK), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · broncode onder EUPL-1.2.`;
+    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM, afgeleid uit EP-Online van RVO${res.labelsFout ? '; bij ophalen niet bereikbaar' : res.labelsLater ? ', later opgehaald ' + new Date(res.labelsLater).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' }) : ''}), rijksmonumenten (RCE, via PDOK en monumentenregister), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · broncode onder EUPL-1.2.`;
   }
 
   function applyEigen(rerender = true) {
@@ -1381,6 +1575,21 @@ footer { font-size: .8rem; color: var(--muted); }
     $('#eigenInfo').textContent = state.eigen.size ? `${state.eigen.size} pand-ID's op de lijst, ${state.res.panden.filter(p => p.status === 'eigen').length} daarvan uitgezonderd.` : 'Blijft in deze browser; wordt nergens heen gestuurd.';
     if (rerender) { styleLayer(); renderAll(); if (state.sel) showDossier(state.sel); }
   }
+  function renderMelding() {
+    const f = state.res.labelsFout;
+    $('#labelMelding').hidden = !f;
+    if (!f) return;
+    const t = new Date(f.tijd).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' });
+    $('#labelMeldingTekst').innerHTML = `<b>Energielabels niet beschikbaar.</b> De labeldienst van RIVM gaf op ${esc(t)} geen antwoord. De analyse van panden, kantoorfunctie en monumenten is compleet; panden onder de plicht staan voorlopig als <b>Label onbekend</b>. <span class="muted small">(${esc(f.melding)})</span>`;
+  }
+  $('#labelRetry').onclick = async () => {
+    const b = $('#labelRetry'); const res = state.res;
+    b.disabled = true; b.textContent = 'Bezig met ophalen…';
+    try { await LabelC.labelsOpnieuw(res); } catch (e) { /* melding toont het nieuwe tijdstip */ }
+    b.disabled = false; b.textContent = 'Labels opnieuw ophalen';
+    if (state.res !== res) return;
+    show(res);
+  };
   const parseIds = t => new Set((t.match(/\d{16}/g) || []));
   $('#eigenBtn').onclick = () => {
     const t = $('#eigen').value;
@@ -1399,17 +1608,23 @@ footer { font-size: .8rem; color: var(--muted); }
 
   function renderLead() {
     const c = counts();
-    const pl = c.voldoet + c.voldoet_niet + c.geen_label;
+    const pl = c.voldoet + c.voldoet_niet + c.geen_label + c.label_onbekend;
     const on = c.onzeker_bedrijf + c.onzeker_gemengd;
-    $('#leadBig').textContent = pl ? `${fmt(pl)} panden vallen onder de plicht; ${Math.round(c.voldoet / pl * 100)}% heeft label C of beter.` : 'Geen panden die zeker onder de plicht vallen.';
-    $('#leadSub').textContent = `${fmt(c.voldoet_niet)} met label D–G, ${fmt(c.geen_label)} zonder label. ${fmt(on)} panden onzeker door gemengde functies, ${fmt(state.res.panden.length)} panden met kantoorfunctie in totaal.`;
+    if (c.label_onbekend) {
+      $('#leadBig').textContent = `${fmt(pl)} panden vallen onder de plicht; energielabels zijn nu niet beschikbaar.`;
+      $('#leadSub').textContent = `${fmt(on)} panden onzeker door gemengde functies, ${fmt(state.res.panden.length)} panden met kantoorfunctie in totaal.`;
+    } else {
+      $('#leadBig').textContent = pl ? `${fmt(pl)} panden vallen onder de plicht; ${Math.round(c.voldoet / pl * 100)}% heeft label C of beter.` : 'Geen panden die zeker onder de plicht vallen.';
+      $('#leadSub').textContent = `${fmt(c.voldoet_niet)} met label D–G, ${fmt(c.geen_label)} zonder label. ${fmt(on)} panden onzeker door gemengde functies, ${fmt(state.res.panden.length)} panden met kantoorfunctie in totaal.`;
+    }
     renderUnits();
   }
 
   // Drie eenheden: panden, adressen (verblijfsobjecten met kantoor), oppervlakte (zeker kantoor, m²)
   function units(panden) {
-    const pl = panden.filter(p => p.status === 'voldoet' || p.status === 'voldoet_niet' || p.status === 'geen_label');
-    const sumBy = (f) => { const o = { voldoet: 0, voldoet_niet: 0, geen_label: 0 }; for (const p of pl) o[p.status] += f(p); o.tot = o.voldoet + o.voldoet_niet + o.geen_label; return o; };
+    const K = ['voldoet', 'voldoet_niet', 'geen_label', 'label_onbekend'];
+    const pl = panden.filter(p => K.includes(p.status));
+    const sumBy = (f) => { const o = { voldoet: 0, voldoet_niet: 0, geen_label: 0, label_onbekend: 0 }; for (const p of pl) o[p.status] += f(p); o.tot = K.reduce((s, k) => s + o[k], 0); return o; };
     return {
       panden: sumBy(() => 1),
       adressen: sumBy(p => p.kvbo.length),
@@ -1420,9 +1635,9 @@ footer { font-size: .8rem; color: var(--muted); }
     const u = units(state.res.panden);
     const card = (naam, o, eenheid) => {
       const pc = k => o.tot ? o[k] / o.tot * 100 : 0;
-      return `<div class="unit"><div class="u-top"><span class="eyebrow">Op ${naam}</span><span class="u-pct">${o.tot ? Math.round(pc('voldoet')) + '%' : '–'}</span></div>
-        <div class="stack">${['voldoet', 'voldoet_niet', 'geen_label'].map(k => `<i style="width:${pc(k)}%;background:${col(k)}" title="${ST[k]}: ${fmt(o[k])} ${eenheid}"></i>`).join('')}</div>
-        <div class="u-sub">C of beter ${fmt(o.voldoet)} · D–G ${fmt(o.voldoet_niet)} · geen label ${fmt(o.geen_label)} ${eenheid}</div></div>`;
+      return `<div class="unit"><div class="u-top"><span class="eyebrow">Op ${naam}</span><span class="u-pct">${o.tot && !o.label_onbekend ? Math.round(pc('voldoet')) + '%' : '–'}</span></div>
+        <div class="stack">${['voldoet', 'voldoet_niet', 'geen_label', 'label_onbekend'].map(k => `<i style="width:${pc(k)}%;background:${col(k)}" title="${ST[k]}: ${fmt(o[k])} ${eenheid}"></i>`).join('')}</div>
+        <div class="u-sub">${o.label_onbekend ? `label onbekend ${fmt(o.label_onbekend)} ${eenheid}` : `C of beter ${fmt(o.voldoet)} · D–G ${fmt(o.voldoet_niet)} · geen label ${fmt(o.geen_label)} ${eenheid}`}</div></div>`;
     };
     $('#units').innerHTML = card('panden', u.panden, 'panden') + card('adressen', u.adressen, 'adressen') + card('oppervlakte', u.m2, 'm²');
   }
@@ -1430,7 +1645,7 @@ footer { font-size: .8rem; color: var(--muted); }
   function renderChips() {
     const c = counts(); const tot = state.res.panden.length || 1;
     $('#stack').innerHTML = ORDER.filter(k => c[k]).map(k => `<i style="width:${c[k] / tot * 100}%;background:${col(k)};opacity:${state.on.has(k) ? 1 : .25}" title="${ST[k]}: ${c[k]}"></i>`).join('');
-    $('#chips').innerHTML = ORDER.filter(k => c[k] || k !== 'eigen').map(k => `<button class="chip" type="button" data-k="${k}" aria-pressed="${state.on.has(k)}"><span class="sw" style="background:${col(k)}"></span>${ST[k]}<span class="n">${fmt(c[k])}</span></button>`).join('');
+    $('#chips').innerHTML = ORDER.filter(k => c[k] || (k !== 'eigen' && k !== 'label_onbekend' && !(c.label_onbekend && ['voldoet', 'voldoet_niet', 'geen_label'].includes(k)))).map(k => `<button class="chip" type="button" data-k="${k}" aria-pressed="${state.on.has(k)}"><span class="sw" style="background:${col(k)}"></span>${ST[k]}<span class="n">${fmt(c[k])}</span></button>`).join('');
     $('#chips').querySelectorAll('.chip').forEach(b => b.onclick = () => toggle(b.dataset.k));
     const alles = ORDER.every(k => state.on.has(k));
     $('#allBtn').hidden = alles;
@@ -1507,7 +1722,8 @@ footer { font-size: .8rem; color: var(--muted); }
         <dt>Aandeel</dt><dd class="num">${share}</dd>
         <dt>Label</dt><dd>${lab}</dd>
         <dt>Wijk</dt><dd>${esc(p.wijk || '–')}</dd>
-        ${p.monument ? `<dt>Monument</dt><dd><a href="${esc(p.monument.url)}" target="_blank" rel="noopener">Rijksmonument ${esc(p.monument.nr)}</a></dd>` : ''}
+        ${p.monument ? `<dt>Monument</dt><dd><a href="${esc(p.monument.url)}" target="_blank" rel="noopener">Rijksmonument ${esc(p.monument.nr)}</a>${p.monument.how ? ` <span class="muted small">(${esc(LabelC.KOPPELING[p.monument.how])}${p.monument.how === 'afstand' ? ', ' + String(p.monument.afstand).replace('.', ',') + ' m' : ''})</span>` : ''}</dd>` : ''}
+        ${p.grenst && p.grenst.length ? `<dt>Grenst aan</dt><dd>${p.grenst.map(g => `<a href="${esc(g.url)}" target="_blank" rel="noopener">Rijksmonument ${esc(g.nr)}</a>`).join(', ')}</dd>` : ''}
       </dl>
       <div><span class="eyebrow">Redenering</span><ol class="reason">${p.redenering.map(r => `<li>${esc(r)}</li>`).join('')}</ol></div>
       <div class="small"><span class="eyebrow">Verblijfsobjecten met kantoor</span><ul class="plain">${p.kvbo.map(v => `<li><span class="mono">${fmt(v.opp)} m²</span> ${esc(v.adres)} <span class="muted">(${esc(v.gd)})</span></li>`).join('')}</ul></div>`;
@@ -1563,9 +1779,9 @@ footer { font-size: .8rem; color: var(--muted); }
 
   // ---------- CSV ----------
   $('#csvBtn').onclick = () => {
-    const head = ['pand_id', 'aantal_kantooradressen', 'adres', 'woonplaats', 'wijk', 'bouwjaar', 'kantoor_m2_min', 'kantoor_m2_max', 'pand_totaal_m2', 'status', 'label_dominant', 'label_hoogste', 'label_laagste', 'rijksmonument', 'redenering'];
+    const head = ['pand_id', 'aantal_kantooradressen', 'adres', 'woonplaats', 'wijk', 'bouwjaar', 'kantoor_m2_min', 'kantoor_m2_max', 'pand_totaal_m2', 'status', 'label_dominant', 'label_hoogste', 'label_laagste', 'rijksmonument', 'monument_koppeling', 'grenst_aan_rijksmonument', 'redenering'];
     const q = v => { const s = String(v ?? ''); return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const lines = [head.join(';')].concat(state.res.panden.map(p => [p.id, p.kvbo.length, p.adres, p.wp, p.wijk, p.bouwjaar, p.offMin, p.offMax, p.totaal, ST[p.status], p.label?.dominant_label, p.label?.hoogste_label, p.label?.laagste_label, p.monument?.nr, p.redenering.join(' ')].map(q).join(';')));
+    const lines = [head.join(';')].concat(state.res.panden.map(p => [p.id, p.kvbo.length, p.adres, p.wp, p.wijk, p.bouwjaar, p.offMin, p.offMax, p.totaal, ST[p.status], p.label?.dominant_label, p.label?.hoogste_label, p.label?.laagste_label, p.monument?.nr, p.monument?.how ? LabelC.KOPPELING[p.monument.how] : '', (p.grenst || []).map(g => g.nr).join(', '), p.redenering.join(' ')].map(q).join(';')));
     const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
     a.download = `label-c-kantoren-${state.res.gm.naam.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.csv`;
