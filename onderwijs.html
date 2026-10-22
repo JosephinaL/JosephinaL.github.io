@@ -81,6 +81,8 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); }
 .legend i { display: inline-block; width: 18px; height: 0; border-top: 2px solid var(--accent); vertical-align: middle; margin-right: 6px; }
 .legend i.dash { border-top-style: dashed; }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart.school { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); cursor: pointer; font-size: .9rem; }
@@ -201,7 +203,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const D = JSON.parse(document.getElementById('duo-data').textContent);
   const LY = D.meta.ll, PY = D.meta.pr;
   const iL = y => LY.indexOf(y), iP = y => PY.indexOf(y);
@@ -365,35 +367,45 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       unit('Sinds 2015', pct(g15, g25), `${fmt(g15)} → ${fmt(g25)} leerlingen, alle vestigingen in de gemeente`) +
       unit('Prognose 2030', pct(n25, p30), `${fmt(n25)} → ${fmt(p30)} leerlingen, huidige vestigingen`) +
       unit('Prognose 2035', pct(n25, p35), `${fmt(n25)} → ${fmt(p35)} leerlingen, huidige vestigingen`);
-    renderGrafiek(gh, PY.map(y => som(scholen, s => s.pr[iP(y)])), n25);
+    renderGrafiekGemeente();
     renderChips();
     renderWeg();
   }
 
-  function renderGrafiek(hist, prog, basis) {
+  function renderGrafiekGemeente() { const sc = S.scholen; renderGrafiek(D.gh[S.g.c] || [], PY.map(y => som(sc, s => s.pr[iP(y)])), som(sc, s => s.n25)); }
+  function terugNaarGemeente() {
+    selCode = null; renderDossier(null); renderGrafiekGemeente(); renderKaart();
+    document.querySelectorAll('#tblWrap tbody tr.sel').forEach(tr => tr.classList.remove('sel'));
+  }
+  function renderGrafiek(hist, prog, basis, opt) {
+    opt = opt || {};
     const W = 760, H = 200, L = 52, R = 56, T = 14, B = 26;
     const jaren = LY.concat(PY);
-    const vals = hist.concat(prog).concat([basis]).filter(v => v != null);
+    const vals = hist.concat(prog).concat([basis]).filter(v => v != null && v >= 0);
     if (!vals.length) { $('#chart').innerHTML = ''; return; }
     let lo = Math.min(...vals), hi = Math.max(...vals);
     const pad = Math.max((hi - lo) * 0.15, hi * 0.03, 5); lo = Math.max(0, lo - pad); hi = hi + pad;
     const x = y => L + (W - L - R) * (y - jaren[0]) / (jaren[jaren.length - 1] - jaren[0]);
     const yv = v => T + (H - T - B) * (1 - (v - lo) / (hi - lo));
-    const pad2 = (ys, vs) => ys.map((y, i) => vs[i] == null ? null : [x(y), yv(vs[i])]).filter(Boolean);
+    const pad2 = (ys, vs) => ys.map((y, i) => vs[i] == null || vs[i] < 0 ? null : [x(y), yv(vs[i])]).filter(Boolean);
+    const laatste = vs => [...vs].reverse().find(v => v != null && v >= 0);
     const line = pts => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-    const ph = pad2(LY, hist), pp = [[x(2025), yv(basis)]].concat(pad2(PY, prog));
+    const ph = pad2(LY, hist), pp = (basis != null && basis >= 0 ? [[x(2025), yv(basis)]] : []).concat(pad2(PY, prog));
     const ticks = [lo + (hi - lo) * 0.1, (lo + hi) / 2, hi - (hi - lo) * 0.1].map(v => { const st = (hi - lo) > 3000 ? 500 : (hi - lo) > 600 ? 100 : (hi - lo) > 150 ? 50 : 10; return Math.round(v / st) * st; });
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Leerlingen per jaar, 2015 tot en met 2035">`;
     ticks.forEach(t => { s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${yv(t)}" y2="${yv(t)}"/><text class="lbl" x="${L - 6}" y="${yv(t) + 4}" text-anchor="end">${nf.format(t)}</text>`; });
     [2015, 2020, 2025, 2030, 2035].forEach(y => { s += `<text class="lbl" x="${x(y)}" y="${H - 6}" text-anchor="middle">${y}</text>`; });
     s += `<line class="ax" x1="${x(2025.5)}" x2="${x(2025.5)}" y1="${T}" y2="${H - B}" stroke-dasharray="2 3"/>`;
     if (ph.length) s += `<path d="${line(ph)}" fill="none" stroke="var(--accent)" stroke-width="2.2"/>`;
-    if (basis != null && pp.length > 1) s += `<path d="${line(pp)}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-dasharray="5 4"/>`;
+    if (pp.length > 1) s += `<path d="${line(pp)}" fill="none" stroke="var(--accent)" stroke-width="2.2" stroke-dasharray="5 4"/>`;
     const eind = (p, v) => p ? `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--accent)"/><text class="val" x="${p[0] + 6}" y="${p[1] + 4}">${nf.format(v)}</text>` : '';
-    if (ph.length) s += eind(ph[ph.length - 1], hist[hist.length - 1]).replace(/x="([\d.]+)" y/, (m, a) => `x="${+a - 6}" text-anchor="end" y`).replace(/y="([\d.]+)">/, (m, a) => `y="${+a - 8}">`);
-    if (pp.length > 1) s += eind(pp[pp.length - 1], prog[prog.length - 1]);
+    if (ph.length) s += eind(ph[ph.length - 1], laatste(hist)).replace(/x="([\d.]+)" y/, (m, a) => `x="${+a - 6}" text-anchor="end" y`).replace(/y="([\d.]+)">/, (m, a) => `y="${+a - 8}">`);
+    if (pp.length > 1) s += eind(pp[pp.length - 1], laatste(prog));
     s += '</svg>';
-    $('#chart').innerHTML = `<span class="eyebrow">Leerlingen per jaar</span>${s}<div class="legend"><span><i></i>Telling, alle vestigingen in de gemeente</span><span><i class="dash"></i>Prognose DUO, huidige vestigingen</span></div>`;
+    const kop = opt.school ? `<div class="chart-kop"><span class="eyebrow">Leerlingen per jaar · ${esc(opt.school)}</span><button class="btn linkish" id="chartTerug" type="button">← Terug naar ${esc(S.g.n)}</button></div>` : '<span class="eyebrow">Leerlingen per jaar</span>';
+    $('#chart').classList.toggle('school', !!opt.school);
+    $('#chart').innerHTML = `${kop}${s}<div class="legend"><span><i></i>${opt.school ? 'Telling, deze school' : 'Telling, alle vestigingen in de gemeente'}</span><span><i class="dash"></i>${opt.school ? 'Prognose DUO, deze school' : 'Prognose DUO, huidige vestigingen'}</span></div>`;
+    const tb = document.getElementById('chartTerug'); if (tb) tb.addEventListener('click', terugNaarGemeente);
   }
 
   function renderChips() {
@@ -481,6 +493,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     selCode = code;
     const s = S.scholen.find(x => x.code === code);
     renderDossier(s);
+    if (s) renderGrafiek(s.ll, s.pr, s.n25, { school: s.naam });
     renderKaart();
     if (vanTabel && s && s.geo && s.geo.lat != null && map) map.setView([s.geo.lat, s.geo.lon], Math.max(map.getZoom(), 15));
     document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', tr.dataset.code === code));
