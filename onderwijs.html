@@ -201,7 +201,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const D = JSON.parse(document.getElementById('duo-data').textContent);
   const LY = D.meta.ll, PY = D.meta.pr;
   const iL = y => LY.indexOf(y), iP = y => PY.indexOf(y);
@@ -209,7 +209,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   const nf = new Intl.NumberFormat('nl-NL');
   const fmt = v => v == null ? '–' : v < 0 ? '<5' : nf.format(v);
   const pct = (a, b) => (a == null || b == null || a <= 0 || b < 0) ? null : (b - a) / a;
-  const fPct = p => p == null ? '–' : (p > 0 ? '+' : p < 0 ? '−' : '±') + Math.abs(Math.round(p * 100)) + '%';
+  const fPct = p => { if (p == null) return '–'; const r = Math.round(p * 100); return r === 0 ? '0%' : (r > 0 ? '+' : '−') + Math.abs(r) + '%'; };
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const KLEIN = new Set(['aan', 'den', 'de', 'der', 'op', 'en', 'van', 'het', 'ter', 'te', 'in', 'bij', 'over', 'zee', 'ijssel']);
   function titel(s) {
@@ -231,9 +231,12 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   const ORDER = ['krimp', 'stabiel', 'groei', 'onbekend'];
 
   // gemeenten
-  const GM = Object.entries(D.gm).map(([c, n]) => ({ c, n: titel(n) })).sort((a, b) => a.n.localeCompare(b.n, 'nl'));
+  const NAAM = { '0518': "'s-Gravenhage", '0796': "'s-Hertogenbosch", '0373': 'Bergen (NH.)', '0893': 'Bergen (L.)', '0820': 'Nuenen, Gerwen en Nederwetten', '1900': 'Súdwest-Fryslân', '1970': 'Noardeast-Fryslân' };
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = Object.entries(D.gm).map(([c, n]) => ({ c, n: NAAM[c] || titel(n) })).sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
   const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
-  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('');
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
 
   // thema
   try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
@@ -379,7 +382,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const pad2 = (ys, vs) => ys.map((y, i) => vs[i] == null ? null : [x(y), yv(vs[i])]).filter(Boolean);
     const line = pts => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
     const ph = pad2(LY, hist), pp = [[x(2025), yv(basis)]].concat(pad2(PY, prog));
-    const ticks = [lo + (hi - lo) * 0.1, (lo + hi) / 2, hi - (hi - lo) * 0.1].map(v => Math.round(v / 10) * 10);
+    const ticks = [lo + (hi - lo) * 0.1, (lo + hi) / 2, hi - (hi - lo) * 0.1].map(v => { const st = (hi - lo) > 3000 ? 500 : (hi - lo) > 600 ? 100 : (hi - lo) > 150 ? 50 : 10; return Math.round(v / st) * st; });
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Leerlingen per jaar, 2015 tot en met 2035">`;
     ticks.forEach(t => { s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${yv(t)}" y2="${yv(t)}"/><text class="lbl" x="${L - 6}" y="${yv(t) + 4}" text-anchor="end">${nf.format(t)}</text>`; });
     [2015, 2020, 2025, 2030, 2035].forEach(y => { s += `<text class="lbl" x="${x(y)}" y="${H - 6}" text-anchor="middle">${y}</text>`; });
