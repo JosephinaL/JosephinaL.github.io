@@ -62,6 +62,8 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 
 .intro { max-width: 70ch; }
 .intro p { margin: 0; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
 .melding { background: var(--surface); border: 1px solid var(--tr-krimp); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
 .melding p { margin: 0; flex: 1 1 320px; }
 .bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
@@ -146,6 +148,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
   <section class="intro" id="intro">
     <p>Waar staan de basisscholen in je gemeente, hoeveel leerlingen hebben ze en wat verwacht DUO voor de komende tien jaar? Kies een gemeente. De scholen worden per buurt ingedeeld, zodat je ziet waar krimp en groei samenkomen. Bruikbaar als vertrekpunt voor onderwijshuisvesting.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
 
   <section id="result" hidden>
@@ -203,7 +206,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.2';
+  const VERSIE = '1.3';
   const D = JSON.parse(document.getElementById('duo-data').textContent);
   const LY = D.meta.ll, PY = D.meta.pr;
   const iL = y => LY.indexOf(y), iP = y => PY.indexOf(y);
@@ -320,6 +323,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     $('#result').hidden = false;
     $('#gmInput').value = g.n;
     try { history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
     document.title = 'Basisonderwijs ' + g.n;
     const scholen = D.s.filter(r => r[5] === g.c).map(school);
     S = { g, scholen, opgehaald: null, pdokFout: 0 };
@@ -602,7 +606,9 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const g = byName.get($('#gmInput').value.trim().toLowerCase());
     if (g && (!S || S.g !== g)) kies(g);
   });
-  const h = (location.hash.match(/gm=(\d{4})/) || [])[1];
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=(\d{4})/) || [])[1] || bewaard;
   if (h && D.gm[h]) kies(GM.find(g => g.c === h));
 })();
 </script>
