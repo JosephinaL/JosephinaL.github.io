@@ -189,10 +189,10 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h1 id="h-hero">Open data, laag voor laag, tot een antwoord dat een gemeente kan gebruiken.</h1>
       <p class="lead">Gemeentelijke vraagstukken lopen dwars door domeinen heen. Het antwoord ligt vaak al in openbare registraties, verspreid over bronnen die niemand naast elkaar legt. Daar begint het werk.</p>
     </div>
-    <svg class="strata" viewBox="0 0 490 396" role="img" aria-labelledby="strata-t strata-d">
+    <svg class="strata" viewBox="0 0 490 413" role="img" aria-labelledby="strata-t strata-d">
       <title id="strata-t">Werkwijze in vier lagen</title>
-      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS), bevolking (CBS) en wonen (CBS). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
-      <line x1="360" y1="82" x2="360" y2="324" stroke="var(--muted)" stroke-dasharray="3 4"/>
+      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS), Wmo (CBS), bevolking (CBS) en wonen (CBS). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
+      <line x1="360" y1="82" x2="360" y2="341" stroke="var(--muted)" stroke-dasharray="3 4"/>
       <g class="layer l1">
         <polygon points="240,50 360,82 480,50 360,18" fill="var(--layer-1)"/>
         <text x="4" y="47" class="t-strong">1 · skelet</text>
@@ -206,19 +206,20 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <text x="4" y="156">onderwijs</text><text x="96" y="156" class="t-src">DUO</text>
         <text x="4" y="173">financiën</text><text x="96" y="173" class="t-src">Iv3</text>
         <text x="4" y="190">jeugd</text><text x="96" y="190" class="t-src">CBS</text>
-        <text x="4" y="207">bevolking</text><text x="96" y="207" class="t-src">CBS</text>
-        <text x="4" y="224">wonen</text><text x="96" y="224" class="t-src">CBS</text>
+        <text x="4" y="207">wmo</text><text x="96" y="207" class="t-src">CBS</text>
+        <text x="4" y="224">bevolking</text><text x="96" y="224" class="t-src">CBS</text>
+        <text x="4" y="241">wonen</text><text x="96" y="241" class="t-src">CBS</text>
       </g>
       <g class="layer l3">
-        <polygon points="240,271 360,303 480,271 360,239" fill="var(--layer-3)"/>
-        <text x="4" y="268" class="t-strong">3 · verrijking</text>
-        <text x="4" y="285">wat alleen de gemeente weet</text>
+        <polygon points="240,288 360,320 480,288 360,256" fill="var(--layer-3)"/>
+        <text x="4" y="285" class="t-strong">3 · verrijking</text>
+        <text x="4" y="302">wat alleen de gemeente weet</text>
       </g>
       <g class="layer l4">
-        <polygon points="240,356 360,388 480,356 360,324" fill="var(--layer-4)"/>
-        <circle cx="341" cy="355" r="4" fill="var(--bg)"/><circle cx="374" cy="364" r="4" fill="var(--bg)"/><circle cx="396" cy="350" r="4" fill="var(--bg)"/>
-        <text x="4" y="353" class="t-strong">4 · antwoord</text>
-        <text x="4" y="370">navolgbaar per object</text>
+        <polygon points="240,373 360,405 480,373 360,341" fill="var(--layer-4)"/>
+        <circle cx="341" cy="372" r="4" fill="var(--bg)"/><circle cx="374" cy="381" r="4" fill="var(--bg)"/><circle cx="396" cy="367" r="4" fill="var(--bg)"/>
+        <text x="4" y="370" class="t-strong">4 · antwoord</text>
+        <text x="4" y="387">navolgbaar per object</text>
       </g>
     </svg>
   </section>
@@ -325,7 +326,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         </div>
       </div>
       <div class="shelf">
-        <div class="shelf-head"><h3>Sociaal domein</h3><span>Jeugdzorg, kosten en verwijzers per wijk</span></div>
+        <div class="shelf-head"><h3>Sociaal domein</h3><span>Jeugdzorg en Wmo per wijk: wie, wat en wat het kost</span></div>
         <div class="rail">
       <article class="tile">
         <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:35.0;background:#2a78d6"></i><i style="flex:32.8;background:#eb6834"></i><i style="flex:8.3;background:#1baf7a"></i><i style="flex:8.6;background:#eda100"></i><i style="flex:15.3;background:#e87ba4"></i></span></div>
@@ -333,6 +334,13 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <span class="meta">Kaart · per wijk · elke gemeente</span>
         <p>Hoeveel jongeren krijgen jeugdzorg, wat kost het en wie verwijst? De eigen gemeente door de jaren heen en per wijk.</p>
         <div class="tile-links"><a class="btn btn-sm" href="jeugdzorg.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-jeugd">Meer weten</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:9.2;background:#d6ecee"></i><i style="flex:8.9;background:#a7d3d8"></i><i style="flex:12.5;background:#6fb3bc"></i><i style="flex:22.8;background:#3a8f9a"></i><i style="flex:28.1;background:#0f5c66"></i><i style="flex:18.4;background:#08383e"></i></span></div>
+        <h4>Wmo per wijk</h4>
+        <span class="meta">Kaart · per wijk · elke gemeente</span>
+        <p>Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat naar leeftijd en inkomen, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="wmo.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-wmo">Meer weten</button></div>
       </article>
         </div>
       </div>
@@ -509,6 +517,31 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
           <li>Het CBS publiceert gebruik, kosten en verwijzers per gemeente en wijk.</li>
           <li>De pagina haalt de cijfers live op zodra je een gemeente kiest.</li>
           <li>Kleine aantallen en de reeksbreuk van 2021 staan er eerlijk bij.</li>
+        </ol>
+        <button class="close" type="button" hidden>Sluiten</button>
+      </div>
+    </article>
+    <article class="product" id="info-wmo" aria-labelledby="h-wmo">
+      <div class="product-body">
+        <h3 id="h-wmo">Wmo per wijk</h3>
+        <div class="spread" role="img" aria-label="Wmo-cliënten in Nederland in 2025 naar leeftijd: jonger dan 30 jaar 9 procent, 30 tot 45 jaar 9 procent, 45 tot 60 jaar 13 procent, 60 tot 75 jaar 23 procent, 75 tot 85 jaar 28 procent, 85 jaar of ouder 18 procent">
+          <i style="flex:9.2;background:#d6ecee"></i><i style="flex:8.9;background:#a7d3d8"></i><i style="flex:12.5;background:#6fb3bc"></i><i style="flex:22.8;background:#3a8f9a"></i><i style="flex:28.1;background:#0f5c66"></i><i style="flex:18.4;background:#08383e"></i>
+        </div>
+        <p>De Wmo in één gemeente, als spiegel: hoeveel inwoners hebben een maatwerkvoorziening, welke, wie zijn het naar leeftijd en inkomen, en wat geeft de gemeente eraan uit volgens haar jaarrekening. Per wijk naast het aandeel 65-plussers, omdat leeftijd het meeste verklaart. Zonder ranglijst van gemeenten. Voor beleidsmedewerkers Wmo en sociaal domein.</p>
+        <div class="facts">
+          <div><b>1,29 mln</b><span>inwoners met Wmo-maatwerk in 2025 (72 per 1.000; 2017: 61)</span></div>
+          <div><b>47%</b><span>van de cliënten is 75 jaar of ouder</span></div>
+          <div><b>157 · 16</b><span>per 1.000 in de laagste en de hoogste inkomensgroep</span></div>
+        </div>
+        <a class="btn" href="wmo.html">Open de kaart <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo werkt het</span>
+        <ol>
+          <li>Gemeenten leveren hun Wmo-voorzieningen halfjaarlijks aan het CBS (Gemeentelijke Monitor Sociaal Domein).</li>
+          <li>Het CBS koppelt ze aan leeftijd, inkomen en woonwijk, en publiceert ze per gemeente en wijk.</li>
+          <li>De lasten komen uit de Iv3-jaarrekening van de gemeente, per taakveld.</li>
+          <li>Per wijk staan de Wmo-cliënten naast het aandeel 65-plussers. Wijken met evenveel ouderen en toch veel meer Wmo vallen dan op, zonder rekenmodel.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>
       </div>
