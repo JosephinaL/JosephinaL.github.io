@@ -276,6 +276,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
           <ul class="small">
             <li><b>Leeftijd verklaart veel</b>: Wmo-gebruik stijgt sterk met de leeftijd. Een wijk met veel ouderen heeft vanzelf meer cliënten per 1.000 inwoners. Kijk daarom naar de kaart van 65-plussers en de spreiding naast elkaar.</li>
             <li><b>Registratie</b>: gemeenten delen hun voorzieningen niet allemaal op dezelfde manier in. Een plotselinge sprong in één type (en een daling in een ander) is meestal een andere registratie, geen echte verandering. Het totaal is betrouwbaarder dan de typen.</li>
+            <li><b>Vijf jaar</b>: de pagina toont de laatste vijf jaar met cijfers. De lasten tonen daarnaast het lopende jaar als het alleen een begroting heeft.</li>
             <li><b>Kleine aantallen</b>: het CBS rondt af op 5 en laat kleine aantallen weg (–). Per wijk is daardoor vaak alleen het totaal bekend.</li>
             <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Alle jaren zijn volgens de verbeterde CBS-methode van december 2025 en dus onderling vergelijkbaar; oudere publicaties wijken af.</li>
             <li><b>Beschermd wonen</b>: de lasten liggen vaak bij een centrumgemeente die het voor de regio regelt. Daarom staan ze in de grafiek apart en tellen ze niet mee in de kerncijfers per inwoner, per 65-plusser en per cliënt.</li>
@@ -292,7 +293,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
   const CAT = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title';
@@ -302,6 +303,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   const WIJK = { 2025: '86158NED', 2024: '85996NED', 2023: '86190NED', 2022: '86189NED', 2021: '86188NED', 2020: '86187NED', 2019: '86186NED', 2018: '86185NED', 2017: '86183NED' };
   const IV3 = { 2026: '45078NED', 2025: '45071NED', 2024: '45067NED', 2023: '45063NED', 2022: '45059NED', 2021: '45054NED', 2020: '45050NED', 2019: '45046NED', 2018: '45042NED', 2017: '45038NED' };
   const EERSTE = 2017;
+  const AANTAL_JAREN = 5; // de pagina toont de laatste vijf jaar met cijfers
 
   const $ = s => document.querySelector(s);
   const nf = new Intl.NumberFormat('nl-NL');
@@ -415,7 +417,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (S.g !== g) return;
     renderKern(); renderGeld();
     voortgang(3, 4, 'Wijken ophalen…');
-    const jaren = Object.keys(WIJK).map(Number).sort((a, b) => b - a);
+    const jaren = Object.keys(WIJK).map(Number).sort((a, b) => b - a).slice(0, AANTAL_JAREN);
     const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
     renderJaren(jaren);
     await kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[0]);
@@ -444,13 +446,15 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     try {
       const rows = await odata(CBS, T.trend, `TypedDataSet?$filter=${q(`startswith(RegioS,'GM${S.g.c}') and substringof('JJ',Perioden) and Geslacht eq 'T001038'`)}&$select=KenmerkenVanPersonen,TypeMaatwerkvoorziening,Perioden,WmoClienten_1,WmoClientenPer1000Inwoners_2`);
       const d = {}, kenm = {};
+      const vanaf = Math.max(...rows.map(r => +r.Perioden.slice(0, 4))) - AANTAL_JAREN + 1;
       rows.forEach(r => {
         const j = +r.Perioden.slice(0, 4), k = tr(r.KenmerkenVanPersonen), t = tr(r.TypeMaatwerkvoorziening);
+        if (j < vanaf) return;
         const o = { n: geldig(r.WmoClienten_1) ? r.WmoClienten_1 : null, p: geldig(r.WmoClientenPer1000Inwoners_2) ? r.WmoClientenPer1000Inwoners_2 : null };
         if (k === 'T009002') (d[t] = d[t] || {})[j] = o;
         if (t === 'T001024') (kenm[k] = kenm[k] || {})[j] = o;
       });
-      const jaren = [...new Set(rows.map(r => +r.Perioden.slice(0, 4)))].sort();
+      const jaren = [...new Set(rows.map(r => +r.Perioden.slice(0, 4)))].filter(j => j >= vanaf).sort();
       const status = {};
       try { (await odata(CBS, T.trend, 'Perioden?$select=Key,Status')).forEach(p => { status[+p.Key.slice(0, 4)] = /JJ/.test(p.Key) ? p.Status : status[+p.Key.slice(0, 4)]; }); } catch (e) { void e; }
       S.trend = { d, kenm, jaren, status };
@@ -488,7 +492,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   ];
   async function laadGeld() {
     const c = S.g.c;
-    const jaren = Object.keys(IV3).map(Number).filter(j => j >= EERSTE).sort();
+    const jaren = Object.keys(IV3).map(Number).filter(j => j >= EERSTE).sort().slice(-(AANTAL_JAREN + 2)); // ruim ophalen: het laatste jaar heeft vaak alleen een begroting
     const d = {}; let mis = 0;
     await Promise.all(jaren.map(async j => {
       const f = `startswith(Gemeenten,'GM${c}') and (startswith(TaakveldBalanspost,'6.6') or startswith(TaakveldBalanspost,'6.71') or startswith(TaakveldBalanspost,'6.79') or startswith(TaakveldBalanspost,'6.81')) and (Verslagsoort eq '${j}X000' or Verslagsoort eq '${j}X005')`;
@@ -516,7 +520,11 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         d[j] = { rek: som('rek'), begr: som('begr') };
       } catch (e) { mis++; }
     }));
-    const jr = Object.keys(d).map(Number).sort();
+    // laatste vijf jaren met een jaarrekening, plus latere jaren met alleen een begroting
+    const alle = Object.keys(d).map(Number).sort();
+    const rek = alle.filter(j => d[j].rek);
+    const grens = rek.length ? rek[Math.max(0, rek.length - AANTAL_JAREN)] : alle[Math.max(0, alle.length - AANTAL_JAREN)];
+    const jr = alle.filter(j => j >= grens && (d[j].rek || d[j].begr));
     S.geld = { d, jaren: jr };
     if (mis) { fouten.add('lasten (Iv3)'); toonMelding(); }
   }
@@ -609,7 +617,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const stap = nice(hi / 3);
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(p.t)} per jaar">`;
     for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${nf.format(t)}</text>`;
-    jaren.forEach(j => { if (j % 2 === 1 || j === jaren[jaren.length - 1]) s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle">${j}</text>`; });
+    jaren.forEach(j => { if (jaren.length <= 6 || j % 2 === 1 || j === jaren[jaren.length - 1]) s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle">${j}</text>`; });
     let pad = '', open = false;
     jaren.forEach((j, i) => { if (vals[i] == null) { open = false; return; } pad += (open ? 'L' : 'M') + x(j).toFixed(1) + ' ' + y(vals[i]).toFixed(1) + ' '; open = true; });
     s += `<path d="${pad}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
