@@ -679,7 +679,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 :root{
   --bg:#f3f5f6; --surface:#ffffff; --fg:#141b21; --muted:#56626c; --line:#d5dbdf; --soft:#e8ecee;
   --accent:#1d5f74; --accent-ink:#ffffff; --nodata:#d9dee2; --edge:#ffffff;
-  --c1:#f1eee6; --c2:#e3d9b8; --c3:#c9b27a; --c4:#9e7d4a; --c5:#6d4f2a; --c6:#3b2a15;
+  --c1:#d6ecee; --c2:#a7d3d8; --c3:#6fb3bc; --c4:#3a8f9a; --c5:#0f5c66; --c6:#08383e;
   --h1:#eef3f7; --h2:#c9dced; --h3:#93bbdc; --h4:#5a93c4; --h5:#2d679c; --h6:#14406a;
   --o1:#f3f0f6; --o2:#ddd2e8; --o3:#bba5d3; --o4:#9378b8; --o5:#6a4f97; --o6:#432b6b;
   --s1:#7a9a3a; --s2:#8a6d4a; --s3:#e8a33b; --s4:#2a78d6; --s5:#6250d6; --s6:#1d5f74; --s7:#d23f3f; --s8:#e87ba4;
@@ -689,7 +689,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1417; --surface:#161d21; --fg:#e6ebee; --muted:#9aa7b0; --line:#2b353b; --soft:#1f282d;
   --accent:#6cc0d6; --accent-ink:#0f1417; --nodata:#2a3237; --edge:#0f1417;
-  --c1:#2b2924; --c2:#4a4130; --c3:#7a6640; --c4:#a88a55; --c5:#d1b27a; --c6:#f0dcae;
+  --c1:#1f3a3e; --c2:#2c5d63; --c3:#3f8790; --c4:#62b0ba; --c5:#a6dde3; --c6:#d8f1f3;
   --h1:#1b2833; --h2:#1f3c57; --h3:#2d5f8a; --h4:#4c86bb; --h5:#86b4dd; --h6:#c8def1;
   --o1:#241f2c; --o2:#3a2f4d; --o3:#5a477a; --o4:#8167a8; --o5:#ab92cf; --o6:#d9c9ef;
   --s1:#8fb34a; --s2:#a8865d; --s3:#e8a33b; --s4:#3987e5; --s5:#9085e9; --s6:#3a9ab3; --s7:#e66767; --s8:#d55181;
@@ -697,7 +697,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 :root[data-theme="dark"]{
   --bg:#0f1417; --surface:#161d21; --fg:#e6ebee; --muted:#9aa7b0; --line:#2b353b; --soft:#1f282d;
   --accent:#6cc0d6; --accent-ink:#0f1417; --nodata:#2a3237; --edge:#0f1417;
-  --c1:#2b2924; --c2:#4a4130; --c3:#7a6640; --c4:#a88a55; --c5:#d1b27a; --c6:#f0dcae;
+  --c1:#1f3a3e; --c2:#2c5d63; --c3:#3f8790; --c4:#62b0ba; --c5:#a6dde3; --c6:#d8f1f3;
   --h1:#1b2833; --h2:#1f3c57; --h3:#2d5f8a; --h4:#4c86bb; --h5:#86b4dd; --h6:#c8def1;
   --o1:#241f2c; --o2:#3a2f4d; --o3:#5a477a; --o4:#8167a8; --o5:#ab92cf; --o6:#d9c9ef;
   --s1:#8fb34a; --s2:#a8865d; --s3:#e8a33b; --s4:#3987e5; --s5:#9085e9; --s6:#3a9ab3; --s7:#e66767; --s8:#d55181;
@@ -714,6 +714,9 @@ h1{font-family:var(--f-display);font-weight:600;font-size:clamp(38px,6.5vw,60px)
 .lead{margin:6px 0 0;max-width:70ch;color:var(--muted);font-size:17px}
 .pick{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
 .pick label{font-weight:600}
+.snel{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;margin:0;font-size:14px;color:var(--muted)}
+.snel button{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px 12px;color:var(--accent);cursor:pointer;font-size:14px}
+.snel button:hover{border-color:var(--accent)}
 .pick select{font-size:17px;padding:9px 36px 9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--surface);max-width:100%;min-width:0}
 .tabs{display:flex;flex-wrap:wrap;gap:8px}
 .tab{font-size:15px;font-weight:600;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 16px;cursor:pointer}
@@ -773,18 +776,19 @@ footer a{color:var(--accent)}
     <p class="eyebrow">Voor beleidsmedewerkers economie en ruimte · alle gemeenten</p>
     <h1>Bedrijvigheid per buurt</h1>
     <p class="lead">Drie vragen over werken in je gemeente, beantwoord met open data van het CBS, de BAG en de Iv3-jaarrekening. Kies een gemeente: per vraag krijg je eerst het antwoord, daarna de kaart en de buurten die eruit springen.</p>
-    <div class="pick"><label for="gm">Gemeente</label><select id="gm"></select></div>
+    <div class="pick"><label for="gm">Gemeente</label><select id="gm"><option value="" disabled selected>Kies een gemeente</option></select></div>
+    <p class="snel" id="snel"><span>Of begin met</span><button type="button" data-gm="0518">Den Haag</button><button type="button" data-gm="1783">Westland</button><button type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </header>
 
-  <div class="tabs" role="tablist" aria-label="Vraag">
+  <div class="tabs" role="tablist" aria-label="Vraag" data-na-keuze hidden>
     <button class="tab" role="tab" data-v="meng">Hoe gemengd zijn wonen en werken?</button>
     <button class="tab" role="tab" data-v="huis">Waar werken ondernemers vanuit huis?</button>
     <button class="tab" role="tab" data-v="ozb">Wat levert bedrijfsruimte aan OZB op?</button>
   </div>
 
-  <section class="answer" aria-live="polite"><h2 id="ans-h"></h2><p id="ans-p"></p><p class="why" id="ans-why"></p></section>
+  <section class="answer" aria-live="polite" data-na-keuze hidden><h2 id="ans-h"></h2><p id="ans-p"></p><p class="why" id="ans-why"></p></section>
 
-  <div class="grid">
+  <div class="grid" data-na-keuze hidden>
     <div class="mapbox"><div id="map" role="region" aria-label="Kaart"></div><div class="legend" id="legend"></div></div>
     <aside>
       <div class="card" id="list"></div>
@@ -805,7 +809,7 @@ footer a{color:var(--accent)}
 
   <footer>
     <p>Bronnen: CBS, Kerncijfers wijken en buurten 2024 en Wijk- en buurtkaart 2024 (via PDOK); Kadaster, BAG (via PDOK); CBS, Iv3-jaarrekening gemeenten 2025 (tabel 45071NED); achtergrondkaart PDOK BRT grijs.</p>
-    <p>Gemaakt door Josephine Linders, oktober 2026. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
+    <p>Gemaakt door <a href="./">Josephine Linders</a>, oktober 2026 · versie 1.1. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
   </footer>
 </div>
 
@@ -836,8 +840,11 @@ const CL={meng:{br:[1,3,8,20,50],c:["c1","c2","c3","c4","c5","c6"],lab:["<1%","1
   huis:{br:[15,20,25,35,50],c:["h1","h2","h3","h4","h5","h6"],lab:["<15","15–20","20–25","25–35","35–50","50+"],t:"Vestigingen per 100 woningen, in woonbuurten",ends:["weinig ondernemers","veel ondernemers aan huis"]},
   ozb:{br:[2.5,3.5,4.5,6,9],c:["o1","o2","o3","o4","o5","o6"],lab:["<2,50","2,50–3,50","3,50–4,50","4,50–6","6–9","9+"],t:"OZB niet-woningen per m² werkruimte (€)",ends:["laag","hoog"]}};
 
-let tab="meng", gi=GM.findIndex(g=>g[0]==="GM0503"), selB=null, COL={};
-const fromHash=(location.hash||"").replace("#","").toUpperCase(); const hi=GM.findIndex(g=>g[0]===fromHash); if(hi>=0) gi=hi;
+/* Startgemeente, gelijk aan de andere producten: gemeente in de link (#gm=0518, ook oude links #GM0518), anders de laatst gekozen gemeente (jl-gemeente, gedeeld tussen de producten), anders de inleiding met snelkeuze. */
+const gmIdx=c=>GM.findIndex(g=>g[0]==="GM"+c);
+let tab="meng", gi=-1, selB=null, COL={};
+{ const h=(location.hash.match(/gm=?(\d{4})/i)||[])[1]; let bewaard=null; try{ bewaard=localStorage.getItem("jl-gemeente"); }catch(e){}
+  if(h&&gmIdx(h)>=0) gi=gmIdx(h); else if(bewaard&&gmIdx(bewaard)>=0) gi=gmIdx(bewaard); }
 
 /* map */
 const map=L.map("map",{preferCanvas:true,zoomSnap:.25,minZoom:6,maxZoom:16}).setView([52.15,5.3],7.25);
@@ -865,12 +872,14 @@ function legend(){ const c=CL[tab];
 /* gemeente */
 const sel=document.getElementById("gm");
 GM.map((g,k)=>[k,GS[k].naam]).sort((a,b)=>a[1].localeCompare(b[1],"nl")).forEach(([k,n])=>{ const o=document.createElement("option"); o.value=k; o.textContent=n; sel.appendChild(o); });
-sel.value=String(gi);
 sel.addEventListener("change",()=>setGm(+sel.value));
-function setGm(k,fit=true){ gi=k; selB=null; map.closePopup();
+document.querySelectorAll("#snel [data-gm]").forEach(b=>b.addEventListener("click",()=>{ const k=gmIdx(b.dataset.gm); if(k>=0){ sel.value=String(k); setGm(k); } }));
+function toonResultaat(){ const was=document.querySelector(".grid").hidden; document.querySelectorAll("[data-na-keuze]").forEach(e=>e.hidden=false); if(was) map.invalidateSize(); }
+function onthoud(k){ const c=GM[k][0].slice(2); try{ localStorage.setItem("jl-gemeente",c); }catch(e){} try{ history.replaceState(null,"","#gm="+c); }catch(e){} }
+function setGm(k,fit=true){ gi=k; selB=null; map.closePopup(); toonResultaat(); sel.value=String(k);
   if(outline) map.removeLayer(outline); outline=L.polygon(dec(G.g[GM[k][0]]),{renderer:R,fill:false,weight:2.4,color:COL.fg||"#000",interactive:false}).addTo(map);
   if(fit) zoomGm();
-  try{ history.replaceState(null,"","#"+GM[k][0].toLowerCase()); }catch(e){}
+  onthoud(k);
   render(); }
 document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>{ tab=t.dataset.v; selB=null; map.closePopup();
   zoomGm();
@@ -917,7 +926,7 @@ function render(){
 function stack(vals,labels,cols){ const tot=vals.reduce((a,b)=>a+b,0)||1;
   return `<div class="stack">${vals.map((v,i)=>v>0?`<i style="flex:${v};background:var(--${cols[i]})" title="${labels[i]}: ${nf.format(100*v/tot)}%"></i>`:"").join("")}</div><div class="keys">${vals.map((v,i)=>v>0?`<span><i class="sw" style="background:var(--${cols[i]})"></i>${labels[i]} ${nf.format(100*v/tot)}%</span>`:"").join("")}</div>`; }
 const SC=SECT.map((_,i)=>"s"+(i+1)), FC=["s3","s6","s2","s8","s7"];
-function selectB(b,ll,zoom){ selB=b; if(b.gm!==gi){ sel.value=String(b.gm); gi=b.gm; if(outline) map.removeLayer(outline); outline=L.polygon(dec(G.g[GM[gi][0]]),{renderer:R,fill:false,weight:2.4,color:COL.fg,interactive:false}).addTo(map); render(); selB=b; }
+function selectB(b,ll,zoom){ selB=b; if(b.gm!==gi){ sel.value=String(b.gm); gi=b.gm; onthoud(gi); if(outline) map.removeLayer(outline); outline=L.polygon(dec(G.g[GM[gi][0]]),{renderer:R,fill:false,weight:2.4,color:COL.fg,interactive:false}).addTo(map); render(); selB=b; }
   const p=bLayers[b.i]; if(zoom) map.fitBounds(p.getBounds(),{maxZoom:15,padding:[40,40]});
   const at=ll||p.getBounds().getCenter();
   L.popup({maxWidth:290,autoPanPadding:[20,20]}).setLatLng(at).setContent(`<div class="pop"><b>${b.naam}</b><span>${GS[b.gm].naam}</span><dl>
@@ -932,7 +941,7 @@ function detail(){ const el=document.getElementById("detail"), b=selB;
    <dt>Woning en werk in één object</dt><dd>${nf.format(b.mix)}</dd>${b.rec?`<dt>Recreatiewoningen (niet meegeteld)</dt><dd>${nf.format(b.rec)}</dd>`:""}</dl>
    ${sS>0?`<h3>Vestigingen naar sector</h3>${stack(b.s,SECT,SC)}`:`<p class="hint">Het CBS geeft geen sectorverdeling bij minder dan 20 vestigingen.</p>`}
    ${b.M>0?`<h3>Werkruimte naar functie</h3>${stack(b.m,FUNC,FC)}`:""}`; }
-readCols(); setGm(gi);
+readCols(); if(gi>=0) setGm(gi);
 matchMedia("(prefers-color-scheme: dark)").addEventListener("change",paint);
 </script>
 
