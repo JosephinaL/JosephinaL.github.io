@@ -96,12 +96,22 @@ nav a:hover { color: var(--accent); }
 .facts span { font-size: .82rem; color: var(--muted); }
 .btn { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: var(--r); }
 .btn:hover { filter: brightness(1.08); }
+/* Producten: twee rijen; per rij staan de indelingen naast elkaar en schuift de rij horizontaal */
 .shelves { display: grid; gap: 28px; }
-.shelf { display: grid; gap: 12px; min-width: 0; }
-.shelf-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.lane-wrap { position: relative; min-width: 0; }
+.lane { display: grid; grid-auto-flow: column; grid-template-rows: auto 1fr; grid-auto-columns: max-content; justify-content: start; gap: 12px 32px; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.lane::-webkit-scrollbar { height: 8px; }
+.lane::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+.lane > .shelf { grid-row: span 2; grid-template-rows: subgrid; }
+.lane-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 40px; height: 64px; display: grid; place-items: center; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r); font: 700 1.6rem/1 var(--f-display); cursor: pointer; box-shadow: 0 2px 10px rgb(0 0 0 / .12); }
+.lane-btn:hover { border-color: var(--accent); color: var(--accent); }
+.lane-btn.prev { left: -12px; } .lane-btn.next { right: -12px; }
+@media (hover: none) { .lane-btn { display: none; } }
+.shelf { display: grid; grid-template-rows: auto 1fr; gap: 12px; min-width: 0; }
+.shelf-head { display: flex; flex-direction: column; justify-content: end; gap: 2px; border-bottom: 1px solid var(--line); padding-bottom: 8px; width: 0; min-width: 100%; }
 .shelf-head h3 { font-size: 1.05rem; }
 .shelf-head span { font-size: .88rem; color: var(--muted); }
-.rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(270px, 340px); gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+.rail { display: grid; grid-auto-flow: column; grid-auto-columns: min(300px, 78vw); gap: 16px; }
 .rail > .tile { scroll-snap-align: start; }
 .tile h4 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0; }
 .meta { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
@@ -234,6 +244,9 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h2 id="h-prod">Van open data naar een bruikbaar informatieproduct, voor elke gemeente</h2>
     </div>
     <div class="shelves">
+      <div class="lane-wrap">
+      <button class="lane-btn prev" type="button" aria-label="Vorige producten" hidden>‹</button>
+      <div class="lane" role="group" aria-label="Fysieke leefomgeving, financiën, economie">
       <div class="shelf">
         <div class="shelf-head"><h3>Fysieke leefomgeving</h3><span>Gebouwen, energie en ruimte</span></div>
         <div class="rail">
@@ -277,6 +290,12 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       </article>
         </div>
       </div>
+      </div>
+      <button class="lane-btn next" type="button" aria-label="Volgende producten" hidden>›</button>
+      </div>
+      <div class="lane-wrap">
+      <button class="lane-btn prev" type="button" aria-label="Vorige producten" hidden>‹</button>
+      <div class="lane" role="group" aria-label="Onderwijs, sociaal domein">
       <div class="shelf">
         <div class="shelf-head"><h3>Onderwijs</h3><span>Scholen, leerlingen en prognoses per buurt</span></div>
         <div class="rail">
@@ -300,6 +319,9 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <div class="tile-links"><a class="btn btn-sm" href="jeugdzorg.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-jeugd">Meer weten</button></div>
       </article>
         </div>
+      </div>
+      </div>
+      <button class="lane-btn next" type="button" aria-label="Volgende producten" hidden>›</button>
       </div>
     </div>
     <article class="product" id="info-labelc" aria-labelledby="h-labelc">
@@ -486,6 +508,14 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
     else selectIt();
     function selectIt() { var r = document.createRange(); r.selectNodeContents(addr); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
   };
+  document.querySelectorAll('#producten .lane-wrap').forEach(function (w) {
+    var lane = w.querySelector('.lane'), prev = w.querySelector('.prev'), next = w.querySelector('.next');
+    var smooth = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    function upd() { var max = lane.scrollWidth - lane.clientWidth; prev.hidden = lane.scrollLeft <= 2; next.hidden = lane.scrollLeft >= max - 2; }
+    prev.onclick = function () { lane.scrollBy({ left: -lane.clientWidth * .8, behavior: smooth }); };
+    next.onclick = function () { lane.scrollBy({ left: lane.clientWidth * .8, behavior: smooth }); };
+    lane.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
+  });
   var infos = document.querySelectorAll('#producten .product'), mores = document.querySelectorAll('#producten .more');
   function show(id) {
     infos.forEach(function (a) { var on = a.id === id; a.hidden = !on; a.classList.toggle('open', on); });
