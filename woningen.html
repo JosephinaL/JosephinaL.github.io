@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Woningvoorraad en leegstand</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Woningvoorraad, eigendom en leegstand per Nederlandse gemeente en buurt, live uit CBS-open data via CBS en PDOK.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --dn-1: #b4492a; --dn-2: #de8b5c; --dn-3: #f0c4a3; --ov: #aab6b8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .ax0 { stroke: var(--muted); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart .noot { font-size: .82rem; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.streep { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; width: 16px; vertical-align: 3px; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 320px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.eig { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; font-size: .88rem; }
+.eig .t { position: relative; height: 14px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.eig .t i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.eig .t b { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px solid var(--fg); }
+.eig .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.eig .rij { display: contents; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 540px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+tbody tr.voorl td { color: var(--muted); }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 140px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Josephine Linders · Wonen · open data</span>
+      <h1 id="title">Woningvoorraad en leegstand</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+
+  <section class="intro" id="intro">
+    <p>Hoeveel woningen heeft je gemeente, wie bezit ze, en hoeveel staan er leeg? Kies een gemeente. Je ziet de voorraad op 1 januari, wat er elk jaar bij komt en af gaat, bij welke eigenaren de lege woningen staan, en per buurt hoe de voorraad is opgebouwd.</p>
+    <p class="muted small">De cijfers komen live van het CBS en PDOK op het moment dat je een gemeente kiest.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="top4" id="top4"></div>
+
+      <!-- door de jaren -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2>Bewoning en eigendom sinds <span id="vanJaar">2021</span></h2></div>
+        <div class="seg" role="group" aria-label="Toon aandeel of aantal">
+          <button type="button" data-m="pct" aria-pressed="true">Aandeel</button>
+          <button type="button" data-m="n" aria-pressed="false">Aantal</button>
+        </div>
+      </div>
+      <div class="trio">
+        <div class="chart" id="chLeeg"></div>
+        <div class="chart" id="chEig"></div>
+        <div class="chart" id="chLeegEig"></div>
+      </div>
+      <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="trendTabel"></div></details>
+
+      <!-- erbij en eraf -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Erbij en eraf</span><h2 id="mutKop">Wat er elk jaar bij komt en af gaat</h2></div>
+      </div>
+      <div class="chart" id="chMut"></div>
+      <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="mutTabel"></div></details>
+
+      <!-- per buurt -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Per buurt</span><h2 id="buurtKop">Per buurt</h2></div>
+        <div class="maten" id="jaren" role="group" aria-label="Kies een jaar"></div>
+      </div>
+      <div class="maten" id="maten" role="group" aria-label="Kies wat de kaart toont"></div>
+      <div class="split">
+        <div class="mapwrap">
+          <div id="map" role="region" aria-label="Kaart van de buurten"></div>
+          <div class="maplegend" id="mapLegend"></div>
+        </div>
+        <aside class="dossier" id="dossier" aria-live="polite"></aside>
+      </div>
+      <div class="panel">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-view="buurt">Buurten</button>
+          <button class="tab" role="tab" aria-selected="false" data-view="wijk">Wijken</button>
+        </div>
+        <div class="tools">
+          <input id="search" type="search" placeholder="Zoek buurt of wijk…">
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvBtn" type="button">CSV buurten en wijken</button>
+        </div>
+        <div class="scroll" id="tblWrap"></div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Woning</b>: een adres in de BAG met een woonfunctie dat in gebruik is, buiten gebruik is of verbouwd wordt. Een studentenkamer met eigen voordeur telt als woning.</li>
+            <li><b>Bewoond, ander gebruik, leeg</b>: bewoond = er staat iemand ingeschreven (BRP). Ander gebruik = niemand ingeschreven, maar wel een gebruiker volgens de WOZ of een bedrijf volgens het Handelsregister, zoals een tweede woning of een praktijk aan huis. Leeg = geen van drieën.</li>
+            <li><b>Eigenaar</b>: koop = bewoond door de eigenaar of in gebruik als tweede woning. Huur wordt gesplitst in corporaties, particuliere personen, BV's en NV's, en overige rechtspersonen (vaak stichtingen). Particuliere verhuur in de grafiek = de laatste drie samen.</li>
+            <li><b>Erbij</b>: nieuwbouw; transformatie (een kantoor, winkel of ander gebouw dat woningen wordt); splitsing (extra woningen in een bestaand pand). <b>Eraf</b>: sloop; samenvoeging (woningen in een bestaand pand opgeheven); functiewijziging (woning wordt iets anders). <b>Overig</b>: correcties en nagekomen meldingen.</li>
+            <li><b>Peildatum</b>: bewoning en eigendom op 1 januari. Erbij en eraf per kalenderjaar; het lopende jaar telt tot de laatste maand die het CBS heeft.</li>
+            <li><b>Per buurt</b>: het CBS geeft een aandeel pas vanaf 20 woningen in de buurt. De WOZ-waarde hoort bij de waardepeildatum een jaar eerder. Corporatiewoningen gaat om eigendom, niet om de hoogte van de huur.</li>
+            <li><b>Kaartkleuren</b>: vijf klassen met elk ongeveer evenveel buurten van de gekozen gemeente. Zo zie je verschillen binnen de gemeente.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Leeg is administratief</b>: het CBS kijkt naar registers, niet naar de woning zelf. Een woning tussen twee huurders, in verbouwing of vlak voor sloop telt als leeg. Een deel leegstand hoort bij een woningmarkt waarin mensen verhuizen.</li>
+            <li><b>Langdurige leegstand</b> (langer dan een jaar leeg) staat niet in de open tabel. Het CBS publiceert die per gemeente, wijk en buurt in de <a href="https://www.cbs.nl/nl-nl/maatwerk/2025/48/landelijke-monitor-leegstand-2025">Landelijke Monitor Leegstand</a>.</li>
+            <li><b>1 januari 2025</b>: voor dit jaar gebruikt het CBS voorlopige leegstandscijfers. Ze worden later vervangen door definitieve.</li>
+            <li><b>Per buurt geen leegstand</b>: het CBS levert per buurt alleen het aandeel woningen zonder ingeschreven bewoners. Dat is leegstand én ander gebruik samen. Op gemeenteniveau zie je hierboven hoe die twee zich verhouden.</li>
+            <li><b>Twee tellingen</b>: de voorraad op 1 januari (bewoning en eigendom) en de jaarlijkse mutaties komen uit twee CBS-tabellen. Ze kunnen enkele tientallen woningen verschillen.</li>
+            <li><b>Grenzen</b>: de buurtindeling verschilt per jaar. Een gemeente die na 2021 is gefuseerd kan een kortere reeks hebben.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const T_VOOR = '86286NED';   // voorraad; eigendom, type eigenaar, status van bewoning, regio
+  const T_MUT = '86098NED';    // levensloop van woningen en niet-woningen
+  const G_WONING = 'A045364';
+  const ST = { tot: 'T001742', bew: 'A059380', ander: 'A059382', leeg: 'A059383' };
+  const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
+  const EERSTE_KWB = 2023;
+  const VOORLOPIG_LEEG = [2025]; // 86286NED: voorlopige leegstandscijfers voor peildatum 1-1-2025
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const nf1 = new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmt = v => v == null ? '–' : nf.format(Math.round(v));
+  const fP = v => v == null || !isFinite(v) ? '–' : nf1.format(v) + '%';
+  const fP0 = v => v == null ? '–' : nf.format(v) + '%';
+  const fS = v => v == null ? '–' : (v > 0 ? '+' : v < 0 ? '−' : '') + nf.format(Math.abs(Math.round(v)));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tr = s => String(s == null ? '' : s).trim();
+  const num = v => (v == null || typeof v !== 'number' || v < 0) ? null : v; // CBS: -99995/-99997 = geheim of onbekend
+  const pct = (a, b) => a == null || !b ? null : 100 * a / b;
+  const MAAND = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+    if (S) { renderReeks(); renderMut(); if (S.b) renderKaart(); }
+  });
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  function toonTip(e, html) {
+    tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+  function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, i.dataset.tip)); i.addEventListener('pointerleave', verbergTip); }); }
+
+  // ---------- ophalen ----------
+  async function getJSON(u, pogingen = 3) {
+    let last;
+    for (let i = 0; i < pogingen; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; if (i < pogingen - 1) await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+
+  // ---------- staat ----------
+  let S = null;
+  let modus = 'pct';
+  let maat = 'onb';
+  let view = 'buurt', sortKey = null, sortDir = 1, selCode = null;
+  let map = null, layer = null, gjLayer = null;
+  const fouten = new Set();
+
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Om ${t} kwam er geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#melding').hidden = false;
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = 'Woningvoorraad en leegstand ' + g.n;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    S = { g, voor: null, nl: null, mut: null, ytd: null, jaren: [], jaar: null, b: null, opgehaald: null };
+    selCode = null; fouten.clear(); toonMelding();
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen…';
+    ['#top4', '#chLeeg', '#chEig', '#chLeegEig', '#trendTabel', '#chMut', '#mutTabel', '#tblWrap', '#dossier', '#jaren', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
+    voortgang(0, 3, 'Voorraad en mutaties ophalen bij het CBS…');
+    const [, , jaren] = await Promise.all([laadVoorraad(), laadMut(), zoekJaren(g.c)]);
+    if (S.g !== g) return;
+    S.opgehaald = new Date();
+    renderKern(); renderReeks(); renderMut();
+    voortgang(2, 3, 'Buurten ophalen bij PDOK…');
+    S.jaren = jaren;
+    renderJaren();
+    const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
+    if (jaren.length) await kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[0]);
+    else { fouten.add('buurtcijfers (PDOK)'); toonMelding(); renderVoet(); }
+    voortgang(3, 3, '');
+  }
+
+  // ---------- voorraad naar bewoning en eigendom (86286NED) ----------
+  function eigRij(r) {
+    return { tot: num(r.TotaleWoningvoorraad_1), koop: num(r.Koopwoningen_2), huur: num(r.TotaalHuurwoningen_3),
+      np: num(r.EigendomNatuurlijkePersonen_4), corp: num(r.EigendomWoningcorporaties_5), bv: num(r.EigendomBVSEnNVS_6),
+      ovr: num(r.EigendomOverigeRechtspersonen_7), onb: num(r.EigendomOnbekend_8) };
+  }
+  function parseVoor(rows) {
+    const per = new Map();
+    rows.forEach(r => {
+      const j = +tr(r.Perioden).slice(0, 4); const st = tr(r.StatusVanBewoning);
+      const k = Object.keys(ST).find(x => ST[x] === st); if (!k || !j) return;
+      if (!per.has(j)) per.set(j, { j });
+      per.get(j)[k] = eigRij(r);
+    });
+    const out = [...per.values()].filter(x => x.tot && x.tot.tot).sort((a, b) => a.j - b.j);
+    out.forEach(x => { x.part = x.tot ? (x.tot.np || 0) + (x.tot.bv || 0) + (x.tot.ovr || 0) : null; });
+    return out.length ? out : null;
+  }
+  async function laadVoorraad() {
+    const c = S.g.c;
+    try {
+      const [a, b] = await Promise.all([
+        getJSON(CBS + T_VOOR + `/TypedDataSet?$filter=startswith(RegioS,'GM${c}')`),
+        getJSON(CBS + T_VOOR + `/TypedDataSet?$filter=startswith(RegioS,'NL01')`).catch(() => null)
+      ]);
+      S.voor = parseVoor(a.value);
+      S.nl = b ? parseVoor(b.value) : null;
+    } catch (e) { S.voor = null; fouten.add('voorraad en leegstand (CBS)'); toonMelding(); }
+  }
+  const lp = (x, k = 'leeg') => x && x[k] && x.tot ? pct(x[k].tot, x.tot.tot) : null;
+  const nlJaar = j => S.nl ? S.nl.find(r => r.j === j) : null;
+
+  // ---------- erbij en eraf (86098NED) ----------
+  const MVELD = 'Perioden,BeginstandVoorraad_1,VergundeNieuwbouw_2,NieuwbouwTotaal_6,WijzigingGebruiksfunctiePositief_9,WijzigingGebruiksfunctieNegatief_10,ToevoegingenTotaal_13,Sloop_15,Onttrekkingen_16,VoorraadMutatieAndersPositief_17,VoorraadMutatieAndersNegatief_18,NagekomenInformatiePositief_19,NagekomenInformatieNegatief_20,SaldoVoorraad_21,EindstandVoorraad_22';
+  function mutRij(r) {
+    const v = k => num(r[k]) || 0;
+    return {
+      per: tr(r.Perioden), begin: num(r.BeginstandVoorraad_1), eind: num(r.EindstandVoorraad_22), saldo: typeof r.SaldoVoorraad_21 === 'number' ? r.SaldoVoorraad_21 : null,
+      vergund: num(r.VergundeNieuwbouw_2),
+      nieuw: v('NieuwbouwTotaal_6'), transf: v('WijzigingGebruiksfunctiePositief_9'), split: v('ToevoegingenTotaal_13'),
+      sloop: v('Sloop_15'), samen: v('Onttrekkingen_16'), fweg: v('WijzigingGebruiksfunctieNegatief_10'),
+      ovp: v('VoorraadMutatieAndersPositief_17') + v('NagekomenInformatiePositief_19'),
+      ovn: v('VoorraadMutatieAndersNegatief_18') + v('NagekomenInformatieNegatief_20')
+    };
+  }
+  async function laadMut() {
+    const c = S.g.c;
+    let rows;
+    try {
+      try {
+        rows = (await getJSON(CBS + T_MUT + `/TypedDataSet?$filter=startswith(RegioS,'GM${c}') and startswith(Gebruiksfunctie,'${G_WONING}')&$select=${MVELD}`)).value;
+      } catch (e) {
+        // terugval: alles van de gemeente, filter in de browser
+        rows = (await getJSON(CBS + T_MUT + `/TypedDataSet?$filter=startswith(RegioS,'GM${c}')`)).value.filter(r => tr(r.Gebruiksfunctie) === G_WONING);
+      }
+      const all = rows.map(mutRij);
+      const jj = all.filter(r => /JJ00$/.test(r.per)).map(r => ({ ...r, j: +r.per.slice(0, 4) })).sort((a, b) => a.j - b.j);
+      // lopend jaar: maanden optellen als er nog geen jaarcijfer is
+      const mm = all.filter(r => /MM\d\d$/.test(r.per));
+      const maxJ = mm.length ? Math.max(...mm.map(r => +r.per.slice(0, 4))) : null;
+      let ytd = null;
+      if (maxJ && !jj.some(r => r.j === maxJ)) {
+        const ms = mm.filter(r => +r.per.slice(0, 4) === maxJ).sort((a, b) => a.per.localeCompare(b.per));
+        if (ms.length) {
+          ytd = { j: maxJ, tm: +ms[ms.length - 1].per.slice(6, 8), voorlopig: true, begin: ms[0].begin, eind: ms[ms.length - 1].eind, vergund: 0, saldo: 0 };
+          ['nieuw', 'transf', 'split', 'sloop', 'samen', 'fweg', 'ovp', 'ovn'].forEach(k => { ytd[k] = ms.reduce((a, r) => a + r[k], 0); });
+          ytd.vergund = ms.reduce((a, r) => a + (r.vergund || 0), 0);
+          ytd.saldo = ms.reduce((a, r) => a + (r.saldo || 0), 0);
+        }
+      }
+      S.mut = jj.length ? jj : null; S.ytd = ytd;
+    } catch (e) { S.mut = null; S.ytd = null; fouten.add('nieuwbouw en sloop (CBS)'); toonMelding(); }
+  }
+  const erbij = r => r.nieuw + r.transf + r.split + r.ovp;
+  const eraf = r => r.sloop + r.samen + r.fweg + r.ovn;
+
+  // ---------- kern ----------
+  function renderKern() {
+    const g = S.g, vs = S.voor;
+    const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    const dpp = (x, y) => x == null || y == null ? '' : ` (${y - x >= 0 ? '+' : '−'}${nf1.format(Math.abs(y - x))} procentpunt)`;
+    let h = '';
+    if (vs) {
+      const L = vs[vs.length - 1], E = vs[0], nl = nlJaar(L.j);
+      $('#vanJaar').textContent = E.j;
+      $('#leadBig').textContent = `${g.n}: ${fmt(L.tot.tot)} woningen op 1 januari ${L.j}`;
+      $('#leadSub').textContent = [L.bew ? `${fmt(L.bew.tot)} bewoond` : '', L.leeg ? `${fmt(L.leeg.tot)} leeg` : '', L.ander ? `${fmt(L.ander.tot)} met ander gebruik` : ''].filter(Boolean).join(' · ');
+      h += unit('Leeg', fP(lp(L)), `${fmt(L.leeg && L.leeg.tot)} woningen. In ${E.j} ${fP(lp(E))}${dpp(lp(E), lp(L))}.${nl ? ` Nederland: ${fP(lp(nl))}.` : ''}`);
+      h += unit('Ander gebruik', fP(lp(L, 'ander')), `${fmt(L.ander && L.ander.tot)} woningen zonder ingeschreven bewoner, maar wel in gebruik: bijvoorbeeld een tweede woning of een bedrijf.`);
+      h += unit('Corporatiewoningen', fP(pct(L.tot.corp, L.tot.tot)), `${fmt(L.tot.corp)} woningen. In ${E.j} ${fP(pct(E.tot.corp, E.tot.tot))}${dpp(pct(E.tot.corp, E.tot.tot), pct(L.tot.corp, L.tot.tot))}.${nl ? ` Nederland: ${fP(pct(nl.tot.corp, nl.tot.tot))}.` : ''}`);
+    } else {
+      $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'de voorraad kon niet worden opgehaald';
+    }
+    if (S.mut) {
+      const M = S.mut[S.mut.length - 1], F = S.mut[0];
+      const groei = F.begin && M.eind ? M.eind - F.begin : null;
+      h += unit(`Erbij in ${M.j}`, fS(M.saldo), `saldo van ${fmt(erbij(M))} erbij en ${fmt(eraf(M))} eraf; ${fmt(M.nieuw)} nieuwbouw. Sinds ${F.j}: ${fS(groei)} woningen${F.begin ? ` (${groei >= 0 ? '+' : '−'}${nf1.format(Math.abs(100 * groei / F.begin))}%)` : ''}.`);
+    }
+    $('#top4').innerHTML = h;
+  }
+
+  // ---------- lijngrafiek ----------
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    modus = b.dataset.m;
+    document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    renderReeks();
+  }));
+  function nice(v) { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
+  const fAs = (t, isPct) => isPct ? (t % 1 ? nf1.format(t) : nf.format(t)) + '%' : (Math.abs(t) >= 10000 ? nf.format(t / 1000) + 'k' : nf.format(t));
+  function lijnen(el, titel, noemer, rs, series, isPct, noot) {
+    const W = 420, H = 210, L = 48, R = 112, Tp = 12, B = 24;
+    const pts = series.map(s => rs.map(r => ({ j: r.j, v: s.w(r), vl: VOORLOPIG_LEEG.includes(r.j) && s.vl })).filter(p => p.v != null));
+    const alle = pts.flat();
+    if (!alle.length) { el.innerHTML = `<h3>${esc(titel)}</h3><p class="small muted" style="margin:0">Geen cijfers.</p>`; return; }
+    const j0 = Math.min(...alle.map(p => p.j)), j1 = Math.max(...alle.map(p => p.j));
+    const hi = Math.max(...alle.map(p => p.v)) * 1.15 || 1;
+    const x = j => L + (W - L - R) * (j - j0) / Math.max(1, j1 - j0);
+    const y = v => Tp + (H - Tp - B) * (1 - v / hi);
+    const stap = nice(hi / 4);
+    const fv = v => isPct ? fP(v) : fmt(v);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(titel)}, ${j0} tot en met ${j1}">`;
+    for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${fAs(t, isPct)}</text>`;
+    const tick = j1 - j0 > 12 ? 5 : 1;
+    for (let j = Math.ceil(j0 / tick) * tick; j <= j1; j += tick) s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle">${j}</text>`;
+    pts.forEach((p, i) => {
+      if (p.length > 1) s += `<path d="${p.map((q, k) => (k ? 'L' : 'M') + x(q.j).toFixed(1) + ' ' + y(q.v).toFixed(1)).join(' ')}" fill="none" stroke="${series[i].kleur}" stroke-width="${series[i].dash ? 1.5 : 2}" ${series[i].dash ? 'stroke-dasharray="5 4"' : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+      p.filter(q => q.vl).forEach(q => { s += `<circle cx="${x(q.j)}" cy="${y(q.v)}" r="3.5" fill="var(--surface)" stroke="${series[i].kleur}" stroke-width="1.5"/>`; });
+    });
+    const ends = pts.map((p, i) => p.length ? { i, yy: y(p[p.length - 1].v), p: p[p.length - 1] } : null).filter(Boolean).sort((a, b) => a.yy - b.yy);
+    for (let k = 1; k < ends.length; k++) if (ends[k].yy - ends[k - 1].yy < 13) ends[k].yy = ends[k - 1].yy + 13;
+    ends.forEach(e => {
+      if (!series[e.i].dash) s += `<circle cx="${x(e.p.j)}" cy="${y(e.p.v)}" r="4" fill="${series[e.i].kleur}" stroke="var(--surface)" stroke-width="2"/>`;
+      s += `<text class="dl" x="${x(e.p.j) + 8}" y="${e.yy + 4}">${esc(series[e.i].kort || series[e.i].naam)} ${fv(e.p.v)}</text>`;
+    });
+    s += `<line class="hl" x1="0" x2="0" y1="${Tp}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>`;
+    s += `<rect class="hit" x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/></svg>`;
+    el.innerHTML = `<div class="chart-kop"><h3>${esc(titel)}</h3></div><span class="noemer">${esc(noemer)}</span>${s}
+      <div class="legend">${series.map(se => `<span><i class="sw ${se.dash ? 'streep' : ''}" style="${se.dash ? '' : 'background:' + se.kleur}"></i>${esc(se.naam)}</span>`).join('')}</div>${noot ? `<p class="noot muted">${noot}</p>` : ''}`;
+    const svg = el.querySelector('svg'), hl = svg.querySelector('.hl');
+    const jaren = [...new Set(alle.map(p => p.j))].sort((a, b) => a - b);
+    const zet = e => {
+      const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) * W / r.width;
+      let bj = jaren[0], bd = 1e9; jaren.forEach(j => { const d = Math.abs(x(j) - px); if (d < bd) { bd = d; bj = j; } });
+      hl.setAttribute('x1', x(bj)); hl.setAttribute('x2', x(bj)); hl.setAttribute('visibility', 'visible');
+      toonTip(e, `<b>1 januari ${bj}</b>${VOORLOPIG_LEEG.includes(bj) && series.some(se => se.vl) ? ' <span class="muted">(leegstand voorlopig)</span>' : ''}` + series.map((se, i) => { const q = pts[i].find(p => p.j === bj); return `<br><i class="sw" style="background:${se.kleur}"></i>${esc(se.naam)}: <span class="num">${q ? fv(q.v) : '–'}</span>`; }).join(''));
+    };
+    svg.addEventListener('pointermove', zet); svg.addEventListener('pointerdown', zet);
+    svg.addEventListener('pointerleave', () => { hl.setAttribute('visibility', 'hidden'); verbergTip(); });
+  }
+
+  // ---------- leegstand naar eigenaar (laatste jaar) ----------
+  const EIG = [['koop', 'Koopwoningen'], ['corp', 'Corporaties'], ['np', 'Particuliere personen'], ['bv', "BV's en NV's"], ['ovr', 'Overige (stichtingen e.d.)']];
+  function leegNaarEig(el) {
+    const vs = S.voor; if (!vs) { el.innerHTML = ''; return; }
+    const L = vs[vs.length - 1], nl = nlJaar(L.j);
+    if (!L.leeg) { el.innerHTML = '<h3>Leeg naar eigenaar</h3><p class="small muted" style="margin:0">Geen cijfers.</p>'; return; }
+    const rij = k => ({ v: L.tot[k], l: L.leeg[k], a: L.ander ? L.ander[k] : null, p: pct(L.leeg[k], L.tot[k]), pn: nl && nl.leeg ? pct(nl.leeg[k], nl.tot[k]) : null });
+    const d = EIG.map(([k, t]) => ({ k, t, ...rij(k) })).filter(x => x.v);
+    const hi = Math.max(1, ...d.map(x => Math.max(x.p || 0, x.pn || 0))) * 1.1;
+    el.innerHTML = `<div class="chart-kop"><h3>Bij welke eigenaar staan ze leeg?</h3></div><span class="noemer">aandeel leeg binnen elke eigenaar, 1 januari ${L.j} · streep = Nederland</span>
+      <div class="eig">${d.map(x => `<span>${esc(x.t)}</span><span class="t" data-tip="<b>${esc(x.t)}</b><br>${fmt(x.v)} woningen, waarvan <span class='num'>${fmt(x.l)}</span> leeg (${fP(x.p)})${x.a != null ? ` en <span class='num'>${fmt(x.a)}</span> ander gebruik` : ''}${x.pn != null ? `<br>Nederland: ${fP(x.pn)} leeg` : ''}"><i style="width:${100 * (x.p || 0) / hi}%"></i>${x.pn != null ? `<b style="left:${100 * x.pn / hi}%"></b>` : ''}</span><span class="v">${fP(x.p)} · ${fmt(x.l)}</span>`).join('')}</div>
+      <p class="noot muted">Van de ${fmt(L.leeg.tot)} lege woningen staan er ${fmt(L.leeg.corp)} bij corporaties en ${fmt((L.leeg.np || 0) + (L.leeg.bv || 0) + (L.leeg.ovr || 0))} bij particuliere verhuurders.${VOORLOPIG_LEEG.includes(L.j) ? ' Leegstand voorlopig.' : ''}</p>`;
+    bindTips(el);
+  }
+
+  function renderReeks() {
+    const vs = S.voor;
+    if (!vs) { $('#chLeeg').innerHTML = '<p class="small muted" style="margin:0">De voorraad kon niet worden opgehaald.</p>'; $('#chEig').innerHTML = ''; $('#chLeegEig').innerHTML = ''; $('#trendTabel').innerHTML = ''; return; }
+    const p = modus === 'pct';
+    const nlMap = new Map((S.nl || []).map(r => [r.j, r]));
+    const ser = [
+      { naam: 'Leeg', kort: 'Leeg', kleur: 'var(--dn-1)', vl: true, w: r => r.leeg ? (p ? lp(r) : r.leeg.tot) : null },
+      { naam: 'Ander gebruik', kort: 'Ander gebr.', kleur: 'var(--ov)', w: r => r.ander ? (p ? lp(r, 'ander') : r.ander.tot) : null }
+    ];
+    if (p && S.nl) ser.push({ naam: 'Leeg in Nederland', kort: 'NL', kleur: 'var(--muted)', dash: true, vl: true, w: r => { const n = nlMap.get(r.j); return n ? lp(n) : null; } });
+    lijnen($('#chLeeg'), 'Leeg en ander gebruik', p ? 'aandeel van alle woningen op 1 januari' : 'aantal woningen op 1 januari', vs, ser, p,
+      vs.some(r => VOORLOPIG_LEEG.includes(r.j)) ? 'Open rondje: voorlopig cijfer.' : '');
+    lijnen($('#chEig'), 'Eigendom', p ? 'aandeel van alle woningen op 1 januari' : 'aantal woningen op 1 januari', vs, [
+      { naam: 'Koop', kort: 'Koop', kleur: 'var(--hh-1)', w: r => p ? pct(r.tot.koop, r.tot.tot) : r.tot.koop },
+      { naam: 'Corporatie', kort: 'Corporatie', kleur: 'var(--hh-3)', w: r => p ? pct(r.tot.corp, r.tot.tot) : r.tot.corp },
+      { naam: 'Particuliere verhuur', kort: 'Part. huur', kleur: 'var(--hh-2)', w: r => p ? pct(r.part, r.tot.tot) : r.part }
+    ], p);
+    leegNaarEig($('#chLeegEig'));
+    $('#trendTabel').innerHTML = `<table><thead><tr><th>1 januari</th><th class="r">Woningen</th><th class="r">Bewoond</th><th class="r">Ander gebruik</th><th class="r">Leeg</th><th class="r">% leeg</th><th class="r">% leeg NL</th><th class="r">Koop</th><th class="r">Corporatie</th><th class="r">Particulier</th><th class="r">BV/NV</th><th class="r">Overig</th><th class="r">Onbekend</th></tr></thead><tbody>` +
+      vs.slice().reverse().map(r => `<tr class="${VOORLOPIG_LEEG.includes(r.j) ? 'voorl' : ''}"><td class="mono">${r.j}${VOORLOPIG_LEEG.includes(r.j) ? '*' : ''}</td><td class="r">${fmt(r.tot.tot)}</td><td class="r">${fmt(r.bew && r.bew.tot)}</td><td class="r">${fmt(r.ander && r.ander.tot)}</td><td class="r">${fmt(r.leeg && r.leeg.tot)}</td><td class="r">${fP(lp(r))}</td><td class="r">${fP(lp(nlMap.get(r.j)))}</td><td class="r">${fmt(r.tot.koop)}</td><td class="r">${fmt(r.tot.corp)}</td><td class="r">${fmt(r.tot.np)}</td><td class="r">${fmt(r.tot.bv)}</td><td class="r">${fmt(r.tot.ovr)}</td><td class="r">${fmt(r.tot.onb)}</td></tr>`).join('') +
+      '</tbody></table>' + (vs.some(r => VOORLOPIG_LEEG.includes(r.j)) ? '<p class="small muted" style="padding:0 10px">* leegstand voorlopig</p>' : '');
+  }
+
+  // ---------- erbij en eraf: gestapelde staven boven en onder nul ----------
+  const MUTS = {
+    op: [['nieuw', 'Nieuwbouw', '--seq-5'], ['transf', 'Transformatie', '--seq-3'], ['split', 'Splitsing', '--seq-2']],
+    af: [['sloop', 'Sloop', '--dn-1'], ['samen', 'Samenvoeging', '--dn-2'], ['fweg', 'Functie gewijzigd', '--dn-3']]
+  };
+  function renderMut() {
+    const el = $('#chMut');
+    if (!S.mut) { el.innerHTML = '<p class="small muted" style="margin:0">De mutaties konden niet worden opgehaald.</p>'; $('#mutTabel').innerHTML = ''; return; }
+    const rs = S.mut.slice(); if (S.ytd) rs.push(S.ytd);
+    const lab = r => r.voorlopig ? `${r.j}*` : String(r.j);
+    $('#mutKop').textContent = `Wat er elk jaar bij komt en af gaat, ${rs[0].j}–${rs[rs.length - 1].j}`;
+    const W = 860, H = 260, L = 52, R = 16, Tp = 14, B = 26;
+    const up = r => erbij(r), dn = r => eraf(r);
+    const hiU = Math.max(1, ...rs.map(up)), hiD = Math.max(1, ...rs.map(dn));
+    const tot = hiU + hiD;
+    const y0 = Tp + (H - Tp - B) * hiU / tot;
+    const sc = (H - Tp - B) / tot;
+    const bw = (W - L - R) / rs.length, gap = Math.min(10, bw * .25);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Woningen erbij en eraf per jaar">`;
+    const stap = nice(Math.max(hiU, hiD) / 5);
+    for (let t = 0; t <= hiU; t += stap) if (t) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y0 - t * sc}" y2="${y0 - t * sc}"/><text class="lbl" x="${L - 6}" y="${y0 - t * sc + 4}" text-anchor="end">+${fAs(t)}</text>`;
+    for (let t = stap; t <= hiD; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y0 + t * sc}" y2="${y0 + t * sc}"/><text class="lbl" x="${L - 6}" y="${y0 + t * sc + 4}" text-anchor="end">−${fAs(t)}</text>`;
+    rs.forEach((r, i) => {
+      const x = L + i * bw + gap / 2, w = bw - gap, op = r.voorlopig ? ' opacity=".55"' : '';
+      let yy = y0;
+      MUTS.op.concat([['ovp', 'Overig', '--ov']]).forEach(([k, , c]) => { const h = r[k] * sc; if (h > 0) { yy -= h; s += `<rect x="${x}" y="${yy}" width="${w}" height="${h}" fill="${css(c)}"${op}/>`; } });
+      yy = y0;
+      MUTS.af.concat([['ovn', 'Overig', '--ov']]).forEach(([k, , c]) => { const h = r[k] * sc; if (h > 0) { s += `<rect x="${x}" y="${yy}" width="${w}" height="${h}" fill="${css(c)}"${op}/>`; yy += h; } });
+      const sy = y0 - (r.saldo || 0) * sc;
+      s += `<line x1="${x - 1}" x2="${x + w + 1}" y1="${sy}" y2="${sy}" stroke="var(--fg)" stroke-width="2.5"/>`;
+      if (rs.length <= 14 || i % 2 === (rs.length - 1) % 2) s += `<text class="lbl" x="${x + w / 2}" y="${H - 8}" text-anchor="middle">${lab(r)}</text>`;
+      s += `<rect class="hb" data-i="${i}" x="${L + i * bw}" y="0" width="${bw}" height="${H - B}" fill="transparent"/>`;
+    });
+    s += `<line class="ax0" x1="${L}" x2="${W - R}" y1="${y0}" y2="${y0}"/></svg>`;
+    const leg = MUTS.op.concat(MUTS.af).map(([, t, c]) => `<span><i class="sw" style="background:var(${c})"></i>${t}</span>`).join('') + `<span><i class="sw" style="background:var(--ov)"></i>Overig</span><span><i class="sw" style="background:var(--fg);height:3px;vertical-align:3px"></i>Saldo</span>`;
+    const F = S.mut[0], M = S.mut[S.mut.length - 1];
+    const som = k => S.mut.reduce((a, r) => a + r[k], 0);
+    const nN = som('nieuw'), nT = som('transf') + som('split'), nS = som('sloop');
+    el.innerHTML = `<span class="noemer">aantal woningen per kalenderjaar · boven de lijn erbij, onder de lijn eraf</span>${s}<div class="legend">${leg}</div>
+      <p class="noot muted">${F.j}–${M.j}: ${fmt(nN)} nieuwbouw, ${fmt(nT)} door transformatie en splitsing, ${fmt(nS)} gesloopt. ${S.ytd ? `${S.ytd.j}* = januari tot en met ${MAAND[S.ytd.tm - 1]}, voorlopig.` : ''}</p>`;
+    el.querySelectorAll('.hb').forEach(hb => {
+      const r = rs[+hb.dataset.i];
+      const regel = ([k, t, c]) => `<br><i class="sw" style="background:var(${c})"></i>${t}: <span class="num">${fmt(r[k])}</span>`;
+      const html = `<b>${r.voorlopig ? `${r.j}, januari t/m ${MAAND[r.tm - 1]} (voorlopig)` : r.j}</b>` + MUTS.op.map(regel).join('') + MUTS.af.map(regel).join('') +
+        `<br><i class="sw" style="background:var(--ov)"></i>Overig: <span class="num">${fS(r.ovp - r.ovn)}</span><br><b>Saldo: <span class="num">${fS(r.saldo)}</span></b>${r.vergund != null ? `<br>Vergund voor nieuwbouw: <span class="num">${fmt(r.vergund)}</span>` : ''}`;
+      hb.addEventListener('pointermove', e => toonTip(e, html)); hb.addEventListener('pointerdown', e => toonTip(e, html)); hb.addEventListener('pointerleave', verbergTip);
+    });
+    $('#mutTabel').innerHTML = `<table><thead><tr><th>Jaar</th><th class="r">Begin</th><th class="r">Nieuwbouw</th><th class="r">Transformatie</th><th class="r">Splitsing</th><th class="r">Sloop</th><th class="r">Samenvoeging</th><th class="r">Functie gewijzigd</th><th class="r">Overig</th><th class="r">Saldo</th><th class="r">Eind</th><th class="r">Vergund nieuwbouw</th></tr></thead><tbody>` +
+      rs.slice().reverse().map(r => `<tr class="${r.voorlopig ? 'voorl' : ''}"><td class="mono">${r.voorlopig ? `${r.j} t/m ${MAAND[r.tm - 1].slice(0, 3)}*` : r.j}</td><td class="r">${fmt(r.begin)}</td><td class="r">${fmt(r.nieuw)}</td><td class="r">${fmt(r.transf)}</td><td class="r">${fmt(r.split)}</td><td class="r">${fmt(r.sloop)}</td><td class="r">${fmt(r.samen)}</td><td class="r">${fmt(r.fweg)}</td><td class="r">${fS(r.ovp - r.ovn)}</td><td class="r">${fS(r.saldo)}</td><td class="r">${fmt(r.eind)}</td><td class="r">${fmt(r.vergund)}</td></tr>`).join('') + '</tbody></table>';
+  }
+
+  // ---------- buurtcijfers (CBS Kerncijfers wijken en buurten via PDOK) ----------
+  async function zoekJaren(c) {
+    const kand = []; for (let j = new Date().getFullYear(); j >= EERSTE_KWB; j--) kand.push(j);
+    const ok = await Promise.all(kand.map(async j => {
+      try {
+        const gj = await getJSON(PDOK(j) + `buurten/items?f=json&gemeentecode=GM${c}&limit=20`, 1);
+        return (gj.features || []).some(f => num(f.properties.woningvoorraad) && num(f.properties.percentage_koopwoningen) != null) ? j : null;
+      } catch (e) { return null; }
+    }));
+    return ok.filter(Boolean);
+  }
+  function renderJaren() {
+    $('#jaren').innerHTML = S.jaren.length > 1 ? '<span class="muted small">Peildatum 1 januari</span>' + S.jaren.map(j => `<button class="btn linkish" type="button" data-j="${j}" aria-pressed="false">${j}</button>`).join('') : '';
+    $('#jaren').querySelectorAll('button').forEach(b => b.addEventListener('click', () => kiesJaar(+b.dataset.j)));
+  }
+  function obj(p, niveau) {
+    const recent10 = num(p.perc_bouwjaar_afgelopen_10_jaar), na2000 = num(p.percentage_bouwjaarklasse_vanaf_2000);
+    const o = {
+      code: niveau === 'buurt' ? p.buurtcode : p.wijkcode, naam: niveau === 'buurt' ? p.buurtnaam : p.wijknaam, wijk: p.wijkcode,
+      won: num(p.woningvoorraad), hh: num(p.aantal_huishoudens), inw: num(p.aantal_inwoners),
+      onb: num(p.percentage_onbewoond), koop: num(p.percentage_koopwoningen), huur: num(p.percentage_huurwoningen),
+      corp: num(p.perc_huurwoningen_in_bezit_woningcorporaties), ovh: num(p.perc_huurwoningen_in_bezit_overige_verhuurders), eonb: num(p.percentage_woningen_met_eigendom_onbekend),
+      eengez: num(p.percentage_eengezinswoning), meergez: num(p.percentage_meergezinswoning),
+      recent: recent10 != null ? recent10 : na2000, woz: num(p.gemiddelde_woningwaarde), nb: num(p.aantal_nieuwbouw_woningen)
+    };
+    o.nOnb = o.won != null && o.onb != null ? Math.round(o.won * o.onb / 100) : null;
+    return o;
+  }
+  let RECENT_LBL = 'Gebouwd in de laatste 10 jaar';
+  async function kiesJaar(j) {
+    const g = S.g; S.jaar = j; selCode = null;
+    $('#jaren').querySelectorAll('button').forEach(b => { const on = +b.dataset.j === j; b.setAttribute('aria-pressed', on); b.classList.toggle('primary', on); });
+    try { history.replaceState(null, '', '#gm=' + g.c + '&jaar=' + j); } catch (e) {}
+    $('#buurtKop').textContent = `Per buurt · 1 januari ${j}`;
+    $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Buurten ophalen…</p>';
+    fouten.delete('buurtcijfers (PDOK)');
+    try {
+      const [bu, wk, gm] = await Promise.all([
+        getJSON(PDOK(j) + `buurten/items?f=json&gemeentecode=GM${g.c}&limit=1000`),
+        getJSON(PDOK(j) + `wijken/items?f=json&gemeentecode=GM${g.c}&limit=1000`),
+        getJSON(PDOK(j) + `gemeenten/items?f=json&gemeentecode=GM${g.c}&limit=10`)
+      ]);
+      if (S.g !== g || S.jaar !== j) return;
+      const land = f => f.properties.water !== 'JA';
+      const buurten = bu.features.filter(land).map(f => obj(f.properties, 'buurt'));
+      const wijken = wk.features.filter(land).map(f => obj(f.properties, 'wijk'));
+      const gmf = gm.features.filter(f => land(f) && num(f.properties.woningvoorraad)).sort((a, c) => c.properties.woningvoorraad - a.properties.woningvoorraad)[0];
+      const gmo = gmf ? obj(gmf.properties, 'gemeente') : null;
+      if (gmo) { gmo.naam = g.n; gmo.code = 'GM' + g.c; }
+      RECENT_LBL = bu.features.some(f => num(f.properties.perc_bouwjaar_afgelopen_10_jaar) != null) ? 'Gebouwd in de laatste 10 jaar' : 'Gebouwd in 2000 of later';
+      S.b = { jaar: j, buurten, wijken, gm: gmo, geo: { type: 'FeatureCollection', features: bu.features.filter(land) } };
+    } catch (e) {
+      if (S.g !== g) return;
+      S.b = null; fouten.add('buurtcijfers (PDOK)');
+    }
+    toonMelding();
+    S.bounded = false;
+    renderMaten(); renderKaart(); renderDossier(null); renderTabel(); renderVoet();
+  }
+
+  // ---------- kaart ----------
+  const MATEN = () => [
+    { k: 'onb', t: 'Zonder ingeschreven bewoners', leg: '% woningen zonder ingeschreven bewoners (leeg of ander gebruik)', f: fP0 },
+    { k: 'corp', t: 'Corporatiewoningen', leg: '% corporatiewoningen', f: fP0 },
+    { k: 'koop', t: 'Koopwoningen', leg: '% koopwoningen', f: fP0 },
+    { k: 'meergez', t: 'Appartementen', leg: '% meergezinswoningen', f: fP0 },
+    { k: 'recent', t: RECENT_LBL, leg: '% ' + RECENT_LBL.toLowerCase(), f: fP0 },
+    { k: 'woz', t: 'WOZ-waarde', leg: 'gemiddelde WOZ-waarde', f: v => v == null ? '–' : '€ ' + nf.format(v) + 'k' }
+  ];
+  function renderMaten() {
+    $('#maten').innerHTML = '<span class="muted small">Kaart toont</span>' + MATEN().map(m => `<button class="btn linkish ${m.k === maat ? 'primary' : ''}" type="button" data-k="${m.k}" aria-pressed="${m.k === maat}">${esc(m.t)}</button>`).join('');
+    $('#maten').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { maat = b.dataset.k; renderMaten(); renderKaart(); }));
+  }
+  function klassen(k) {
+    const v = S.b.buurten.map(o => o[k]).filter(x => x != null).sort((a, b) => a - b);
+    if (!v.length) return null;
+    const q = [v[0]]; for (let i = 1; i < 5; i++) q.push(v[Math.floor(i * v.length / 5)]); q.push(v[v.length - 1]);
+    const g = [...new Set(q)];
+    return g.length < 2 ? { g: [v[0], v[0]], n: 1 } : { g, n: g.length - 1 };
+  }
+  function kleurVoor(v, kl) {
+    if (v == null || !kl) return null;
+    if (kl.n === 1) return css('--seq-3');
+    let i = 0; while (i < kl.n - 1 && v >= kl.g[i + 1]) i++;
+    const stap = kl.n === 5 ? i + 1 : Math.round(1 + i * 4 / Math.max(1, kl.n - 1));
+    return css('--seq-' + stap);
+  }
+  function renderKaart() {
+    if (typeof L === 'undefined') { $('#map').innerHTML = '<p class="small muted" style="padding:12px">De kaartbibliotheek kon niet laden. De tabel werkt wel.</p>'; return; }
+    if (!map) {
+      map = L.map('map', { scrollWheelZoom: false });
+      L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT · Buurtgrenzen: CBS' }).addTo(map);
+      map.on('focus', () => map.scrollWheelZoom.enable());
+      map.setView([52.1, 5.3], 7);
+    }
+    if (layer) layer.remove(); layer = null; gjLayer = null;
+    const b = S.b;
+    if (!b) { $('#mapLegend').innerHTML = '<span>Geen buurtcijfers opgehaald.</span>'; setTimeout(() => map.invalidateSize(), 50); return; }
+    const m = MATEN().find(x => x.k === maat);
+    const byCode = new Map(b.buurten.map(o => [o.code, o]));
+    const kl = klassen(maat);
+    const lijn = css('--surface') || '#fff';
+    layer = L.featureGroup().addTo(map);
+    gjLayer = L.geoJSON(b.geo, {
+      style: f => {
+        const o = byCode.get(f.properties.buurtcode); const sel = o && o.code === selCode;
+        let fill = o ? kleurVoor(o[maat], kl) : null, leeg = false;
+        if (!fill) { fill = css('--sunk'); leeg = true; }
+        return { color: sel ? css('--fg') : lijn, weight: sel ? 3 : 1.2, fillColor: fill, fillOpacity: 0.85, dashArray: leeg ? '3 3' : null };
+      },
+      onEachFeature: (f, ly) => {
+        const o = byCode.get(f.properties.buurtcode);
+        const val = !o || o[maat] == null ? 'geen cijfer' : m.f(o[maat]);
+        ly.bindTooltip(`<b>${esc(o ? o.naam : f.properties.buurtnaam)}</b><br>${esc(m.t)}: ${val}<br>${o ? fmt(o.won) : '–'} woningen`, { sticky: true });
+        ly.on('click', () => kiesBuurt(f.properties.buurtcode, false));
+      }
+    }).addTo(layer);
+    if (kl) {
+      let h = `<span>${esc(m.leg)}:</span>`;
+      if (kl.n === 1) h += `<span><i class="sw" style="background:${css('--seq-3')}"></i>${m.f(kl.g[0])}</span>`;
+      else for (let i = 0; i < kl.n; i++) h += `<span><i class="sw" style="background:${kleurVoor(kl.g[i], kl)}"></i>${m.f(kl.g[i])}${i === kl.n - 1 ? '–' + m.f(kl.g[i + 1]) : ' tot ' + m.f(kl.g[i + 1])}</span>`;
+      h += `<span><i class="sw" style="background:${css('--sunk')};border-style:dashed"></i>geen cijfer</span>`;
+      if (b.gm && b.gm[maat] != null) h += `<span>gemeente: ${m.f(b.gm[maat])}</span>`;
+      $('#mapLegend').innerHTML = h;
+    } else $('#mapLegend').innerHTML = '<span>Geen cijfers voor deze maat in dit jaar.</span>';
+    const passen = !S.bounded; S.bounded = true;
+    setTimeout(() => { map.invalidateSize(); if (passen && gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); }, 60);
+  }
+
+  // ---------- dossier ----------
+  function eigStack(o) {
+    const d = [['koop', 'Koop', 'var(--hh-1)'], ['corp', 'Corporatie', 'var(--hh-3)'], ['ovh', 'Overige verhuur', 'var(--hh-2)'], ['eonb', 'Eigendom onbekend', 'var(--ov)']].map(([k, t, c]) => ({ t, c, v: o[k] })).filter(x => x.v);
+    const tot = d.reduce((a, x) => a + x.v, 0);
+    if (!tot) return '<span class="muted">–</span>';
+    return `<div class="stack" role="img" aria-label="Woningen naar eigendom">${d.map(x => `<i style="width:${100 * x.v / tot}%;background:${x.c}" data-tip="${esc(x.t)}: ${x.v}%"></i>`).join('')}</div>`;
+  }
+  function renderDossier(o) {
+    const b = S.b;
+    if (!b) { $('#dossier').innerHTML = '<span class="eyebrow">Buurt</span><p class="muted" style="margin:0">Geen buurtcijfers beschikbaar.</p>'; return; }
+    const x = o || b.gm; if (!x) { $('#dossier').innerHTML = ''; return; }
+    const isBuurt = o && /^BU/.test(o.code);
+    const wijknaam = isBuurt ? ((b.wijken.find(w => w.code === o.wijk) || {}).naam || '') : '';
+    $('#dossier').innerHTML = `<span class="eyebrow">${!o ? 'Hele gemeente' : isBuurt ? 'Buurt' + (wijknaam ? ' · ' + esc(wijknaam) : '') : 'Wijk'} · 1 januari ${b.jaar}</span><h2>${esc(x.naam)}</h2>
+      <dl>
+        <dt>Woningen</dt><dd>${fmt(x.won)}</dd>
+        <dt>Huishoudens</dt><dd>${fmt(x.hh)}</dd>
+        <dt>Zonder bewoners</dt><dd>${fP0(x.onb)}${x.nOnb != null ? ` · ${o ? 'ca. ' : ''}${fmt(x.nOnb)}` : ''}</dd>
+        <dt>Appartementen</dt><dd>${fP0(x.meergez)}</dd>
+        <dt>${esc(RECENT_LBL)}</dt><dd>${fP0(x.recent)}</dd>
+        ${x.nb != null ? `<dt>Nieuwbouw in ${b.jaar}</dt><dd>${fmt(x.nb)} woningen</dd>` : ''}
+        <dt>WOZ-waarde</dt><dd>${x.woz == null ? '–' : '€ ' + nf.format(x.woz * 1000) + ' gemiddeld'} <span class="muted small">(waarde 1-1-${b.jaar - 1})</span></dd>
+      </dl>
+      <span class="eyebrow">Eigendom</span>${eigStack(x)}
+      <div class="legend"><span><i class="sw" style="background:var(--hh-1)"></i>Koop ${fP0(x.koop)}</span><span><i class="sw" style="background:var(--hh-3)"></i>Corporatie ${fP0(x.corp)}</span><span><i class="sw" style="background:var(--hh-2)"></i>Overige verhuur ${fP0(x.ovh)}</span></div>
+      ${o ? `<button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>` : '<p class="small muted" style="margin:0">Klik een buurt op de kaart of in de tabel.</p>'}`;
+    bindTips($('#dossier'));
+    const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesBuurt(null));
+  }
+  function kiesBuurt(code, vanTabel) {
+    selCode = code;
+    const o = code ? (S.b.buurten.find(x => x.code === code) || S.b.wijken.find(x => x.code === code)) : null;
+    renderDossier(o);
+    if (gjLayer) gjLayer.setStyle(gjLayer.options.style);
+    if (vanTabel && gjLayer && code) {
+      const ls = gjLayer.getLayers().filter(l => /^WK/.test(code) ? l.feature.properties.wijkcode === code : l.feature.properties.buurtcode === code);
+      if (ls.length) map.fitBounds(L.featureGroup(ls).getBounds(), { maxZoom: 15, padding: [24, 24] });
+    }
+    document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', !!code && tr.dataset.code === code));
+  }
+
+  // ---------- tabellen ----------
+  const COLS = () => [
+    { k: 'naam', t: 'Naam' }, { k: 'wijknaam', t: 'Wijk', alleenBuurt: 1 },
+    { k: 'won', t: 'Woningen', r: 1 }, { k: 'hh', t: 'Huishoudens', r: 1 },
+    { k: 'stack', t: 'Eigendom', nosort: 1 },
+    { k: 'koop', t: '% koop', r: 1, f: fP0 }, { k: 'corp', t: '% corporatie', r: 1, f: fP0 },
+    { k: 'onb', t: '% zonder bewoners', r: 1, f: fP0 }, { k: 'nOnb', t: 'Zonder bewoners (ca.)', r: 1 },
+    { k: 'meergez', t: '% appartement', r: 1, f: fP0 }, { k: 'recent', t: RECENT_LBL.replace('Gebouwd in ', '% '), r: 1, f: fP0 },
+    { k: 'woz', t: 'WOZ (× € 1.000)', r: 1 }
+  ];
+  function zetView(v) {
+    view = v; sortKey = null;
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x.dataset.view === v));
+    renderTabel();
+  }
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => zetView(b.dataset.view)));
+  $('#search').addEventListener('input', renderTabel);
+  function renderTabel() {
+    if (!S || !S.b) { $('#tblWrap').innerHTML = ''; $('#rowCount').textContent = ''; return; }
+    const b = S.b;
+    const wn = new Map(b.wijken.map(w => [w.code, w.naam]));
+    const cols = COLS().filter(c => view === 'buurt' || !c.alleenBuurt);
+    const q = $('#search').value.trim().toLowerCase();
+    let rest = (view === 'buurt' ? b.buurten : b.wijken).map(o => ({ ...o, wijknaam: wn.get(o.wijk) || '' }));
+    if (q) rest = rest.filter(r => [r.naam, r.wijknaam, r.code].join(' ').toLowerCase().includes(q));
+    if (sortKey) rest.sort((a, c) => { const x = a[sortKey], y = c[sortKey]; if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y, 'nl') : x - y) * sortDir; });
+    else rest.sort((a, c) => a.code.localeCompare(c.code));
+    const rs = (b.gm ? [{ ...b.gm, isGm: true }] : []).concat(rest);
+    const cel = (r, c) => c.k === 'stack' ? eigStack(r) : c.f ? c.f(r[c.k]) : c.r ? fmt(r[c.k]) : esc(r[c.k]);
+    $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.nosort ? 'style="cursor:default"' : ''} ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.t}</th>`).join('')}</tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selCode ? 'sel' : ''}" data-code="${esc(r.code)}">${cols.map(c => `<td class="${c.r ? 'r' : ''}">${cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    $('#rowCount').textContent = `${rest.length} ${view === 'buurt' ? 'buurten' : 'wijken'} · 1 januari ${b.jaar}`;
+    $('#tblWrap').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
+      const k = th.dataset.k; if (k === 'stack') return;
+      if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = (k === 'naam' || k === 'wijknaam') ? 1 : -1; }
+      renderTabel();
+    }));
+    $('#tblWrap').querySelectorAll('tbody tr.klik').forEach(tr => tr.addEventListener('click', () => kiesBuurt(tr.dataset.code, true)));
+    bindTips($('#tblWrap'));
+  }
+
+  // ---------- CSV ----------
+  function csvDownload(naam, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '\ufeff' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S || !S.b) return;
+    const b = S.b;
+    const kop = ['peildatum', 'gemeentecode', 'gemeente', 'niveau', 'code', 'naam', 'wijkcode', 'woningen', 'huishoudens', 'pct_koop', 'pct_huur', 'pct_corporatie', 'pct_overige_verhuur', 'pct_eigendom_onbekend', 'pct_zonder_ingeschreven_bewoners', 'zonder_bewoners_ca', 'pct_eengezins', 'pct_meergezins', RECENT_LBL.toLowerCase().replace(/\s+/g, '_').replace(/^gebouwd_in_/, 'pct_bouwjaar_'), 'nieuwbouw_in_jaar', 'woz_gemiddeld_x1000'];
+    const rij = (niv, o) => [`${b.jaar}-01-01`, 'GM' + S.g.c, S.g.n, niv, o.code, o.naam, niv === 'gemeente' ? '' : o.wijk, o.won, o.hh, o.koop, o.huur, o.corp, o.ovh, o.eonb, o.onb, o.nOnb, o.eengez, o.meergez, o.recent, o.nb, o.woz];
+    const rows = (b.gm ? [rij('gemeente', b.gm)] : []).concat(b.wijken.map(o => rij('wijk', o))).concat(b.buurten.map(o => rij('buurt', o)));
+    csvDownload(`woningen_buurten_${b.jaar}_${S.g.n.replace(/[^\w-]+/g, '_').toLowerCase()}.csv`, kop, rows);
+  });
+
+  // ---------- voet ----------
+  function renderVoet() {
+    const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+    const vs = S.voor, ms = S.mut;
+    const j = S.b ? S.b.jaar : (S.jaren[0] || '');
+    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Bewoning en eigendom: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_VOOR}/table">Voorraad woningen; eigendom, type eigenaar, status van bewoning</a> (${T_VOOR}${vs ? `, ${vs[0].j}–${vs[vs.length - 1].j}` : ''}, peildatum 1 januari). Erbij en eraf: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_MUT}/table">Levensloop van woningen en niet-woningen</a> (${T_MUT}${ms ? `, ${ms[0].j}–${S.ytd ? S.ytd.j + ' t/m ' + MAAND[S.ytd.tm - 1] : ms[ms.length - 1].j}` : ''}, uit de BAG). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Woningvoorraad en leegstand · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', async () => {
+    const g = S.g; const was = [...fouten]; fouten.clear(); toonMelding();
+    if (was.some(x => /voorraad/.test(x))) await laadVoorraad();
+    if (was.some(x => /nieuwbouw/.test(x))) await laadMut();
+    if (S.g !== g) return;
+    S.opgehaald = new Date(); renderKern(); renderReeks(); renderMut();
+    if (was.some(x => /PDOK/.test(x))) {
+      if (!S.jaren.length) { S.jaren = await zoekJaren(g.c); renderJaren(); }
+      if (S.jaren.length) await kiesJaar(S.jaar || S.jaren[0]); else fouten.add('buurtcijfers (PDOK)');
+    }
+    toonMelding(); renderVoet();
+  });
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+</body>
+</html>
