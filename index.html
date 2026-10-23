@@ -191,10 +191,10 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h1 id="h-hero">Open data, laag voor laag, tot een antwoord dat een gemeente kan gebruiken.</h1>
       <p class="lead">Gemeentelijke vraagstukken lopen dwars door domeinen heen. Het antwoord ligt vaak al in openbare registraties, verspreid over bronnen die niemand naast elkaar legt. Daar begint het werk.</p>
     </div>
-    <svg class="strata" viewBox="0 0 490 362" role="img" aria-labelledby="strata-t strata-d">
+    <svg class="strata" viewBox="0 0 490 379" role="img" aria-labelledby="strata-t strata-d">
       <title id="strata-t">Werkwijze in vier lagen</title>
-      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3) en jeugd (CBS). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
-      <line x1="360" y1="82" x2="360" y2="290" stroke="var(--muted)" stroke-dasharray="3 4"/>
+      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS) en bevolking (CBS). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
+      <line x1="360" y1="82" x2="360" y2="307" stroke="var(--muted)" stroke-dasharray="3 4"/>
       <g class="layer l1">
         <polygon points="240,50 360,82 480,50 360,18" fill="var(--layer-1)"/>
         <text x="4" y="47" class="t-strong">1 · skelet</text>
@@ -208,17 +208,18 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <text x="4" y="156">onderwijs</text><text x="96" y="156" class="t-src">DUO</text>
         <text x="4" y="173">financiën</text><text x="96" y="173" class="t-src">Iv3</text>
         <text x="4" y="190">jeugd</text><text x="96" y="190" class="t-src">CBS</text>
+        <text x="4" y="207">bevolking</text><text x="96" y="207" class="t-src">CBS</text>
       </g>
       <g class="layer l3">
-        <polygon points="240,237 360,269 480,237 360,205" fill="var(--layer-3)"/>
-        <text x="4" y="234" class="t-strong">3 · verrijking</text>
-        <text x="4" y="251">wat alleen de gemeente weet</text>
+        <polygon points="240,254 360,286 480,254 360,222" fill="var(--layer-3)"/>
+        <text x="4" y="251" class="t-strong">3 · verrijking</text>
+        <text x="4" y="268">wat alleen de gemeente weet</text>
       </g>
       <g class="layer l4">
-        <polygon points="240,322 360,354 480,322 360,290" fill="var(--layer-4)"/>
-        <circle cx="341" cy="321" r="4" fill="var(--bg)"/><circle cx="374" cy="330" r="4" fill="var(--bg)"/><circle cx="396" cy="316" r="4" fill="var(--bg)"/>
-        <text x="4" y="319" class="t-strong">4 · antwoord</text>
-        <text x="4" y="336">navolgbaar per object</text>
+        <polygon points="240,339 360,371 480,339 360,307" fill="var(--layer-4)"/>
+        <circle cx="341" cy="338" r="4" fill="var(--bg)"/><circle cx="374" cy="347" r="4" fill="var(--bg)"/><circle cx="396" cy="333" r="4" fill="var(--bg)"/>
+        <text x="4" y="336" class="t-strong">4 · antwoord</text>
+        <text x="4" y="353">navolgbaar per object</text>
       </g>
     </svg>
   </section>
@@ -289,7 +290,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       </div>
       <div class="lane-wrap">
       <button class="lane-btn prev" type="button" aria-label="Vorige producten" hidden>‹</button>
-      <div class="lane" role="group" aria-label="Economie, onderwijs, sociaal domein">
+      <div class="lane" role="group" aria-label="Economie, onderwijs, bevolking en wonen, sociaal domein">
       <div class="shelf">
         <div class="shelf-head"><h3>Economie en ondernemen</h3><span>Werken, wonen en bedrijfsruimte per buurt</span></div>
         <div class="rail">
@@ -311,6 +312,18 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <span class="meta">Kaart · per school en buurt · elke gemeente</span>
         <p>Waar staan de basisscholen, hoeveel leerlingen hebben ze en wat verwacht DUO tot 2035? Krimp en groei per school en per buurt.</p>
         <div class="tile-links"><a class="btn btn-sm" href="onderwijs.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-onderwijs">Meer weten</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>Bevolking en wonen</h3><span>Wie er woont en hoe dat verandert</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:40.1;background:#2a78d6"></i><i style="flex:28.4;background:#eda100"></i><i style="flex:31.5;background:#1baf7a"></i></span></div>
+        <h4>Huishoudens en vergrijzing</h4>
+        <span class="meta">Kaart · per buurt · elke gemeente</span>
+        <p>Hoe zijn de huishoudens samengesteld, hoe snel vergrijst de gemeente sinds 1995, en in welke buurten wonen de ouderen en de alleenwonenden?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="huishoudens.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-huish">Meer weten</button></div>
       </article>
         </div>
       </div>
@@ -427,6 +440,31 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
           <li>Het adres wordt via de BAG aan een CBS-buurt gekoppeld.</li>
           <li>Trend: prognose 2030 tegenover de telling van 2025.</li>
           <li>Gesloten en nieuwe scholen staan er apart bij.</li>
+        </ol>
+        <button class="close" type="button" hidden>Sluiten</button>
+      </div>
+    </article>
+    <article class="product" id="info-huish" aria-labelledby="h-huish">
+      <div class="product-body">
+        <h3 id="h-huish">Huishoudens en vergrijzing</h3>
+        <div class="spread" role="img" aria-label="Huishoudens in Nederland op 1 januari 2025: 40 procent alleenwonend, 28 procent samen zonder kinderen, 32 procent met kinderen">
+          <i style="flex:40.1;background:#2a78d6"></i><i style="flex:28.4;background:#eda100"></i><i style="flex:31.5;background:#1baf7a"></i>
+        </div>
+        <p>Wie er woont in een gemeente, en hoe dat verandert. Hoe de huishoudens zijn samengesteld, hoe snel de gemeente vergrijst sinds 1995, en per buurt waar de ouderen, de alleenwonenden en de gezinnen wonen. De noemer onder wonen, zorg en jeugd. Voor beleidsmedewerkers wonen en sociaal domein.</p>
+        <div class="facts">
+          <div><b>40,1%</b><span>van de huishoudens alleenwonend (2025; 1995: 32,6%)</span></div>
+          <div><b>21,1%</b><span>van de inwoners 65 of ouder (2026)</span></div>
+          <div><b>1995</b><span>eerste jaar van de reeks</span></div>
+        </div>
+        <a class="btn" href="huishoudens.html">Open de kaart <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo werkt het</span>
+        <ol>
+          <li>Het CBS telt per gemeente de inwoners naar leeftijd en de huishoudens naar samenstelling, elk jaar op 1 januari.</li>
+          <li>Per buurt komen de cijfers samen met de buurtgrenzen van het CBS, via PDOK.</li>
+          <li>De pagina haalt alles live op zodra je een gemeente kiest.</li>
+          <li>Wie de komende twintig jaar 65 wordt, staat erbij. Een prognose niet: die is niet per leeftijd en gemeente als open data beschikbaar.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>
       </div>
