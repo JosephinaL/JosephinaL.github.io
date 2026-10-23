@@ -96,33 +96,31 @@ nav a:hover { color: var(--accent); }
 .facts span { font-size: .82rem; color: var(--muted); }
 .btn { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: var(--r); }
 .btn:hover { filter: brightness(1.08); }
-/* Producten: twee rijen; per rij staan de indelingen naast elkaar en schuift de rij horizontaal */
-.shelves { display: grid; gap: 28px; }
-.lane-wrap { position: relative; min-width: 0; --fade: 96px; }
-@media (max-width: 700px) { .lane-wrap { --fade: 40px; } }
-.lane { display: grid; grid-auto-flow: column; grid-template-rows: auto 1fr; grid-auto-columns: max-content; justify-content: start; gap: 12px 32px; overflow-x: auto; scroll-snap-type: x proximity; overscroll-behavior-x: contain; padding-bottom: 10px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-.lane::-webkit-scrollbar { height: 8px; }
-.lane::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
-.lane > .shelf { grid-row: span 2; grid-template-rows: subgrid; }
-.lane-btn { position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 40px; height: 64px; display: grid; place-items: center; background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: var(--r); font: 700 1.6rem/1 var(--f-display); cursor: pointer; box-shadow: 0 2px 10px rgb(0 0 0 / .12); }
-.lane-btn:hover { border-color: var(--accent); color: var(--accent); }
-.lane-btn.prev { left: -12px; } .lane-btn.next { right: -12px; }
-@media (hover: none) { .lane-btn { display: none; } }
-.lane-wrap.more-r .lane { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - var(--fade)), transparent); mask-image: linear-gradient(to right, #000 calc(100% - var(--fade)), transparent); }
-.lane-wrap.more-l .lane { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - var(--fade)), transparent); mask-image: linear-gradient(to left, #000 calc(100% - var(--fade)), transparent); }
-.lane-wrap.more-l.more-r .lane { -webkit-mask-image: linear-gradient(to right, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); mask-image: linear-gradient(to right, transparent, #000 var(--fade), #000 calc(100% - var(--fade)), transparent); }
-.shelf { display: grid; grid-template-rows: auto 1fr; gap: 12px; min-width: 0; }
-.shelf-head { display: flex; flex-direction: column; justify-content: end; gap: 2px; border-bottom: 1px solid var(--line); padding-bottom: 8px; width: 0; min-width: 100%; }
+/* Producten: raster van vier kolommen, van boven naar beneden te lezen.
+   Een plank beslaat zoveel kolommen als ze tegels heeft (max. 4) en loopt nooit over twee rijen.
+   Past een plank niet meer op de rij, dan begint ze op de rij eronder. Geen horizontaal scrollen. */
+.shelves { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; }
+.shelf { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.shelf-head { display: flex; flex-direction: column; justify-content: end; gap: 2px; border-bottom: 1px solid var(--line); padding-bottom: 8px; min-width: 0; }
 .shelf-head h3 { font-size: 1.05rem; }
 .shelf-head span { font-size: .88rem; color: var(--muted); }
-.rail { display: grid; grid-auto-flow: column; grid-auto-columns: min(max(300px, calc((min(1440px, 100vw - 52px) - 96px) / 4)), 78vw); gap: 16px; }
-.rail > .tile { scroll-snap-align: start; }
+.rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 640px) { .rail { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 1100px) {
+  .shelves { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; margin-top: -32px; }
+  .shelf { grid-column: span 1; grid-row: span 2; grid-template-columns: subgrid; grid-template-rows: subgrid; row-gap: 0; }
+  .shelf:has(.tile + .tile) { grid-column: span 2; }
+  .shelf:has(.tile + .tile + .tile) { grid-column: span 3; }
+  .shelf:has(.tile + .tile + .tile + .tile) { grid-column: span 4; }
+  .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
+  .rail { grid-column: 1 / -1; grid-template-columns: subgrid; }
+}
 .tile h4 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0; }
 .meta { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .tile { transition: border-color .15s ease, transform .15s ease; }
 .tile:hover { border-color: var(--accent); }
 @media (prefers-reduced-motion: no-preference) { .tile:hover { transform: translateY(-2px); } }
-.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; min-width: 0; }
 .tile h3 { margin-top: 4px; }
 .tile p { color: var(--muted); font-size: .95rem; }
 .vis { height: 28px; display: flex; flex-direction: column; justify-content: center; }
@@ -252,9 +250,6 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h2 id="h-prod">Van open data naar een bruikbaar informatieproduct, voor elke gemeente</h2>
     </div>
     <div class="shelves">
-      <div class="lane-wrap">
-      <button class="lane-btn prev" type="button" aria-label="Vorige producten" hidden>‹</button>
-      <div class="lane" role="group" aria-label="Fysieke leefomgeving, financiën">
       <div class="shelf">
         <div class="shelf-head"><h3>Fysieke leefomgeving</h3><span>Gebouwen, energie en ruimte</span></div>
         <div class="rail">
@@ -286,12 +281,6 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       </article>
         </div>
       </div>
-      </div>
-      <button class="lane-btn next" type="button" aria-label="Volgende producten" hidden>›</button>
-      </div>
-      <div class="lane-wrap">
-      <button class="lane-btn prev" type="button" aria-label="Vorige producten" hidden>‹</button>
-      <div class="lane" role="group" aria-label="Economie, onderwijs, bevolking en wonen, sociaal domein">
       <div class="shelf">
         <div class="shelf-head"><h3>Economie en ondernemen</h3><span>Werken, wonen en bedrijfsruimte per buurt</span></div>
         <div class="rail">
@@ -346,9 +335,6 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <div class="tile-links"><a class="btn btn-sm" href="jeugdzorg.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-jeugd">Meer weten</button></div>
       </article>
         </div>
-      </div>
-      </div>
-      <button class="lane-btn next" type="button" aria-label="Volgende producten" hidden>›</button>
       </div>
     </div>
     <article class="product" id="info-labelc" aria-labelledby="h-labelc">
@@ -585,14 +571,6 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
     else selectIt();
     function selectIt() { var r = document.createRange(); r.selectNodeContents(addr); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
   };
-  document.querySelectorAll('#producten .lane-wrap').forEach(function (w) {
-    var lane = w.querySelector('.lane'), prev = w.querySelector('.prev'), next = w.querySelector('.next');
-    var smooth = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-    function upd() { var max = lane.scrollWidth - lane.clientWidth; prev.hidden = lane.scrollLeft <= 2; next.hidden = lane.scrollLeft >= max - 2; w.classList.toggle('more-l', !prev.hidden); w.classList.toggle('more-r', !next.hidden); }
-    prev.onclick = function () { lane.scrollBy({ left: -lane.clientWidth * .8, behavior: smooth }); };
-    next.onclick = function () { lane.scrollBy({ left: lane.clientWidth * .8, behavior: smooth }); };
-    lane.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
-  });
   var infos = document.querySelectorAll('#producten .product'), mores = document.querySelectorAll('#producten .more');
   function show(id) {
     infos.forEach(function (a) { var on = a.id === id; a.hidden = !on; a.classList.toggle('open', on); });
