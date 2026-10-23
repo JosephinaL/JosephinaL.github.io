@@ -683,7 +683,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 :root {
   --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
   --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff;
-  --st-voldoet: #2f8f46; --st-voldoet_niet: #d2462c; --st-geen_label: #d99a12; --st-label_onbekend: #5b6b86;
+  --st-voldoet: #2f8f46; --st-voldoet_niet: #d2462c; --st-geen_label: #d99a12; --st-label_onbekend: #5b6b86; --st-label_uiteen: #2a8a8a;
   --st-onzeker_bedrijf: #7656b0; --st-onzeker_gemengd: #3f74c4; --st-monument: #8a6634;
   --st-eigen: #b04d78; --st-buiten: #9aa7aa;
   --lbl-A: #1a8a3f; --lbl-B: #57a83a; --lbl-C: #b3c72a; --lbl-D: #f2d01c; --lbl-E: #f0a018; --lbl-F: #e4642a; --lbl-G: #d22a2a;
@@ -696,13 +696,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416;
-  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a; --st-label_onbekend: #8fa0c2;
+  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a; --st-label_onbekend: #8fa0c2; --st-label_uiteen: #4fbcbc;
   --st-onzeker_bedrijf: #9d82d6; --st-onzeker_gemengd: #6b9be0; --st-monument: #b58d55;
   --st-eigen: #d57aa0; --st-buiten: #6d7b7e; color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416;
-  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a; --st-label_onbekend: #8fa0c2;
+  --st-voldoet: #4cb865; --st-voldoet_niet: #ef6a4f; --st-geen_label: #e8b13a; --st-label_onbekend: #8fa0c2; --st-label_uiteen: #4fbcbc;
   --st-onzeker_bedrijf: #9d82d6; --st-onzeker_gemengd: #6b9be0; --st-monument: #b58d55;
   --st-eigen: #d57aa0; --st-buiten: #6d7b7e; color-scheme: dark; }
 
@@ -917,6 +917,7 @@ footer { font-size: .8rem; color: var(--muted); }
             <li><b>Plichtig</b>: meer dan 100 m² kantoorfunctie én minstens 50% van de gebruiksoppervlakte van het pand, geen monument.</li>
             <li><b>Onzeker</b>: een verblijfsobject heeft kantoor plus een andere functie. De BAG splitst die oppervlakte niet, dus de 50%- en 100 m²-toets zijn niet te maken. "Bedrijf" als industriefunctie meedoet, anders "gemengd".</li>
             <li><b>Label</b>: dominant label van het pand bij RIVM (afgeleid uit EP-Online). A t/m C voldoet.</li>
+            <li><b>Onzeker: labels uiteen</b>: het dominante label is D of slechter, maar minstens één verblijfsobject in het pand heeft C of beter. Welk label voor het gebouw geldt, is uit open data niet vast te stellen. Deze panden tellen wel als plichtig, niet als voldoet.</li>
             <li><b>Monument</b>: rijksmonument volgens RCE. Rijks-, provinciale en gemeentelijke monumenten zijn uitgezonderd (Bbl art. 3.87 lid 4 met art. 6.28); een beschermd stads- of dorpsgezicht niet. Koppeling, van sterk naar zwak: het monumentenregister noemt het BAG-pand zelf (RCE linked data; vooral recente inschrijvingen), het registerpunt ligt in het pand, of een adres ligt binnen de monumentcontour, of het punt ligt binnen 3 m naast het pand en in geen ander pand. Die laatste koppeling staat in de redenering; controleer haar.</li>
             <li><b>Grenst aan rijksmonument</b>: het pand raakt een monumentpand. Vormen beide samen één kantoorgebouw, dan geldt de uitzondering voor het geheel. Dat is uit de BAG niet vast te stellen; het pand houdt zijn status en krijgt een vermelding.</li>
           </ul>
@@ -926,7 +927,7 @@ footer { font-size: .8rem; color: var(--muted); }
           <p class="small">RVO meldt per 1 juli 2026 landelijk 72% label C of beter op adressen en 84% op oppervlakte. Deze cijfers zijn niet een-op-een te vergelijken met de percentages hierboven:</p>
           <ul class="plain small">
             <li><b>Noemer.</b> Panden met status Onzeker tellen hier niet mee. RVO deelt die met WOZ-gegevens wel in.</li>
-            <li><b>Labelbron.</b> Dit product gebruikt de RIVM-afleiding per pand. Die loopt achter op EP-Online, zodat "geen label" hier zwaarder weegt.</li>
+            <li><b>Labelbron.</b> Dit product gebruikt de RIVM-afleiding per pand (Atlas Leefomgeving), maandelijks bijgewerkt uit EP-Online van RVO. RIVM publiceert geen bruikbare peildatum; de stand loopt doorgaans enkele weken achter op EP-Online (gemeten oktober 2026: ca. zeven weken). Recent geregistreerde labels ontbreken daardoor, zodat "geen label" hier zwaarder weegt. Gecontroleerd voor Delft en Westland: 95% overeenstemming per pand met EP-Online.</li>
             <li><b>Oppervlakte.</b> Hier telt alleen oppervlakte die zeker kantoor is; RVO gebruikt de WOZ-verdeling naar gebruiksdeel.</li>
           </ul>
           <p class="small">Vergelijk daarom vooral gemeenten en wijken onderling, met dezelfde methode.</p>
@@ -1407,6 +1408,7 @@ footer { font-size: .8rem; color: var(--muted); }
   // ---------- classificatie ----------
   const STATUS = {
     voldoet: 'Voldoet', voldoet_niet: 'Voldoet niet', geen_label: 'Geen label', label_onbekend: 'Label onbekend',
+    label_uiteen: 'Onzeker: labels uiteen',
     onzeker_bedrijf: 'Onzeker: bedrijf', onzeker_gemengd: 'Onzeker: gemengd',
     monument: 'Monument', eigen: 'Eigen uitzondering', buiten: 'Buiten de plicht'
   };
@@ -1453,6 +1455,7 @@ footer { font-size: .8rem; color: var(--muted); }
       if (p.labelOnbekend) { p.status = 'label_onbekend'; r.push('De energielabels konden niet worden opgehaald bij RIVM (bron tijdelijk niet bereikbaar). Of dit pand een label heeft, is nu onbekend.'); }
       else if (!L) { p.status = 'geen_label'; r.push('Geen geregistreerd energielabel bij RIVM/EP-Online.'); }
       else if (labelOK(L.dominant_label)) { p.status = 'voldoet'; r.push(`Dominant label ${L.dominant_label}: voldoet.`); }
+      else if (labelOK(L.hoogste_label)) { p.status = 'label_uiteen'; r.push(`Dominant label ${L.dominant_label} is slechter dan C, maar het hoogste label in dit pand is ${L.hoogste_label}. Of het pand voldoet, hangt af van welk label voor het gebouw geldt; dat is uit open data niet vast te stellen.`); }
       else { p.status = 'voldoet_niet'; r.push(`Dominant label ${L.dominant_label}: slechter dan C.`); }
     } else if (L) r.push(`Label: dominant ${L.dominant_label}.`);
     if (L && L.hoogste_label !== L.laagste_label) r.push(`Labels in dit pand lopen uiteen van ${L.hoogste_label} tot ${L.laagste_label} (${L.aant_labels} labels).`);
@@ -1471,8 +1474,8 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.3';
-  const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
+  const VERSIE = '1.4';
+  const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
   const lblCol = l => l ? css('--lbl-' + l[0]) : null;
@@ -1584,7 +1587,7 @@ footer { font-size: .8rem; color: var(--muted); }
     drawMap(); renderAll(); renderMelding();
     $('#dossier').innerHTML = '<span class="eyebrow">Pand</span><p class="muted" style="margin:0">Klik een pand op de kaart of in de tabel om te zien waarom het zo is ingedeeld.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM, afgeleid uit EP-Online van RVO${res.labelsFout ? '; bij ophalen niet bereikbaar' : res.labelsLater ? ', later opgehaald ' + new Date(res.labelsLater).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' }) : ''}), rijksmonumenten (RCE, via PDOK en monumentenregister), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · broncode onder EUPL-1.2.`;
+    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks bijgewerkt, loopt doorgaans enkele weken achter op EP-Online${res.labelsFout ? '; bij ophalen niet bereikbaar' : res.labelsLater ? ', later opgehaald ' + new Date(res.labelsLater).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' }) : ''}), rijksmonumenten (RCE, via PDOK en monumentenregister), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · broncode onder EUPL-1.2.`;
   }
 
   function applyEigen(rerender = true) {
@@ -1625,36 +1628,37 @@ footer { font-size: .8rem; color: var(--muted); }
 
   function renderLead() {
     const c = counts();
-    const pl = c.voldoet + c.voldoet_niet + c.geen_label + c.label_onbekend;
+    const pl = c.voldoet + c.voldoet_niet + c.geen_label + c.label_onbekend + c.label_uiteen;
     const on = c.onzeker_bedrijf + c.onzeker_gemengd;
     if (c.label_onbekend) {
       $('#leadBig').textContent = `${fmt(pl)} panden vallen onder de plicht; energielabels zijn nu niet beschikbaar.`;
       $('#leadSub').textContent = `${fmt(on)} panden onzeker door gemengde functies, ${fmt(state.res.panden.length)} panden met kantoorfunctie in totaal.`;
     } else {
       $('#leadBig').textContent = pl ? `${fmt(pl)} panden vallen onder de plicht; ${Math.round(c.voldoet / pl * 100)}% heeft label C of beter.` : 'Geen panden die zeker onder de plicht vallen.';
-      $('#leadSub').textContent = `${fmt(c.voldoet_niet)} met label D–G, ${fmt(c.geen_label)} zonder label. ${fmt(on)} panden onzeker door gemengde functies, ${fmt(state.res.panden.length)} panden met kantoorfunctie in totaal.`;
+      $('#leadSub').textContent = `${fmt(c.voldoet_niet)} met label D–G, ${fmt(c.geen_label)} zonder label${c.label_uiteen ? `, ${fmt(c.label_uiteen)} met uiteenlopende labels rond C` : ''}. ${fmt(on)} panden onzeker door gemengde functies, ${fmt(state.res.panden.length)} panden met kantoorfunctie in totaal.`;
     }
     renderUnits();
   }
 
   // Drie eenheden: panden, adressen (verblijfsobjecten met kantoor), oppervlakte (zeker kantoor, m²)
   function units(panden) {
-    const K = ['voldoet', 'voldoet_niet', 'geen_label', 'label_onbekend'];
+    const K = ['voldoet', 'voldoet_niet', 'label_uiteen', 'geen_label', 'label_onbekend'];
     const pl = panden.filter(p => K.includes(p.status));
-    const sumBy = (f) => { const o = { voldoet: 0, voldoet_niet: 0, geen_label: 0, label_onbekend: 0 }; for (const p of pl) o[p.status] += f(p); o.tot = K.reduce((s, k) => s + o[k], 0); return o; };
+    const sumBy = (f) => { const o = { voldoet: 0, voldoet_niet: 0, label_uiteen: 0, geen_label: 0, label_onbekend: 0 }; for (const p of pl) o[p.status] += f(p); o.tot = K.reduce((s, k) => s + o[k], 0); return o; };
     return {
       panden: sumBy(() => 1),
       adressen: sumBy(p => p.kvbo.length),
       m2: sumBy(p => p.offMin)
     };
   }
+  const K_UNIT = ['voldoet', 'voldoet_niet', 'label_uiteen', 'geen_label', 'label_onbekend'];
   function renderUnits() {
     const u = units(state.res.panden);
     const card = (naam, o, eenheid) => {
       const pc = k => o.tot ? o[k] / o.tot * 100 : 0;
       return `<div class="unit"><div class="u-top"><span class="eyebrow">Op ${naam}</span><span class="u-pct">${o.tot && !o.label_onbekend ? Math.round(pc('voldoet')) + '%' : '–'}</span></div>
-        <div class="stack">${['voldoet', 'voldoet_niet', 'geen_label', 'label_onbekend'].map(k => `<i style="width:${pc(k)}%;background:${col(k)}" title="${ST[k]}: ${fmt(o[k])} ${eenheid}"></i>`).join('')}</div>
-        <div class="u-sub">${o.label_onbekend ? `label onbekend ${fmt(o.label_onbekend)} ${eenheid}` : `C of beter ${fmt(o.voldoet)} · D–G ${fmt(o.voldoet_niet)} · geen label ${fmt(o.geen_label)} ${eenheid}`}</div></div>`;
+        <div class="stack">${K_UNIT.map(k => `<i style="width:${pc(k)}%;background:${col(k)}" title="${ST[k]}: ${fmt(o[k])} ${eenheid}"></i>`).join('')}</div>
+        <div class="u-sub">${o.label_onbekend ? `label onbekend ${fmt(o.label_onbekend)} ${eenheid}` : `C of beter ${fmt(o.voldoet)} · D–G ${fmt(o.voldoet_niet)}${o.label_uiteen ? ` · labels uiteen ${fmt(o.label_uiteen)}` : ''} · geen label ${fmt(o.geen_label)} ${eenheid}`}</div></div>`;
     };
     $('#units').innerHTML = card('panden', u.panden, 'panden') + card('adressen', u.adressen, 'adressen') + card('oppervlakte', u.m2, 'm²');
   }
@@ -1662,7 +1666,7 @@ footer { font-size: .8rem; color: var(--muted); }
   function renderChips() {
     const c = counts(); const tot = state.res.panden.length || 1;
     $('#stack').innerHTML = ORDER.filter(k => c[k]).map(k => `<i style="width:${c[k] / tot * 100}%;background:${col(k)};opacity:${state.on.has(k) ? 1 : .25}" title="${ST[k]}: ${c[k]}"></i>`).join('');
-    $('#chips').innerHTML = ORDER.filter(k => c[k] || (k !== 'eigen' && k !== 'label_onbekend' && !(c.label_onbekend && ['voldoet', 'voldoet_niet', 'geen_label'].includes(k)))).map(k => `<button class="chip" type="button" data-k="${k}" aria-pressed="${state.on.has(k)}"><span class="sw" style="background:${col(k)}"></span>${ST[k]}<span class="n">${fmt(c[k])}</span></button>`).join('');
+    $('#chips').innerHTML = ORDER.filter(k => c[k] || (k !== 'eigen' && k !== 'label_onbekend' && k !== 'label_uiteen' && !(c.label_onbekend && ['voldoet', 'voldoet_niet', 'geen_label', 'label_uiteen'].includes(k)))).map(k => `<button class="chip" type="button" data-k="${k}" aria-pressed="${state.on.has(k)}"><span class="sw" style="background:${col(k)}"></span>${ST[k]}<span class="n">${fmt(c[k])}</span></button>`).join('');
     $('#chips').querySelectorAll('.chip').forEach(b => b.onclick = () => toggle(b.dataset.k));
     const alles = ORDER.every(k => state.on.has(k));
     $('#allBtn').hidden = alles;
@@ -1784,7 +1788,7 @@ footer { font-size: .8rem; color: var(--muted); }
     for (const p of state.res.panden) { const g = p[key] || '(buiten indeling)'; if (!groups.has(g)) groups.set(g, Object.fromEntries(ORDER.map(k => [k, 0]))); groups.get(g)[p.status]++; }
     const vis = ORDER.filter(k => state.on.has(k));
     const m2 = new Map(); for (const p of state.res.panden) { const g = p[key] || '(buiten indeling)'; if (!m2.has(g)) m2.set(g, []); m2.get(g).push(p); }
-    const rows = [...groups].map(([g, c]) => { const pl = c.voldoet + c.voldoet_niet + c.geen_label; const um = units(m2.get(g)).m2; return { g, c, pl, pct: pl ? c.voldoet / pl : null, pctM2: um.tot ? um.voldoet / um.tot : null, tot: vis.reduce((s, k) => s + c[k], 0) }; }).sort((a, b) => b.pl - a.pl || a.g.localeCompare(b.g, 'nl'));
+    const rows = [...groups].map(([g, c]) => { const pl = c.voldoet + c.voldoet_niet + c.geen_label + c.label_uiteen + c.label_onbekend; const um = units(m2.get(g)).m2; return { g, c, pl, pct: pl ? c.voldoet / pl : null, pctM2: um.tot ? um.voldoet / um.tot : null, tot: vis.reduce((s, k) => s + c[k], 0) }; }).sort((a, b) => b.pl - a.pl || a.g.localeCompare(b.g, 'nl'));
     $('#rowCount').textContent = `${rows.length} ${key === 'wijk' ? `wijken (CBS ${state.res.wijkJaar})` : 'woonplaatsen'}`;
     $('#tblWrap').innerHTML = `<table class="agg"><thead><tr><th>${key === 'wijk' ? 'Wijk' : 'Woonplaats'}</th><th class="r">Plichtig</th><th class="r">Voldoet (panden)</th><th class="r">Voldoet (m²)</th><th>Verdeling</th>${vis.map(k => `<th class="r"><span class="dot" style="background:${col(k)}"></span>${ST[k]}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr data-g="${esc(r.g)}"><td>${esc(r.g)}</td><td class="r num">${fmt(r.pl)}</td><td class="r num">${r.pct == null ? '–' : Math.round(r.pct * 100) + '%'}</td><td class="r num">${r.pctM2 == null ? '–' : Math.round(r.pctM2 * 100) + '%'}</td><td class="bar-cell"><div class="stack">${vis.filter(k => r.c[k]).map(k => `<i style="width:${r.c[k] / (r.tot || 1) * 100}%;background:${col(k)}"></i>`).join('')}</div></td>${vis.map(k => `<td class="r num">${r.c[k] || ''}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
     $('#tblWrap').querySelectorAll('tbody tr').forEach(tr => tr.onclick = () => {
