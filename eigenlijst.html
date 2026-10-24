@@ -855,6 +855,7 @@ footer { font-size: .8rem; color: var(--muted); }
       <textarea id="lijst" spellcheck="false" placeholder="naam;postcode;huisnummer;huisletter;gebruik;oppervlakte&#10;Stadskantoor;2611AB;1;;kantoor;12000&#10;Sporthal Noord;2622EA;14;A;sport;1800"></textarea>
       <div class="rij">
         <button class="btn primary" id="leesBtn" type="button">Lees de lijst</button>
+        <button class="btn" id="wisBtn" type="button" hidden>Wis</button>
         <span class="btn file">Open CSV-bestand<input id="bestand" type="file" accept=".csv,.txt,.tsv,text/csv,text/plain" aria-label="Open CSV-bestand"></span>
         <button class="btn linkish" id="voorbeeldBtn" type="button">Probeer met een voorbeeld: vastgoed Amsterdam</button>
       </div>
@@ -894,6 +895,10 @@ footer { font-size: .8rem; color: var(--muted); }
   <section id="result" hidden>
     <div class="wrap">
       <div class="melding" id="melding" role="status" hidden><p id="meldingTekst"></p></div>
+      <div class="rij" style="justify-content:space-between">
+        <span class="small muted" id="lijstNaam"></span>
+        <button class="btn" id="nieuwBtn" type="button">Nieuwe lijst</button>
+      </div>
       <div class="lead">
         <span class="big" id="leadBig"></span>
         <span class="muted" id="leadSub"></span>
@@ -1584,7 +1589,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.1.1';
+  const VERSIE = '0.1.2';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
@@ -1642,12 +1647,35 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   function lees(tekst, bron) {
     const { kop, regels } = E.leesTekst(tekst);
     if (!kop.length || !regels.length) { $('#leesInfo').textContent = 'Geen regels gevonden. Plak de lijst met een kopregel erboven.'; $('#kolommen').hidden = true; return false; }
+    // Een andere lijst inlezen maakt een getoonde uitkomst ongeldig: die verdwijnt.
+    if (state.res) wisUitkomst();
     state.kop = kop; state.regels = regels; state.rol = E.herkenRollen(kop, regels); state.bron = bron || '';
+    state.bronNaam = bron === 'voorbeeld' ? 'Voorbeeld: vastgoed Amsterdam' : bron && bron !== 'geplakt' ? bron : 'Geplakte lijst';
     $('#leesInfo').textContent = `${fmt(regels.length)} regels en ${kop.length} kolommen gelezen.`;
     renderKolommen();
     $('#kolommen').hidden = false;
+    $('#wisBtn').hidden = false;
     return true;
   }
+  // ---------- nieuwe lijst ----------
+  function wisUitkomst() {
+    state.res = null; state.sel = null; state.plek = null;
+    $('#result').hidden = true; $('#progress').hidden = true;
+    $('#dossier').innerHTML = ''; $('#tblWrap').innerHTML = ''; $('#search').value = ''; state.q = '';
+  }
+  function nieuweLijst() {
+    wisUitkomst();
+    state.kop = state.regels = state.rol = null; state.bron = '';
+    $('#lijst').value = ''; $('#kolommen').hidden = true; $('#kolBody').innerHTML = '';
+    $('#leesInfo').textContent = 'Excel-bestand? Kopieer de kolommen en plak ze hierboven, of sla op als CSV.';
+    $('#wisBtn').hidden = true;
+    updateGo();
+    $('#invoer').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    $('#lijst').focus({ preventScroll: true });
+  }
+  $('#nieuwBtn').onclick = nieuweLijst;
+  $('#wisBtn').onclick = nieuweLijst;
+  $('#lijst').oninput = () => { $('#wisBtn').hidden = !$('#lijst').value; };
   $('#leesBtn').onclick = () => { if (lees($('#lijst').value, 'geplakt')) $('#kolommen').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); };
   $('#bestand').onchange = e => {
     const f = e.target.files[0]; if (!f) return;
@@ -1741,6 +1769,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   }
   function show(res) {
     state.res = res; state.sel = null; state.limit = 400; state.on = new Set(ORDER);
+    $('#lijstNaam').textContent = `${state.bronNaam || 'Lijst'} · ${fmt(res.regels.length)} regels · ${res.gm.naam}`;
     state.plek = plekken(res);
     $('#result').hidden = false;
     const f = res.fouten, mel = [];
@@ -1811,6 +1840,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
       L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT-Achtergrondkaart' }).addTo(map);
       map.on('zoomend', () => { if (pandLayer) { if (map.getZoom() >= 16) pandLayer.addTo(map); else pandLayer.remove(); } });
     }
+    map.invalidateSize();
     [layer, pandLayer, outline].forEach(l => l && l.remove());
     outline = L.geoJSON(state.gm.geom, { interactive: false, style: { color: css('--accent'), weight: 2, fill: false, dashArray: '6 4' } }).addTo(map);
     const P = state.res.panden.filter(p => state.res.regels.some(r => r.P.includes(p)) && p.geom);
@@ -1826,7 +1856,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     }
     layer.addTo(map);
     const b = layer.getLayers().length ? layer.getBounds() : outline.getBounds();
-    map.fitBounds(b, { padding: [20, 20], maxZoom: 16 });
+    map.fitBounds(b, { padding: [30, 30], maxZoom: 18 });
     styleLayer();
   }
   function plekZichtbaar(pl) { return pl.regels.some(r => state.on.has(r.status)); }
