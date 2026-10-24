@@ -59,9 +59,17 @@ Label C-kantoren en Eigen lijst op de kaart nemen eigen gegevens van de gemeente
 - In Eigen lijst op de kaart staat een beveiligingsregel (Content-Security-Policy) die alleen verbindingen toestaat met `api.pdok.nl` en `data.rivm.nl`. Zo is na te gaan dat de lijst nergens anders heen kan.
 - Een controle vooraf stopt lijsten met persoonsgegevens (namen, BSN, contactgegevens, cliënten of bewoners) voordat er iets wordt opgezocht. De pagina is bedoeld voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed.
 
+## Gebruik
+
+© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina's kopiëren, aanpassen of elders publiceren alleen na overleg: joselin@live.nl.
+
+Een directe link naar je eigen gemeente werkt met `#gm=` en de gemeentecode, bijvoorbeeld `schulden.html#gm=0518` voor 's-Gravenhage.
+
+Fout gezien of een cijfer dat je niet herkent? Meld het per e-mail of via [Issues](https://github.com/josephinal/josephinal.github.io/issues).
+
 ## Bronnen en licenties
 
-De gebruikte data valt onder de licenties van de bronhouders, met naamsvermelding op de pagina:
+Deze gebruiksregel geldt voor de pagina's zelf: opbouw, code, teksten en rekenwijze. De gebruikte data valt onder de licenties van de bronhouders, met naamsvermelding op de pagina:
 
 - Kadaster/BZK (BAG, PDOK): CC0
 - KOOP (Officiële bekendmakingen): CC0
