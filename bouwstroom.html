@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bouwstroom</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Van vergunning tot voordeur: welke woningen in een Nederlandse gemeente vergund, in aanbouw of klaar zijn, per pand, live uit de BAG en de officiële bekendmakingen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --dn-1: #b4492a; --dn-2: #de8b5c; --dn-3: #f0c4a3; --ov: #aab6b8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.unit.sig { border-left: 4px solid var(--warn); }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+
+/* stroom: de fasen als keten */
+.stroom { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+@media (min-width: 900px) { .stroom { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.fase { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 12px; display: grid; gap: 2px; position: relative; align-content: start; border-top: 5px solid var(--c, var(--line)); }
+.fase .f-n { font-family: var(--f-display); font-stretch: 85%; font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.fase .f-t { font-weight: 600; }
+.fase .f-s { font-size: .8rem; color: var(--muted); }
+@media (min-width: 900px) { .fase:not(:last-child)::after { content: "→"; position: absolute; right: -9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 1rem; background: var(--bg); line-height: 1; padding: 1px 0; z-index: 1; } }
+.zijstroom { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: .88rem; color: var(--muted); }
+.zijstroom b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.zijstroom i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 980px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .ax0 { stroke: var(--muted); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart .noot { font-size: .82rem; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+
+table.mat { font-size: .86rem; }
+table.mat th { position: static; cursor: default; }
+table.mat td.r b { font-weight: 600; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 320px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.laag { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 10px 2px 6px; font-size: .82rem; cursor: pointer; user-select: none; }
+.laag input { margin: 0; accent-color: var(--accent); }
+.laag i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; }
+.laag i.rond { border-radius: 50%; }
+.laag[data-uit] { opacity: .55; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 12px; }
+#map { height: 580px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; max-height: 640px; overflow: auto; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.dossier ul { margin: 0; padding-left: 1.1em; font-size: .86rem; display: grid; gap: 4px; }
+.dossier .sigtxt { border-left: 3px solid var(--warn); padding: 4px 10px; font-size: .88rem; background: color-mix(in srgb, var(--warn) 8%, transparent); }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 420px; } .dossier { max-height: none; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.tools select { padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+.chip { display: inline-block; padding: 0 8px; border-radius: 999px; font-size: .78rem; white-space: nowrap; border: 1px solid var(--line); }
+.chip .d { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+.chip.sig { border-color: var(--warn); color: var(--warn); }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <span class="eyebrow">Josephine Linders · Wonen · open data</span>
+      <h1 id="title">Bouwstroom: van vergunning tot voordeur</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+
+  <section class="intro" id="intro">
+    <p>Welke woningen komen eraan in je gemeente, hoe ver zijn ze, en waar staat iets stil? Kies een gemeente. Je ziet per pand wat er vergund is, in aanbouw is of net klaar, welke nieuwe woningen in bestaande panden ontstaan, en welke vergunningen voor woningen het afgelopen jaar zijn aangevraagd en verleend.</p>
+    <p class="muted small">De gegevens komen live uit de Basisregistratie Adressen en Gebouwen (BAG, dagelijks bijgewerkt) en uit de officiële bekendmakingen van de gemeente, op het moment dat je een gemeente kiest.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="top4" id="top4"></div>
+
+      <!-- de stroom -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">De stroom</span><h2>Van vergunning tot voordeur</h2></div>
+        <p class="small muted" id="stroomNoot"></p>
+      </div>
+      <div class="stroom" id="stroom"></div>
+      <div class="zijstroom" id="zijstroom"></div>
+
+      <div class="duo">
+        <div class="chart" id="chJaar"></div>
+        <div class="chart" id="chBek"></div>
+      </div>
+
+      <!-- kaart -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Per pand</span><h2 id="kaartKop">Op de kaart</h2></div>
+      </div>
+      <div class="maten" id="lagen" role="group" aria-label="Kies welke lagen de kaart toont"></div>
+      <div class="split">
+        <div class="mapwrap">
+          <div id="map" role="region" aria-label="Kaart met panden en bekendmakingen"></div>
+          <div class="maplegend" id="mapLegend"></div>
+        </div>
+        <aside class="dossier" id="dossier" aria-live="polite"></aside>
+      </div>
+
+      <div class="panel">
+        <div class="tabs" role="tablist">
+          <button class="tab" role="tab" aria-selected="true" data-view="proj">Panden</button>
+          <button class="tab" role="tab" aria-selected="false" data-view="buurt">Per buurt</button>
+          <button class="tab" role="tab" aria-selected="false" data-view="bek">Bekendmakingen</button>
+        </div>
+        <div class="tools">
+          <input id="search" type="search" placeholder="Zoek adres, buurt of tekst…">
+          <select id="faseFilter" aria-label="Filter"></select>
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvBtn" type="button">CSV</button>
+        </div>
+        <div class="scroll" id="tblWrap"></div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Woning</b>: een verblijfsobject in de BAG met een woonfunctie. Een studentenkamer met eigen voordeur telt als woning. Andere functies (kantoor, winkel) in hetzelfde pand tellen apart. Panden zonder woning, zoals een kas, schuur of bedrijfshal, tellen niet mee<span id="nietWoon"></span>.</li>
+            <li><b>Vergund</b>: een nieuw verblijfsobject ("gevormd") in een pand met de status "bouwvergunning verleend". <b>In aanbouw</b>: hetzelfde, in een pand met de status "bouw gestart". <b>Klaar, nog in te meten</b>: pand of verblijfsobject "in gebruik (niet ingemeten)": opgeleverd, de gemeente moet het nog definitief inmeten.</li>
+            <li><b>In bestaand pand</b>: een nieuw verblijfsobject in een pand dat al in gebruik is of verbouwd wordt. Dat zijn splitsingen en transformaties, bijvoorbeeld een kantoor dat woningen wordt.</li>
+            <li><b>Opgeleverd</b>: panden die in gebruik zijn met bouwjaar <span class="jY1"></span> of <span class="jY"></span>. Het aantal woningen is het aantal verblijfsobjecten in panden met een woonfunctie; in een gemengd pand telt ook een winkel of kantoor mee.</li>
+            <li><b>Verwacht bouwjaar</b>: bij een vergund pand registreert de gemeente het jaar waarin het pand naar verwachting klaar is. Is dat jaar voorbij terwijl het pand nog op "vergund" of "bouw gestart" staat, dan krijgt het het <b>signaal "verwacht jaar voorbij"</b>.</li>
+            <li><b>Sloop</b>: panden met de status "sloopvergunning verleend", met het aantal verblijfsobjecten dat erin staat.</li>
+            <li><b>Bekendmakingen</b>: omgevingsvergunningen in het gemeenteblad van de afgelopen twaalf maanden waarin woningen genoemd worden. Elke publicatie is ingedeeld naar soort (nieuwbouw, splitsen, transformatie, samenvoegen) en stap (aanvraag, besluit, termijn verlengd, wijziging van een eerder verleende vergunning, ingetrokken, geweigerd), op basis van de tekst. Een wijziging telt niet mee in de woningen uit besluiten, zodat een project niet twee keer meetelt. Het aantal woningen is het eerste getal vóór "woningen" of "appartementen".</li>
+            <li><b>Buurt</b>: de buurt waarin het pand of het punt van de bekendmaking ligt, volgens de CBS-buurtgrenzen.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>De BAG volgt de gemeente</b>: een status verandert pas als de gemeente de melding verwerkt. Een signaal kan een vertraagd project zijn, maar ook een start of oplevering die nog niet in de BAG is bijgewerkt. Beide zijn de moeite van het nagaan waard; de BAG-beheerder van de gemeente kan het verschil zien.</li>
+            <li><b>Verwacht bouwjaar is een schatting</b>, ingevuld bij de vergunning. Een project in fasen kan meerdere panden met verschillende jaren hebben.</li>
+            <li><b>Geen datum van de statuswijziging</b>: de open BAG geeft alleen de datum van het laatste brondocument, en die verandert ook bij correcties. Hoe lang een pand al in een fase staat, is daarom niet te tonen.</li>
+            <li><b>Bekendmakingen tellen niet op</b>: één project heeft vaak een aanvraag, een verlenging van de termijn en een besluit. Dat zijn drie publicaties. Tel ze niet bij elkaar op en ook niet bij de BAG.</li>
+            <li><b>De indeling van bekendmakingen is tekstherkenning</b>: gemeenten schrijven hun publicaties verschillend. Een publicatie zonder herkenbare beschrijving valt erbuiten; soms valt een verbouwing er ten onrechte in. Elke regel linkt naar de publicatie zelf.</li>
+            <li><b>Sloop en samenvoegen</b> halen woningen weg. In de stroom staan ze apart, niet als min op het totaal.</li>
+            <li>De jaarlijkse optelling van nieuwbouw, sloop en splitsing staat in <a href="woningen.html">Woningvoorraad en leegstand</a>.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const BAG = 'https://api.pdok.nl/kadaster/bag/ogc/v2/collections/';
+  const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
+  const SRU = 'https://repository.overheid.nl/sru';
+  const NU = new Date();
+  const JAAR = NU.getFullYear();
+  const DAGEN_BEK = 365;
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const fmt = v => v == null ? '–' : nf.format(Math.round(v));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const dmy = s => { if (!s) return '–'; const d = new Date(s); return isNaN(d) ? s : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }); };
+  const iso = d => d.toISOString().slice(0, 10);
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+  document.querySelectorAll('.jY').forEach(e => { e.textContent = JAAR; });
+  document.querySelectorAll('.jY1').forEach(e => { e.textContent = JAAR - 1; });
+
+  // ---------- fasen ----------
+  const FASEN = [
+    { k: 'vergund', t: 'Vergund', lang: 'Vergund, bouw nog niet gestart', c: '--seq-2' },
+    { k: 'bouw', t: 'In aanbouw', lang: 'Bouw gestart', c: '--seq-4' },
+    { k: 'klaar', t: 'Klaar, nog in te meten', lang: 'In gebruik, nog niet ingemeten', c: '--seq-5' },
+    { k: 'opgeleverd', t: 'Opgeleverd', lang: `In gebruik, bouwjaar ${JAAR - 1} of ${JAAR}`, c: '--hh-3' },
+    { k: 'bestaand', t: 'In bestaand pand', lang: 'Nieuwe verblijfsobjecten in een bestaand pand (splitsing, transformatie)', c: '--hh-2' },
+    { k: 'sloop', t: 'Sloopvergunning', lang: 'Sloopvergunning verleend', c: '--dn-1' }
+  ];
+  const FASE = Object.fromEntries(FASEN.map(f => [f.k, f]));
+  const PAND_FASE = { 'Bouwvergunning verleend': 'vergund', 'Bouw gestart': 'bouw', 'Pand in gebruik (niet ingemeten)': 'klaar', 'Sloopvergunning verleend': 'sloop' };
+  const BEK_KLEUR = '--hh-1';
+  const SOORTEN = ['Nieuwbouw', 'Transformatie', 'Splitsen', 'Samenvoegen'];
+  const STAPPEN = ['Aanvraag', 'In behandeling', 'Ontwerpbesluit', 'Besluit', 'Wijziging', 'Geweigerd', 'Ingetrokken', 'Overig'];
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+    if (S && S.klaar) { renderJaar(); renderBekMat(); renderKaart(); }
+  });
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  function toonTip(e, html) {
+    tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+
+  // ---------- ophalen ----------
+  async function getText(u, pogingen = 3, ms = 45000) {
+    let last;
+    for (let i = 0; i < pogingen; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), ms);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.text();
+      } catch (e) { last = e; if (i < pogingen - 1) await new Promise(res => setTimeout(res, 800 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  const getJSON = async (u, p) => JSON.parse(await getText(u, p));
+  // alle pagina's van een OGC API-collectie
+  async function alles(url, onPagina) {
+    let out = [], stamp = null;
+    while (url) {
+      const d = await getJSON(url);
+      out = out.concat(d.features || []); stamp = stamp || d.timeStamp;
+      if (onPagina) onPagina(out.length);
+      const nx = (d.links || []).find(l => l.rel === 'next');
+      url = nx && (d.features || []).length ? nx.href : null;
+    }
+    return { features: out, stamp };
+  }
+
+  // ---------- geometrie ----------
+  function ringIn(x, y, ring) {
+    let inside = false;
+    for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+    }
+    return inside;
+  }
+  function polysVan(geom) { return !geom ? [] : geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : []; }
+  function inGeom(x, y, g) { return g.polys.some(p => ringIn(x, y, p[0]) && !p.slice(1).some(h => ringIn(x, y, h))); }
+  function maakGebied(geom, props) {
+    const polys = polysVan(geom); let a = [180, 90, -180, -90];
+    polys.forEach(p => p[0].forEach(([x, y]) => { a = [Math.min(a[0], x), Math.min(a[1], y), Math.max(a[2], x), Math.max(a[3], y)]; }));
+    return { polys, bb: a, props };
+  }
+  const inBB = (x, y, b) => x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3];
+  function zoekGebied(x, y, lijst) { for (const g of lijst) if (inBB(x, y, g.bb) && inGeom(x, y, g)) return g; return null; }
+  function midden(geom) {
+    if (!geom) return null;
+    if (geom.type === 'Point') return geom.coordinates;
+    const ring = polysVan(geom)[0]; if (!ring) return null;
+    const r = ring[0]; let sx = 0, sy = 0; const n = r.length - 1 || 1;
+    for (let i = 0; i < n; i++) { sx += r[i][0]; sy += r[i][1]; }
+    return [sx / n, sy / n];
+  }
+
+  // ---------- bekendmakingen: indelen naar stap, soort en aantal ----------
+  const NUMW = { een: 1, 'één': 1, twee: 2, drie: 3, vier: 4, vijf: 5, zes: 6, zeven: 7, acht: 8, negen: 9, tien: 10, elf: 11, twaalf: 12, dertien: 13, veertien: 14, vijftien: 15, zestien: 16, zeventien: 17, achttien: 18, negentien: 19, twintig: 20 };
+  const BIJV = '(?:(?:nieuwe|nieuwbouw|grondgebonden|sociale|tijdelijke|flex|zelfstandige|vrije[- ]sector|middenhuur|huur|koop|levensloopbestendige|eengezins|starters|senioren|separate|aparte|afzonderlijke|vrijstaande|geschakelde|rij|patio|beneden|boven|twee-onder-(?:een|één)-kap)[- ]?)*';
+  const NOUN = '(?:[a-z-]*woningen|woning|appartementen|appartement|wooneenheden|wooneenheid|woonunits?|studio\'?s|woonruimtes|tussenwoning|hoekwoning|woonhuis|woonhuizen)';
+  const TAL = '(\\d+|' + Object.keys(NUMW).join('|') + ')';
+  const RE_AANTAL = new RegExp('\\b' + TAL + '\\s+' + BIJV + NOUN + '\\b');
+  const RE_NA = new RegExp('\\b(?:naar|in|tot)\\s+' + TAL + '\\s+' + BIJV + NOUN + '\\b');
+  const RE_NIEUW = new RegExp('\\b(?:oprichten|realiseren|realisatie|bouwen|nieuwbouw|plaatsen|herbouw|bouw)\\s+(?:van\\s+)?(?:(?:\\d+|' + Object.keys(NUMW).join('|') + ')\\s+)?' + BIJV + NOUN + '\\b');
+  const RE_BESTAAND = /(?:verbouw|vergrot|uitbreid|uitbreiding|aanbouw|uitbouw|dakkapel|dakopbouw|opbouw|verduurzam|renover|isoler|aanpass|onderhoud|wijzigen van de gevel|bijgebouw|schuur|carport|tuinhuis|garage|overkapping|zwembad|zonnepane|kozijn|warmtepomp|airco|dakterras|balkon|serre|veranda|erfafscheiding|constructie|steiger|interne|tweede bouwlaag)[^.;]{0,50}?\b(?:van|aan|bij|achter|op|in)\s+(?:de|het|een)\s+(?:bestaande\s+)?(?:woning|woonhuis|appartement|woongebouw|flat)/;
+  const RE_ONDERHOUD = /\b(groot onderhoud|onderhoud|verduurzam\w*|renovatie|renoveren|isoleren|isolatie)\b/;
+  const RE_TRANSF = /(?:omzet|wijzig|transform|ombouw|herbestem|verbouw|verander|gebruiken|gebruik van)[^.;]{0,90}?(?:kantoor|winkel|bedrijf|praktijk|school|kerk|maatschappelijk|zorg|horeca|bank|fabriek|loods|kas|agrarisch|commerci|atelier|garage|opslag|berging|pakhuis|hotel)[^.;]{0,70}?\b(?:naar|tot|in|voor)\b[^.;]{0,40}?(?:woning|appartement|wooneenhe|studio|woonruimte|woonfunctie|wonen)/;
+
+  function klasse(titel, abs) {
+    const t = (titel + ' . ' + (abs || '')).toLowerCase().replace(/\s+/g, ' ');
+    const kop = titel.toLowerCase();
+    let stap = 'Overig';
+    if (/weiger/.test(kop)) stap = 'Geweigerd';
+    else if (/ingetrokken|intrekk|buiten behandeling/.test(kop)) stap = 'Ingetrokken';
+    else if (/beslistermijn/.test(kop)) stap = 'In behandeling';
+    else if (/ontwerp/.test(kop)) stap = 'Ontwerpbesluit';
+    else if (/^(aanvraag|ontvangen)|aanvraag (omgevings)?vergunning ontvangen|ingediende aanvraag/.test(kop) && !/beschikking op aanvraag|besluit op aanvraag/.test(kop)) stap = 'Aanvraag';
+    else if (/verlen(ing|d)|verleend|beschikking|besluit|toestemming|vergunning voor|omzettingsvergunning|splitsingsvergunning/.test(kop)) stap = 'Besluit';
+    else if (/aanvraag|ontvangen/.test(kop)) stap = 'Aanvraag';
+    // een wijziging van een al verleende vergunning: niet opnieuw tellen
+    if ((stap === 'Aanvraag' || stap === 'Besluit') && /gewijzigd uitvoeren|wijzig\w* (van )?(de|een|het) (eerder )?verleende|wijziging van (de|een) (verleende )?(omgevings)?vergunning|revisievergunning|herziening van de vergunning/.test(t)) stap = 'Wijziging';
+    if (/onttrekkingsvergunning|tweede woning|vakantieverhuur|bed ?(&|and|en) ?breakfast|recreatiewoning|vakantiewoning|chalet|mantelzorg|tiny house/.test(t)) return { stap, soort: null, n: null };
+    let soort = null;
+    if (/samenvoeg/.test(t) && /woning|appartement|woonruimte/.test(t)) soort = 'Samenvoegen';
+    else if (/splitsingsvergunning/.test(t) || (/split|herindel|opsplits/.test(t) && /woning|appartement|woonruimte|wooneenhe|studio|kamers?\b/.test(t) && !/(kantoor|bedrijfs|winkel)\w* in \d+ (zelfstandige )?(units|ruimtes|kantoren|bedrijfsunits)/.test(t))) soort = 'Splitsen';
+    else if (RE_TRANSF.test(t) || /transformatie[^.;]{0,60}(woning|appartement|wooneenhe|wonen)/.test(t)) soort = 'Transformatie';
+    else if (RE_NIEUW.test(t) || (/\b(nieuwbouw|oprichten|realiseren|bouwen)\b/.test(t) && /\b\d+\s+[a-z -]*?(woningen|appartementen|wooneenheden)|\b(woongebouw|appartementencomplex|appartementengebouw)\b/.test(t))) soort = 'Nieuwbouw';
+    const telt = /\b\d+\s+[a-z -]*?(woningen|appartementen|wooneenheden)\b/.test(t) && /\b(nieuwbouw|oprichten|realiseren|bouwen|nieuwe)\b/.test(t);
+    if (soort === 'Nieuwbouw' && (RE_BESTAAND.test(t) || RE_ONDERHOUD.test(t)) && !telt) soort = null;
+    let n = null;
+    const getal = s => /^\d+$/.test(s) ? +s : NUMW[s];
+    if (soort === 'Splitsen') { const m = t.match(RE_NA); if (m) n = getal(m[1]); }
+    else if (soort !== 'Samenvoegen') {
+      const m = t.match(RE_AANTAL);
+      if (m) n = getal(m[1]);
+      else if (soort === 'Nieuwbouw' && /\b(een|één) (nieuwe |vrijstaande |nieuwbouw ?|grondgebonden )?(woning|woonhuis|tussenwoning|hoekwoning)\b/.test(t)) n = 1;
+    }
+    if (!(n > 0 && n < 5000)) n = null;
+    return { stap, soort, n };
+  }
+
+
+  // ---------- staat ----------
+  let S = null;
+  let view = 'proj', sortKey = null, sortDir = 1, selId = null, filter = 'alle';
+  let map = null, lagen = {}, lagenAan = new Set(['vergund', 'bouw', 'klaar', 'opgeleverd', 'bestaand', 'sloop', 'bek']), objLaag = new Map();
+  const mv = (n, een, meer) => `${fmt(n)} ${n === 1 ? een : meer}`;
+  const fouten = new Set();
+
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Om ${t} kwam er geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#melding').hidden = false;
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = 'Bouwstroom ' + g.n;
+    try { localStorage.setItem('jl-gemeente', g.c); history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
+    S = { g, gebied: null, buurten: [], wijken: new Map(), bjaar: null, panden: new Map(), proj: [], bek: null, bekN: null, bekNaam: null, bagStamp: null, opgehaald: null, klaar: false };
+    selId = null; fouten.clear(); toonMelding();
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'gegevens ophalen…';
+    ['#top4', '#stroom', '#zijstroom', '#chJaar', '#chBek', '#tblWrap', '#dossier', '#mapLegend', '#stroomNoot'].forEach(s => { $(s).innerHTML = ''; });
+    voortgang(0, 4, 'Gemeentegrens en buurten ophalen bij PDOK…');
+    const ok = await laadGebied();
+    if (S.g !== g) return;
+    if (!ok) { fouten.add('gemeentegrens (PDOK)'); toonMelding(); $('#leadSub').textContent = 'de gemeentegrens kon niet worden opgehaald'; voortgang(4, 4, ''); return; }
+    voortgang(1, 4, 'Panden en verblijfsobjecten ophalen uit de BAG…');
+    await Promise.all([laadBAG(), laadBek()]);
+    if (S.g !== g) return;
+    S.opgehaald = new Date(); S.klaar = true;
+    voortgang(4, 4, '');
+    renderAlles();
+  }
+  function renderAlles() { $('#nietWoon').textContent = S.nietWoon ? ` (in ${S.g.n} nu ${nf.format(S.nietWoon)} panden)` : ''; renderKern(); renderStroom(); renderJaar(); renderBekMat(); renderLagen(); renderKaart(); renderDossier(null); renderFilter(); renderTabel(); renderVoet(); }
+
+  // ---------- gebied: gemeente, buurten, wijken (CBS via PDOK) ----------
+  async function laadGebied() {
+    const c = S.g.c;
+    for (let j = JAAR; j >= 2023; j--) {
+      try {
+        const gm = await getJSON(PDOK(j) + `gemeenten/items?f=json&gemeentecode=GM${c}&limit=10`, 1);
+        const land = (gm.features || []).filter(f => f.properties.water !== 'JA');
+        if (!land.length) continue;
+        const [bu, wk] = await Promise.all([
+          alles(PDOK(j) + `buurten/items?f=json&gemeentecode=GM${c}&limit=1000`),
+          alles(PDOK(j) + `wijken/items?f=json&gemeentecode=GM${c}&limit=1000`)
+        ]);
+        if (!bu.features.length) continue;
+        const polys = land.flatMap(f => polysVan(f.geometry));
+        S.gebied = maakGebied({ type: 'MultiPolygon', coordinates: polys }, {});
+        S.buurten = bu.features.filter(f => f.properties.water !== 'JA').map(f => maakGebied(f.geometry, { code: f.properties.buurtcode, naam: f.properties.buurtnaam, wijk: f.properties.wijkcode }));
+        wk.features.forEach(f => S.wijken.set(f.properties.wijkcode, f.properties.wijknaam));
+        S.bjaar = j;
+        return true;
+      } catch (e) { /* volgend jaar proberen */ }
+    }
+    return false;
+  }
+  function buurtVan(xy) {
+    if (!xy) return null;
+    const b = zoekGebied(xy[0], xy[1], S.buurten);
+    return b ? b.props : null;
+  }
+
+  // ---------- BAG ----------
+  const q = s => encodeURIComponent(s);
+  async function laadBAG() {
+    const g = S.g, bb = S.gebied.bb.map(v => v.toFixed(6)).join(',');
+    const url = (coll, flt) => `${BAG}${coll}/items?f=json&limit=1000&bbox=${bb}&filter=${q(flt)}`;
+    let n = 0; const tel = () => { voortgang(2, 4, `BAG: ${fmt(++n)} pagina's ontvangen…`); };
+    try {
+      const [vg, vn, pp, po] = await Promise.all([
+        alles(url('verblijfsobject', "status='Verblijfsobject gevormd'"), tel),
+        alles(url('verblijfsobject', "status='Verblijfsobject in gebruik (niet ingemeten)'"), tel),
+        alles(url('pand', Object.keys(PAND_FASE).map(s => `status='${s}'`).join(' OR ')), tel),
+        alles(url('pand', `status='Pand in gebruik' AND bouwjaar>=${JAAR - 1}`), tel)
+      ]);
+      if (S.g !== g) return;
+      S.bagStamp = vg.stamp || pp.stamp;
+      bouwProjecten(vg.features, vn.features, pp.features, po.features);
+    } catch (e) {
+      if (S.g !== g) return;
+      fouten.add('BAG (PDOK)'); toonMelding();
+    }
+  }
+  const pandId = href => String(href || '').split('/').pop();
+  function adresVan(p) {
+    return [p.openbare_ruimte_naam, [p.huisnummer, p.huisletter || '', p.toevoeging ? '-' + p.toevoeging : ''].join('')].filter(Boolean).join(' ');
+  }
+  function bouwProjecten(vg, vn, pp, po) {
+    const gc = S.g.c;
+    const panden = new Map();
+    const eigenPand = f => { const m = midden(f.geometry); return m && inGeom(m[0], m[1], S.gebied) ? m : null; };
+    pp.forEach(f => {
+      const m = eigenPand(f); if (!m) return;
+      const p = f.properties;
+      panden.set(f.id, { uid: f.id, id: p.identificatie, status: p.status, fase: PAND_FASE[p.status], bouwjaar: p.bouwjaar, doel: p.gebruiksdoel || '', nvbo: p.aantal_verblijfsobjecten || 0, geom: f.geometry, xy: m, vbo: [], hrefs: p['verblijfsobject.href'] || [] });
+    });
+    po.forEach(f => {
+      const p = f.properties; if (!(p.aantal_verblijfsobjecten > 0)) return;
+      const m = eigenPand(f); if (!m) return;
+      panden.set(f.id, { uid: f.id, id: p.identificatie, status: p.status, fase: 'opgeleverd', bouwjaar: p.bouwjaar, doel: p.gebruiksdoel || '', nvbo: p.aantal_verblijfsobjecten, geom: f.geometry, xy: m, vbo: [], hrefs: p['verblijfsobject.href'] || [] });
+    });
+    const losse = new Map(); // nieuwe vbo in panden buiten de pijplijn: bestaand pand
+    const voegToe = (f, klaarStatus) => {
+      const p = f.properties;
+      if (String(p.bronhouder_identificatie || '').padStart(4, '0') !== gc) return;
+      const v = { id: p.identificatie, status: p.status, doel: p.gebruiksdoel || '', woon: /woonfunctie/.test(p.gebruiksdoel || ''), opp: p.oppervlakte, adres: adresVan(p), pc: p.postcode, wp: p.woonplaats_naam, xy: f.geometry && f.geometry.coordinates, klaar: klaarStatus };
+      const pid = pandId((p['pand.href'] || [])[0]);
+      let pd = panden.get(pid);
+      if (!pd) {
+        pd = losse.get(pid);
+        if (!pd) { pd = { uid: pid, id: null, status: null, fase: 'bestaand', bouwjaar: null, doel: '', nvbo: null, geom: null, xy: v.xy, vbo: [], hrefs: [] }; losse.set(pid, pd); }
+      }
+      pd.vbo.push(v);
+    };
+    vg.forEach(f => voegToe(f, false));
+    vn.forEach(f => voegToe(f, true));
+    // vbo 'in gebruik (niet ingemeten)' in een pand buiten de pijplijn: dat pand is klaar
+    losse.forEach(pd => { if (pd.vbo.some(v => v.klaar)) pd.fase = 'klaar'; });
+    const proj = [...panden.values(), ...losse.values()];
+    proj.forEach(pd => {
+      pd.woon = pd.vbo.filter(v => v.woon).length;
+      pd.ander = pd.vbo.length - pd.woon;
+      if (pd.fase === 'opgeleverd' || pd.fase === 'sloop') { pd.woon = /woonfunctie/.test(pd.doel) ? pd.nvbo : 0; pd.ander = pd.nvbo - pd.woon; }
+      else if (!pd.vbo.length && pd.nvbo) { pd.woon = /woonfunctie/.test(pd.doel) ? pd.nvbo : 0; pd.ander = pd.nvbo - pd.woon; pd.zonderVbo = true; }
+      pd.buurt = buurtVan(pd.xy);
+      pd.adres = adresLijst(pd.vbo);
+      pd.sig = (pd.fase === 'vergund' || pd.fase === 'bouw') && pd.bouwjaar && pd.bouwjaar < JAAR ? JAAR - pd.bouwjaar : 0;
+      if (pd.fase === 'bestaand') pd.uid = 'b:' + pd.uid;
+    });
+    proj.sort((a, b) => (b.woon || 0) - (a.woon || 0));
+    // alleen panden met minstens één woning: een kas, schuur of bedrijfshal hoort niet in de woningbouwstroom
+    S.nietWoon = proj.filter(p => !p.woon).length;
+    S.proj = proj.filter(p => p.woon > 0);
+    S.pmap = new Map(S.proj.map(p => [p.uid, p]));
+  }
+  function adresLijst(vbo) {
+    if (!vbo.length) return '';
+    const per = new Map();
+    vbo.forEach(v => { const k = v.adres.replace(/\s+\S+$/, ''); if (!per.has(k)) per.set(k, []); per.get(k).push(v); });
+    const [straat, vs] = [...per.entries()].sort((a, b) => b[1].length - a[1].length)[0];
+    const nrs = vs.map(v => parseInt(v.adres.split(' ').pop(), 10)).filter(x => !isNaN(x)).sort((a, b) => a - b);
+    let s = straat + (nrs.length ? ' ' + (nrs[0] === nrs[nrs.length - 1] ? vs[0].adres.split(' ').pop() : nrs[0] + '–' + nrs[nrs.length - 1]) : '');
+    if (per.size > 1) s += ` e.a.`;
+    if (vbo.length > 3) s += ` (${nf.format(vbo.length)} adressen)`;
+    return s;
+  }
+
+  // ---------- bekendmakingen (KOOP, SRU) ----------
+  const KW = ['woningen', 'woning', 'appartementen', 'wooneenheden', 'woonunits', 'splitsen', 'splitsing', 'transformatie', 'transformeren', 'omzetten', 'woongebouw', 'nieuwbouw', 'samenvoegen'];
+  function sruQuery(naam, van, tot) {
+    return 'c.product-area==officielepublicaties and dt.type=="omgevingsvergunning" and dt.creator=="' + naam.replace(/"/g, '') + '" and dt.modified>=' + van + (tot ? ' and dt.modified<=' + tot : '') +
+      ' and (' + KW.map(w => 'cql.textAndIndexes="' + w + '"').join(' or ') + ')';
+  }
+  const sruUrl = (qq, start, max) => `${SRU}?operation=searchRetrieve&version=2.0&maximumRecords=${max}&startRecord=${start}&query=${encodeURIComponent(qq)}`;
+  function parseSru(t) {
+    const x = new DOMParser().parseFromString(t, 'application/xml');
+    const nEl = x.getElementsByTagNameNS('*', 'numberOfRecords')[0];
+    const recs = [...x.getElementsByTagNameNS('*', 'record')].map(r => {
+      const g = n => { const e = r.getElementsByTagNameNS('*', n)[0]; return e ? e.textContent.trim() : ''; };
+      const xy = [...r.getElementsByTagNameNS('*', 'locatiegebied'), ...r.getElementsByTagNameNS('*', 'geometrie')].map(e => locXY(e.textContent)).find(Boolean) || null;
+      return { id: g('identifier'), titel: g('title'), abs: g('abstract'), datum: g('available') || g('date') || g('modified'), xy };
+    });
+    return { n: nEl ? +nEl.textContent : null, recs };
+  }
+  function locXY(s) {
+    if (!s) return null;
+    s = s.trim();
+    if (/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(s)) { const [a, b] = s.split(',').map(Number); return wgs(a > b ? [b, a] : [a, b]); } // "lat,lon"
+    const nums = (s.match(/-?\d+(\.\d+)?\s+-?\d+(\.\d+)?/g) || []).map(p => p.trim().split(/\s+/).map(Number));
+    if (!nums.length) return null;
+    let sx = 0, sy = 0; nums.forEach(([a, b]) => { sx += a; sy += b; });
+    const x = sx / nums.length, y = sy / nums.length;
+    return wgs(x > y ? [y, x] : [x, y]); // Nederland: lengte < breedte
+  }
+  // alleen coördinaten in Nederland (WGS84); RD-coördinaten vallen af
+  const wgs = p => p && p[0] > 3 && p[0] < 7.6 && p[1] > 50.5 && p[1] < 53.8 ? p : null;
+  async function bekPeriode(naam, van, tot) {
+    const qq = sruQuery(naam, van, tot);
+    const eerste = parseSru(await getText(sruUrl(qq, 1, 1000)));
+    if (eerste.n > 10000 && van !== tot) {
+      const a = new Date(van), b = new Date(tot || iso(NU)); const m = new Date((+a + +b) / 2);
+      const [x, y] = await Promise.all([bekPeriode(naam, van, iso(m)), bekPeriode(naam, iso(new Date(+m + 864e5)), tot || iso(NU))]);
+      return { n: x.n + y.n, recs: x.recs.concat(y.recs) };
+    }
+    const rest = [];
+    for (let s = 1001; s <= Math.min(eerste.n || 0, 10000); s += 1000) rest.push(getText(sruUrl(qq, s, 1000)).then(parseSru));
+    const alle = (await Promise.all(rest)).reduce((a, p) => a.concat(p.recs), eerste.recs);
+    return { n: eerste.n, recs: alle };
+  }
+  async function laadBek() {
+    const g = S.g;
+    const van = iso(new Date(+NU - DAGEN_BEK * 864e5));
+    const namen = [g.n]; const zonderPunt = g.n.replace(/\((\w+)\.\)/, '($1)'); if (zonderPunt !== g.n) namen.push(zonderPunt);
+    try {
+      let res = null, gebruikt = null;
+      for (const nm of namen) { res = await bekPeriode(nm, van, null); gebruikt = nm; if (res.n) break; }
+      if (S.g !== g) return;
+      const gezien = new Set();
+      S.bekN = res.n; S.bekNaam = gebruikt; S.bekVan = van;
+      S.bek = res.recs.filter(r => r.id && !gezien.has(r.id) && gezien.add(r.id)).map(r => {
+        const k = klasse(r.titel, r.abs);
+        return { ...r, ...k, buurt: r.xy ? buurtVan(r.xy) : null, uid: 'k:' + r.id };
+      }).filter(r => r.soort).sort((a, b) => (b.datum || '').localeCompare(a.datum || ''));
+    } catch (e) {
+      if (S.g !== g) return;
+      S.bek = null; fouten.add('bekendmakingen (overheid.nl)'); toonMelding();
+    }
+  }
+
+  // ---------- tellingen ----------
+  const som = (arr, k) => arr.reduce((a, x) => a + (x[k] || 0), 0);
+  function perFase() {
+    const o = {}; FASEN.forEach(f => { o[f.k] = { woon: 0, ander: 0, panden: 0 }; });
+    S.proj.forEach(p => { const t = o[p.fase]; t.woon += p.woon || 0; t.ander += p.ander || 0; t.panden++; });
+    return o;
+  }
+
+  // ---------- kern ----------
+  function renderKern() {
+    const g = S.g;
+    const unit = (titel, val, sub, cls = '') => `<div class="unit ${cls}"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    if (!S.proj.length && fouten.has('BAG (PDOK)')) {
+      $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'de BAG kon niet worden bevraagd';
+      $('#top4').innerHTML = ''; return;
+    }
+    const f = perFase();
+    const pijp = f.vergund.woon + f.bouw.woon + f.klaar.woon;
+    $('#leadBig').textContent = `${g.n}: ${fmt(pijp)} nieuwe woningen onderweg`;
+    $('#leadSub').textContent = `${fmt(f.vergund.woon)} vergund · ${fmt(f.bouw.woon)} in aanbouw · ${fmt(f.klaar.woon)} klaar, nog in te meten · daarnaast ${fmt(f.bestaand.woon)} in bestaande panden`;
+    const sig = S.proj.filter(p => p.sig);
+    const sigW = som(sig, 'woon');
+    const sig2 = sig.filter(p => p.sig >= 2);
+    let h = '';
+    h += unit('Vergund', fmt(f.vergund.woon), `woningen in ${fmt(f.vergund.panden)} panden; de bouw is volgens de BAG nog niet gestart.`);
+    h += unit('In aanbouw', fmt(f.bouw.woon), `woningen in ${fmt(f.bouw.panden)} panden met de status "bouw gestart".`);
+    h += unit(`Opgeleverd ${JAAR - 1}–${JAAR}`, 'ca. ' + fmt(f.opgeleverd.woon), `woningen in ${fmt(f.opgeleverd.panden)} nieuwe panden met bouwjaar ${JAAR - 1} of ${JAAR} die in gebruik zijn.`);
+    h += unit('Verwacht jaar voorbij', fmt(sigW), sig.length ? `woningen in ${fmt(sig.length)} panden staan nog op vergund of in aanbouw, terwijl het verwachte bouwjaar voorbij is. ${sig2.length ? `${fmt(som(sig2, 'woon'))} daarvan twee jaar of langer.` : ''}` : 'geen panden met een verstreken verwacht bouwjaar.', sig.length ? 'sig' : '');
+    $('#top4').innerHTML = h;
+  }
+
+  // ---------- stroom ----------
+  function renderStroom() {
+    const f = perFase();
+    const bek = S.bek || [];
+    const nb = bek.filter(r => r.soort === 'Nieuwbouw' || r.soort === 'Transformatie');
+    const bAanv = nb.filter(r => r.stap === 'Aanvraag'), bBes = nb.filter(r => r.stap === 'Besluit');
+    const card = (k, titel, n, sub, kleur) => `<div class="fase" style="--c:var(${kleur})"><span class="f-t">${titel}</span><span class="f-n">${n}</span><span class="f-s">${sub}</span></div>`;
+    let h = '';
+    h += card('bek', 'Aangevraagd en verleend', S.bek ? fmt(bAanv.length + bBes.length) : '–',
+      S.bek ? `publicaties voor nieuwbouw en transformatie in 12 maanden: ${mv(bAanv.length, 'aanvraag', 'aanvragen')}, ${mv(bBes.length, 'besluit', 'besluiten')}. In de besluiten genoemd: ${mv(som(bBes, 'n'), 'woning', 'woningen')}.` : 'bekendmakingen niet beschikbaar', BEK_KLEUR);
+    ['vergund', 'bouw', 'klaar', 'opgeleverd'].forEach(k => {
+      const x = f[k];
+      h += card(k, FASE[k].t, (k === 'opgeleverd' ? 'ca. ' : '') + fmt(x.woon), `woningen in ${fmt(x.panden)} panden${x.ander ? `, plus ${fmt(x.ander)} andere verblijfsobjecten` : ''}`, FASE[k].c);
+    });
+    $('#stroom').innerHTML = h;
+    const sp = bek.filter(r => r.soort === 'Splitsen'), sv = bek.filter(r => r.soort === 'Samenvoegen');
+    $('#zijstroom').innerHTML = `<span><i style="background:var(${FASE.bestaand.c})"></i>In bestaande panden: <b>${fmt(f.bestaand.woon)}</b> nieuwe woningen in ${fmt(f.bestaand.panden)} panden (splitsing, transformatie)</span>` +
+      `<span><i style="background:var(${FASE.sloop.c})"></i>Sloopvergunning: <b>${fmt(f.sloop.panden)}</b> panden met ${fmt(f.sloop.woon)} woningen</span>` +
+      (S.bek ? `<span><i style="background:var(${BEK_KLEUR})"></i>Bekendmakingen splitsen: <b>${fmt(sp.length)}</b> · samenvoegen: <b>${fmt(sv.length)}</b></span>` : '');
+    $('#stroomNoot').textContent = 'Woningen tellen per fase één keer. De bekendmakingen zijn publicaties, geen woningen: één project kan meerdere publicaties hebben.';
+  }
+
+  // ---------- grafiek: verwacht bouwjaar ----------
+  function renderJaar() {
+    const el = $('#chJaar');
+    const rs = S.proj.filter(p => (p.fase === 'vergund' || p.fase === 'bouw') && p.woon);
+    if (!rs.length) { el.innerHTML = '<h3>Wanneer verwacht?</h3><p class="small muted" style="margin:0">Geen vergunde of in aanbouw zijnde woningen in de BAG.</p>'; return; }
+    const bins = []; for (let j = JAAR - 3; j <= JAAR + 3; j++) bins.push(j);
+    const key = j => j == null ? null : Math.min(JAAR + 3, Math.max(JAAR - 3, j));
+    const lab = j => j === JAAR - 3 ? `≤${j}` : j === JAAR + 3 ? `≥${j}` : String(j);
+    const d = bins.map(j => ({ j, vergund: 0, bouw: 0, pv: 0, pb: 0 }));
+    let onb = 0;
+    rs.forEach(p => { const k = key(p.bouwjaar); if (k == null) { onb += p.woon; return; } const r = d.find(x => x.j === k); r[p.fase] += p.woon; r[p.fase === 'vergund' ? 'pv' : 'pb']++; });
+    const W = 560, H = 230, L = 46, R = 10, Tp = 18, B = 26;
+    const hi = Math.max(1, ...d.map(r => r.vergund + r.bouw)) * 1.12;
+    const bw = (W - L - R) / d.length, gap = Math.min(14, bw * .28);
+    const y = v => Tp + (H - Tp - B) * (1 - v / hi);
+    const nice = v => { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * e; };
+    const stap = nice(hi / 4);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Woningen vergund en in aanbouw naar verwacht bouwjaar">`;
+    const xVoorbij = L + 3 * bw;
+    s += `<rect x="${L}" y="${Tp - 14}" width="${xVoorbij - L}" height="${H - B - Tp + 14}" fill="${css('--warn')}" opacity=".07"/>`;
+    s += `<text class="lbl" x="${L + 4}" y="${Tp - 4}" style="fill:var(--warn)">verwacht jaar voorbij</text>`;
+    for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${fmt(t)}</text>`;
+    d.forEach((r, i) => {
+      const x = L + i * bw + gap / 2, w = bw - gap;
+      let yy = y(0);
+      [['bouw', FASE.bouw.c], ['vergund', FASE.vergund.c]].forEach(([k, c]) => { const h = (H - Tp - B) * r[k] / hi; if (h > 0) { yy -= h; s += `<rect x="${x}" y="${yy}" width="${w}" height="${h}" fill="${css(c)}"/>`; } });
+      const tot = r.vergund + r.bouw;
+      if (tot) s += `<text class="dl" x="${x + w / 2}" y="${yy - 4}" text-anchor="middle">${fmt(tot)}</text>`;
+      s += `<text class="lbl" x="${x + w / 2}" y="${H - 8}" text-anchor="middle" ${r.j === JAAR ? 'style="font-weight:600;fill:var(--fg)"' : ''}>${lab(r.j)}</text>`;
+      s += `<rect class="hb" data-i="${i}" x="${L + i * bw}" y="0" width="${bw}" height="${H - B}" fill="transparent"/>`;
+    });
+    s += `<line class="ax0" x1="${L}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}"/></svg>`;
+    el.innerHTML = `<h3>Wanneer verwacht?</h3><span class="noemer">woningen die vergund of in aanbouw zijn, naar het bouwjaar dat de gemeente in de BAG verwacht</span>${s}
+      <div class="legend"><span><i class="sw" style="background:var(${FASE.vergund.c})"></i>Vergund</span><span><i class="sw" style="background:var(${FASE.bouw.c})"></i>In aanbouw</span></div>
+      <p class="noot muted">Links van ${JAAR}: het verwachte jaar is voorbij, maar volgens de BAG is het pand nog niet klaar.${onb ? ` ${fmt(onb)} woningen zonder verwacht bouwjaar.` : ''}</p>`;
+    el.querySelectorAll('.hb').forEach(hb => {
+      const r = d[+hb.dataset.i];
+      const html = `<b>Verwacht bouwjaar ${lab(r.j)}</b><br><i class="sw" style="background:var(${FASE.vergund.c})"></i>Vergund: <span class="num">${fmt(r.vergund)}</span> woningen in ${fmt(r.pv)} panden<br><i class="sw" style="background:var(${FASE.bouw.c})"></i>In aanbouw: <span class="num">${fmt(r.bouw)}</span> woningen in ${fmt(r.pb)} panden`;
+      hb.addEventListener('pointermove', e => toonTip(e, html)); hb.addEventListener('pointerdown', e => toonTip(e, html)); hb.addEventListener('pointerleave', verbergTip);
+    });
+  }
+
+  // ---------- bekendmakingen: soort × stap ----------
+  function renderBekMat() {
+    const el = $('#chBek');
+    if (!S.bek) { el.innerHTML = '<h3>Bekendmakingen</h3><p class="small muted" style="margin:0">De bekendmakingen konden niet worden opgehaald.</p>'; return; }
+    const st = STAPPEN.filter(s => S.bek.some(r => r.stap === s));
+    const cel = (so, s) => { const rs = S.bek.filter(r => r.soort === so && r.stap === s); const n = som(rs, 'n'); return rs.length ? `<b>${fmt(rs.length)}</b>${n ? `<br><span class="muted">${fmt(n)} won.</span>` : ''}` : '<span class="muted">–</span>'; };
+    el.innerHTML = `<h3>Bekendmakingen over woningen</h3><span class="noemer">omgevingsvergunningen in het gemeenteblad sinds ${dmy(S.bekVan)} · aantal publicaties, met het aantal woningen dat erin genoemd wordt</span>
+      <div class="scroll" style="max-height:none"><table class="mat"><thead><tr><th>Soort</th>${st.map(s => `<th class="r">${esc(s)}</th>`).join('')}</tr></thead><tbody>
+      ${SOORTEN.map(so => `<tr><td>${so}</td>${st.map(s => `<td class="r">${cel(so, s)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+      <p class="noot muted">${fmt(S.bek.length)} van de ${fmt(S.bekN)} gevonden publicaties gaan over woningen erbij of eraf; de rest is vooral verbouw. "In behandeling" = de beslistermijn is verlengd; "Wijziging" = een eerder verleende vergunning wordt gewijzigd. Klik op het tabblad Bekendmakingen onder de kaart voor de lijst.</p>`;
+  }
+
+  // ---------- kaart ----------
+  function renderLagen() {
+    const tel = {}; FASEN.forEach(f => { tel[f.k] = S.proj.filter(p => p.fase === f.k).length; });
+    tel.bek = S.bek ? S.bek.filter(r => r.xy).length : 0;
+    const items = FASEN.map(f => ({ k: f.k, t: f.t, c: f.c, n: tel[f.k] })).concat([{ k: 'bek', t: 'Bekendmakingen', c: BEK_KLEUR, n: tel.bek, rond: 1 }]);
+    $('#lagen').innerHTML = '<span class="muted small">Kaart toont</span>' + items.map(i => `<label class="laag" ${lagenAan.has(i.k) ? '' : 'data-uit'}><input type="checkbox" data-k="${i.k}" ${lagenAan.has(i.k) ? 'checked' : ''}><i class="${i.rond ? 'rond' : ''}" style="background:var(${i.c})"></i>${esc(i.t)} <span class="muted">${fmt(i.n)}</span></label>`).join('');
+    $('#lagen').querySelectorAll('input').forEach(cb => cb.addEventListener('change', () => {
+      if (cb.checked) lagenAan.add(cb.dataset.k); else lagenAan.delete(cb.dataset.k);
+      cb.closest('.laag').toggleAttribute('data-uit', !cb.checked);
+      zetLagen();
+    }));
+  }
+  let puntVlak = [];
+  // ingezoomd (vanaf 16) panden als vlak, daarbuiten als rondje naar aantal woningen
+  function pasZoom() {
+    const vlak = map.getZoom() >= 16;
+    puntVlak.forEach(({ g, pt, vl }) => { const weg = vlak ? pt : vl, erbij = vlak ? vl : pt; if (g.hasLayer(weg)) g.removeLayer(weg); if (!g.hasLayer(erbij)) g.addLayer(erbij); });
+  }
+  function zetLagen() { if (!map) return; Object.entries(lagen).forEach(([k, l]) => { if (lagenAan.has(k)) l.addTo(map); else l.remove(); }); }
+  function stijl(p, sel) {
+    const c = css(FASE[p.fase].c);
+    return { color: sel ? css('--fg') : p.sig ? css('--warn') : c, weight: sel ? 3 : p.sig ? 2.5 : 1, fillColor: c, fillOpacity: .8, dashArray: p.sig ? '4 3' : null };
+  }
+  function renderKaart() {
+    if (typeof L === 'undefined') { $('#map').innerHTML = '<p class="small muted" style="padding:12px">De kaartbibliotheek kon niet laden. De tabellen werken wel.</p>'; return; }
+    if (!map) {
+      map = L.map('map', { scrollWheelZoom: false, preferCanvas: true });
+      L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT · BAG: Kadaster · Buurten: CBS' }).addTo(map);
+      map.on('focus', () => map.scrollWheelZoom.enable());
+      map.setView([52.1, 5.3], 7);
+    }
+    Object.values(lagen).forEach(l => l.remove()); lagen = {}; objLaag = new Map();
+    const lijn = css('--surface') || '#fff';
+    // gemeentegrens
+    if (S.gebied) {
+      lagen.grens = L.geoJSON({ type: 'MultiPolygon', coordinates: S.gebied.polys }, { style: { color: css('--muted'), weight: 1.5, fill: false, dashArray: '6 4' }, interactive: false });
+      lagenAan.add('grens');
+    }
+    FASEN.forEach(f => { lagen[f.k] = L.featureGroup(); });
+    puntVlak = [];
+    // volgorde: bestaand en opgeleverd onderop, de pijplijn erboven
+    const volg = { bestaand: 0, sloop: 1, opgeleverd: 2, vergund: 3, bouw: 4, klaar: 5 };
+    S.proj.slice().sort((a, b) => volg[a.fase] - volg[b.fase] || (b.woon || 0) - (a.woon || 0)).forEach(p => {
+      const tipTxt = `<b>${esc(p.adres || (p.buurt ? p.buurt.naam : 'Pand'))}</b><br>${esc(FASE[p.fase].t)}${p.bouwjaar ? ` · bouwjaar ${p.bouwjaar}` : ''}<br>${fmt(p.woon)} woningen${p.ander ? ` · ${fmt(p.ander)} anders` : ''}${p.sig ? `<br><span style="color:var(--warn)">verwacht jaar voorbij</span>` : ''}`;
+      const klein = p.fase === 'bestaand' || p.fase === 'sloop';
+      const pt = p.xy ? L.circleMarker([p.xy[1], p.xy[0]], { radius: klein ? 3 + Math.min(5, Math.sqrt(p.woon || 1) * .6) : 4 + Math.min(12, Math.sqrt(p.woon || 1) * .9),
+        color: p.sig ? css('--warn') : lijn, weight: p.sig ? 2.5 : 1, fillColor: css(FASE[p.fase].c), fillOpacity: .9 }) : null;
+      const vl = p.geom ? L.geoJSON(p.geom, { style: () => stijl(p, p.uid === selId) }) : null;
+      [pt, vl].filter(Boolean).forEach(ly => { ly.bindTooltip(tipTxt, { sticky: true }); ly.on('click', () => kiesObj(p.uid, false)); });
+      if (vl && pt) puntVlak.push({ g: lagen[p.fase], pt, vl });
+      (pt || vl).addTo(lagen[p.fase]);
+      objLaag.set(p.uid, vl || pt);
+    });
+    if (!map._bsZoom) { map.on('zoomend', pasZoom); map._bsZoom = true; }
+    pasZoom();
+    lagen.bek = L.featureGroup();
+    (S.bek || []).forEach(r => {
+      if (!r.xy) return;
+      const ly = L.circleMarker([r.xy[1], r.xy[0]], { radius: 5 + Math.min(6, Math.sqrt(r.n || 1)), color: css(BEK_KLEUR), weight: 2, fillColor: lijn, fillOpacity: .9 });
+      ly.bindTooltip(`<b>${esc(r.soort)} · ${esc(r.stap)}</b> · ${dmy(r.datum)}${r.n ? `<br>${fmt(r.n)} woningen genoemd` : ''}<br>${esc((r.abs || r.titel).slice(0, 140))}`, { sticky: true });
+      ly.on('click', () => kiesObj(r.uid, false));
+      ly.addTo(lagen.bek); objLaag.set(r.uid, ly);
+    });
+    zetLagen();
+    $('#mapLegend').innerHTML = `<span>Rondje = pand, groter naarmate er meer woningen in zitten; ingezoomd zie je het pand zelf. Open rondje = bekendmaking.</span><span><i style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2.5px solid var(--warn);vertical-align:-1px;margin-right:4px"></i>verwacht jaar voorbij</span>`;
+    setTimeout(() => {
+      map.invalidateSize();
+      if (lagen.grens) map.fitBounds(lagen.grens.getBounds(), { padding: [12, 12] });
+    }, 60);
+  }
+
+  // ---------- dossier ----------
+  async function vulAdres(p) {
+    if (p.adres || !p.hrefs || !p.hrefs.length || p.adresBezig) return;
+    p.adresBezig = true;
+    try {
+      const vs = await Promise.all(p.hrefs.slice(0, 6).map(h => getJSON(h + (h.includes('?') ? '&' : '?') + 'f=json', 1).catch(() => null)));
+      const lijst = vs.filter(Boolean).map(f => ({ adres: adresVan(f.properties), doel: f.properties.gebruiksdoel, status: f.properties.status, pc: f.properties.postcode, wp: f.properties.woonplaats_naam }));
+      p.adres = adresLijst(lijst) + (p.hrefs.length > 6 ? ' e.a.' : '');
+      p.vboExtra = lijst;
+    } catch (e) { /* zonder adres verder */ }
+    if (selId === p.uid) renderDossier(p);
+  }
+  const bagLink = id => `https://bagviewer.kadaster.nl/lvbag/bag-viewer/?objectId=${id}`;
+  const bekLink = id => `https://zoek.officielebekendmakingen.nl/${encodeURIComponent(id)}.html`;
+  function afstand(a, b) { const dx = (a[0] - b[0]) * 68500, dy = (a[1] - b[1]) * 111300; return Math.sqrt(dx * dx + dy * dy); }
+  function renderDossier(o) {
+    const el = $('#dossier');
+    if (!o) {
+      const f = perFase();
+      el.innerHTML = `<span class="eyebrow">Hele gemeente</span><h2>${esc(S.g.n)}</h2>
+        <dl>${FASEN.map(x => `<dt>${esc(x.t)}</dt><dd>${(x.k === 'opgeleverd' ? 'ca. ' : '') + fmt(f[x.k].woon)} woningen · ${fmt(f[x.k].panden)} panden</dd>`).join('')}
+        ${S.bek ? `<dt>Bekendmakingen</dt><dd>${fmt(S.bek.length)} in 12 maanden</dd>` : ''}</dl>
+        <p class="small muted" style="margin:0">Klik een pand of een rondje op de kaart, of een regel in de tabel.</p>`;
+      return;
+    }
+    if (o.uid.startsWith('k:')) {
+      const r = o;
+      const dicht = r.xy ? S.proj.filter(p => p.xy && afstand(p.xy, r.xy) < 75).sort((a, b) => afstand(a.xy, r.xy) - afstand(b.xy, r.xy)).slice(0, 5) : [];
+      el.innerHTML = `<span class="eyebrow">Bekendmaking · ${esc(r.soort)}</span><h2>${esc(r.stap)}</h2>
+        <dl><dt>Datum</dt><dd>${dmy(r.datum)}</dd>${r.n ? `<dt>Genoemd</dt><dd>${fmt(r.n)} woningen${r.soort === 'Splitsen' ? ' na splitsing' : ''}</dd>` : ''}<dt>Buurt</dt><dd>${r.buurt ? esc(r.buurt.naam) : '–'}</dd></dl>
+        <p class="small" style="margin:0">${esc(r.titel)}${r.abs && !r.titel.includes(r.abs.slice(0, 30)) ? `<br><span class="muted">${esc(r.abs)}</span>` : ''}</p>
+        <a href="${bekLink(r.id)}" target="_blank" rel="noopener">Lees de publicatie (${esc(r.id)})</a>
+        ${dicht.length ? `<span class="eyebrow">In de BAG binnen 75 m</span><ul>${dicht.map(p => `<li><a href="#" data-uid="${esc(p.uid)}">${esc(p.adres || 'pand ' + (p.id || ''))}</a>: ${esc(FASE[p.fase].t.toLowerCase())}, ${fmt(p.woon)} woningen</li>`).join('')}</ul>` : ''}
+        <button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>`;
+    } else {
+      const p = o;
+      vulAdres(p);
+      const bek = (S.bek || []).filter(r => r.xy && p.xy && afstand(r.xy, p.xy) < 75).slice(0, 6);
+      const vbo = (p.vbo.length ? p.vbo : p.vboExtra || []);
+      const doelen = {}; vbo.forEach(v => { (v.doel || 'onbekend').split(',').forEach(d => { doelen[d] = (doelen[d] || 0) + 1; }); });
+      el.innerHTML = `<span class="eyebrow">${esc(FASE[p.fase].t)}${p.buurt ? ' · ' + esc(p.buurt.naam) : ''}</span><h2>${esc(p.adres || (p.adresBezig ? 'Adres ophalen…' : 'Pand ' + (p.id || '')))}</h2>
+        ${p.sig ? `<div class="sigtxt">Verwacht bouwjaar ${p.bouwjaar} is voorbij; de BAG-status is nog "${esc(p.status)}". Vertraagd project, of een start of oplevering die nog niet in de BAG staat.</div>` : ''}
+        <dl>
+          <dt>Status</dt><dd>${esc(p.status || 'Pand in gebruik of verbouwing')}</dd>
+          ${p.bouwjaar ? `<dt>${p.fase === 'vergund' || p.fase === 'bouw' ? 'Verwacht bouwjaar' : 'Bouwjaar'}</dt><dd>${p.bouwjaar}</dd>` : ''}
+          <dt>Woningen</dt><dd>${fmt(p.woon)}${p.fase === 'bestaand' ? ' nieuw' : ''}</dd>
+          ${p.ander ? `<dt>Andere functies</dt><dd>${fmt(p.ander)}</dd>` : ''}
+          ${Object.keys(doelen).length ? `<dt>Gebruiksdoel</dt><dd>${Object.entries(doelen).map(([d, n]) => `${esc(d)} ${n}`).join(' · ')}</dd>` : ''}
+          ${p.buurt ? `<dt>Wijk</dt><dd>${esc(S.wijken.get(p.buurt.wijk) || '–')}</dd>` : ''}
+        </dl>
+        ${p.id ? `<a href="${bagLink(p.id)}" target="_blank" rel="noopener">Pand ${esc(p.id)} in de BAG-viewer</a>` : (vbo[0] && vbo[0].id ? `<a href="${bagLink(vbo[0].id)}" target="_blank" rel="noopener">Verblijfsobject in de BAG-viewer</a>` : '')}
+        ${p.zonderVbo ? '<p class="small muted" style="margin:0">Dit pand heeft (nog) geen nieuwe verblijfsobjecten in de BAG; het aantal komt van het pand zelf.</p>' : ''}
+        ${bek.length ? `<span class="eyebrow">Bekendmakingen binnen 75 m</span><ul>${bek.map(r => `<li><a href="#" data-uid="${esc(r.uid)}">${dmy(r.datum)}</a> · ${esc(r.soort.toLowerCase())}, ${esc(r.stap.toLowerCase())}${r.n ? `, ${fmt(r.n)} woningen` : ''}</li>`).join('')}</ul>` : ''}
+        <button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>`;
+    }
+    el.querySelectorAll('a[data-uid]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); kiesObj(a.dataset.uid, true); }));
+    const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesObj(null));
+  }
+  function vindObj(uid) { return uid ? (uid.startsWith('k:') ? (S.bek || []).find(r => r.uid === uid) : S.pmap.get(uid)) : null; }
+  function kiesObj(uid, zoom) {
+    const vorig = selId; selId = uid;
+    const o = vindObj(uid);
+    renderDossier(o);
+    [vorig, uid].forEach(u => { const p = u && !u.startsWith('k:') ? S.pmap.get(u) : null; const ly = u && objLaag.get(u); if (p && p.geom && ly && ly.setStyle) ly.setStyle(stijl(p, u === selId)); });
+    if (o && zoom && map) {
+      const ly = objLaag.get(uid);
+      if (ly) { const lagK = uid.startsWith('k:') ? 'bek' : o.fase; if (!lagenAan.has(lagK)) { lagenAan.add(lagK); renderLagen(); zetLagen(); } map.setView(ly.getBounds ? ly.getBounds().getCenter() : ly.getLatLng(), 17); }
+    }
+    document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', !!uid && tr.dataset.uid === uid));
+  }
+
+  // ---------- tabellen ----------
+  function renderFilter() {
+    const opts = view === 'proj' ? [['alle', 'Alle fasen'], ['sig', 'Alleen: verwacht jaar voorbij']].concat(FASEN.map(f => [f.k, f.t]))
+      : view === 'bek' ? [['alle', 'Alle soorten']].concat(SOORTEN.map(s => [s, s])).concat(STAPPEN.map(s => ['stap:' + s, 'Stap: ' + s]))
+      : [['alle', 'Alle buurten'], ['sig', 'Met signaal']];
+    if (!opts.some(o => o[0] === filter)) filter = 'alle';
+    $('#faseFilter').innerHTML = opts.map(([k, t]) => `<option value="${esc(k)}" ${k === filter ? 'selected' : ''}>${esc(t)}</option>`).join('');
+  }
+  $('#faseFilter').addEventListener('change', e => { filter = e.target.value; renderTabel(); });
+  document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
+    view = b.dataset.view; sortKey = null; filter = 'alle';
+    document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x.dataset.view === view));
+    renderFilter(); renderTabel();
+  }));
+  $('#search').addEventListener('input', () => renderTabel());
+  const chip = (k, extra = '') => `<span class="chip"><i class="d" style="background:var(${FASE[k].c})"></i>${esc(FASE[k].t)}${extra}</span>`;
+  function rijenProj() {
+    return S.proj.map(p => ({ uid: p.uid, adres: p.adres || '', buurt: p.buurt ? p.buurt.naam : '', wijk: p.buurt ? (S.wijken.get(p.buurt.wijk) || '') : '', fase: p.fase, faseT: FASE[p.fase].t, woon: p.woon, ander: p.ander, bouwjaar: p.bouwjaar, sig: p.sig, status: p.status || '', pand: p.id || '' }));
+  }
+  function rijenBuurt() {
+    const m = new Map();
+    const get = b => { const k = b ? b.code : '–'; if (!m.has(k)) m.set(k, { uid: k, buurt: b ? b.naam : '(buiten de buurten)', wijk: b ? (S.wijken.get(b.wijk) || '') : '', vergund: 0, bouw: 0, klaar: 0, opgeleverd: 0, bestaand: 0, sloop: 0, sigW: 0, bek: 0, bekN: 0 }); return m.get(k); };
+    S.buurten.forEach(b => get(b.props));
+    S.proj.forEach(p => { const r = get(p.buurt); r[p.fase] += p.woon || 0; if (p.sig) r.sigW += p.woon || 0; });
+    (S.bek || []).forEach(x => { const r = get(x.buurt); r.bek++; if ((x.soort === 'Nieuwbouw' || x.soort === 'Transformatie') && x.stap === 'Besluit') r.bekN += x.n || 0; });
+    return [...m.values()].filter(r => r.vergund + r.bouw + r.klaar + r.opgeleverd + r.bestaand + r.sloop + r.bek > 0 || r.uid !== '–');
+  }
+  function rijenBek() { return (S.bek || []).map(r => ({ uid: r.uid, datum: r.datum, soort: r.soort, stap: r.stap, n: r.n, tekst: (r.abs && r.abs.length > 20 ? r.abs : r.titel), titel: r.titel, buurt: r.buurt ? r.buurt.naam : '', id: r.id })); }
+  const COLS = {
+    proj: [{ k: 'adres', t: 'Adres', f: r => r.adres ? esc(r.adres) : `<span class="muted">pand ${esc(r.pand.slice(-6))} · klik voor adres</span>` }, { k: 'buurt', t: 'Buurt' }, { k: 'faseT', t: 'Fase', f: r => chip(r.fase) + (r.sig ? ` <span class="chip sig">verwacht ${r.bouwjaar}</span>` : '') },
+      { k: 'woon', t: 'Woningen', r: 1 }, { k: 'ander', t: 'Anders', r: 1 }, { k: 'bouwjaar', t: 'Bouwjaar', r: 1, f: r => r.bouwjaar || '–' }],
+    buurt: [{ k: 'buurt', t: 'Buurt' }, { k: 'wijk', t: 'Wijk' }, { k: 'vergund', t: 'Vergund', r: 1 }, { k: 'bouw', t: 'In aanbouw', r: 1 }, { k: 'klaar', t: 'Klaar', r: 1 },
+      { k: 'opgeleverd', t: 'Opgeleverd (ca.)', r: 1 }, { k: 'bestaand', t: 'Bestaand pand', r: 1 }, { k: 'sloop', t: 'Sloop', r: 1 }, { k: 'sigW', t: 'Verwacht jaar voorbij', r: 1 },
+      { k: 'bek', t: 'Bekendmakingen', r: 1 }, { k: 'bekN', t: 'Woningen in besluiten', r: 1 }],
+    bek: [{ k: 'datum', t: 'Datum', f: r => `<span class="mono">${esc(r.datum)}</span>` }, { k: 'soort', t: 'Soort' }, { k: 'stap', t: 'Stap' }, { k: 'n', t: 'Woningen', r: 1 },
+      { k: 'tekst', t: 'Omschrijving', f: r => `${esc(r.tekst.slice(0, 180))}${r.tekst.length > 180 ? '…' : ''} <a href="${bekLink(r.id)}" target="_blank" rel="noopener" title="Open de publicatie">↗</a>` }, { k: 'buurt', t: 'Buurt' }]
+  };
+  function gefilterd() {
+    const zoek = $('#search').value.trim().toLowerCase();
+    let rs = view === 'proj' ? rijenProj() : view === 'buurt' ? rijenBuurt() : rijenBek();
+    if (view === 'proj' && filter !== 'alle') rs = rs.filter(r => filter === 'sig' ? r.sig : r.fase === filter);
+    if (view === 'buurt' && filter === 'sig') rs = rs.filter(r => r.sigW > 0);
+    if (view === 'bek' && filter !== 'alle') rs = rs.filter(r => filter.startsWith('stap:') ? r.stap === filter.slice(5) : r.soort === filter);
+    if (zoek) rs = rs.filter(r => Object.values(r).join(' ').toLowerCase().includes(zoek));
+    if (sortKey) rs.sort((a, b) => { const x = a[sortKey], y = b[sortKey]; if (x == null || x === '') return 1; if (y == null || y === '') return -1; return (typeof x === 'string' ? x.localeCompare(y, 'nl') : x - y) * sortDir; });
+    else if (view === 'buurt') rs.sort((a, b) => (b.vergund + b.bouw + b.klaar) - (a.vergund + a.bouw + a.klaar));
+    return rs;
+  }
+  function renderTabel() {
+    if (!S || !S.klaar) return;
+    const cols = COLS[view];
+    const rs = gefilterd();
+    const MAX = 1500;
+    const toon = rs.slice(0, MAX);
+    $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.t}</th>`).join('')}</tr></thead>
+      <tbody>${toon.map(r => `<tr class="klik ${r.uid === selId ? 'sel' : ''}" data-uid="${esc(r.uid)}">${cols.map(c => `<td class="${c.r ? 'r' : ''}">${c.f ? c.f(r) : c.r ? fmt(r[c.k]) : esc(r[c.k])}</td>`).join('')}</tr>`).join('')}</tbody></table>
+      ${rs.length > MAX ? `<p class="small muted" style="padding:0 12px">De eerste ${fmt(MAX)} van ${fmt(rs.length)} regels; de CSV bevat alles.</p>` : ''}`;
+    $('#rowCount').textContent = `${fmt(rs.length)} ${view === 'proj' ? 'panden' : view === 'buurt' ? 'buurten' : 'bekendmakingen'}`;
+    $('#tblWrap').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
+      const k = th.dataset.k;
+      if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = ['adres', 'buurt', 'wijk', 'faseT', 'soort', 'stap', 'tekst'].includes(k) ? 1 : -1; }
+      renderTabel();
+    }));
+    $('#tblWrap').querySelectorAll('tbody tr.klik').forEach(tr => tr.addEventListener('click', e => {
+      if (e.target.closest('a')) return;
+      if (view === 'buurt') { const b = S.buurten.find(x => x.props.code === tr.dataset.uid); if (b && map) map.fitBounds(L.geoJSON({ type: 'MultiPolygon', coordinates: b.polys }).getBounds(), { padding: [20, 20] }); return; }
+      kiesObj(tr.dataset.uid, true);
+      $('#map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }));
+  }
+
+  // ---------- CSV ----------
+  function csvDownload(naam, kop, rows) {
+    const qq = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(qq).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S || !S.klaar) return;
+    const slug = S.g.n.replace(/[^\w-]+/g, '_').toLowerCase(), d = iso(new Date());
+    if (view === 'proj') {
+      csvDownload(`bouwstroom_panden_${slug}_${d}.csv`, ['gemeentecode', 'gemeente', 'pand_id', 'adres', 'buurtcode', 'buurt', 'wijk', 'fase', 'bag_status', 'bouwjaar', 'woningen', 'andere_verblijfsobjecten', 'verwacht_jaar_voorbij_jaren', 'lon', 'lat'],
+        S.proj.map(p => ['GM' + S.g.c, S.g.n, p.id || '', p.adres, p.buurt ? p.buurt.code : '', p.buurt ? p.buurt.naam : '', p.buurt ? S.wijken.get(p.buurt.wijk) || '' : '', FASE[p.fase].t, p.status || '', p.bouwjaar || '', p.woon, p.ander, p.sig || '', p.xy ? p.xy[0].toFixed(6) : '', p.xy ? p.xy[1].toFixed(6) : '']));
+    } else if (view === 'buurt') {
+      csvDownload(`bouwstroom_buurten_${slug}_${d}.csv`, ['buurtcode', 'buurt', 'wijk', 'vergund', 'in_aanbouw', 'klaar_niet_ingemeten', 'opgeleverd_ca', 'nieuw_in_bestaand_pand', 'sloop', 'verwacht_jaar_voorbij', 'bekendmakingen', 'woningen_in_besluiten'],
+        rijenBuurt().map(r => [r.uid, r.buurt, r.wijk, r.vergund, r.bouw, r.klaar, r.opgeleverd, r.bestaand, r.sloop, r.sigW, r.bek, r.bekN]));
+    } else {
+      csvDownload(`bouwstroom_bekendmakingen_${slug}_${d}.csv`, ['datum', 'soort', 'stap', 'woningen_genoemd', 'titel', 'omschrijving', 'buurtcode', 'buurt', 'publicatie', 'link', 'lon', 'lat'],
+        (S.bek || []).map(r => [r.datum, r.soort, r.stap, r.n || '', r.titel, r.abs, r.buurt ? r.buurt.code : '', r.buurt ? r.buurt.naam : '', r.id, bekLink(r.id), r.xy ? r.xy[0].toFixed(6) : '', r.xy ? r.xy[1].toFixed(6) : '']));
+    }
+  });
+
+  // ---------- voet ----------
+  function renderVoet() {
+    const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+    const bs = S.bagStamp ? new Date(S.bagStamp).toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
+    $('#foot').innerHTML = `Bronnen: <a href="https://www.kadaster.nl/zakelijk/registraties/basisregistraties/bag">Basisregistratie Adressen en Gebouwen</a> (Kadaster, CC0), panden en verblijfsobjecten via de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API van PDOK</a>, dagelijks bijgewerkt${bs ? `; antwoord van ${bs}` : ''}. Bekendmakingen: <a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a> (KOOP, CC0), gemeenteblad, omgevingsvergunningen sinds ${S.bekVan ? dmy(S.bekVan) : '–'}${S.bekNaam ? ` (uitgever "${esc(S.bekNaam)}")` : ''}, via de SRU-dienst van overheid.nl. Buurten en wijken: CBS Wijk- en buurtkaart ${S.bjaar || ''} via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${S.bjaar}/ogc/v1">PDOK</a> (CC-BY 4.0). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Bouwstroom · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', () => { if (S) kies(S.g); });
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+</body>
+</html>

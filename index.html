@@ -189,10 +189,10 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h1 id="h-hero">Open data, laag voor laag, tot een antwoord dat een gemeente kan gebruiken.</h1>
       <p class="lead">Gemeentelijke vraagstukken lopen dwars door domeinen heen. Het antwoord ligt vaak al in openbare registraties, verspreid over bronnen die niemand naast elkaar legt. Daar begint het werk.</p>
     </div>
-    <svg class="strata" viewBox="0 0 490 413" role="img" aria-labelledby="strata-t strata-d">
+    <svg class="strata" viewBox="0 0 490 430" role="img" aria-labelledby="strata-t strata-d">
       <title id="strata-t">Werkwijze in vier lagen</title>
-      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS), Wmo (CBS), bevolking (CBS) en wonen (CBS). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
-      <line x1="360" y1="82" x2="360" y2="341" stroke="var(--muted)" stroke-dasharray="3 4"/>
+      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS), Wmo (CBS), bevolking (CBS), wonen (CBS) en vergunningen (KOOP). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
+      <line x1="360" y1="82" x2="360" y2="358" stroke="var(--muted)" stroke-dasharray="3 4"/>
       <g class="layer l1">
         <polygon points="240,50 360,82 480,50 360,18" fill="var(--layer-1)"/>
         <text x="4" y="47" class="t-strong">1 · skelet</text>
@@ -201,25 +201,26 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <g class="layer l2">
         <polygon points="240,135 360,167 480,135 360,103" fill="var(--layer-2)"/>
         <text x="4" y="105" class="t-strong">2 · open domeindata</text>
-        <text x="4" y="122">energie</text><text x="96" y="122" class="t-src">RIVM</text>
-        <text x="4" y="139">erfgoed</text><text x="96" y="139" class="t-src">RCE</text>
-        <text x="4" y="156">onderwijs</text><text x="96" y="156" class="t-src">DUO</text>
-        <text x="4" y="173">financiën</text><text x="96" y="173" class="t-src">Iv3</text>
-        <text x="4" y="190">jeugd</text><text x="96" y="190" class="t-src">CBS</text>
-        <text x="4" y="207">wmo</text><text x="96" y="207" class="t-src">CBS</text>
-        <text x="4" y="224">bevolking</text><text x="96" y="224" class="t-src">CBS</text>
-        <text x="4" y="241">wonen</text><text x="96" y="241" class="t-src">CBS</text>
+        <text x="4" y="122">energie</text><text x="112" y="122" class="t-src">RIVM</text>
+        <text x="4" y="139">erfgoed</text><text x="112" y="139" class="t-src">RCE</text>
+        <text x="4" y="156">onderwijs</text><text x="112" y="156" class="t-src">DUO</text>
+        <text x="4" y="173">financiën</text><text x="112" y="173" class="t-src">Iv3</text>
+        <text x="4" y="190">jeugd</text><text x="112" y="190" class="t-src">CBS</text>
+        <text x="4" y="207">wmo</text><text x="112" y="207" class="t-src">CBS</text>
+        <text x="4" y="224">bevolking</text><text x="112" y="224" class="t-src">CBS</text>
+        <text x="4" y="241">wonen</text><text x="112" y="241" class="t-src">CBS</text>
+        <text x="4" y="258">vergunningen</text><text x="112" y="258" class="t-src">KOOP</text>
       </g>
       <g class="layer l3">
-        <polygon points="240,288 360,320 480,288 360,256" fill="var(--layer-3)"/>
-        <text x="4" y="285" class="t-strong">3 · verrijking</text>
-        <text x="4" y="302">wat alleen de gemeente weet</text>
+        <polygon points="240,305 360,337 480,305 360,273" fill="var(--layer-3)"/>
+        <text x="4" y="302" class="t-strong">3 · verrijking</text>
+        <text x="4" y="319">wat alleen de gemeente weet</text>
       </g>
       <g class="layer l4">
-        <polygon points="240,373 360,405 480,373 360,341" fill="var(--layer-4)"/>
-        <circle cx="341" cy="372" r="4" fill="var(--bg)"/><circle cx="374" cy="381" r="4" fill="var(--bg)"/><circle cx="396" cy="367" r="4" fill="var(--bg)"/>
-        <text x="4" y="370" class="t-strong">4 · antwoord</text>
-        <text x="4" y="387">navolgbaar per object</text>
+        <polygon points="240,390 360,422 480,390 360,358" fill="var(--layer-4)"/>
+        <circle cx="341" cy="389" r="4" fill="var(--bg)"/><circle cx="374" cy="398" r="4" fill="var(--bg)"/><circle cx="396" cy="384" r="4" fill="var(--bg)"/>
+        <text x="4" y="387" class="t-strong">4 · antwoord</text>
+        <text x="4" y="404">navolgbaar per object</text>
       </g>
     </svg>
   </section>
@@ -307,7 +308,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         </div>
       </div>
       <div class="shelf">
-        <div class="shelf-head"><h3>Bevolking en wonen</h3><span>Wie er woont, en in welke woningen</span></div>
+        <div class="shelf-head"><h3>Bevolking en wonen</h3><span>Wie er woont, in welke woningen, en wat erbij komt</span></div>
         <div class="rail">
       <article class="tile">
         <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:40.1;background:#2a78d6"></i><i style="flex:28.4;background:#eda100"></i><i style="flex:31.5;background:#1baf7a"></i></span></div>
@@ -322,6 +323,13 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <span class="meta">Kaart · per buurt · elke gemeente</span>
         <p>Hoeveel woningen heeft de gemeente, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg, en bij welke eigenaar?</p>
         <div class="tile-links"><a class="btn btn-sm" href="woningen.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-woning">Meer weten</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:148325;background:#a7d3d8"></i><i style="flex:107406;background:#3a8f9a"></i><i style="flex:550;background:#0f5c66"></i><i style="flex:43385;background:#eda100"></i></span></div>
+        <h4>Bouwstroom</h4>
+        <span class="meta">Kaart · per pand · elke gemeente</span>
+        <p>Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? Met de vergunningen uit het gemeenteblad.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="bouwstroom.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-bouw">Meer weten</button></div>
       </article>
         </div>
       </div>
@@ -492,6 +500,31 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
           <li>Uit de BAG volgt per jaar wat erbij komt en wat eraf gaat.</li>
           <li>Per buurt komen de cijfers samen met de buurtgrenzen van het CBS, via PDOK.</li>
           <li>Leegstand per buurt is geen open data. De buurtkaart toont daarom woningen zonder ingeschreven bewoners, en zegt dat erbij.</li>
+        </ol>
+        <button class="close" type="button" hidden>Sluiten</button>
+      </div>
+    </article>
+    <article class="product" id="info-bouw" aria-labelledby="h-bouw">
+      <div class="product-body">
+        <h3 id="h-bouw">Bouwstroom: van vergunning tot voordeur</h3>
+        <div class="spread" role="img" aria-label="Nieuwe woningen in de BAG op 24 oktober 2026: 148.325 vergund, 107.406 in aanbouw, 550 klaar maar nog niet ingemeten, 43.385 nieuw in bestaande panden">
+          <i style="flex:148325;background:#a7d3d8"></i><i style="flex:107406;background:#3a8f9a"></i><i style="flex:550;background:#0f5c66"></i><i style="flex:43385;background:#eda100"></i>
+        </div>
+        <p>De woningbouw van een gemeente per pand, bijna live: wat vergund is, wat in aanbouw is, wat klaar is maar nog niet ingemeten, en wat net is opgeleverd. Daarnaast de nieuwe woningen die in bestaande panden ontstaan door splitsing en transformatie, en de vergunningen voor woningen die het afgelopen jaar zijn aangevraagd en verleend. Panden waarvan het verwachte bouwjaar voorbij is, springen eruit: een vertraagd project, of een start of oplevering die nog niet in de BAG staat. Voor beleidsmedewerkers wonen en BAG-beheerders.</p>
+        <div class="facts">
+          <div><b>256.281</b><span>nieuwe woningen vergund, in aanbouw of klaar (24 oktober 2026)</span></div>
+          <div><b>43.385</b><span>nieuwe woningen in bestaande panden: splitsing en transformatie</span></div>
+          <div><b>dagelijks</b><span>bijgewerkt: BAG en gemeenteblad</span></div>
+        </div>
+        <a class="btn" href="bouwstroom.html">Open de kaart <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo werkt het</span>
+        <ol>
+          <li>De gemeente legt in de BAG voor elk pand vast of het vergund is, in aanbouw of klaar, en welk bouwjaar ze verwacht.</li>
+          <li>Het gemeenteblad publiceert elke aanvraag en elk besluit voor een omgevingsvergunning, met de plek erbij.</li>
+          <li>De pagina haalt beide live op zodra je een gemeente kiest, en legt ze per pand en per buurt naast elkaar.</li>
+          <li>Wat de pagina uit de tekst van een vergunning afleidt, staat er eerlijk bij, met een link naar de publicatie zelf.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>
       </div>
