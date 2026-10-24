@@ -86,10 +86,16 @@ footer p{margin:0}
 footer a{color:var(--accent)}
 :root{--namew:150px}
 @media (max-width:620px){:root{--namew:92px}.r .v{display:none}.axis,.r{grid-template-columns:var(--namew) minmax(0,1fr)}.axis span.u{display:none}.controls{position:static}}
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
 </style>
 
 <div class="wrap">
   <header>
+    <a class="terug" href="./#producten">← Alle producten</a>
     <p class="eyebrow">Open data · Iv3 2025 · CBS</p>
     <h1>Iv3-panorama</h1>
     <p class="lead">Alle 342 gemeenten onder elkaar. Elke regel laat zien hoe een gemeente haar uitgaven over negen hoofdgroepen verdeelt. Waar een kleur breder of smaller is dan bij de rest, wijkt een gemeente af. De gemeenten staan op alfabet, zodat je je eigen gemeente snel vindt. Klik op een kleur om die vooraan in elke balk te zetten, of sorteer van hoog naar laag om te zien wie eruit springt. Klik op een regel om de Iv3-spiegel van die gemeente te openen.</p>
@@ -119,6 +125,7 @@ footer a{color:var(--accent)}
   <p class="caveat">Uitgaven volgens de jaarrekening 2025; bij Duiven en Rozendaal, die nog geen jaarrekening hebben aangeleverd, de begroting. Een andere verdeling betekent niet meteen een andere keuze. Gemeenten boeken soms anders: de ene zet kosten van de eigen organisatie op Bestuur en eigen organisatie (overhead), de andere op de taak zelf. Werk dat via een samenwerkingsverband loopt, staat als bijdrage op het taakveld van dat werk. Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal.</p>
 
   <footer>
+    <p class="terug-onder" style="margin:0"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
     <p>Bron: CBS, Gemeenten 2025, onbewerkte Iv3-data (tabel 45071NED), opgehaald op 21 oktober 2026; inwoners op 1 januari 2025 (CBS, tabel 70072ned). Lasten per hoofdtaakveld, zonder mutaties in reserves en het resultaat.</p>
     <p>Gemaakt door Josephine Linders, oktober 2026. Hoort bij de <a id="splink" href="iv3spiegel.html">Iv3-spiegel</a>. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
   </footer>
