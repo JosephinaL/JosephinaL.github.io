@@ -820,6 +820,19 @@ tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
 .more { padding: 12px; }
 .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
 footer { font-size: .8rem; color: var(--muted); }
+.deel { border-left: 4px solid var(--accent); }
+.deelgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px 24px; }
+@media (max-width: 800px) { .deelgrid { grid-template-columns: minmax(0, 1fr); } }
+fieldset.niveau { border: 0; margin: 0; padding: 0; display: grid; gap: 6px; font-size: .9rem; min-width: 0; }
+fieldset.niveau legend { padding: 0; margin-bottom: 4px; }
+fieldset.niveau label { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.maat select, #titelInput { padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); }
+#titelInput { width: 100%; }
+.deelopties { display: grid; gap: 8px; align-content: start; }
+label.check { display: flex; gap: 8px; align-items: baseline; }
+#deelInfo { color: var(--st-in_orde); font-weight: 600; }
+.legenda { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); }
+.legenda i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 </head>
@@ -912,6 +925,29 @@ footer { font-size: .8rem; color: var(--muted); }
       <div class="split">
         <div id="map" role="region" aria-label="Kaart van de objecten uit de lijst"></div>
         <aside class="dossier" id="dossier" aria-live="polite"></aside>
+      </div>
+      <div class="card deel" id="deel">
+        <div class="rij" style="justify-content:space-between"><h2>Delen en gebruiken</h2><span class="small" id="deelInfo" role="status"></span></div>
+        <div class="deelgrid">
+          <fieldset class="niveau">
+            <legend class="eyebrow">Niveau</legend>
+            <label><input type="radio" name="niveau" value="object" checked> <b>Per object</b> <span class="muted">met adressen, voor intern gebruik</span></label>
+            <label><input type="radio" name="niveau" value="buurt"> <b>Per buurt</b> <span class="muted">zonder adressen, voor stukken die openbaar worden</span></label>
+            <label class="maat" id="maatLabel" hidden>Kleur per buurt
+              <select id="maat"><option value="objecten">aantal objecten</option><option value="signaal">aantal met een signaal</option></select></label>
+          </fieldset>
+          <div class="deelopties">
+            <label class="field"><span class="small muted">Titel boven kaart en tabel</span><input id="titelInput" type="text"></label>
+            <label class="check small"><input type="checkbox" id="makerCheck" checked> Vermeld "Gemaakt met Eigen lijst op de kaart · josephinal.github.io"</label>
+          </div>
+        </div>
+        <div class="rij">
+          <button class="btn primary" id="pngBtn" type="button">Kaart als afbeelding (PNG)</button>
+          <button class="btn" id="kopKaartBtn" type="button">Kopieer kaart</button>
+          <button class="btn" id="kopTabelBtn" type="button">Kopieer tabel</button>
+          <button class="btn" id="geoBtn" type="button">GeoJSON voor GIS</button>
+        </div>
+        <p class="small muted" id="deelUitleg"></p>
       </div>
       <div class="panel">
         <div class="tabs" role="tablist">
@@ -1431,6 +1467,7 @@ footer { font-size: .8rem; color: var(--muted); }
     step('klaar', 'Klaar');
     return {
       gm: { code: gm.code, naam: gm.naam }, kop, rol, regels: R, panden, wbJaar,
+      buurten: buurten.map(b => ({ code: b.code, naam: b.naam, wijk: wijkNaam.get(b.wijk) || '', geom: b.geom })),
       fouten: { labels: labelsFout, monumenten: monFout }, opgehaald: new Date().toISOString(),
       gemeenten: (() => { const t = {}; for (const r of R) { const c = (r.V[0] && r.V[0].bron) || (r.ls && r.ls.gemeentecode); if (c) t[c] = (t[c] || 0) + 1; } return t; })()
     };
@@ -1589,7 +1626,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.1.2';
+  const VERSIE = '0.2';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
@@ -1601,7 +1638,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   };
-  const state = { gemeenten: null, gm: null, kop: null, regels: null, rol: null, res: null, on: new Set(ORDER), view: 'regels', sort: { k: 'nr', dir: 1 }, q: '', sel: null, limit: 400, bron: '' };
+  const state = { gemeenten: null, gm: null, kop: null, regels: null, rol: null, res: null, on: new Set(ORDER), view: 'regels', sort: { k: 'nr', dir: 1 }, q: '', sel: null, limit: 400, bron: '', niveau: 'object', maat: 'objecten' };
 
   // ---------- thema ----------
   const saved = store.get('labelc-theme');
@@ -1784,7 +1821,9 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     $('#melding').hidden = !mel.length && !ander;
     $('#meldingTekst').innerHTML = esc(mel.join(' ')) + (ander ? `${mel.length ? '<br>' : ''}<b>${fmt(tel[0][1])} van de ${fmt(totaal)} gekoppelde regels liggen in ${esc(ander.naam)}, niet in ${esc(res.gm.naam)}.</b> Buurten, kaartgrens en het zoeken op straat volgen de gekozen gemeente. <button class="btn primary" id="wisselBtn" type="button">Kies ${esc(ander.naam)} en koppel opnieuw</button>` : '');
     if (ander) $('#wisselBtn').onclick = () => { kiesGemeente(ander); run(); };
-    drawMap(); renderAll();
+    state.niveau = 'object'; document.querySelector('input[name=niveau][value=object]').checked = true;
+    $('#titelInput').value = state.bron === 'voorbeeld' ? 'Gemeentelijk vastgoed Amsterdam (voorbeeld)' : `Eigen lijst op de kaart · ${res.gm.naam}`;
+    drawMap(); renderAll(); renderDeel();
     $('#dossier').innerHTML = '<span class="eyebrow">Object</span><p class="muted" style="margin:0">Klik een object op de kaart of een regel in de tabel om te zien hoe het gekoppeld is en waarom het een signaal heeft.</p>';
     const d = new Date(res.opgehaald);
     $('#foot').innerHTML = `Gekoppeld ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Lijst: ${state.bron === 'voorbeeld' ? 'voorbeeld, 39 verhuurbare eenheden uit de open dataset Gemeentelijk Vastgoed van de gemeente Amsterdam (api.data.amsterdam.nl), opgehaald 24 oktober 2026' : 'eigen invoer, alleen in deze browser (geen open data)'}. Bronnen: BAG (Kadaster, via PDOK; live), adressen (PDOK Locatieserver), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks, enkele weken achter), rijksmonumenten (RCE, via PDOK), buurten en wijken ${res.wbJaar || '–'} (CBS, via PDOK). Signalen zijn indicatief.<br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · broncode onder EUPL-1.2.`;
@@ -1833,15 +1872,15 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   $('#allBtn').onclick = () => { state.on = new Set(ORDER); renderChips(); styleLayer(); renderTable(); };
 
   // ---------- kaart ----------
-  let map, layer, pandLayer, outline, byKey = new Map();
+  let map, layer, pandLayer, outline, buurtLayer, byKey = new Map();
   function drawMap() {
     if (!map) {
       map = L.map('map', { preferCanvas: true, zoomSnap: .5 });
       L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT-Achtergrondkaart' }).addTo(map);
-      map.on('zoomend', () => { if (pandLayer) { if (map.getZoom() >= 16) pandLayer.addTo(map); else pandLayer.remove(); } });
+      map.on('zoomend', () => { if (pandLayer) { if (map.getZoom() >= 16 && state.niveau !== 'buurt') pandLayer.addTo(map); else pandLayer.remove(); } });
     }
     map.invalidateSize();
-    [layer, pandLayer, outline].forEach(l => l && l.remove());
+    [layer, pandLayer, outline, buurtLayer].forEach(l => l && l.remove());
     outline = L.geoJSON(state.gm.geom, { interactive: false, style: { color: css('--accent'), weight: 2, fill: false, dashArray: '6 4' } }).addTo(map);
     const P = state.res.panden.filter(p => state.res.regels.some(r => r.P.includes(p)) && p.geom);
     pandLayer = L.geoJSON({ type: 'FeatureCollection', features: P.map(p => ({ type: 'Feature', geometry: p.geom, properties: {} })) }, { interactive: false, style: { color: css('--muted'), weight: 1, fillOpacity: .08 } });
@@ -1855,6 +1894,10 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
       byKey.set(pl.key, m); layer.addLayer(m);
     }
     layer.addTo(map);
+    buurtLayer = L.geoJSON({ type: 'FeatureCollection', features: (state.res.buurten || []).map(b => ({ type: 'Feature', geometry: b.geom, properties: { code: b.code } })) }, {
+      style: () => ({}),
+      onEachFeature: (ft, l) => l.bindTooltip(() => { const t = buurtTelling().get(ft.properties.code) || { objecten: 0, signaal: 0 }; const b = state.res.buurten.find(x => x.code === ft.properties.code); return `${esc(b.naam)}<br>${afg(t.objecten)} objecten · ${afg(t.signaal)} met een signaal`; }, { sticky: true })
+    });
     const b = layer.getLayers().length ? layer.getBounds() : outline.getBounds();
     map.fitBounds(b, { padding: [30, 30], maxZoom: 18 });
     styleLayer();
@@ -1872,6 +1915,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     }
     if (outline) outline.setStyle({ color: css('--accent') });
     $('#map').dataset.zichtbaar = layer.getLayers().length;
+    stijlNiveau();
   }
   function select(key, fly) {
     state.sel = key; styleLayer(); showDossier(key);
@@ -1963,22 +2007,259 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   }
 
   // ---------- verrijkte lijst ----------
+  const EXTRA = ['koppeling', 'reden_niet_gekoppeld', 'bag_verblijfsobject', 'bag_pand', 'bag_adres', 'bag_status', 'bag_gebruiksdoel', 'bag_oppervlakte_m2', 'bouwjaar', 'energielabel', 'label_c_plicht', 'rijksmonument', 'buurtcode', 'buurt', 'wijk', 'status', 'signalen'];
+  const uq = a => [...new Set(a.filter(x => x != null && x !== ''))].join(', ');
+  function verrijkt(r) {
+    return [r.koppeling || '', r.reden || '', uq(r.V.map(v => v.id)), uq(r.P.map(p => p.id)), r.adresBAG || '',
+      uq([...r.V.map(v => v.status), ...r.P.map(p => p.status)]), uq(r.V.map(v => v.gd)), r.V.length ? r.V.reduce((s, v) => s + v.opp, 0) : '',
+      uq(r.P.map(p => p.bouwjaar)), uq(r.P.map(p => p.label && p.label.dominant_label)), uq(r.P.map(p => p.kantoor && p.kantoor.plicht)),
+      uq(r.P.map(p => p.monument && p.monument.nr)), r.buurt ? r.buurt.code : '', r.buurt ? r.buurt.naam : '', r.buurt ? r.buurt.wijk : '',
+      ST[r.status], [...r.signalen.map(s => s.t), ...r.info].join(' ')];
+  }
+  const bestandsnaam = (soort, ext) => `eigen-lijst-${state.res.gm.naam.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${soort}.${ext}`;
+  function bewaar(blob, naam) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = naam;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
   $('#csvBtn').onclick = () => {
     const res = state.res;
-    const extra = ['koppeling', 'reden_niet_gekoppeld', 'bag_verblijfsobject', 'bag_pand', 'bag_adres', 'bag_status', 'bag_gebruiksdoel', 'bag_oppervlakte_m2', 'bouwjaar', 'energielabel', 'label_c_plicht', 'rijksmonument', 'buurtcode', 'buurt', 'wijk', 'status', 'signalen'];
     const q = v => { const s = String(v ?? ''); return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const u = a => [...new Set(a.filter(x => x != null && x !== ''))].join(', ');
-    const lines = [res.kop.concat(extra).map(q).join(';')].concat(res.regels.map(r => r.cel.concat([
-      r.koppeling || '', r.reden || '', u(r.V.map(v => v.id)), u(r.P.map(p => p.id)), r.adresBAG || '',
-      u([...r.V.map(v => v.status), ...r.P.map(p => p.status)]), u(r.V.map(v => v.gd)), r.V.length ? r.V.reduce((s, v) => s + v.opp, 0) : '',
-      u(r.P.map(p => p.bouwjaar)), u(r.P.map(p => p.label && p.label.dominant_label)), u(r.P.map(p => p.kantoor && p.kantoor.plicht)),
-      u(r.P.map(p => p.monument && p.monument.nr)), r.buurt ? r.buurt.code : '', r.buurt ? r.buurt.naam : '', r.buurt ? r.buurt.wijk : '',
-      ST[r.status], [...r.signalen.map(s => s.t), ...r.info].join(' ')
-    ]).map(q).join(';')));
-    const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `eigen-lijst-${res.gm.naam.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-verrijkt.csv`;
-    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    const lines = [res.kop.concat(EXTRA).map(q).join(';')].concat(res.regels.map(r => r.cel.concat(verrijkt(r)).map(q).join(';')));
+    bewaar(new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' }), bestandsnaam('verrijkt', 'csv'));
+  };
+
+  // ---------- delen: niveau, buurten, bron ----------
+  // Kleine aantallen per buurt worden afgeschermd: 1 of 2 wordt "<3".
+  const afg = v => !v ? '0' : v < 3 ? '<3' : fmt(v);
+  const KLASSEN = [[1, 2, '1–2'], [3, 5, '3–5'], [6, 10, '6–10'], [11, 25, '11–25'], [26, Infinity, '26 of meer']];
+  const KLEUR = ['#8fcacc', '#55a9ad', '#2a868c', '#14646b', '#08424a'];
+  const klasse = v => KLASSEN.findIndex(([a, b]) => v >= a && v <= b);
+  const SIGNAAL = ['bag', 'label_c', 'controleren'];
+  function buurtTelling() {
+    const t = new Map();
+    if (!state.plek) return t;
+    for (const pl of state.plek.values()) {
+      if (!plekZichtbaar(pl)) continue;
+      const b = pl.regels[0].buurt; if (!b) continue;
+      if (!t.has(b.code)) t.set(b.code, { objecten: 0, signaal: 0, bag: 0, label_c: 0, controleren: 0 });
+      const o = t.get(b.code); o.objecten++;
+      const st = plekStatus(pl);
+      if (SIGNAAL.includes(st)) { o.signaal++; o[st]++; }
+    }
+    return t;
+  }
+  function stijlNiveau() {
+    if (!buurtLayer || !map) return;
+    const perBuurt = state.niveau === 'buurt';
+    if (perBuurt) {
+      const t = buurtTelling();
+      buurtLayer.eachLayer(l => {
+        const v = (t.get(l.feature.properties.code) || {})[state.maat] || 0, k = klasse(v);
+        l.setStyle({ color: css('--surface'), weight: 1, fillColor: k < 0 ? css('--sunk') : KLEUR[k], fillOpacity: k < 0 ? .5 : .85 });
+      });
+      if (!map.hasLayer(buurtLayer)) buurtLayer.addTo(map);
+      if (map.hasLayer(layer)) layer.remove();
+      if (pandLayer && map.hasLayer(pandLayer)) pandLayer.remove();
+    } else {
+      if (map.hasLayer(buurtLayer)) buurtLayer.remove();
+      if (!map.hasLayer(layer)) layer.addTo(map);
+    }
+    if (outline) outline.bringToFront();
+  }
+  document.querySelectorAll('input[name=niveau]').forEach(i => i.onchange = () => {
+    state.niveau = i.value; renderDeel(); stijlNiveau();
+    if (state.niveau === 'buurt' && outline) map.fitBounds(outline.getBounds(), { padding: [10, 10] });
+    else if (layer.getLayers().length) map.fitBounds(layer.getBounds(), { padding: [30, 30], maxZoom: 18 });
+  });
+  $('#maat').onchange = e => { state.maat = e.target.value; stijlNiveau(); renderDeel(); };
+  function renderDeel() {
+    const perBuurt = state.niveau === 'buurt';
+    $('#maatLabel').hidden = !perBuurt;
+    $('#kopTabelBtn').textContent = perBuurt ? 'Kopieer tabel per buurt' : 'Kopieer tabel';
+    $('#geoBtn').textContent = perBuurt ? 'GeoJSON per buurt' : 'GeoJSON voor GIS';
+    $('#deelUitleg').innerHTML = perBuurt
+      ? `Per buurt het aantal objecten en het aantal met een signaal, zonder adressen. Aantallen van 1 of 2 staan als &lt;3 (in de afbeelding als klasse 1–2), zodat één gebouw niet herkenbaar wordt. Ook dan geldt: in een buurt met één opvallend gemeentelijk gebouw kan wie de buurt kent, het herleiden. Bekijk de afbeelding voor je hem deelt.`
+      : `De afbeelding toont de kaart zoals je hem nu ziet, met de statussen die aan staan. De tabel bevat de regels uit het tabblad Regels, met filter en zoekterm. Er staan adressen en signalen in. Een beleidsstuk dat naar de raad gaat of onder de Woo valt, wordt openbaar; kies dan <b>Per buurt</b>.`;
+    $('#deelInfo').textContent = '';
+  }
+  function meld(t) { $('#deelInfo').textContent = t; clearTimeout(meld.t); meld.t = setTimeout(() => { $('#deelInfo').textContent = ''; }, 5000); }
+  function datumTekst() { return new Date(state.res.opgehaald).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }); }
+  function bronTekst() {
+    const lijst = state.bron === 'voorbeeld' ? 'lijst: Gemeente Amsterdam, Gemeentelijk Vastgoed (open data)' : 'lijst: eigen gegevens van de gemeente';
+    return `Bronnen: ${lijst}; BAG (Kadaster); energielabels (RIVM, afgeleid uit EP-Online van RVO); rijksmonumenten (RCE); buurten (CBS ${state.res.wbJaar || ''}); achtergrondkaart (Kadaster, via PDOK). Gekoppeld op ${datumTekst()}. Signalen zijn indicatief, geen vaststelling.` + (state.niveau === 'buurt' ? ' Aantallen van 1 of 2 zijn afgeschermd.' : '');
+  }
+  const makerTekst = () => $('#makerCheck').checked ? 'Gemaakt met Eigen lijst op de kaart · josephinal.github.io' : '';
+  const titel = () => $('#titelInput').value.trim() || `Eigen lijst op de kaart · ${state.res.gm.naam}`;
+
+  // ---------- kaart als afbeelding ----------
+  // Licht palet, ook als de pagina donker staat: een afbeelding gaat een document in.
+  const LICHT = { bag: '#d2462c', label_c: '#d98a12', controleren: '#7656b0', in_orde: '#2a8a8a', niet: '#9aa7aa', fg: '#172426', muted: '#5a6b6e', accent: '#0f5c66', lijn: '#d3dcdc' };
+  const TEGEL = 'https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png';
+  const laadBeeld = url => new Promise(res => { const i = new Image(); i.crossOrigin = 'anonymous'; i.onload = () => res(i); i.onerror = () => res(null); i.src = url; });
+  function regels(ctx, tekst, maxB) {
+    const uit = []; let r = '';
+    for (const w of String(tekst).split(/\s+/)) { const t = r ? r + ' ' + w : w; if (ctx.measureText(t).width > maxB && r) { uit.push(r); r = w; } else r = t; }
+    if (r) uit.push(r);
+    return uit;
+  }
+  async function maakAfbeelding() {
+    const sz = map.getSize();
+    const z = Math.min(19, Math.round(map.getZoom()) + 1);
+    const f = Math.pow(2, z - map.getZoom());
+    const W = Math.round(sz.x * f), Hm = Math.round(sz.y * f);
+    const S = W / 1000 > 1.2 ? W / 1000 : 1.2;            // tekstschaal, afgestemd op de breedte
+    const centrum = map.project(map.getCenter(), z);
+    const o = L.point(centrum.x - W / 2, centrum.y - Hm / 2);
+    const fontS = (w, px) => `${w} ${Math.round(px * S)}px "Source Sans 3", "Segoe UI", Arial, sans-serif`;
+    const fontD = (w, px) => `${w} ${Math.round(px * S)}px Archivo, "Arial Narrow", Arial, sans-serif`;
+    // kop en voet vooraf meten
+    const meet = document.createElement('canvas').getContext('2d');
+    const pad = Math.round(24 * S);
+    meet.font = fontS(400, 13);
+    const perBuurt = state.niveau === 'buurt';
+    const bron = regels(meet, bronTekst(), W - 2 * pad);
+    const maker = makerTekst();
+    const kopH = Math.round(84 * S), legH = Math.round(34 * S);
+    const voetH = legH + bron.length * Math.round(18 * S) + (maker ? Math.round(22 * S) : 0) + pad;
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = kopH + Hm + voetH;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, cv.width, cv.height);
+    // kop
+    ctx.fillStyle = LICHT.fg; ctx.font = fontD(700, 24); ctx.textBaseline = 'alphabetic';
+    ctx.fillText(titel(), pad, Math.round(40 * S));
+    ctx.fillStyle = LICHT.muted; ctx.font = fontS(400, 14);
+    const zicht = [...state.plek.values()].filter(plekZichtbaar).length;
+    ctx.fillText(perBuurt ? `${state.maat === 'signaal' ? 'Objecten met een signaal' : 'Objecten'} per buurt (CBS ${state.res.wbJaar || ''}) · ${state.res.gm.naam} · ${datumTekst()}` : `${fmt(zicht)} objecten op de kaart · ${state.res.gm.naam} · ${datumTekst()}`, pad, Math.round(66 * S));
+    // achtergrondkaart
+    ctx.save(); ctx.beginPath(); ctx.rect(0, kopH, W, Hm); ctx.clip();
+    ctx.fillStyle = '#eef1f1'; ctx.fillRect(0, kopH, W, Hm);
+    const x0 = Math.floor(o.x / 256), x1 = Math.floor((o.x + W) / 256), y0 = Math.floor(o.y / 256), y1 = Math.floor((o.y + Hm) / 256);
+    const tegels = [];
+    for (let x = x0; x <= x1; x++) for (let y = y0; y <= y1; y++) tegels.push({ x, y });
+    const beelden = await Promise.all(tegels.map(t => laadBeeld(TEGEL.replace('{z}', z).replace('{x}', t.x).replace('{y}', t.y))));
+    tegels.forEach((t, i) => { if (beelden[i]) ctx.drawImage(beelden[i], Math.round(t.x * 256 - o.x), Math.round(kopH + t.y * 256 - o.y), 256, 256); });
+    const pt = (lng, lat) => { const p = map.project(L.latLng(lat, lng), z); return [p.x - o.x, kopH + p.y - o.y]; };
+    const pad2 = geom => {
+      ctx.beginPath();
+      const polys = geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : [];
+      for (const poly of polys) for (const ring of poly) ring.forEach(([x, y], i) => { const [a, b] = pt(x, y); i ? ctx.lineTo(a, b) : ctx.moveTo(a, b); });
+    };
+    if (perBuurt) {
+      // ondergrond dimmen, zodat de buurtkleuren de kaart dragen
+      ctx.fillStyle = 'rgba(255,255,255,.55)'; ctx.fillRect(0, kopH, W, Hm);
+      const t = buurtTelling();
+      for (const b of state.res.buurten || []) {
+        const v = (t.get(b.code) || {})[state.maat] || 0, k = klasse(v);
+        pad2(b.geom);
+        if (k >= 0) { ctx.fillStyle = KLEUR[k]; ctx.globalAlpha = .9; ctx.fill('evenodd'); ctx.globalAlpha = 1; }
+        ctx.strokeStyle = k >= 0 ? '#ffffff' : 'rgba(90,107,110,.35)'; ctx.lineWidth = (k >= 0 ? 1.2 : .6) * S; ctx.stroke();
+      }
+    }
+    pad2(state.gm.geom); ctx.setLineDash([6 * S, 4 * S]); ctx.strokeStyle = LICHT.accent; ctx.lineWidth = 2 * S; ctx.stroke(); ctx.setLineDash([]);
+    if (!perBuurt) {
+      const volg = ['in_orde', 'controleren', 'label_c', 'bag'];
+      const pl = [...state.plek.values()].filter(plekZichtbaar).sort((a, b) => volg.indexOf(plekStatus(a)) - volg.indexOf(plekStatus(b)));
+      for (const p of pl) {
+        const [a, b] = pt(p.xy[0], p.xy[1]);
+        const r = Math.min(11, 5 + Math.sqrt(p.regels.length) * 1.5) * f;
+        ctx.beginPath(); ctx.arc(a, b, r, 0, 2 * Math.PI);
+        ctx.fillStyle = LICHT[plekStatus(p)]; ctx.fill();
+        ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5 * f; ctx.stroke();
+      }
+    }
+    ctx.restore();
+    ctx.strokeStyle = LICHT.lijn; ctx.lineWidth = 1; ctx.strokeRect(0.5, kopH + .5, W - 1, Hm - 1);
+    // legenda
+    let lx = pad; const ly = kopH + Hm + Math.round(22 * S);
+    ctx.font = fontS(400, 13); ctx.textBaseline = 'middle';
+    const item = (kleur, tekst, rond) => {
+      const s = Math.round(12 * S);
+      ctx.fillStyle = kleur; ctx.beginPath();
+      if (rond) ctx.arc(lx + s / 2, ly, s / 2, 0, 2 * Math.PI); else ctx.rect(lx, ly - s / 2, s * 1.4, s);
+      ctx.fill();
+      lx += (rond ? s : s * 1.4) + Math.round(6 * S);
+      ctx.fillStyle = LICHT.fg; ctx.fillText(tekst, lx, ly);
+      lx += ctx.measureText(tekst).width + Math.round(18 * S);
+    };
+    if (perBuurt) {
+      ctx.fillStyle = LICHT.muted; const kop = state.maat === 'signaal' ? 'Met een signaal:' : 'Objecten:'; ctx.fillText(kop, lx, ly); lx += ctx.measureText(kop).width + Math.round(10 * S);
+      KLASSEN.forEach(([, , t], i) => item(KLEUR[i], t, false));
+    } else {
+      const c = {}; for (const p of state.plek.values()) if (plekZichtbaar(p)) { const s = plekStatus(p); c[s] = (c[s] || 0) + 1; }
+      ORDER.filter(s => c[s]).forEach(s => item(LICHT[s], `${ST[s]} (${fmt(c[s])})`, true));
+    }
+    // bron en maker
+    ctx.textBaseline = 'alphabetic'; ctx.fillStyle = LICHT.muted; ctx.font = fontS(400, 13);
+    let by = kopH + Hm + legH + Math.round(16 * S);
+    for (const r of bron) { ctx.fillText(r, pad, by); by += Math.round(18 * S); }
+    if (maker) { ctx.fillStyle = LICHT.accent; ctx.font = fontS(600, 13); ctx.fillText(maker, pad, by + Math.round(4 * S)); }
+    return cv;
+  }
+  const naarBlob = cv => new Promise(r => cv.toBlob(r, 'image/png'));
+  $('#pngBtn').onclick = async () => {
+    const b = $('#pngBtn'); b.disabled = true; $('#deelInfo').textContent = 'Kaart wordt gemaakt…';
+    try { const cv = await maakAfbeelding(); bewaar(await naarBlob(cv), bestandsnaam(state.niveau === 'buurt' ? 'kaart-per-buurt' : 'kaart', 'png')); meld('Afbeelding opgeslagen.'); }
+    catch (e) { meld('Afbeelding maken mislukt: ' + e.message); }
+    finally { b.disabled = false; }
+  };
+  $('#kopKaartBtn').onclick = async () => {
+    $('#deelInfo').textContent = 'Kaart wordt gemaakt…';
+    try {
+      const cv = await maakAfbeelding();
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': naarBlob(cv) })]);
+      meld('Kaart gekopieerd. Plak hem in je document.');
+    } catch (e) { meld('Kopiëren lukt niet in deze browser; gebruik "Kaart als afbeelding".'); }
+  };
+
+  // ---------- tabel kopiëren ----------
+  function zichtbareRegels() {
+    const c = COLS.find(c => c.k === state.sort.k);
+    return state.res.regels.filter(r => r.gekoppeld && state.on.has(r.status) && (!state.q || zoek(r).includes(state.q)))
+      .sort((a, b) => { const x = c.v(a), y = c.v(b); return (x > y ? 1 : x < y ? -1 : 0) * state.sort.dir || a.nr - b.nr; });
+  }
+  function tabelData() {
+    if (state.niveau === 'buurt') {
+      const t = buurtTelling();
+      const rij = (state.res.buurten || []).filter(b => t.has(b.code)).map(b => { const o = t.get(b.code); return { b, o }; }).sort((x, y) => y.o.objecten - x.o.objecten || x.b.naam.localeCompare(y.b.naam, 'nl'));
+      return { kop: ['Buurt', 'Wijk', 'Objecten', 'Met een signaal', ST.bag, ST.label_c, ST.controleren], rechts: [2, 3, 4, 5, 6],
+        rijen: rij.map(({ b, o }) => [b.naam, b.wijk, afg(o.objecten), afg(o.signaal), afg(o.bag), afg(o.label_c), afg(o.controleren)]) };
+    }
+    const lbl = r => { const p = r.P.find(p => p.label); return p ? p.label.dominant_label : ''; };
+    return { kop: ['#', 'Naam', 'Adres (BAG)', 'Eigen gebruik', 'Gebruiksdoel BAG', 'm² eigen', 'm² BAG', 'Label', 'Buurt', 'Status', 'Signalen'], rechts: [0, 5, 6],
+      rijen: zichtbareRegels().map(r => [r.nr, cel(r, 'naam'), r.adresBAG || (r.P[0] ? 'Pand ' + r.P[0].id : ''), cel(r, 'gebruik'), COLS[4].v(r), r.k.opp == null ? '' : fmt(r.k.opp), r.V.length ? fmt(r.V.reduce((s, v) => s + v.opp, 0)) : '', lbl(r), r.buurt ? r.buurt.naam : '', ST[r.status], r.signalen.map(s => s.t).join(' ')]) };
+  }
+  $('#kopTabelBtn').onclick = async () => {
+    const d = tabelData();
+    const th = 'border:1px solid #c8d2d2;padding:4px 6px;background:#eef3f3;text-align:left;font-weight:600';
+    const td = i => `border:1px solid #c8d2d2;padding:4px 6px;vertical-align:top${d.rechts.includes(i) ? ';text-align:right' : ''}`;
+    const html = `<p style="font-weight:700;margin:0 0 6px">${esc(titel())}</p><table style="border-collapse:collapse;font-family:Arial,sans-serif;font-size:10pt"><thead><tr>${d.kop.map(k => `<th style="${th}">${esc(k)}</th>`).join('')}</tr></thead><tbody>${d.rijen.map(r => `<tr>${r.map((v, i) => `<td style="${td(i)}">${esc(v)}</td>`).join('')}</tr>`).join('')}</tbody></table><p style="font-size:8pt;color:#5a6b6e;margin:6px 0 0">${esc(bronTekst())}${makerTekst() ? '<br>' + esc(makerTekst()) : ''}</p>`;
+    const tekst = [titel(), d.kop.join('\t'), ...d.rijen.map(r => r.join('\t')), '', bronTekst(), makerTekst()].filter((x, i, a) => x !== '' || i === a.indexOf('')).join('\n');
+    try {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([tekst], { type: 'text/plain' }) })]);
+      meld(`Tabel gekopieerd: ${fmt(d.rijen.length)} ${state.niveau === 'buurt' ? 'buurten' : 'regels'}. Plak hem in Word of Excel.`);
+    } catch (e) {
+      try { await navigator.clipboard.writeText(tekst); meld('Tabel gekopieerd als tekst.'); } catch (e2) { meld('Kopiëren lukt niet in deze browser; gebruik de CSV-download.'); }
+    }
+  };
+
+  // ---------- GeoJSON ----------
+  $('#geoBtn').onclick = () => {
+    const res = state.res, perBuurt = state.niveau === 'buurt';
+    let features;
+    if (perBuurt) {
+      const t = buurtTelling(), n = v => (v && v >= 3 ? v : v ? null : 0);
+      features = (res.buurten || []).map(b => { const o = t.get(b.code) || {}; return { type: 'Feature', geometry: b.geom, properties: { buurtcode: b.code, buurt: b.naam, wijk: b.wijk, objecten: n(o.objecten), met_signaal: n(o.signaal), niet_in_gebruik_bag: n(o.bag), kantoor_zonder_label_c: n(o.label_c), controleren: n(o.controleren) } }; });
+    } else {
+      const sleutels = res.kop.concat(EXTRA);
+      features = res.regels.filter(r => r.gekoppeld && r.xy && state.on.has(r.status)).map(r => {
+        const w = r.cel.concat(verrijkt(r)), props = { regel: r.nr };
+        sleutels.forEach((k, i) => { props[props[k] === undefined ? k : k + '_' + i] = w[i]; });
+        return { type: 'Feature', geometry: { type: 'Point', coordinates: [+r.xy[0].toFixed(7), +r.xy[1].toFixed(7)] }, properties: props };
+      });
+    }
+    const fc = { type: 'FeatureCollection', name: titel(), bron: bronTekst(), gemaakt: res.opgehaald, ...(perBuurt ? { afscherming: 'Aantallen van 1 of 2 zijn leeg (null).' } : {}), ...(makerTekst() ? { gemaakt_met: makerTekst() } : {}), features };
+    bewaar(new Blob([JSON.stringify(fc)], { type: 'application/geo+json' }), bestandsnaam(perBuurt ? 'per-buurt' : 'objecten', 'geojson'));
+    meld(`GeoJSON opgeslagen: ${fmt(features.length)} ${perBuurt ? 'buurten' : 'objecten'}, coördinaten in WGS84.`);
   };
 
   init();
