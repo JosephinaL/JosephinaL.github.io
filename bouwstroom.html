@@ -171,6 +171,16 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .leaflet-container { font: inherit; }
 .leaflet-tooltip { font: 13px var(--f-body); }
 .maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+
+.herken { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -208,6 +218,23 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
       <div class="top4" id="top4"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit is de stand in de BAG, niet het woningbouwprogramma of de planlijst van de gemeente. Een project telt pas mee als de panden in de BAG zijn opgevoerd; "vergund" is een pand met de BAG-status bouwvergunning verleend. Een woning is een verblijfsobject met woonfunctie, dus elke zelfstandige studio telt als woning.</li>
+          <li><b>Een andere peildatum of indeling.</b> De BAG van vandaag en de bekendmakingen van de afgelopen twaalf maanden. Panden horen bij de gemeente waarin ze liggen. "Opgeleverd" telt panden met bouwjaar vorig en dit jaar; het CBS telt nieuwbouw per kalenderjaar en komt daarom anders uit (zie <a href="woningen.html">Woningvoorraad</a>).</li>
+          <li><b>Registratie bij de bron.</b> Gemeenten houden de levensloop in de BAG verschillend bij. Sommige zetten een pand zelden op "bouw gestart", en het bouwjaar bij een vergund pand is niet overal het verwachte jaar van oplevering. Dan klopt de pagina met de BAG, maar loopt de BAG achter op de praktijk; het signaal "verwacht jaar voorbij" maakt dat vaak zichtbaar. Bekendmakingen worden op hun tekst ingedeeld; een ongewone formulering kan verkeerd vallen.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een pand af van de BAG zelf (link naar de BAG-viewer in het dossier), dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het Kadaster (BAG) en de officiële bekendmakingen door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="mailto:joselin@live.nl">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
 
       <!-- de stroom -->
       <div class="sectiekop">
@@ -287,7 +314,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
+  const PRODUCT = 'Bouwstroom';
   const BAG = 'https://api.pdok.nl/kadaster/bag/ogc/v2/collections/';
   const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
   const SRU = 'https://repository.overheid.nl/sru';
@@ -1014,7 +1042,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   });
 
   // ---------- voet ----------
+
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:joselin@live.nl?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
   function renderVoet() {
+    renderHerken();
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const bs = S.bagStamp ? new Date(S.bagStamp).toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
     $('#foot').innerHTML = `Bronnen: <a href="https://www.kadaster.nl/zakelijk/registraties/basisregistraties/bag">Basisregistratie Adressen en Gebouwen</a> (Kadaster, CC0), panden en verblijfsobjecten via de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API van PDOK</a>, dagelijks bijgewerkt${bs ? `; antwoord van ${bs}` : ''}. Bekendmakingen: <a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a> (KOOP, CC0), gemeenteblad, omgevingsvergunningen sinds ${S.bekVan ? dmy(S.bekVan) : '–'}${S.bekNaam ? ` (uitgever "${esc(S.bekNaam)}")` : ''}, via de SRU-dienst van overheid.nl. Buurten en wijken: CBS Wijk- en buurtkaart ${S.bjaar || ''} via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${S.bjaar}/ogc/v1">PDOK</a> (CC-BY 4.0). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Bouwstroom · versie ${VERSIE}`;
