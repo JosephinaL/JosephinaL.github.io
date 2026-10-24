@@ -8,20 +8,32 @@ Informatieproducten voor gemeentelijke vraagstukken, gebouwd op openbare registr
 
 | Product | Pagina | Vraag | Bronnen |
 |---|---|---|---|
+| **Fysieke leefomgeving** | | | |
 | Label C-kantoren | [labelc.html](https://josephinal.github.io/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
+| **Financiën** | | | |
 | Iv3-spiegel | [iv3spiegel.html](https://josephinal.github.io/iv3spiegel.html) | Waar gaat het geld van een gemeente heen, en deed ze wat ze van plan was? | Iv3 (CBS) |
 | Iv3-panorama | [iv3panorama.html](https://josephinal.github.io/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |
+| **Economie en ondernemen** | | | |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinal.github.io/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
+| **Onderwijs** | | | |
 | Basisonderwijs per buurt | [onderwijs.html](https://josephinal.github.io/onderwijs.html) | Waar krimpen en groeien basisscholen tot 2035? | DUO, BAG/PDOK, CBS |
+| **Bevolking en wonen** | | | |
+| Huishoudens en vergrijzing | [huishoudens.html](https://josephinal.github.io/huishoudens.html) | Hoe zijn de huishoudens samengesteld, hoe snel vergrijst de gemeente sinds 1995, en in welke buurten? | CBS (Regionale kerncijfers, Kerncijfers wijken en buurten), PDOK |
+| Woningvoorraad en leegstand | [woningen.html](https://josephinal.github.io/woningen.html) | Hoeveel woningen zijn er, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg? | CBS (Woningvoorraad, Levensloop van woningen, Kerncijfers wijken en buurten), PDOK |
+| Bouwstroom | [bouwstroom.html](https://josephinal.github.io/bouwstroom.html) | Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? | BAG, Officiële bekendmakingen (gemeenteblad), CBS |
+| **Sociaal domein** | | | |
 | Jeugdzorg per wijk | [jeugdzorg.html](https://josephinal.github.io/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
+| Wmo per wijk | [wmo.html](https://josephinal.github.io/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
+| **Werkbank** | | | |
+| Eigen lijst op de kaart | [eigenlijst.html](https://josephinal.github.io/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed in eigen beheer, eruit naast de BAG en open data? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
 
 ## Werkwijze
 
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS).
-3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving.
+2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Wmo, bevolking en wonen (CBS), vergunningen (gemeenteblad).
+3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving. Eigen lijst op de kaart is daar het gereedschap voor.
 4. **Antwoord:** navolgbaar per object.
 
 Drie principes:
@@ -33,13 +45,29 @@ Drie principes:
 ## Techniek
 
 - Elk product is één zelfstandig HTML-bestand, zonder buildstap.
-- De data komt live uit openbare API's (PDOK, RIVM, RCE, CBS) of staat inline, zoals bij DUO, waar de API geen verzoeken van andere sites toestaat.
+- De data komt live uit openbare API's (PDOK, RIVM, RCE, CBS, Officiële bekendmakingen) of staat inline, zoals bij DUO, waar de API geen verzoeken van andere sites toestaat.
 - Bron en peildatum staan op elke pagina.
 - Gehost via GitHub Pages.
 
+### Eigen gegevens
+
+Label C-kantoren en Eigen lijst op de kaart nemen eigen gegevens van de gemeente op. Daarvoor geldt:
+
+- De lijst wordt in de browser gelezen en nergens bewaard. Er is geen eigen server; sluit je de pagina, dan is de lijst weg.
+- Eigen lijst op de kaart stuurt alleen de adressen als zoekvraag naar PDOK, om ze in de BAG te vinden. Dat staat op de pagina.
+- In Eigen lijst op de kaart staat een beveiligingsregel (Content-Security-Policy) die alleen verbindingen toestaat met `api.pdok.nl` en `data.rivm.nl`. Zo is na te gaan dat de lijst nergens anders heen kan.
+- Een controle vooraf stopt lijsten met persoonsgegevens (namen, BSN, contactgegevens, cliënten of bewoners) voordat er iets wordt opgezocht. De pagina is bedoeld voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed.
+
 ## Bronnen en licenties
 
-De gebruikte data valt onder de licenties van de bronhouders: Kadaster/BZK (BAG, PDOK), CBS, RIVM, Rijksdienst voor het Cultureel Erfgoed en DUO (CC-BY, naamsvermelding op de pagina).
+De gebruikte data valt onder de licenties van de bronhouders, met naamsvermelding op de pagina:
+
+- Kadaster/BZK (BAG, PDOK): CC0
+- KOOP (Officiële bekendmakingen): CC0
+- CBS (Statline, Kerncijfers wijken en buurten, Iv3): CC-BY 4.0
+- RIVM (energielabels, afgeleid uit EP-Online van RVO) en Rijksdienst voor het Cultureel Erfgoed
+- DUO: CC-BY
+- Gemeente Amsterdam (Gemeentelijk Vastgoed, alleen als voorbeeldlijst): openbaar
 
 ## Auteur
 
