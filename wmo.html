@@ -158,12 +158,18 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .leaflet-tooltip { font: 13px var(--f-body); }
 .maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
 .maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="brand">
+      <a class="terug" href="./#producten">← Alle producten</a>
       <span class="eyebrow">Josephine Linders · Wmo · open data</span>
       <h1 id="title">Wmo per wijk</h1>
       <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
@@ -285,6 +291,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
+      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
     </div>
   </section>
 </div>
