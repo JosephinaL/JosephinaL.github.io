@@ -149,10 +149,16 @@ summary{cursor:pointer;font-weight:600}
 .terms span{font-size:14.5px;color:var(--muted)}
 footer{font-size:13px;color:var(--muted);display:grid;gap:6px;max-width:90ch}
 footer p{margin:0}
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
 </style>
 
 <div class="wrap">
   <header>
+    <a class="terug" href="./#producten">← Alle producten</a>
     <p class="eyebrow">Open data · Iv3 2025 · CBS</p>
     <h1 data-text="Iv3-spiegel">Iv3-spiegel</h1>
     <p class="lead">Elke gemeente legt haar geldzaken vast in hetzelfde schema, het Iv3. Kies een gemeente en zie hoe haar huishouding eruitziet: waar het geld heen gaat, waar het vandaan komt en of ze deed wat ze van plan was.</p>
@@ -197,6 +203,7 @@ footer p{margin:0}
   </details>
 
   <footer>
+    <p class="terug-onder" style="margin:0"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
     <p>Bron: CBS, Gemeenten 2025, onbewerkte Iv3-data (tabel 45071NED), opgehaald op 21 oktober 2026; inwoners op 1 januari 2025 (CBS, tabel 70072ned). Bedragen zijn de tweede plaatsing waar die er is, anders de eerste.</p>
     <p>Mutaties in reserves (taakveld 0.10) en het resultaat (0.11) zijn apart gehouden van de lasten en baten. Overhead staat in Iv3 op taakveld 0.4 en is niet over de andere taakvelden verdeeld.</p>
     <p>Gemaakt door Josephine Linders, oktober 2026. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
