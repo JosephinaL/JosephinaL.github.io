@@ -770,10 +770,16 @@ details ul{margin:10px 0 0;padding-left:1.2em;display:grid;gap:6px;font-size:14.
 footer{font-size:13px;color:var(--muted);display:grid;gap:6px;max-width:95ch}
 footer p{margin:0}
 footer a{color:var(--accent)}
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
 </style>
 
 <div class="wrap">
   <header>
+    <a class="terug" href="./#producten">← Alle producten</a>
     <p class="eyebrow">Voor beleidsmedewerkers economie en ruimte · alle gemeenten</p>
     <h1>Bedrijvigheid per buurt</h1>
     <p class="lead">Drie vragen over werken in je gemeente, beantwoord met open data van het CBS, de BAG en de Iv3-jaarrekening. Kies een gemeente: per vraag krijg je eerst het antwoord, daarna de kaart en de buurten die eruit springen.</p>
@@ -811,6 +817,7 @@ footer a{color:var(--accent)}
   </details>
 
   <footer>
+    <p class="terug-onder" style="margin:0"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
     <p>Bronnen: Kadaster, BAG (via PDOK), stand 30 september 2026; CBS, Kerncijfers wijken en buurten 2025 (tabel 86165NED) en Wijk- en buurtkaart 2025 (via PDOK); CBS, Iv3-jaarrekening gemeenten 2025 (tabel 45071NED); achtergrondkaart PDOK BRT grijs.</p>
     <p>Gemaakt door <a href="./">Josephine Linders</a>, oktober 2026 · versie 1.2. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
   </footer>
