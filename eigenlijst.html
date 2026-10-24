@@ -748,6 +748,10 @@ textarea { width: 100%; min-height: 160px; padding: 8px; border: 1px solid var(-
 .file input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 ul.plain { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 .belofte { border-left: 4px solid var(--st-controleren); }
+.privacy { border: 1px solid var(--st-bag); border-left-width: 4px; border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; font-size: .9rem; background: color-mix(in srgb, var(--st-bag) 6%, var(--surface)); }
+.privacy.zacht { border-color: var(--st-label_c); background: color-mix(in srgb, var(--st-label_c) 7%, var(--surface)); }
+.privacy p { margin: 0; }
+.privacy ul { margin: 0; padding-left: 1.2em; }
 
 table { border-collapse: collapse; width: 100%; font-size: .88rem; }
 th, td { padding: 7px 10px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
@@ -881,6 +885,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         <li>Naar buiten gaan alleen <b>zoekvragen naar openbare diensten</b>: BAG-ID's en adressen (postcode, huisnummer, straat) naar PDOK, pand-ID's naar RIVM. Namen, gebruik, oppervlakte en alle andere kolommen gaan nergens heen.</li>
         <li>De pagina kan technisch niets anders bereiken dan PDOK en RIVM: dat legt haar beveiligingsregel (Content-Security-Policy) vast. Lettertypen komen van Google Fonts, zonder gegevens uit je lijst.</li>
         <li>Geschikt voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed. Bij lijsten over inwoners zijn ook de adressen als zoekvraag al gevoelig; daarvoor is deze versie niet bedoeld.</li>
+        <li>Daarom kijkt de pagina vóór het koppelen naar kolomkoppen en inhoud. Wijst iets op persoonsgegevens (BSN, geboortedatum, namen, e-mail, telefoon, IBAN), dan koppelt ze niet. Wijst een kolomkop op inwoners (cliënt, bewoner, Wmo en dergelijke), dan pas na jouw bevestiging. Deze controle is een vangnet, geen garantie: de verantwoordelijkheid voor wat je inleest blijft bij jou.</li>
       </ul>
     </div>
   </section>
@@ -892,6 +897,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     </div>
     <p class="small">De pagina heeft de kolommen herkend. Klopt een rol niet, kies dan een andere. Een kolom met BAG-ID's mag meer ID's per cel bevatten; een weggevallen voorloopnul wordt aangevuld.</p>
     <div class="scroll" style="max-height:340px"><table><thead><tr><th>Kolom</th><th>Rol</th><th>Voorbeeld</th></tr></thead><tbody id="kolBody"></tbody></table></div>
+    <div class="privacy" id="privacy" role="alert" hidden></div>
     <div class="rij">
       <button class="btn primary" id="goBtn" type="button">Koppelen aan de BAG</button>
       <span class="small muted" id="goInfo"></span>
@@ -1577,7 +1583,45 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     throw new Error('Geen gemeentegrenzen gevonden bij CBS.');
   }
 
-  root.EigenLijst = { leesTekst, herkenRollen, sleutels, splitsAdres, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal };
+  // ---------- privacycontrole vooraf ----------
+  // Draait vóór elk verzoek naar buiten. Meldt per kolom wat er op persoonsgegevens wijst, nooit de waarden zelf.
+  // hard: directe persoonsgegevens, koppelen gaat niet door. zacht: kolomkop wijst op inwoners, koppelen pas na bevestiging.
+  function elfproef(s) {
+    const d = String(s).padStart(9, '0');
+    if (!/^\d{9}$/.test(d) || /^0+$/.test(d)) return false;
+    let t = 0;
+    for (let i = 0; i < 8; i++) t += +d[i] * (9 - i);
+    return (t - +d[8]) % 11 === 0;
+  }
+  const KOP_HARD = [
+    [/(^|\W)(bsn|sofi)(\W|$)|burger.?service/i, 'kolomkop wijst op een burgerservicenummer'],
+    [/geboorte|geboren|date.?of.?birth|geb\.?\s*dat/i, 'kolomkop wijst op een geboortedatum'],
+    [/voornaam|achternaam|tussenvoegsel|voorletter|geslachtsnaam|roepnaam/i, 'kolomkop wijst op persoonsnamen'],
+    [/e-?mail|telefoon|mobiel|gsm/i, 'kolomkop wijst op contactgegevens van een persoon'],
+    [/iban|rekening.?n(umme)?r|bankrekening/i, 'kolomkop wijst op een rekeningnummer']
+  ];
+  const KOP_ZACHT = /cli[eë]nt|bewoner|inwoner|aanvrager|huishouden|gezin|\bwmo\b|jeugd|uitkering|schuld|bijstand|participatie|indicatie|beschikking|zorgvraag|melder|overlast|leerling|pati[eë]nt|huurder|persoon|leeftijd|geslacht|nationaliteit|burger/i;
+  function controleerPrivacy(kop, regels, rol) {
+    const hard = [], zacht = [];
+    kop.forEach((k, i) => {
+      const naam = k || 'Kolom ' + (i + 1);
+      const v = regels.map(r => (r[i] || '').trim()).filter(Boolean);
+      for (const [re, reden] of KOP_HARD) if (re.test(k)) { hard.push({ kolom: naam, reden }); return; }
+      {
+        const n9 = v.filter(x => /^\d{8,9}$/.test(x));
+        if (n9.length >= 3 && n9.length >= 0.8 * v.length && n9.filter(elfproef).length >= 0.8 * n9.length) { hard.push({ kolom: naam, reden: 'bevat nummers die de elfproef voor een BSN halen' }); return; }
+        if (v.some(x => /[^@\s]+@[^@\s]+\.[a-z]{2,}/i.test(x))) { hard.push({ kolom: naam, reden: 'bevat e-mailadressen' }); return; }
+        if (v.some(x => /(^|[^\d])(\+31|0031|0)\s?[1-9](?:[\s-]?\d){8}(?!\d)/.test(x))) { hard.push({ kolom: naam, reden: 'bevat telefoonnummers' }); return; }
+        if (v.some(x => /\bNL\s?\d{2}\s?[A-Z]{4}(\s?\d){10}\b/i.test(x))) { hard.push({ kolom: naam, reden: 'bevat IBAN-rekeningnummers' }); return; }
+        const pers = v.filter(x => /(^|\s)(dhr|mevr|mw|mr|mevrouw|meneer|de heer)\.?\s/i.test(x) || (/^([A-Z]\.\s?){1,4}\s?([a-z]+\s){0,2}[A-Z][a-z]/.test(x) && !/\b(b\.?v|n\.?v|stichting|vereniging|vof|coöperatie)\b/i.test(x)));
+        if (pers.length >= 3 && pers.length >= 0.2 * v.length) { hard.push({ kolom: naam, reden: 'bevat persoonsnamen (aanhef of voorletters)' }); return; }
+      }
+      if (KOP_ZACHT.test(k)) zacht.push({ kolom: naam, reden: 'kolomkop wijst op gegevens over inwoners' });
+    });
+    return { hard, zacht };
+  }
+
+  root.EigenLijst = { controleerPrivacy, elfproef, leesTekst, herkenRollen, sleutels, splitsAdres, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>
@@ -1626,7 +1670,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.2';
+  const VERSIE = '0.2.1';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
@@ -1702,7 +1746,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   }
   function nieuweLijst() {
     wisUitkomst();
-    state.kop = state.regels = state.rol = null; state.bron = '';
+    state.kop = state.regels = state.rol = state.privacy = null; state.bron = ''; $('#privacy').hidden = true;
     $('#lijst').value = ''; $('#kolommen').hidden = true; $('#kolBody').innerHTML = '';
     $('#leesInfo').textContent = 'Excel-bestand? Kopieer de kolommen en plak ze hierboven, of sla op als CSV.';
     $('#wisBtn').hidden = true;
@@ -1751,13 +1795,31 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     $('#kolInfo').textContent = sleutel ? `Koppelen op ${sleutel}${heeft('id') && nr ? '; regels zonder ID op adres' : ''}.`
       : heeft('straat') && !nr ? 'Geen huisnummer: staat het huisnummer in de straatkolom, kies dan de rol "Adres (straat en huisnummer in één cel)".'
       : 'Geen sleutel: kies een kolom met BAG-ID, of postcode of straat met huisnummer.';
+    renderPrivacy();
     updateGo();
   }
+  // ---------- privacycontrole ----------
+  // Draait bij het inlezen, vóór elk verzoek naar buiten. Hard: niet koppelen. Zacht: pas na bevestiging.
+  function renderPrivacy() {
+    const c = state.privacy = E.controleerPrivacy(state.kop, state.regels, state.rol);
+    const box = $('#privacy');
+    const lijst = a => `<ul>${a.map(x => `<li><b>${esc(x.kolom)}</b>: ${esc(x.reden)}</li>`).join('')}</ul>`;
+    if (c.hard.length) {
+      box.className = 'privacy'; box.hidden = false;
+      box.innerHTML = `<p><b>Niet gekoppeld: deze lijst lijkt persoonsgegevens te bevatten.</b> Er is niets verstuurd.</p>${lijst(c.hard)}<p class="small">Gaat de lijst over inwoners, gebruik deze pagina dan niet. Gaat hij niet over inwoners, maar staat er bijvoorbeeld een contactpersoon van een gebouw in, haal die kolom dan uit je eigen bestand en lees de lijst opnieuw in.</p>`;
+    } else if (c.zacht.length) {
+      box.className = 'privacy zacht'; box.hidden = false;
+      box.innerHTML = `<p><b>Gaat deze lijst over inwoners?</b> Een kolomkop wijst daarop. Er is nog niets verstuurd.</p>${lijst(c.zacht)}<label class="check small"><input type="checkbox" id="privacyOk"> De lijst gaat niet over inwoners; de kolom betekent hier iets anders (bijvoorbeeld een organisatie als huurder).</label>`;
+      $('#privacyOk').onchange = updateGo;
+    } else { box.hidden = true; box.innerHTML = ''; }
+  }
+  const privacyVrij = () => !state.privacy || (!state.privacy.hard.length && (!state.privacy.zacht.length || ($('#privacyOk') && $('#privacyOk').checked)));
   function updateGo() {
     const heeft = r => state.rol && state.rol.includes(r);
     const ok = state.regels && (heeft('id') || heeft('adres') || ((heeft('postcode') || heeft('straat')) && heeft('huisnummer')));
-    $('#goBtn').disabled = !(ok && state.gm);
-    $('#goInfo').textContent = !state.gm ? 'Kies eerst een gemeente (rechtsboven).' : ok ? `Gemeente: ${state.gm.naam}.` : '';
+    const vrij = privacyVrij();
+    $('#goBtn').disabled = !(ok && state.gm && vrij);
+    $('#goInfo').textContent = !state.gm ? 'Kies eerst een gemeente (rechtsboven).' : !vrij ? (state.privacy.hard.length ? 'Koppelen staat uit vanwege mogelijke persoonsgegevens.' : 'Bevestig eerst dat de lijst niet over inwoners gaat.') : ok ? `Gemeente: ${state.gm.naam}.` : '';
   }
   $('#goBtn').onclick = () => run();
 
@@ -1765,6 +1827,9 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   const STEPS = ['adressen', 'bag', 'panden', 'labels', 'monumenten', 'buurten', 'kantoren'];
   async function run() {
     const gm = state.gm; if (!gm || !state.regels) return;
+    // dubbele zekerheid: ook bij een aanroep buiten de knop om gaat er niets weg zolang de controle niet vrij is
+    if (!state.privacy) state.privacy = E.controleerPrivacy(state.kop, state.regels, state.rol);
+    if (!privacyVrij()) { renderPrivacy(); updateGo(); $('#kolommen').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); return; }
     $('#goBtn').disabled = true;
     const P = $('#progress'); P.hidden = false; P.classList.remove('err');
     $('#result').hidden = true;
