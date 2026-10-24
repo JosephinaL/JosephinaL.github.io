@@ -831,12 +831,18 @@ ul.plain { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 .small { font-size: .85rem; }
 footer { font-size: .8rem; color: var(--muted); }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="brand">
+      <a class="terug" href="./#producten">← Alle producten</a>
       <span class="eyebrow">Josephine Linders · Energielabel C-verplichting kantoren · open data</span>
       <h1 id="title">Label C-kantoren</h1>
       <div class="ladder" aria-label="Energielabels A tot en met G; vanaf D voldoet een kantoor niet">
@@ -956,6 +962,7 @@ footer { font-size: .8rem; color: var(--muted); }
         </div>
       </div>
       <footer id="foot"></footer>
+      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
     </div>
   </section>
 </div>
