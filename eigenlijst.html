@@ -1117,7 +1117,7 @@ footer { font-size: .8rem; color: var(--muted); }
   // Rollen van kolommen: herkend op kopnaam en inhoud, aan te passen in de pagina.
   const ROLLEN = {
     id: 'BAG-ID (pand, verblijfsobject of nummeraanduiding)', postcode: 'Postcode', huisnummer: 'Huisnummer',
-    huisletter: 'Huisletter', toevoeging: 'Toevoeging', straat: 'Straat', plaats: 'Plaats',
+    huisletter: 'Huisletter', toevoeging: 'Toevoeging', straat: 'Straat', adres: 'Adres (straat en huisnummer in één cel)', plaats: 'Plaats',
     naam: 'Naam of omschrijving', gebruik: 'Eigen gebruik of functie', opp: 'Eigen oppervlakte (m²)', overig: '–'
   };
   const ID_RE = /(^|\D)(\d{15,16})(?=\D|$)/g;
@@ -1141,7 +1141,17 @@ footer { font-size: .8rem; color: var(--muted); }
       if (r === 'huisnummer' && aandeel(i, /^\d+/) < 0.5) continue;
       zet(i, r);
     }
+    // Een straatkolom waarin ook het huisnummer staat ("Markt 17-B") is een adreskolom.
+    for (let i = 0; i < n; i++) {
+      if ((rol[i] === 'straat' || (rol[i] === 'overig' && /adres/i.test(kop[i]))) && aandeel(i, ADRES_RE) >= 0.6 && !rol.includes('adres')) rol[i] = 'adres';
+    }
     return rol;
+  }
+  const ADRES_RE = /^\s*(?:\d+\w*\s+)?\D+?\s+\d+\s*[A-Za-z]?(?:\s*[-\s]\s*[\w/]+)?\s*(?:,.*)?$/;
+  // Splitst "Markt 17-B", "Oude Delft 12a", "Markt 9 A" in straat, huisnummer, huisletter en toevoeging.
+  function splitsAdres(t) {
+    const m = String(t || '').match(/^\s*(.+?)\s+(\d+)\s*(?:([A-Za-z])(?![A-Za-z]))?\s*(?:[-\s]+([\w/]+))?\s*(?:,.*)?$/);
+    return m ? { straat: m[1].trim(), hnr: +m[2], letter: (m[3] || '').toUpperCase(), toev: normToev(m[4]) } : null;
   }
 
   // ---------- sleutels per regel ----------
@@ -1177,6 +1187,8 @@ footer { font-size: .8rem; color: var(--muted); }
     const hm = hcel.match(/^(\d+)\s*([A-Za-z])?\s*(?:[-\s]\s*(\S+))?$/);
     if (hm) { if (!k.letter && hm[2]) k.letter = hm[2].toUpperCase(); if (!k.toev && hm[3]) k.toev = normToev(hm[3]); }
     k.straat = col('straat').trim();
+    const ad = splitsAdres(col('adres'));
+    if (ad) { if (!k.straat) k.straat = ad.straat; if (k.hnr == null) { k.hnr = ad.hnr; if (!k.letter) k.letter = ad.letter; if (!k.toev) k.toev = ad.toev; } }
     k.plaats = col('plaats').trim();
     k.naam = col('naam').trim();
     k.gebruik = col('gebruik').trim();
@@ -1202,6 +1214,14 @@ footer { font-size: .8rem; color: var(--muted); }
     const L = d => String(d.huisletter || '').toUpperCase(), T = d => normToev(d.huisnummertoevoeging);
     const exact = zelfde.find(d => L(d) === k.letter && T(d) === k.toev);
     if (exact) return { doc: exact, benadering: false };
+    if (!k.letter && /^[A-Z]$/.test(k.toev)) {
+      const alsLetter = zelfde.find(d => L(d) === k.toev && !T(d));
+      if (alsLetter) return { doc: alsLetter, benadering: false };
+    }
+    if (k.letter && !k.toev) {
+      const alsToev = zelfde.find(d => !L(d) && T(d) === k.letter);
+      if (alsToev) return { doc: alsToev, benadering: false };
+    }
     if (k.letter || k.toev) {
       const opLetter = zelfde.find(d => L(d) === k.letter && !T(d));
       if (opLetter) return { doc: opLetter, benadering: true };
@@ -1267,7 +1287,7 @@ footer { font-size: .8rem; color: var(--muted); }
       const fs = await getAllPages(`${BAG}/verblijfsobject/items?f=json&limit=1000&filter-lang=cql2-text&filter=${f}`);
       for (const x of fs) {
         const p = x.properties;
-        V.set(p.identificatie, { id: p.identificatie, status: p.status, gd: p.gebruiksdoel || '', opp: p.oppervlakte || 0, bron: p.bronhouder_identificatie,
+        V.set(p.identificatie, { id: p.identificatie, hoofd: p.hoofdadres_identificatie, status: p.status, gd: p.gebruiksdoel || '', opp: p.oppervlakte || 0, bron: p.bronhouder_identificatie,
           adres: `${p.openbare_ruimte_naam || ''} ${p.huisnummer || ''}${p.huisletter || ''}${p.toevoeging ? '-' + p.toevoeging : ''}`.trim() + (p.woonplaats_naam ? ', ' + p.woonplaats_naam : ''),
           xy: x.geometry && x.geometry.coordinates, panden: (p['pand.href'] || []).map(uuidOf) });
       }
@@ -1306,7 +1326,9 @@ footer { font-size: .8rem; color: var(--muted); }
       const v0 = r.V.find(v => v.xy);
       r.xy = v0 ? v0.xy : r.P[0] ? middenVan(r.P[0].geom) : r.lig ? ll(r.lig.centroide_ll) : r.ls ? ll(r.ls.centroide_ll) : null;
       r.plek = r.V[0] ? 'v' + r.V[0].id : r.P[0] ? 'p' + r.P[0].id : r.lig ? 'l' + r.lig.adresseerbaarobject_id : null;
-      r.adresBAG = r.V[0] ? r.V[0].adres : r.ls ? r.ls.weergavenaam : r.lig ? r.lig.weergavenaam : '';
+      r.adresBAG = r.ls ? r.ls.weergavenaam : r.V[0] ? r.V[0].adres : r.lig ? r.lig.weergavenaam : '';
+      if (r.ls && r.V[0] && r.V[0].hoofd && r.ls.nummeraanduiding_id && r.ls.nummeraanduiding_id !== r.V[0].hoofd)
+        r.info.push(`${r.ls.weergavenaam} is een nevenadres: het hoort bij verblijfsobject ${r.V[0].id}, met hoofdadres ${r.V[0].adres}. Gebruiksdoel en oppervlakte gelden voor dat hele verblijfsobject.`);
       if (r.V.some(v => v.bron && v.bron !== gmc)) r.info.push(`Verblijfsobject van een andere gemeente (code ${uniq(r.V.map(v => v.bron)).join(', ')})`);
     }
     const panden = [...P.values()];
@@ -1404,7 +1426,8 @@ footer { font-size: .8rem; color: var(--muted); }
     step('klaar', 'Klaar');
     return {
       gm: { code: gm.code, naam: gm.naam }, kop, rol, regels: R, panden, wbJaar,
-      fouten: { labels: labelsFout, monumenten: monFout }, opgehaald: new Date().toISOString()
+      fouten: { labels: labelsFout, monumenten: monFout }, opgehaald: new Date().toISOString(),
+      gemeenten: (() => { const t = {}; for (const r of R) { const c = (r.V[0] && r.V[0].bron) || (r.ls && r.ls.gemeentecode); if (c) t[c] = (t[c] || 0) + 1; } return t; })()
     };
   }
   function zetAdres(r, keus, via) {
@@ -1454,8 +1477,9 @@ footer { font-size: .8rem; color: var(--muted); }
   ];
   function verwachtGebruik(t) {
     if (!t || /niet gebruiken|niet van toepassing|leegstand|multifunctioneel/i.test(t)) return null;
-    for (const [re, gd] of GEBRUIK) if (re.test(t)) return gd;
-    return null;
+    const gd = new Set();
+    for (const deel of t.split(/[,;|/]+|\s+en\s+/)) for (const [re, g] of GEBRUIK) if (re.test(deel)) { g.forEach(x => gd.add(x)); break; }
+    return gd.size ? [...gd] : null;
   }
   const STATUS = {
     bag: 'Niet (meer) in gebruik in de BAG', label_c: 'Kantoor zonder label C', controleren: 'Controleren',
@@ -1511,7 +1535,7 @@ footer { font-size: .8rem; color: var(--muted); }
     throw new Error('Geen gemeentegrenzen gevonden bij CBS.');
   }
 
-  root.EigenLijst = { leesTekst, herkenRollen, sleutels, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal };
+  root.EigenLijst = { leesTekst, herkenRollen, sleutels, splitsAdres, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>
@@ -1560,7 +1584,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.1';
+  const VERSIE = '0.1.1';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
@@ -1657,13 +1681,16 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
       renderKolommen();
     });
     const heeft = r => state.rol.includes(r);
-    const sleutel = heeft('id') ? 'BAG-ID' : heeft('postcode') && heeft('huisnummer') ? 'postcode en huisnummer' : heeft('straat') && heeft('huisnummer') ? 'straat en huisnummer' : null;
-    $('#kolInfo').textContent = sleutel ? `Koppelen op ${sleutel}${heeft('id') && heeft('huisnummer') ? '; zonder ID op adres' : ''}.` : 'Geen sleutel: kies een kolom met BAG-ID, of postcode/straat en huisnummer.';
+    const nr = heeft('huisnummer') || heeft('adres');
+    const sleutel = heeft('id') ? 'BAG-ID' : heeft('postcode') && nr ? 'postcode en huisnummer' : (heeft('straat') || heeft('adres')) && nr ? 'straat en huisnummer' : null;
+    $('#kolInfo').textContent = sleutel ? `Koppelen op ${sleutel}${heeft('id') && nr ? '; regels zonder ID op adres' : ''}.`
+      : heeft('straat') && !nr ? 'Geen huisnummer: staat het huisnummer in de straatkolom, kies dan de rol "Adres (straat en huisnummer in één cel)".'
+      : 'Geen sleutel: kies een kolom met BAG-ID, of postcode of straat met huisnummer.';
     updateGo();
   }
   function updateGo() {
     const heeft = r => state.rol && state.rol.includes(r);
-    const ok = state.regels && (heeft('id') || ((heeft('postcode') || heeft('straat')) && heeft('huisnummer')));
+    const ok = state.regels && (heeft('id') || heeft('adres') || ((heeft('postcode') || heeft('straat')) && heeft('huisnummer')));
     $('#goBtn').disabled = !(ok && state.gm);
     $('#goInfo').textContent = !state.gm ? 'Kies eerst een gemeente (rechtsboven).' : ok ? `Gemeente: ${state.gm.naam}.` : '';
   }
@@ -1720,7 +1747,14 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     if (f.labels) mel.push('De energielabels konden niet worden opgehaald bij RIVM; de label C-toets ontbreekt.');
     if (f.monumenten) mel.push('De rijksmonumenten konden niet worden opgehaald.');
     if (!res.wbJaar) mel.push('De buurtgrenzen konden niet worden opgehaald.');
-    $('#melding').hidden = !mel.length; $('#meldingTekst').textContent = mel.join(' ');
+    // Liggen de meeste objecten in een andere gemeente dan gekozen, dan dat melden met een knop om te wisselen.
+    const tel = Object.entries(res.gemeenten || {}).sort((a, b) => b[1] - a[1]);
+    const totaal = tel.reduce((s, [, n]) => s + n, 0);
+    const eigen = state.res.gm.code.replace(/^GM/, '');
+    const ander = tel.length && tel[0][0] !== eigen && tel[0][1] > totaal / 2 ? vind('GM' + tel[0][0]) : null;
+    $('#melding').hidden = !mel.length && !ander;
+    $('#meldingTekst').innerHTML = esc(mel.join(' ')) + (ander ? `${mel.length ? '<br>' : ''}<b>${fmt(tel[0][1])} van de ${fmt(totaal)} gekoppelde regels liggen in ${esc(ander.naam)}, niet in ${esc(res.gm.naam)}.</b> Buurten, kaartgrens en het zoeken op straat volgen de gekozen gemeente. <button class="btn primary" id="wisselBtn" type="button">Kies ${esc(ander.naam)} en koppel opnieuw</button>` : '');
+    if (ander) $('#wisselBtn').onclick = () => { kiesGemeente(ander); run(); };
     drawMap(); renderAll();
     $('#dossier').innerHTML = '<span class="eyebrow">Object</span><p class="muted" style="margin:0">Klik een object op de kaart of een regel in de tabel om te zien hoe het gekoppeld is en waarom het een signaal heeft.</p>';
     const d = new Date(res.opgehaald);
