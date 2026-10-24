@@ -885,7 +885,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         <li>Naar buiten gaan alleen <b>zoekvragen naar openbare diensten</b>: BAG-ID's en adressen (postcode, huisnummer, straat) naar PDOK, pand-ID's naar RIVM. Namen, gebruik, oppervlakte en alle andere kolommen gaan nergens heen.</li>
         <li>De pagina kan technisch niets anders bereiken dan PDOK en RIVM: dat legt haar beveiligingsregel (Content-Security-Policy) vast. Lettertypen komen van Google Fonts, zonder gegevens uit je lijst.</li>
         <li>Geschikt voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed. Bij lijsten over inwoners zijn ook de adressen als zoekvraag al gevoelig; daarvoor is deze versie niet bedoeld.</li>
-        <li>Daarom kijkt de pagina vóór het koppelen naar kolomkoppen en inhoud. Wijst iets op persoonsgegevens (BSN, geboortedatum, namen, e-mail, telefoon, IBAN), dan koppelt ze niet. Wijst een kolomkop op inwoners (cliënt, bewoner, Wmo en dergelijke), dan pas na jouw bevestiging. Deze controle is een vangnet, geen garantie: de verantwoordelijkheid voor wat je inleest blijft bij jou.</li>
+        <li>Daarom kijkt de pagina vóór het koppelen naar kolomkoppen en inhoud. Wijst iets op persoonsgegevens (BSN, geboortedatum, e-mail, telefoon, IBAN, veelvoorkomende voor- en achternamen), dan koppelt ze niet. Wijst een kolomkop op inwoners (cliënt, bewoner, Wmo en dergelijke), of lijkt een naamkolom op persoonsnamen, dan pas na jouw bevestiging. Deze controle is een vangnet, geen garantie: de verantwoordelijkheid voor wat je inleest blijft bij jou.</li>
       </ul>
     </div>
   </section>
@@ -1601,6 +1601,24 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     [/iban|rekening.?n(umme)?r|bankrekening/i, 'kolomkop wijst op een rekeningnummer']
   ];
   const KOP_ZACHT = /cli[eë]nt|bewoner|inwoner|aanvrager|huishouden|gezin|\bwmo\b|jeugd|uitkering|schuld|bijstand|participatie|indicatie|beschikking|zorgvraag|melder|overlast|leerling|pati[eë]nt|huurder|persoon|leeftijd|geslacht|nationaliteit|burger/i;
+  // Veelvoorkomende Nederlandse voornamen en achternamen (kleine letters). Bedoeld als vangnet, niet als volledige lijst.
+  const VOOR = new Set(('jan piet klaas kees henk gerrit hans peter paul johan willem wim jaap joop cor dirk evert frank fred gert harm hendrik herman jacob jos joost karel koen lucas luuk mark martin martijn maarten michiel nick niels pieter rob robert ruud sander stefan thijs thomas tim tom ton wouter bram daan finn jesse lars levi milan noah sem sven max bas bart erik eric marco marcel jeroen arjan arie ad gijs hugo ivo jasper jeffrey kevin mike patrick rik roy ronald ruben sjaak teun theo wessel youssef mohamed ahmed ali mustafa omar ibrahim hassan mehmet ' +
+    'truus ingrid anna anne annie annemarie astrid bep carla corrie cora diana dineke els elly emma esther eva femke fenna fleur gerda greet hanneke hilde ilse ineke inge iris jacqueline janny jolanda joke judith julia karin kim lisa lieke linda lotte maria marie marieke marjolein marloes mieke miriam monique nathalie nicole petra renate rianne rita roos sandra sanne saskia sophie sylvia tamara tineke tessa ria wilma willemijn yvonne zoë fatima aisha khadija sara noor nina lynn julia mila tess evi saar').split(' '));
+  const ACHTER = new Set(('jansen janssen de jong jong de vries vries van den berg berg van dijk dijk bakker visser smit meijer meyer de boer boer mulder de groot groot bos vos peters hendriks van leeuwen leeuwen dekker brouwer de wit wit dijkstra smits de graaf graaf van der meer meer van der linden linden kok jacobs de haan haan vermeulen van den heuvel heuvel van der veen veen van den broek broek de bruijn bruijn de bruin bruin van der heijden heijden schouten van beek beek willems van vliet vliet van de ven ven hoekstra maas verhoeven koster van dam dam van der wal wal prins blom huisman peeters de jonge jonge kuipers van veen post kuiper veenstra kramer van den brink brink scholten van wijk wijk postma martens vink de ruiter ruiter timmermans groen gerritsen jonker van loon loon boer van der velde velde willemsen smeets de lange lange de vos van den bosch bosch evers mol hermans van der laan laan molenaar wouters claassen haverkamp de koning koning sanders bosman van rijn rijn bakkers hoogendoorn de bakker kroon verbeek').split(' '));
+  const TUSSEN = /^(de|den|der|van|het|ter|ten|te|in|op|la|le|'t|v\.d\.)$/;
+  const NIET_NAAM = /\d|gebouw|school|hal\b|zaal|sport|kantoor|huis|centrum|toren|kerk|synagoge|moskee|museum|bad\b|park|tuin|woning|opvang|kinder|loket|horeca|winkel|unit|ruimte|berging|garage|werf|depot|atelier|kiosk|kantine|clubhuis|bibliotheek|theater|station|brug|gemaal|wijk|buurt|stichting|vereniging|b\.?v\b|n\.?v\b|gemeente|dienst|bureau|praktijk|zorg|okt|ggd|kdv|bso|psz/i;
+  function lijktNaam(v) {
+    if (!v || NIET_NAAM.test(v) || v.length > 40) return false;
+    const t = v.toLowerCase().replace(/[.,]/g, ' ').trim().split(/\s+/);
+    if (t.length === 1) return VOOR.has(t[0]) || ACHTER.has(t[0]);
+    if (t.length > 4) return false;
+    const rest = t.slice(1).filter(x => !TUSSEN.test(x));
+    if (VOOR.has(t[0]) && rest.length >= 1) return true;                       // Piet Jansen, Anna de Vries
+    const zonder = t.filter(x => !TUSSEN.test(x));
+    return zonder.length === 1 && ACHTER.has(zonder[0]);                       // de Vries, van den Berg
+  }
+  const lijktNaamVorm = v => !!v && !NIET_NAAM.test(v) && v.length <= 30 && /^[A-ZÀ-Ý][a-zà-ÿ'’-]+( (?:[a-z']{1,4} ){0,2}[A-ZÀ-Ý][a-zà-ÿ'’-]+)?$/.test(v.trim());
+  const ADRESROL = new Set(['straat', 'adres', 'plaats', 'postcode', 'huisnummer', 'huisletter', 'toevoeging']);
   function controleerPrivacy(kop, regels, rol) {
     const hard = [], zacht = [];
     kop.forEach((k, i) => {
@@ -1615,6 +1633,11 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         if (v.some(x => /\bNL\s?\d{2}\s?[A-Z]{4}(\s?\d){10}\b/i.test(x))) { hard.push({ kolom: naam, reden: 'bevat IBAN-rekeningnummers' }); return; }
         const pers = v.filter(x => /(^|\s)(dhr|mevr|mw|mr|mevrouw|meneer|de heer)\.?\s/i.test(x) || (/^([A-Z]\.\s?){1,4}\s?([a-z]+\s){0,2}[A-Z][a-z]/.test(x) && !/\b(b\.?v|n\.?v|stichting|vereniging|vof|coöperatie)\b/i.test(x)));
         if (pers.length >= 3 && pers.length >= 0.2 * v.length) { hard.push({ kolom: naam, reden: 'bevat persoonsnamen (aanhef of voorletters)' }); return; }
+        if (!ADRESROL.has(rol[i]) && v.length) {
+          const nm = v.filter(lijktNaam).length;
+          if (nm >= 2 && nm >= 0.3 * v.length) { hard.push({ kolom: naam, reden: 'bevat veelvoorkomende voor- of achternamen' }); return; }
+          if (/naam|contact|eigenaar|gebruiker|bewoner|wie/i.test(k) && v.filter(lijktNaamVorm).length >= 0.6 * v.length && v.length >= 2) { zacht.push({ kolom: naam, reden: 'waarden lijken op persoonsnamen' }); return; }
+        }
       }
       if (KOP_ZACHT.test(k)) zacht.push({ kolom: naam, reden: 'kolomkop wijst op gegevens over inwoners' });
     });
@@ -1670,7 +1693,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.2.1';
+  const VERSIE = '0.2.2';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
