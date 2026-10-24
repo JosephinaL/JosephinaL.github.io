@@ -160,12 +160,18 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .herken .meld a.btn { text-decoration: none; color: inherit; }
 .herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="brand">
+      <a class="terug" href="./#producten">← Alle producten</a>
       <span class="eyebrow">Josephine Linders · Schulden · open data</span>
       <h1 id="title">Schulden per wijk</h1>
       <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
@@ -302,6 +308,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
+      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
     </div>
   </section>
 </div>
