@@ -838,12 +838,18 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
 .legenda { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); }
 .legenda i { display: inline-block; width: 14px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="brand">
+      <a class="terug" href="./#producten">← Alle producten</a>
       <span class="eyebrow">Josephine Linders · Eigen lijst op de kaart · open data plus wat alleen de gemeente weet</span>
       <h1 id="title">Eigen lijst op de kaart</h1>
       <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken · eerste toepassing: gemeentelijk vastgoed</span>
@@ -1001,6 +1007,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         </div>
       </div>
       <footer id="foot"></footer>
+      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
     </div>
   </section>
 </div>
