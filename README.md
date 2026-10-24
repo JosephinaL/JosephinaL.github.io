@@ -25,6 +25,7 @@ Informatieproducten voor gemeentelijke vraagstukken, gebouwd op openbare registr
 | Jeugdzorg per wijk | [jeugdzorg.html](https://josephinal.github.io/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
 | Wmo per wijk | [wmo.html](https://josephinal.github.io/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
 | Schulden per wijk | [schulden.html](https://josephinal.github.io/schulden.html) | Hoeveel huishoudens hebben problematische schulden, bij welke schuldeisers, wie zijn het en in welke wijken? | CBS (Schuldenproblematiek in beeld), PDOK |
+| Inburgering per gemeente | [inburgering.html](https://josephinal.github.io/inburgering.html) | Wie werd inburgeringsplichtig onder de Wet inburgering 2021, hoe ver is elke jaargroep en in welke leerroute? | DUO (WI 2021 Instroom, Uitstroom en Leerroute), CBS (Regionale kerncijfers) |
 | **Werkbank** | | | |
 | Eigen lijst op de kaart | [eigenlijst.html](https://josephinal.github.io/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed in eigen beheer, eruit naast de BAG en open data? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
 
@@ -33,7 +34,7 @@ Informatieproducten voor gemeentelijke vraagstukken, gebouwd op openbare registr
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Wmo, schulden, bevolking en wonen (CBS), vergunningen (gemeenteblad).
+2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Wmo, schulden, bevolking en wonen (CBS), inburgering (DUO), vergunningen (gemeenteblad).
 3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving. Eigen lijst op de kaart is daar het gereedschap voor.
 4. **Antwoord:** navolgbaar per object.
 
@@ -46,7 +47,7 @@ Drie principes:
 ## Techniek
 
 - Elk product is één zelfstandig HTML-bestand, zonder buildstap.
-- De data komt live uit openbare API's (PDOK, RIVM, RCE, CBS, Officiële bekendmakingen) of staat inline, zoals bij DUO, waar de API geen verzoeken van andere sites toestaat, en bij Schuldenproblematiek in beeld, dat alleen als download bij een CBS-dashboard bestaat.
+- De data komt live uit openbare API's (PDOK, RIVM, RCE, CBS, Officiële bekendmakingen) of staat inline, zoals bij DUO (onderwijs en inburgering), waar de API geen verzoeken van andere sites toestaat, en bij Schuldenproblematiek in beeld, dat alleen als download bij een CBS-dashboard bestaat.
 - Bron en peildatum staan op elke pagina.
 - Gehost via GitHub Pages.
 
@@ -75,7 +76,7 @@ Deze gebruiksregel geldt voor de pagina's zelf: opbouw, code, teksten en rekenwi
 - KOOP (Officiële bekendmakingen): CC0
 - CBS (Statline, Kerncijfers wijken en buurten, Iv3): CC-BY 4.0; CBS Schuldenproblematiek in beeld (aanvullend statistisch onderzoek): overnemen met het CBS als bron
 - RIVM (energielabels, afgeleid uit EP-Online van RVO) en Rijksdienst voor het Cultureel Erfgoed
-- DUO: CC-BY
+- DUO: CC-BY; WI 2021-inburgeringsdata: door DUO vrij van auteursrechten verklaard, met DUO als bron vermeld
 - Gemeente Amsterdam (Gemeentelijk Vastgoed, alleen als voorbeeldlijst): openbaar
 
 ## Auteur

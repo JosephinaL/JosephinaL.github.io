@@ -189,10 +189,10 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <h1 id="h-hero">Open data, laag voor laag, tot een antwoord dat een gemeente kan gebruiken.</h1>
       <p class="lead">Gemeentelijke vraagstukken lopen dwars door domeinen heen. Het antwoord ligt vaak al in openbare registraties, verspreid over bronnen die niemand naast elkaar legt. Daar begint het werk.</p>
     </div>
-    <svg class="strata" viewBox="0 0 490 447" role="img" aria-labelledby="strata-t strata-d">
+    <svg class="strata" viewBox="0 0 490 464" role="img" aria-labelledby="strata-t strata-d">
       <title id="strata-t">Werkwijze in vier lagen</title>
-      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS), Wmo (CBS), schulden (CBS), bevolking (CBS), wonen (CBS) en vergunningen (KOOP). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
-      <line x1="360" y1="82" x2="360" y2="375" stroke="var(--muted)" stroke-dasharray="3 4"/>
+      <desc id="strata-d">Bovenaan BAG en CBS-buurten en -wijken als skelet. Daaronder open domeindata: energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd (CBS), Wmo (CBS), schulden (CBS), inburgering (DUO), bevolking (CBS), wonen (CBS) en vergunningen (KOOP). Dan wat alleen de gemeente weet. Onderaan een navolgbaar antwoord per object.</desc>
+      <line x1="360" y1="82" x2="360" y2="392" stroke="var(--muted)" stroke-dasharray="3 4"/>
       <g class="layer l1">
         <polygon points="240,50 360,82 480,50 360,18" fill="var(--layer-1)"/>
         <text x="4" y="47" class="t-strong">1 · skelet</text>
@@ -208,20 +208,21 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <text x="4" y="190">jeugd</text><text x="112" y="190" class="t-src">CBS</text>
         <text x="4" y="207">wmo</text><text x="112" y="207" class="t-src">CBS</text>
         <text x="4" y="224">schulden</text><text x="112" y="224" class="t-src">CBS</text>
-        <text x="4" y="241">bevolking</text><text x="112" y="241" class="t-src">CBS</text>
-        <text x="4" y="258">wonen</text><text x="112" y="258" class="t-src">CBS</text>
-        <text x="4" y="275">vergunningen</text><text x="112" y="275" class="t-src">KOOP</text>
+        <text x="4" y="241">inburgering</text><text x="112" y="241" class="t-src">DUO</text>
+        <text x="4" y="258">bevolking</text><text x="112" y="258" class="t-src">CBS</text>
+        <text x="4" y="275">wonen</text><text x="112" y="275" class="t-src">CBS</text>
+        <text x="4" y="292">vergunningen</text><text x="112" y="292" class="t-src">KOOP</text>
       </g>
       <g class="layer l3">
-        <polygon points="240,322 360,354 480,322 360,290" fill="var(--layer-3)"/>
-        <text x="4" y="319" class="t-strong">3 · verrijking</text>
-        <text x="4" y="336">wat alleen de gemeente weet</text>
+        <polygon points="240,339 360,371 480,339 360,307" fill="var(--layer-3)"/>
+        <text x="4" y="336" class="t-strong">3 · verrijking</text>
+        <text x="4" y="353">wat alleen de gemeente weet</text>
       </g>
       <g class="layer l4">
-        <polygon points="240,407 360,439 480,407 360,375" fill="var(--layer-4)"/>
-        <circle cx="341" cy="406" r="4" fill="var(--bg)"/><circle cx="374" cy="415" r="4" fill="var(--bg)"/><circle cx="396" cy="401" r="4" fill="var(--bg)"/>
-        <text x="4" y="404" class="t-strong">4 · antwoord</text>
-        <text x="4" y="421">navolgbaar per object</text>
+        <polygon points="240,424 360,456 480,424 360,392" fill="var(--layer-4)"/>
+        <circle cx="341" cy="423" r="4" fill="var(--bg)"/><circle cx="374" cy="432" r="4" fill="var(--bg)"/><circle cx="396" cy="418" r="4" fill="var(--bg)"/>
+        <text x="4" y="421" class="t-strong">4 · antwoord</text>
+        <text x="4" y="438">navolgbaar per object</text>
       </g>
     </svg>
   </section>
@@ -335,7 +336,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         </div>
       </div>
       <div class="shelf">
-        <div class="shelf-head"><h3>Sociaal domein</h3><span>Jeugdzorg, Wmo en schulden per wijk: wie, wat en hoeveel</span></div>
+        <div class="shelf-head"><h3>Sociaal domein</h3><span>Jeugdzorg, Wmo, schulden en inburgering: wie, wat en hoeveel</span></div>
         <div class="rail">
       <article class="tile">
         <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:35.0;background:#2a78d6"></i><i style="flex:32.8;background:#eb6834"></i><i style="flex:8.3;background:#1baf7a"></i><i style="flex:8.6;background:#eda100"></i><i style="flex:15.3;background:#e87ba4"></i></span></div>
@@ -357,6 +358,13 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
         <span class="meta">Kaart · per wijk · elke gemeente</span>
         <p>Hoeveel huishoudens hebben problematische schulden, bij welke schuldeisers, wie zijn het en in welke wijken? De eigen gemeente door de jaren heen.</p>
         <div class="tile-links"><a class="btn btn-sm" href="schulden.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-schulden">Meer weten</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:36.2;background:#0f5c66"></i><i style="flex:15.0;background:#3a8f9a"></i><i style="flex:3.8;background:#a7d3d8"></i><i style="flex:34.6;background:#c98500"></i><i style="flex:3.0;background:#ecd08f"></i><i style="flex:7.4;background:#8aa3a7"></i></span></div>
+        <h4>Inburgering per gemeente</h4>
+        <span class="meta">Per jaargroep · elke gemeente</span>
+        <p>Wie werd inburgeringsplichtig, hoe ver is elke jaargroep en in welke leerroute zitten ze? De gemeente heeft sinds 2022 de regie.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="inburgering.html">Open de pagina <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-inburgering">Meer weten</button></div>
       </article>
         </div>
       </div>
@@ -620,6 +628,31 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
           <li>Per registratie geldt een eigen grens voor een problematische schuld; telt één lid van het huishouden, dan telt het huishouden.</li>
           <li>De cijfers per gemeente en wijk staan in de pagina; de wijkgrenzen komen live van PDOK.</li>
           <li>Alleen wat geregistreerd is: schulden bij verhuurder, energiebedrijf of familie ontbreken. Wie schuldhulp krijgt, staat er niet in.</li>
+        </ol>
+        <button class="close" type="button" hidden>Sluiten</button>
+      </div>
+    </article>
+    <article class="product" id="info-inburgering" aria-labelledby="h-inburgering">
+      <div class="product-body">
+        <h3 id="h-inburgering">Inburgering per gemeente</h3>
+        <div class="spread" role="img" aria-label="Jaargroep 2022 van de Wet inburgering 2021 in Nederland, stand eind september 2026: voldaan 36 procent, via de Z-route 15 procent, ontheven of vrijgesteld 4 procent, nog inburgeringsplichtig 35 procent, tijdelijk vrijgesteld 3 procent, vervallen 7 procent">
+          <i style="flex:36.2;background:#0f5c66"></i><i style="flex:15.0;background:#3a8f9a"></i><i style="flex:3.8;background:#a7d3d8"></i><i style="flex:34.6;background:#c98500"></i><i style="flex:3.0;background:#ecd08f"></i><i style="flex:7.4;background:#8aa3a7"></i>
+        </div>
+        <p>De inburgering onder de Wet inburgering 2021 in één gemeente, als spiegel: hoeveel inwoners er elk jaar inburgeringsplichtig werden, asielstatushouders en gezinsmigranten, hoe ver elke jaargroep nu is, en in welke leerroute ze zitten. Nederland is het enige vergelijkingspunt; geen ranglijst van gemeenten. Voor beleidsmedewerkers inburgering en participatie.</p>
+        <div class="facts">
+          <div><b>154.025</b><span>inburgeringsplichtig geworden sinds 2022 (stand eind september 2026)</span></div>
+          <div><b>55%</b><span>van de jaargroep 2022 heeft de inburgering afgerond; 35% is nog plichtig</span></div>
+          <div><b>25%</b><span>van wie een leerroute heeft, zit in de zelfredzaamheidsroute</span></div>
+        </div>
+        <a class="btn" href="inburgering.html">Open de pagina <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo werkt het</span>
+        <ol>
+          <li>DUO publiceert maandelijks de in- en uitstroom van alle inburgeraars uit het Informatiesysteem Inburgering, per gemeente.</li>
+          <li>Per jaargroep (jaar van het besluit) en doelgroep: status, reden van uitstroom en leerroute uit het persoonlijk plan.</li>
+          <li>De cijfers staan in de pagina; het aantal inwoners komt live van het CBS.</li>
+          <li>Groepjes van 1 tot 4 publiceert DUO niet. In kleine gemeenten is een deel daarom niet uitgesplitst; de pagina laat zien hoeveel.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>
       </div>
