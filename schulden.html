@@ -208,7 +208,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
         <div class="meld">
           <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
-          <a class="btn primary" id="herkenMail" href="mailto:joselin@live.nl">Meld het per e-mail</a>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
           <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
           <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
         </div>
@@ -819,7 +819,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const titel = PRODUCT + (g ? ' – ' + g.n : '');
     const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
       '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
-    m.href = 'mailto:joselin@live.nl?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
     gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
   }
   function renderVoet() {

@@ -186,7 +186,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <p class="small muted status">Deze pagina is een bewerking van open data van DUO door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en DUO is niet verantwoordelijk voor de bewerking.</p>
         <div class="meld">
           <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
-          <a class="btn primary" id="herkenMail" href="mailto:joselin@live.nl">Meld het per e-mail</a>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
           <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
           <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
         </div>
@@ -606,13 +606,13 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const titel = PRODUCT + (g ? ' – ' + g.n : '');
     const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
       '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
-    m.href = 'mailto:joselin@live.nl?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
     gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
   }
   // ---------- voet ----------
   function renderVoet() {
     renderHerken();
-    $('#foot').innerHTML = `Bron: DUO, <a href="https://onderwijsdata.duo.nl/datasets/wi-2021">WI 2021 Instroom, Uitstroom en Leerroute</a> (Open Onderwijsdata, uit het Informatiesysteem Inburgering), bijgewerkt ${BIJGEWERKT}, stand eind ${STAND}; opgehaald 24 oktober 2026 en opgenomen in deze pagina. DUO verklaart de data vrij van auteursrechten. Inwoners op 1 januari: CBS, Regionale kerncijfers Nederland (70072ned), live${S && S.inwFout ? ' (nu niet bereikbaar)' : ''}. De cijfers overnemen mag met DUO als bron.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg: joselin@live.nl.<br>Josephine Linders · Inburgering per gemeente · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bron: DUO, <a href="https://onderwijsdata.duo.nl/datasets/wi-2021">WI 2021 Instroom, Uitstroom en Leerroute</a> (Open Onderwijsdata, uit het Informatiesysteem Inburgering), bijgewerkt ${BIJGEWERKT}, stand eind ${STAND}; opgehaald 24 oktober 2026 en opgenomen in deze pagina. DUO verklaart de data vrij van auteursrechten. Inwoners op 1 januari: CBS, Regionale kerncijfers Nederland (70072ned), live${S && S.inwFout ? ' (nu niet bereikbaar)' : ''}. De cijfers overnemen mag met DUO als bron.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Inburgering per gemeente · versie ${VERSIE}`;
   }
 
   // ---------- hertekenen bij andere breedte ----------

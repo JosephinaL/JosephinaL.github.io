@@ -62,11 +62,11 @@ Label C-kantoren en Eigen lijst op de kaart nemen eigen gegevens van de gemeente
 
 ## Gebruik
 
-© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina's kopiëren, aanpassen of elders publiceren alleen na overleg: joselin@live.nl.
+© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina's kopiëren, aanpassen of elders publiceren alleen na overleg, via [Samenwerken](https://josephinal.github.io/#samenwerken).
 
 Een directe link naar je eigen gemeente werkt met `#gm=` en de gemeentecode, bijvoorbeeld `schulden.html#gm=0518` voor 's-Gravenhage.
 
-Fout gezien of een cijfer dat je niet herkent? Meld het per e-mail of via [Issues](https://github.com/josephinal/josephinal.github.io/issues).
+Fout gezien of een cijfer dat je niet herkent? Meld het via de knop onder de cijfers op de pagina, via [Samenwerken](https://josephinal.github.io/#samenwerken) of via [Issues](https://github.com/josephinal/josephinal.github.io/issues).
 
 ## Bronnen en licenties
 
