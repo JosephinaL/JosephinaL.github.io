@@ -851,5 +851,41 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   if (h && D[h]) kies(D[h]);
 })();
 </script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
 </body>
 </html>

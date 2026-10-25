@@ -1651,7 +1651,7 @@ footer { font-size: .8rem; color: var(--muted); }
     drawMap(); renderAll(); renderMelding();
     $('#dossier').innerHTML = '<span class="eyebrow">Pand</span><p class="muted" style="margin:0">Klik een pand op de kaart of in de tabel om te zien waarom het zo is ingedeeld.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks bijgewerkt, loopt doorgaans enkele weken achter op EP-Online${res.labelsFout ? '; bij ophalen niet bereikbaar' : res.labelsLater ? ', later opgehaald ' + new Date(res.labelsLater).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' }) : ''}), rijksmonumenten (RCE, via PDOK en monumentenregister), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<span id="footEigen"></span><br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · broncode onder EUPL-1.2.`;
+    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks bijgewerkt, loopt doorgaans enkele weken achter op EP-Online${res.labelsFout ? '; bij ophalen niet bereikbaar' : res.labelsLater ? ', later opgehaald ' + new Date(res.labelsLater).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' }) : ''}), rijksmonumenten (RCE, via PDOK en monumentenregister), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<span id="footEigen"></span><br>© 2026 <a href="./">Josephine Linders</a> · versie ${VERSIE} · gebruik: linken en citeren met bronvermelding; overnemen na overleg.`;
     eigenTekstElders();
   }
 
@@ -1901,6 +1901,42 @@ footer { font-size: .8rem; color: var(--muted); }
   });
 
   init();
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
 })();
 </script>
 </body>
