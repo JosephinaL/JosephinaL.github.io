@@ -157,8 +157,11 @@ dl.cv dd { margin: 0; }
 @media (max-width: 720px) { .contact { grid-template-columns: minmax(0, 1fr); } }
 .contact p { color: var(--muted); max-width: 60ch; }
 .mail { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.mail code { font-family: var(--f-mono); font-size: 1rem; background: var(--surface); border: 1px solid var(--line); padding: 8px 12px; border-radius: var(--r); user-select: all; overflow-wrap: anywhere; }
-.copy { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--r); padding: 8px 12px; cursor: pointer; font: inherit; font-size: .9rem; }
+.knop { font: inherit; font-size: .95rem; line-height: 1.2; padding: 12px 20px; border-radius: var(--r); border: 1px solid var(--accent); cursor: pointer; text-decoration: none; display: inline-block; }
+.knop-primair { background: var(--accent); color: var(--bg); font-weight: 700; }
+.knop-primair:hover { filter: brightness(1.12); }
+.knop-secundair { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.knop-secundair:hover { border-color: var(--accent); }
 
 footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 24px; border-top: 1px solid var(--line); padding-top: 18px; }
 @media (prefers-reduced-motion: no-preference) {
@@ -712,8 +715,8 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <p>Gemeenten, omgevingsdiensten en kennisinstellingen zijn welkom met een vraag, een dataset of een toepassing die breder bruikbaar zou kunnen zijn.</p>
     </div>
     <div class="mail">
-      <code id="mailAddr">joselin@live.nl</code>
-      <button class="copy" id="copyBtn" type="button">Kopieer</button>
+      <a class="knop knop-primair" id="mailBtn" href="#samenwerken">Mail je vraag</a>
+      <button class="knop knop-secundair" id="copyBtn" type="button">Kopieer e-mailadres</button>
     </div>
   </section>
 
@@ -732,13 +735,14 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
     root.dataset.theme = dark ? 'light' : 'dark';
     try { localStorage.setItem('jl-theme', root.dataset.theme); } catch (e) {}
   };
-  var copy = document.getElementById('copyBtn'), addr = document.getElementById('mailAddr');
+  var adres = ['joselin', 'live.nl'].join('@');
+  document.getElementById('mailBtn').href = 'mailto:' + adres + '?subject=' + encodeURIComponent('Vraag via josephinal.github.io');
+  var copy = document.getElementById('copyBtn'), copyLabel = copy.textContent;
   copy.onclick = function () {
-    var txt = addr.textContent.trim();
-    var done = function () { copy.textContent = 'Gekopieerd'; setTimeout(function () { copy.textContent = 'Kopieer'; }, 1800); };
-    if (navigator.clipboard) navigator.clipboard.writeText(txt).then(done, function () { selectIt(); });
-    else selectIt();
-    function selectIt() { var r = document.createRange(); r.selectNodeContents(addr); var s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    var toon = function () { copy.textContent = adres; };
+    var done = function () { copy.textContent = 'Gekopieerd: ' + adres; setTimeout(function () { copy.textContent = copyLabel; }, 2500); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(adres).then(done, toon);
+    else toon();
   };
   var infos = document.querySelectorAll('#producten .product'), mores = document.querySelectorAll('#producten .more');
   function show(id) {
