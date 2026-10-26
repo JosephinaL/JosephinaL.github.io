@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeugdzorg per wijk · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Jeugdzorggebruik, kosten en verwijzers per Nederlandse gemeente en wijk, live uit CBS-open data.">
+<meta name="description" content="Jeugdzorggebruik, kosten, verwijzers en huishoudsamenstelling per Nederlandse gemeente en wijk, live uit CBS-open data.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
@@ -149,6 +149,19 @@ tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
 tbody tr.gm td { font-weight: 600; }
 .stack { display: flex; gap: 2px; height: 14px; min-width: 160px; border-radius: 3px; overflow: hidden; }
 .stack i { display: block; height: 100%; }
+.hhbar { position: relative; padding: 4px 0; }
+.hhbar .stack { height: 16px; }
+.hhbar .tk { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px solid var(--fg); }
+.hhbar .tk.gm { border-left-style: dotted; }
+.tkleg { display: inline-block; width: 0; height: 12px; border-left: 2px solid var(--fg); vertical-align: -1px; margin-right: 6px; }
+.tkleg.gm { border-left-style: dotted; }
+.signaal { font-size: .88rem; background: var(--sunk); border-radius: var(--r); padding: 8px 10px; }
+td.sig { font-size: .82rem; min-width: 220px; white-space: normal; }
+.ctxtab { font-size: .85rem; }
+.ctxtab th { position: static; cursor: default; font-weight: 600; color: var(--muted); font-size: .78rem; }
+.ctxtab th, .ctxtab td { padding: 4px 6px; }
+.ctxtab td:first-child { padding-left: 0; }
+.kaartkop { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
 .cel-sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
 .klein { color: var(--muted); font-style: italic; }
 
@@ -188,7 +201,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   </header>
 
   <section class="intro" id="intro">
-    <p>Hoeveel jongeren in je gemeente krijgen jeugdzorg, wat kost dat en wie verwijst ze? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen en de verdeling over de wijken. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor.</p>
+    <p>Hoeveel jongeren in je gemeente krijgen jeugdzorg, wat kost dat en wie verwijst ze? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen en de verdeling over de wijken. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor. Alleen Nederland als geheel staat erbij als referentiepunt.</p>
     <p class="muted small">De cijfers komen live van het CBS op het moment dat je een gemeente kiest.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
@@ -207,7 +220,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <!-- gebruik -->
       <div class="sectiekop">
         <div><span class="eyebrow">Door de jaren</span><h2>Gebruik van jeugdzorg</h2></div>
-        <div class="seg" role="group" aria-label="Toon percentage of aantal">
+        <div class="seg" id="trendSeg" role="group" aria-label="Toon percentage of aantal">
           <button type="button" data-m="pct" aria-pressed="true">Percentage</button>
           <button type="button" data-m="n" aria-pressed="false">Aantal</button>
         </div>
@@ -233,6 +246,12 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <div class="info" id="wijkInfo" hidden><p id="wijkInfoTxt"></p><button class="btn linkish" id="wijkInfoBtn" type="button" hidden></button></div>
       <div class="split">
         <div class="mapwrap">
+          <div class="kaartkop"><span class="small muted">Kleur de kaart op</span>
+            <div class="seg" id="kaartSeg" role="group" aria-label="Kies wat de kaart kleurt">
+              <button type="button" data-k="pct" aria-pressed="true">% jongeren met jeugdzorg</button>
+              <button type="button" data-k="een" aria-pressed="false">% eenouder</button>
+            </div>
+          </div>
           <div id="map" role="region" aria-label="Kaart van de wijken"></div>
           <div class="maplegend" id="mapLegend"></div>
         </div>
@@ -243,6 +262,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
           <button class="tab" role="tab" aria-selected="true" data-view="wijk">Wijken</button>
           <button class="tab" role="tab" aria-selected="false" data-view="buurt">Buurten</button>
           <button class="tab" role="tab" aria-selected="false" data-view="verwijzer">Verwijzers</button>
+          <button class="tab" role="tab" aria-selected="false" data-view="huishouden">Huishouden en context</button>
         </div>
         <div class="tools">
           <input id="search" type="search" placeholder="Zoek wijk of buurt…">
@@ -251,6 +271,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
           <button class="btn" id="csvWijk" type="button">CSV wijken en buurten</button>
         </div>
         <div class="legend" id="vwLegend" style="padding:0 12px 8px" hidden></div>
+        <div class="legend" id="hhLegend" style="padding:0 12px 8px" hidden></div>
         <div class="scroll" id="tblWrap"></div>
       </div>
 
@@ -264,6 +285,9 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Woonplaats</b>: een jongere telt mee in de gemeente en wijk waar hij woont, niet waar de hulp wordt gegeven.</li>
             <li><b>Kosten</b>: gerealiseerde en begrote kosten zoals de gemeente die aan het CBS opgeeft. Per inwoner is gedeeld door alle inwoners. Per jongere is gedeeld door het aantal jongeren met jeugdzorg (inclusief pgb).</li>
             <li><b>Verwijzers</b>: wie een jeugdhulptraject startte. Een jongere kan meer trajecten hebben. Jeugdbescherming en jeugdreclassering hebben geen verwijzer en tellen hier niet mee.</li>
+            <li><b>Huishouden bij de hulpvraag</b>: in welk huishouden de jongere woonde toen de jeugdzorg begon. Eenouder, bij een paar, of ander huishouden (zoals pleegzorg, zelfstandig of in een instelling). Het CBS koppelt dit per jongere. Het aandeel eenouder is gedeeld door de som van de drie groepen.</li>
+            <li><b>Referentie</b>: de doorgetrokken streep is Nederland, de gestippelde de eigen gemeente. "Opvallend" noemt een wijk als het aandeel eenouder 5 procentpunt of meer van Nederland afwijkt, het aandeel huishoudens met kinderen 8 procentpunt of meer van de gemeente, of de inkomensmaat een kwart of meer hoger of lager ligt dan in de gemeente.</li>
+            <li><b>Context van de wijk</b>: uit Kerncijfers wijken en buurten. Huishoudens met kinderen als deel van alle huishoudens. Vanaf 2024 meet het CBS armoede als "personen in armoede"; tot en met 2023 als "huishoudens onder of rond het sociaal minimum". De pagina noemt steeds welke maat en welk jaar.</li>
           </ul>
         </div>
         <div class="card">
@@ -274,6 +298,9 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Het CBS stelt ze later nog bij.</li>
             <li><b>Kosten ontbreken soms</b>: niet elke gemeente levert haar kosten aan het CBS. Gemeenten verdelen de kosten ook niet allemaal op dezelfde manier over de vormen.</li>
             <li><b>Geen jeugd-ggz apart</b>: jeugdhulp is één begrip. Psychische hulp, opvoedhulp en hulp bij een beperking zijn niet te onderscheiden.</li>
+            <li><b>Geen koppeling per gezin in de context</b>: het huishouden bij de hulpvraag is per jongere bekend. De inkomens- en huishoudcijfers van de wijk gelden voor alle bewoners. Valt een hoog aandeel eenouder samen met veel armoede in de wijk, dan zegt dat iets over de wijk, niet over de gezinnen in de jeugdzorg zelf.</li>
+            <li><b>Ouder contextjaar</b>: het CBS publiceert inkomenscijfers per wijk later dan de jeugdzorgcijfers. Ontbreken ze voor het gekozen jaar, dan toont de pagina het meest recente jaar dat er wel is. Is de wijkindeling tussendoor gewijzigd, dan blijft de context van een gewijzigde wijk leeg.</li>
+            <li><b>Kleine aantallen bij huishouden</b>: onder de 50 jongeren met jeugdzorg in een wijk toont de pagina geen aandeel eenouder.</li>
             <li><b>Geen oordeel</b>: een hoger percentage kan betekenen dat de hulp goed bereikbaar is, of dat er meer nodig is. De cijfers zeggen het verschil, niet de oorzaak.</li>
           </ul>
         </div>
@@ -288,7 +315,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOG = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title,Modified';
   const T = { trendOud: '84134NED', trendNieuw: '85099NED', kosten: '83454NED' };
@@ -297,6 +324,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   const KWB = { 2025: '86165NED', 2024: '85984NED', 2023: '85618NED', 2022: '85318NED', 2021: '85039NED' };
   const BREUK = 2021; // eerste jaar van de herziene reeks
   const MIN_JONG = 150; // ondergrens (jongeren tot 23 jaar) voor een percentage per wijk of buurt
+  const MIN_HH = 50; // ondergrens (jongeren met jeugdzorg) voor een aandeel per huishoudtype
 
   const $ = s => document.querySelector(s);
   const nf = new Intl.NumberFormat('nl-NL');
@@ -388,6 +416,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   let modus = 'pct';
   let kostJaar = null;
   let view = 'wijk', sortKey = null, sortDir = 1, selWijk = null;
+  let kaartMaat = 'pct';
   let map = null, layer = null, gjLayer = null;
   const fouten = new Set();
 
@@ -495,9 +524,9 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     { k: 'A027919', t: 'Jeugdbescherming', noemer: 'van jongeren tot 18 jaar · opgelegd door de rechter' },
     { k: 'A027920', t: 'Jeugdreclassering', noemer: 'van jongeren van 12 tot 23 jaar' }
   ];
-  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('#trendSeg button').forEach(b => b.addEventListener('click', () => {
     modus = b.dataset.m;
-    document.querySelectorAll('.seg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    document.querySelectorAll('#trendSeg button').forEach(x => x.setAttribute('aria-pressed', x === b));
     renderTrend();
   }));
   function renderTrend() {
@@ -644,7 +673,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const metPct = w && w.heeftPct;
     if (w && !metPct) {
       const ouder = Object.keys(KWB).map(Number).filter(y => y < j && WIJK[y]).sort((a, b) => b - a)[0];
-      $('#wijkInfoTxt').textContent = `Voor ${j} heeft het CBS de percentages per wijk en buurt nog niet gepubliceerd. De kaart toont daarom aantallen.${ouder ? ' Kies ' + ouder + ' voor de percentages.' : ''}`;
+      $('#wijkInfoTxt').textContent = `Voor ${j} heeft het CBS de percentages per wijk en buurt nog niet gepubliceerd. De kaart toont daarom aantallen. Het aandeel eenouder is er wel: kies boven de kaart "% eenouder".${ouder ? ' Kies ' + ouder + ' voor de percentages.' : ''}`;
       $('#wijkInfoBtn').hidden = !ouder; $('#wijkInfoBtn').textContent = ouder ? 'Toon ' + ouder : '';
       $('#wijkInfoBtn').onclick = () => kiesJaar(ouder);
       $('#wijkInfo').hidden = false;
@@ -657,7 +686,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
   async function laadWijk(c, j) {
     const t = WIJK[j];
-    let res = { jaar: j, wijken: [], gm: null, buurten: [], heeftPct: false, geo: null, perLabel: String(j), tabel: t, kwb: KWB[j] };
+    let res = { jaar: j, wijken: [], gm: null, nl: null, ctx: null, buurten: [], heeftPct: false, geo: null, perLabel: String(j), tabel: t, kwb: KWB[j] };
     try {
       const m = await meta(t);
       const per = await odata(t, m.tijd);
@@ -673,7 +702,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         ms: K(/^MedischSpecialist/), rechter: K(/^RechterOfficier/), geen: K(/^GeenVerwijzer/), onb: K(/^VerwijzerOnbekend/)
       };
       const [rows, namen] = await Promise.all([
-        odata(t, `TypedDataSet?$filter=(startswith(${m.geo},'GM${c}') or startswith(${m.geo},'WK${c}')) and ${m.tijd} eq '${pk}' and ${m.vorm} eq '${tot}'`),
+        odata(t, `TypedDataSet?$filter=(startswith(${m.geo},'GM${c}') or startswith(${m.geo},'WK${c}') or startswith(${m.geo},'NL01')) and ${m.tijd} eq '${pk}' and ${m.vorm} eq '${tot}'`),
         odata(t, `${m.geo}?$filter=startswith(Key,'WK${c}')&$select=Key,Title`)
       ]);
       const naam = new Map(namen.map(x => [tr(x.Key), tr(x.Title)]));
@@ -681,7 +710,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         const code = tr(r[m.geo]);
         const o = { code, naam: naam.get(code) || code };
         Object.entries(kol).forEach(([k, col]) => { o[k] = col ? r[col] : null; });
-        if (/^GM/.test(code)) { o.naam = S.g.n; res.gm = o; } else res.wijken.push(o);
+        if (/^NL/.test(code)) { o.naam = 'Nederland'; res.nl = o; } else if (/^GM/.test(code)) { o.naam = S.g.n; res.gm = o; } else res.wijken.push(o);
       });
     } catch (e) { fouten.add('wijken'); res.wijken = []; }
     // percentages uit Kerncijfers wijken en buurten
@@ -709,6 +738,13 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         }
       } catch (e) { void e; }
     }
+    // context uit Kerncijfers wijken en buurten (valt terug op een ouder jaar)
+    res.ctx = await laadContext(c, j);
+    if (res.ctx) {
+      const zetC = o => { const k = o && res.ctx.perCode.get(o.code); if (o) o.ctx = k || null; };
+      res.wijken.forEach(zetC); zetC(res.gm);
+      if (res.nl) res.nl.ctx = res.ctx.perCode.get('NL') || null;
+    }
     // wijkgrenzen
     try {
       const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/wijken/items?f=json&gemeentecode=GM${c}&limit=1000`;
@@ -717,6 +753,89 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     } catch (e) { res.geo = null; }
     return res;
   }
+  async function laadContext(c, j) {
+    const jaren = Object.keys(KWB).map(Number).filter(y => y <= j).sort((a, b) => b - a).slice(0, 3);
+    for (const y of jaren) {
+      try {
+        const km = await meta(KWB[y]);
+        const kol = {
+          hhTot: km.k(/^HuishoudensTotaal/), hhKind: km.k(/^HuishoudensMetKinderen/),
+          arm: km.k(/^PersonenInArmoede/), sm: km.k(/^HuishOnderOfRondSociaalMinimum/), laag40: km.k(/^k_40HuishoudensMetLaagsteInkomen/)
+        };
+        if (!kol.hhTot || !kol.hhKind || !(kol.arm || kol.sm)) continue;
+        const geo = km.geo;
+        const sel = [geo].concat(Object.values(kol).filter(Boolean)).join(',');
+        const rows = await odata(KWB[y], `TypedDataSet?$filter=startswith(${geo},'GM${c}') or startswith(${geo},'WK${c}') or startswith(${geo},'NL')&$select=${sel}`);
+        const v = (r, k) => kol[k] ? r[kol[k]] : null;
+        const perCode = new Map();
+        rows.forEach(r => {
+          const tot = v(r, 'hhTot'), kind = v(r, 'hhKind');
+          const code = tr(r[geo]);
+          perCode.set(/^NL/.test(code) ? 'NL' : code, {
+            pKind: tot && kind != null ? 100 * kind / tot : null,
+            arm: v(r, 'arm'), sm: v(r, 'sm'), laag40: v(r, 'laag40')
+          });
+        });
+        const gm = perCode.get('GM' + c);
+        if (!gm) continue;
+        const maat = gm.arm != null ? 'arm' : gm.sm != null ? 'sm' : null;
+        if (!maat) continue;
+        perCode.forEach(o => { o.ink = o[maat]; });
+        return {
+          jaar: y, tabel: KWB[y], perCode, maat,
+          inkLang: maat === 'arm' ? 'Personen in armoede' : 'Huishoudens onder of rond sociaal minimum',
+          inkKort: maat === 'arm' ? 'armoede' : 'rond sociaal minimum'
+        };
+      } catch (e) { void e; }
+    }
+    return null;
+  }
+
+  // ---------- huishouden bij de hulpvraag ----------
+  function hh(o) {
+    if (!o) return { toon: false };
+    const tot = (o.een || 0) + (o.paar || 0) + (o.ander || 0);
+    const r = { tot, toon: tot >= MIN_HH && o.een != null };
+    if (tot) { r.pEen = 100 * (o.een || 0) / tot; r.pPaar = 100 * (o.paar || 0) / tot; r.pAnder = 100 * (o.ander || 0) / tot; }
+    return r;
+  }
+  const hhTekst = o => { const h = hh(o); return h.toon ? fP(h.pEen) : (h.tot ? '<span class="klein" title="Minder dan ' + MIN_HH + ' jongeren met jeugdzorg: geen aandeel">klein</span>' : '–'); };
+  const pp = d => d == null ? '–' : (d > 0 ? '+' : d < 0 ? '−' : '') + nf1.format(Math.abs(d)) + ' pp';
+  // wat valt op aan deze wijk (of gemeente) ten opzichte van de referentie
+  function signaal(o) {
+    const w = S.w; if (!w || !o) return [];
+    const isGm = o === w.gm || o.isGm;
+    const delen = [];
+    const h = hh(o), hn = hh(w.nl);
+    if (h.toon && hn.toon && Math.abs(h.pEen - hn.pEen) >= 5) delen.push(`eenouder ${fP(h.pEen)} (Nederland ${fP(hn.pEen)})`);
+    const ref = isGm ? (w.nl && w.nl.ctx) : (w.gm && w.gm.ctx), refNaam = isGm ? 'Nederland' : 'gemeente';
+    const c = o.ctx;
+    if (c && ref && w.ctx) {
+      if (c.pKind != null && ref.pKind != null && Math.abs(c.pKind - ref.pKind) >= 8) delen.push(`huishoudens met kinderen ${fP(c.pKind)} (${refNaam} ${fP(ref.pKind)})`);
+      if (c.ink != null && ref.ink) {
+        const rt = c.ink / ref.ink;
+        if ((rt >= 1.25 || rt <= 0.8) && Math.abs(c.ink - ref.ink) >= 0.5) delen.push(`${w.ctx.inkKort} ${fP(c.ink)} (${refNaam} ${fP(ref.ink)})`);
+      }
+    }
+    return delen;
+  }
+  const HHV = [
+    { k: 'pEen', n: 'een', t: 'Eenouder', c: '--vw-2' },
+    { k: 'pPaar', n: 'paar', t: 'Bij een paar', c: '--vw-1' },
+    { k: 'pAnder', n: 'ander', t: 'Ander huishouden', c: '--vw-3' }
+  ];
+  function hhStapel(o, ticks) {
+    const h = hh(o);
+    if (!h.tot) return '<span class="muted">–</span>';
+    const bar = `<div class="stack" role="img" aria-label="Huishouden bij de hulpvraag">${HHV.filter(v => o[v.n]).map(v => `<i style="width:${h[v.k]}%;background:var(${v.c})" data-tip="${esc(v.t)}: ${fmt(o[v.n])} jongeren (${nf.format(Math.round(h[v.k]))}%)"></i>`).join('')}</div>`;
+    if (!ticks) return bar;
+    const hn = hh(S.w.nl), hg = hh(S.w.gm);
+    let t = '';
+    if (hn.toon) t += `<span class="tk" style="left:${hn.pEen}%" title="Nederland ${fP(hn.pEen)}"></span>`;
+    if (hg.toon && o !== S.w.gm) t += `<span class="tk gm" style="left:${hg.pEen}%" title="Gemeente ${fP(hg.pEen)}"></span>`;
+    return `<div class="hhbar">${bar}${t}</div>`;
+  }
+
   async function getJSONsnel(u) {
     const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
     try { const r = await fetch(u, { signal: ac.signal }); if (!r.ok) throw new Error('HTTP ' + r.status); return await r.json(); }
@@ -726,8 +845,15 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   const pctTekst = o => !o || o.pct == null ? '–' : pctTonen(o) ? fP(o.pct) : '<span class="klein" title="Minder dan ' + MIN_JONG + ' jongeren tot 23 jaar: geen percentage">klein</span>';
 
   // ---------- kaart ----------
+  const kaartWaarde = o => kaartMaat === 'een' ? (hh(o).toon ? hh(o).pEen : null) : (pctTonen(o) ? o.pct : null);
+  const kaartKleurt = w => kaartMaat === 'een' ? w.wijken.some(o => kaartWaarde(o) != null) : w.heeftPct;
+  document.querySelectorAll('#kaartSeg button').forEach(b => b.addEventListener('click', () => {
+    kaartMaat = b.dataset.k;
+    document.querySelectorAll('#kaartSeg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    if (S && S.w) renderKaart();
+  }));
   function klassen() {
-    const v = S.w.wijken.filter(pctTonen).map(o => o.pct);
+    const v = S.w.wijken.map(kaartWaarde).filter(x => x != null);
     if (!v.length) return null;
     const lo = Math.min(...v), hi = Math.max(...v);
     const n = Math.min(5, v.length);
@@ -757,24 +883,27 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       setTimeout(() => map.invalidateSize(), 50); return;
     }
     const byCode = new Map(w.wijken.map(o => [o.code, o]));
-    const kl = w.heeftPct ? klassen() : null;
+    const kleurt = kaartKleurt(w);
+    const kl = kleurt ? klassen() : null;
     const lijn = css('--surface') || '#fff';
     layer = L.featureGroup().addTo(map);
     const gj = gjLayer = L.geoJSON(w.geo, {
       style: f => {
         const o = byCode.get(f.properties.wijkcode);
         const sel = o && o.code === selWijk;
-        const fill = w.heeftPct ? (pctTonen(o) ? kleurVoor(o.pct, kl) : css('--sunk')) : css('--sunk');
-        return { color: sel ? css('--fg') : lijn, weight: sel ? 3 : 1.5, fillColor: fill, fillOpacity: w.heeftPct ? 0.85 : 0.45, dashArray: (w.heeftPct && !pctTonen(o)) ? '3 3' : null };
+        const wv = kaartWaarde(o);
+        const fill = kleurt && wv != null ? kleurVoor(wv, kl) : css('--sunk');
+        return { color: sel ? css('--fg') : lijn, weight: sel ? 3 : 1.5, fillColor: fill, fillOpacity: kleurt ? 0.85 : 0.45, dashArray: (kleurt && wv == null) ? '3 3' : null };
       },
       onEachFeature: (f, ly) => {
         const o = byCode.get(f.properties.wijkcode);
         const nm = o ? o.naam : (f.properties.wijknaam || f.properties.wijkcode);
-        ly.bindTooltip(`<b>${esc(nm)}</b><br>${o ? fmt(o.n) : '–'} jongeren met jeugdzorg${w.heeftPct ? ' · ' + (o ? (pctTonen(o) ? fP(o.pct) : 'te klein voor %') : '–') : ''}`, { sticky: true });
+        const hv = hh(o);
+        ly.bindTooltip(`<b>${esc(nm)}</b><br>${o ? fmt(o.n) : '–'} jongeren met jeugdzorg${w.heeftPct ? ' · ' + (o ? (pctTonen(o) ? fP(o.pct) : 'te klein voor %') : '–') : ''}<br>eenouder ${hv.toon ? fP(hv.pEen) : (hv.tot ? 'te klein' : '–')}`, { sticky: true });
         ly.on('click', () => kiesWijk(f.properties.wijkcode, false));
       }
     }).addTo(layer);
-    if (!w.heeftPct) {
+    if (!kleurt) {
       gj.eachLayer(ly => {
         const o = byCode.get(ly.feature.properties.wijkcode);
         if (o && o.n) {
@@ -785,14 +914,15 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     }
     const grens = gj.getBounds(), passen = !S.bounded; S.bounded = true;
     // legenda
-    if (w.heeftPct && kl) {
-      let h = '<span>Jongeren met jeugdzorg, % van jongeren tot 23 jaar:</span>';
+    if (kleurt && kl) {
+      const hn = hh(w.nl);
+      let h = kaartMaat === 'een' ? `<span>Eenouder, % van de jongeren met jeugdzorg${hn.toon ? ` (Nederland ${fP(hn.pEen)})` : ''}:</span>` : '<span>Jongeren met jeugdzorg, % van jongeren tot 23 jaar:</span>';
       if (kl.n === 1) h += `<span><i class="sw" style="background:${css('--seq-3')}"></i>${fP(kl.grenzen[0])}</span>`;
       else for (let i = 0; i < kl.n; i++) h += `<span><i class="sw" style="background:${kleurVoor(kl.grenzen[i] + 1e-9, kl)}"></i>${nf1.format(kl.grenzen[i])}–${nf1.format(kl.grenzen[i + 1])}</span>`;
       h += `<span><i class="sw" style="background:${css('--sunk')};border-style:dashed"></i>te klein of geen cijfer</span>`;
       $('#mapLegend').innerHTML = h;
     } else {
-      $('#mapLegend').innerHTML = '<span><i class="sw" style="background:var(--accent);border-radius:50%"></i>Grootte van de stip: aantal jongeren met jeugdzorg</span>';
+      $('#mapLegend').innerHTML = '<span><i class="sw" style="background:var(--accent);border-radius:50%"></i>Grootte van de stip: aantal jongeren met jeugdzorg</span>' + (kaartMaat === 'een' ? '<span>Geen wijk heeft genoeg jongeren met jeugdzorg voor een aandeel eenouder.</span>' : '');
     }
     setTimeout(() => { map.invalidateSize(); if (passen) map.fitBounds(grens, { padding: [16, 16] }); }, 60);
   }
@@ -833,16 +963,31 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <dt>4 tot 12 jaar</dt><dd>${fmt(x.a4)}</dd>
         <dt>12 tot 18 jaar</dt><dd>${fmt(x.a12)}</dd>
         <dt>18 tot 23 jaar</dt><dd>${fmt(x.a18)}</dd>
-        <dt>Eenouderhuishouden</dt><dd>${fmt(x.een)}</dd>
-        <dt>Bij een paar</dt><dd>${fmt(x.paar)}</dd>
         <dt>Trajecten</dt><dd>${fmt(x.traj)}</dd>
       </dl>
+      ${dossierHuishouden(x, !o)}
       <span class="eyebrow">Verwijzers jeugdhulp</span>${stapel(x)}
       <div class="legend">${vw.delen.filter(d => d.n).map(d => `<span><i class="sw" style="background:var(${d.c})"></i>${esc(d.t)} ${fmt(d.n)}</span>`).join('')}</div>
       ${buurten.length ? `<span class="eyebrow">Buurten in deze wijk</span><ul>${buurten.map(b => `<li>${esc(b.naam)}: ${fmt(b.n)} · ${pctTekst(b)}</li>`).join('')}</ul>` : ''}
       ${o ? `<button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>` : '<p class="small muted" style="margin:0">Klik een wijk op de kaart of in de tabel.</p>'}`;
     bindStapelTips($('#dossier'));
     const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesWijk(null));
+  }
+  function dossierHuishouden(x, isGm) {
+    const w = S.w, h = hh(x), hn = hh(w.nl), hg = hh(w.gm);
+    let s = `<span class="eyebrow">Huishouden bij de hulpvraag</span>${hhStapel(x, true)}
+      <div class="legend">${HHV.map(v => `<span><i class="sw" style="background:var(${v.c})"></i>${v.t} ${h.toon ? fP(h[v.k]) : fmt(x[v.n])}</span>`).join('')}</div>
+      <div class="legend">${hn.toon ? `<span><i class="tkleg"></i>Nederland eenouder ${fP(hn.pEen)}</span>` : ''}${!isGm && hg.toon ? `<span><i class="tkleg gm"></i>${esc(S.g.n)} ${fP(hg.pEen)}</span>` : ''}${!h.toon && h.tot ? `<span>Minder dan ${MIN_HH} jongeren: geen aandeel</span>` : ''}</div>`;
+    const c = x.ctx, ref = isGm ? (w.nl && w.nl.ctx) : (w.gm && w.gm.ctx), refNaam = isGm ? 'Nederland' : S.g.n;
+    if (w.ctx) {
+      const rij = (t, v, r) => `<tr><td>${t}</td><td class="r">${fP(v)}</td><td class="r muted">${fP(r)}</td></tr>`;
+      s += `<span class="eyebrow">Context van de ${isGm ? 'gemeente' : 'wijk'} · ${w.ctx.jaar}</span>`;
+      s += c ? `<table class="ctxtab"><thead><tr><th></th><th class="r">${isGm ? 'Gemeente' : 'Wijk'}</th><th class="r">${esc(refNaam)}</th></tr></thead><tbody>${rij('Huishoudens met kinderen', c.pKind, ref && ref.pKind)}${rij(w.ctx.inkLang, c.ink, ref && ref.ink)}${c.laag40 != null || (ref && ref.laag40 != null) ? rij('Huishoudens bij 40% laagste inkomens', c.laag40, ref && ref.laag40) : ''}</tbody></table>`
+        : `<p class="small muted" style="margin:0">Geen contextcijfers voor deze wijk in ${w.ctx.jaar}. Mogelijk is de wijkindeling gewijzigd.</p>`;
+    }
+    const sg = signaal(x);
+    s += `<div class="signaal"><b>Opvallend${isGm ? ' ten opzichte van Nederland' : ''}:</b> ${sg.length ? esc(sg.join(' · ')) : 'geen afwijking boven de drempels.'}</div>`;
+    return s;
   }
   function kiesWijk(code, vanTabel) {
     selWijk = code;
@@ -867,6 +1012,12 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       { k: 'naam', t: 'Wijk' }, { k: 'stack', t: 'Verdeling', nosort: 1 },
       { k: 'v_toegang', t: 'Gemeentelijke toegang', r: 1, sw: '--vw-1' }, { k: 'v_huisarts', t: 'Huisarts', r: 1, sw: '--vw-2' }, { k: 'v_medisch', t: 'Jeugdarts of specialist', r: 1, sw: '--vw-3' },
       { k: 'v_justitie', t: 'Rechter of GI', r: 1, sw: '--vw-4' }, { k: 'v_geen', t: 'Geen of onbekend', r: 1, sw: '--vw-5' }, { k: 'v_tot', t: 'Totaal', r: 1 }
+    ],
+    huishouden: [
+      { k: 'naam', t: 'Wijk' }, { k: 'hhstack', t: 'Huishouden bij hulpvraag', nosort: 1 },
+      { k: 'h_een', t: '% eenouder', r: 1, f: r => hhTekst(r) }, { k: 'h_dnl', t: 't.o.v. Nederland', r: 1, f: r => r.isRef ? '' : pp(r.h_dnl) },
+      { k: 'c_kind', t: '% huish. met kinderen', r: 1, f: r => fP(r.c_kind) }, { k: 'c_ink', t: 'ink', r: 1, f: r => fP(r.c_ink) },
+      { k: 'c_laag', t: '% huish. 40% laagste ink.', r: 1, f: r => fP(r.c_laag) }, { k: 'sig', t: 'Opvallend', nosort: 1, cls: 'sig', f: r => r.isRef ? '<span class="muted">referentie</span>' : esc(signaal(r).join(' · ')) || '<span class="muted">–</span>' }
     ]
   };
   function zetView(v) {
@@ -885,6 +1036,11 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     }
     const lijst = (w.gm ? [{ ...w.gm, isGm: true }] : []).concat(w.wijken);
     if (view === 'verwijzer') return lijst.map(o => { const v = verwijzers(o); const r = { ...o, v_tot: v.tot || null }; v.delen.forEach(d => { r['v_' + d.k] = d.n || null; }); return r; });
+    if (view === 'huishouden') {
+      const hn = hh(w.nl);
+      const met = (o, extra) => { const h = hh(o), c = o.ctx || {}; return { ...o, ...extra, h_een: h.toon ? h.pEen : null, h_dnl: h.toon && hn.toon ? h.pEen - hn.pEen : null, c_kind: c.pKind, c_ink: c.ink, c_laag: c.laag40 }; };
+      return (w.nl ? [met(w.nl, { isGm: true, isRef: true, code: 'NL01' })] : []).concat(lijst.map(o => met(o, {})));
+    }
     return lijst;
   }
   function renderTabel() {
@@ -902,20 +1058,25 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     }); else rest.sort((a, b) => a.code.localeCompare(b.code));
     rs = gm.concat(rest);
     $('#vwLegend').hidden = view !== 'verwijzer';
+    $('#hhLegend').hidden = view !== 'huishouden';
+    $('#hhLegend').innerHTML = HHV.map(v => `<span><i class="sw" style="background:var(${v.c})"></i>${v.t}</span>`).join('') + `<span>Huishouden waarin de jongere woonde bij de start van de jeugdzorg. Context: Kerncijfers wijken en buurten ${S.w.ctx ? S.w.ctx.jaar + (S.w.ctx.jaar !== S.w.jaar ? ' (meest recente jaar met inkomenscijfers)' : '') : 'niet beschikbaar'}.</span>`;
+    const kopTekst = c => c.k === 'c_ink' ? '% ' + (S.w.ctx ? S.w.ctx.inkKort : 'armoede') : c.t;
     $('#vwLegend').innerHTML = VW.map(v => `<span><i class="sw" style="background:var(${v.c})"></i>${esc(v.t)}</span>`).join('') + '<span>Aandeel van de jeugdhulptrajecten met een bekende telling.</span>';
     const cel = (r, c) => {
       const v = r[c.k];
       if (c.k === 'stack') return stapel(r);
+      if (c.k === 'hhstack') return hhStapel(r, false);
+      if (c.f) return c.f(r);
       if (c.pct) return pctTekst(r);
       if (c.r) return fmt(v);
       return esc(v);
     };
     if (!rs.length) { $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Geen cijfers voor dit jaar.</p>'; $('#rowCount').textContent = ''; return; }
-    $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.nosort ? 'style="cursor:default"' : ''} ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.sw ? `<i class="cel-sw" style="background:var(${c.sw})"></i>` : ''}${c.t}</th>`).join('')}</tr></thead>
-      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : (view !== 'buurt' ? 'klik' : '')} ${r.code === selWijk ? 'sel' : ''}" data-code="${esc(r.code)}">${cols.map(c => `<td class="${c.r ? 'r' : ''}">${cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-    $('#rowCount').textContent = `${rs.length - gm.length} ${view === 'buurt' ? 'buurten' : 'wijken'} · ${S.w.perLabel}`;
+    $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.nosort ? 'style="cursor:default"' : ''} ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.sw ? `<i class="cel-sw" style="background:var(${c.sw})"></i>` : ''}${kopTekst(c)}</th>`).join('')}</tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : (view !== 'buurt' ? 'klik' : '')} ${r.code === selWijk ? 'sel' : ''}" data-code="${esc(r.code)}">${cols.map(c => `<td class="${c.r ? 'r' : ''} ${c.cls || ''}">${cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    $('#rowCount').textContent = `${rs.filter(r => !r.isGm).length} ${view === 'buurt' ? 'buurten' : 'wijken'} · ${S.w.perLabel}`;
     $('#tblWrap').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
-      const k = th.dataset.k; if (k === 'stack') return;
+      const k = th.dataset.k; if (k === 'stack' || k === 'hhstack' || k === 'sig') return;
       if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = (k === 'naam' || k === 'wijknaam') ? 1 : -1; }
       renderTabel();
     }));
@@ -936,8 +1097,11 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   $('#csvWijk').addEventListener('click', () => {
     if (!S || !S.w) return;
     const w = S.w;
-    const kop = ['jaar', 'gemeentecode', 'gemeente', 'niveau', 'code', 'naam', 'wijkcode', 'jongeren_met_jeugdzorg', 'pct_jongeren_tot23', 'pct_betrouwbaar', '0_4', '4_12', '12_18', '18_23', 'eenouder', 'bij_paar', 'ander_huishouden', 'trajecten', 'verw_gemeentelijke_toegang', 'verw_huisarts', 'verw_jeugdarts', 'verw_medisch_specialist', 'verw_gecertificeerde_instelling', 'verw_rechter_ovj', 'verw_geen', 'verw_onbekend'];
-    const rij = (niv, o, wk) => [w.jaar, 'GM' + S.g.c, S.g.n, niv, o.code, o.naam, wk, o.n, komma(o.pct), o.pct == null ? '' : (pctTonen(o) ? 'ja' : 'nee'), o.a0, o.a4, o.a12, o.a18, o.een, o.paar, o.ander, o.traj, o.toegang, o.huisarts, o.jeugdarts, o.ms, o.gi, o.rechter, o.geen, o.onb];
+    const kop = ['jaar', 'gemeentecode', 'gemeente', 'niveau', 'code', 'naam', 'wijkcode', 'jongeren_met_jeugdzorg', 'pct_jongeren_tot23', 'pct_betrouwbaar', '0_4', '4_12', '12_18', '18_23', 'eenouder', 'bij_paar', 'ander_huishouden', 'trajecten', 'verw_gemeentelijke_toegang', 'verw_huisarts', 'verw_jeugdarts', 'verw_medisch_specialist', 'verw_gecertificeerde_instelling', 'verw_rechter_ovj', 'verw_geen', 'verw_onbekend', 'pct_eenouder', 'pct_eenouder_nederland', 'contextjaar', 'pct_huishoudens_met_kinderen', 'inkomensmaat', 'pct_inkomensmaat', 'pct_huishoudens_40_laagste_inkomen'];
+    const rij = (niv, o, wk) => [w.jaar, 'GM' + S.g.c, S.g.n, niv, o.code, o.naam, wk, o.n, komma(o.pct), o.pct == null ? '' : (pctTonen(o) ? 'ja' : 'nee'), o.a0, o.a4, o.a12, o.a18, o.een, o.paar, o.ander, o.traj, o.toegang, o.huisarts, o.jeugdarts, o.ms, o.gi, o.rechter, o.geen, o.onb].concat(niv === 'buurt' ? ['', '', '', '', '', '', ''] : (() => {
+      const h = hh(o), hn = hh(w.nl), c = o.ctx || {}, r1 = v => v == null ? '' : komma(Math.round(v * 10) / 10);
+      return [h.toon ? r1(h.pEen) : '', hn.toon ? r1(hn.pEen) : '', w.ctx ? w.ctx.jaar : '', r1(c.pKind), w.ctx ? w.ctx.inkLang : '', r1(c.ink), r1(c.laag40)];
+    })());
     const rows = (w.gm ? [rij('gemeente', w.gm, '')] : []).concat(w.wijken.map(o => rij('wijk', o, o.code))).concat(w.buurten.map(b => rij('buurt', b, b.wijk)));
     csvDownload(`jeugdzorg_wijken_${w.jaar}_${S.g.n.replace(/[^\w-]+/g, '_').toLowerCase()}.csv`, kop, rows);
   });
@@ -947,7 +1111,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
     const w = S.w || {};
-    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}${w.ctx ? `, context (huishoudens en inkomen) uit Kerncijfers wijken en buurten ${w.ctx.jaar} ${link(w.ctx.tabel)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
