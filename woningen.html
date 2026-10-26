@@ -142,6 +142,10 @@ details.tabelview .scroll { max-height: 420px; }
 .focus .fl { font-size: .82rem; color: var(--muted); }
 .focus .fv { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .focus .fc { font-size: .82rem; color: var(--muted); }
+.focus .fv small { font-size: 1rem; font-weight: 700; margin-left: 6px; }
+.dossier dl .uit { color: var(--fg); font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier dl dt.uit { box-shadow: -6px 0 0 color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier .legend span.uit { color: var(--fg); font-weight: 700; }
 @media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
 
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
@@ -717,6 +721,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
   // ---------- kaart ----------
   const MATEN = () => [
+    { k: 'alles', t: 'Alles', leg: '', f: () => '' },
     { k: 'onb', t: 'Zonder ingeschreven bewoners', leg: '% woningen zonder ingeschreven bewoners (leeg of ander gebruik)', f: fP0 },
     { k: 'corp', t: 'Corporatiewoningen', leg: '% corporatiewoningen', f: fP0 },
     { k: 'koop', t: 'Koopwoningen', leg: '% koopwoningen', f: fP0 },
@@ -762,17 +767,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       style: f => {
         const o = byCode.get(f.properties.buurtcode); const sel = o && o.code === selCode;
         let fill = o ? kleurVoor(o[maat], kl) : null, leeg = false;
-        if (!fill) { fill = css('--sunk'); leeg = true; }
+        if (maat === 'alles') fill = css('--sunk');
+        else if (!fill) { fill = css('--sunk'); leeg = true; }
         return { color: sel ? css('--fg') : lijn, weight: sel ? 3 : 1.2, fillColor: fill, fillOpacity: 0.85, dashArray: leeg ? '3 3' : null };
       },
       onEachFeature: (f, ly) => {
         const o = byCode.get(f.properties.buurtcode);
         const val = !o || o[maat] == null ? 'geen cijfer' : m.f(o[maat]);
-        ly.bindTooltip(`<b>${esc(o ? o.naam : f.properties.buurtnaam)}</b><br>${esc(m.t)}: ${val}<br>${o ? fmt(o.won) : '–'} woningen`, { sticky: true });
+        ly.bindTooltip(`<b>${esc(o ? o.naam : f.properties.buurtnaam)}</b><br>${maat === 'alles' ? '' : esc(m.t) + ': ' + val + '<br>'}${o ? fmt(o.won) : '–'} woningen`, { sticky: true });
         ly.on('click', () => kiesBuurt(f.properties.buurtcode, false));
       }
     }).addTo(layer);
-    if (kl) {
+    if (selCode) gjLayer.getLayers().forEach(l => { if (l.feature.properties.buurtcode === selCode) l.bringToFront(); });
+    if (maat === 'alles') $('#mapLegend').innerHTML = '<span>Kies een maat om de buurten in te kleuren. Klik een buurt voor alle cijfers.</span>';
+    else if (kl) {
       let h = `<span>${esc(m.leg)}:</span>`;
       if (kl.n === 1) h += `<span><i class="sw" style="background:${css('--seq-3')}"></i>${m.f(kl.g[0])}</span>`;
       else for (let i = 0; i < kl.n; i++) h += `<span><i class="sw" style="background:${kleurVoor(kl.g[i], kl)}"></i>${m.f(kl.g[i])}${i === kl.n - 1 ? '–' + m.f(kl.g[i + 1]) : ' tot ' + m.f(kl.g[i + 1])}</span>`;
@@ -799,25 +807,36 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const wijk = isBuurt ? b.wijken.find(w => w.code === o.wijk) : null;
     const sep = '<span class="sep" aria-hidden="true">›</span>';
     let kr = o ? '<button type="button" class="eyebrow" data-naar="gm">Hele gemeente</button>' : '<span class="eyebrow">Hele gemeente</span>';
-    if (isBuurt && wijk) kr += sep + `<button type="button" class="eyebrow" data-naar="${esc(wijk.code)}">Wijk ${esc(wijk.naam)}</button>`;
+    if (isBuurt && wijk) kr += sep + `<button type="button" class="eyebrow" data-naar="${esc(wijk.code)}">${/^wijk\b/i.test(wijk.naam) ? '' : 'Wijk '}${esc(wijk.naam)}</button>`;
     if (o) kr += sep + `<span class="eyebrow">${isBuurt ? 'Buurt' : 'Wijk'}</span>`;
     kr += `<span class="eyebrow">&nbsp;· 1 januari ${b.jaar}</span>`;
     const m = MATEN().find(y => y.k === maat);
-    const vgl = o && b.gm && b.gm[maat] != null ? `${esc(S.g.n)}: ${m.f(b.gm[maat])}` : (!o ? 'gemeentetotaal' : '');
-    const focus = `<div class="focus"><span class="fl">${esc(m.t)}</span><span class="fv">${m.f(x[maat])}</span>${vgl ? `<span class="fc">${vgl}</span>` : ''}</div>`;
+    const PCT = { onb: 1, corp: 1, koop: 1, meergez: 1, recent: 1 };
+    const aantal = (y, k) => k === 'onb' ? y.nOnb : (y.won != null && y[k] != null ? Math.round(y.won * y[k] / 100) : null);
+    const waarde = (y, k) => {
+      if (k === 'woz') return y.woz == null ? '–' : '€ ' + nf.format(y.woz * 1000);
+      const n = aantal(y, k);
+      return fP0(y[k]) + (n != null ? `<small>ca. ${fmt(n)} woningen</small>` : '');
+    };
+    const kort = (y, k) => k === 'woz' ? (y.woz == null ? '–' : '€ ' + nf.format(y.woz * 1000)) : fP0(y[k]) + (aantal(y, k) != null ? '<span style="white-space:nowrap"> · ca. ' + fmt(aantal(y, k)) + '</span>' : '');
+    const vgl = maat === 'alles' ? '' : o && b.gm && b.gm[maat] != null ? `${esc(S.g.n)}: ${kort(b.gm, maat)}` : (!o ? 'hele gemeente' : '');
+    const focus = maat === 'alles' ? '' : `<div class="focus"><span class="fl">${esc(m.t)}${maat === 'woz' ? ` <span class="small">(gemiddeld, waarde 1-1-${b.jaar - 1})</span>` : ''}</span><span class="fv">${waarde(x, maat)}</span>${vgl ? `<span class="fc">${vgl}</span>` : ''}</div>`;
+    const u = k => maat === k ? ' class="uit"' : '';
     $('#dossier').innerHTML = `<nav class="kruimel" aria-label="Niveau">${kr}</nav><h2>${esc(x.naam)}</h2>
       ${focus}
       <dl>
         <dt>Woningen</dt><dd>${fmt(x.won)}</dd>
         <dt>Huishoudens</dt><dd>${fmt(x.hh)}</dd>
-        <dt>Zonder bewoners</dt><dd>${fP0(x.onb)}${x.nOnb != null ? ` · ${o ? 'ca. ' : ''}${fmt(x.nOnb)}` : ''}</dd>
-        <dt>Appartementen</dt><dd>${fP0(x.meergez)}</dd>
-        <dt>${esc(RECENT_LBL)}</dt><dd>${fP0(x.recent)}</dd>
+        <dt${u('onb')}>Zonder bewoners</dt><dd${u('onb')}>${kort(x, 'onb')}</dd>
+        <dt${u('corp')}>Corporatiewoningen</dt><dd${u('corp')}>${kort(x, 'corp')}</dd>
+        <dt${u('koop')}>Koopwoningen</dt><dd${u('koop')}>${kort(x, 'koop')}</dd>
+        <dt${u('meergez')}>Appartementen</dt><dd${u('meergez')}>${kort(x, 'meergez')}</dd>
+        <dt${u('recent')}>${esc(RECENT_LBL)}</dt><dd${u('recent')}>${kort(x, 'recent')}</dd>
         ${x.nb != null ? `<dt>Nieuwbouw in ${b.jaar}</dt><dd>${fmt(x.nb)} woningen</dd>` : ''}
-        <dt>WOZ-waarde</dt><dd>${x.woz == null ? '–' : '€ ' + nf.format(x.woz * 1000) + ' gemiddeld'} <span class="muted small">(waarde 1-1-${b.jaar - 1})</span></dd>
+        <dt${u('woz')}>WOZ-waarde</dt><dd${u('woz')}>${x.woz == null ? '–' : '€ ' + nf.format(x.woz * 1000) + ' gemiddeld'} <span class="muted small">(waarde 1-1-${b.jaar - 1})</span></dd>
       </dl>
       <span class="eyebrow">Eigendom</span>${eigStack(x)}
-      <div class="legend"><span><i class="sw" style="background:var(--hh-1)"></i>Koop ${fP0(x.koop)}</span><span><i class="sw" style="background:var(--hh-3)"></i>Corporatie ${fP0(x.corp)}</span><span><i class="sw" style="background:var(--hh-2)"></i>Overige verhuur ${fP0(x.ovh)}</span></div>
+      <div class="legend"><span${u('koop')}><i class="sw" style="background:var(--hh-1)"></i>Koop ${fP0(x.koop)}</span><span${u('corp')}><i class="sw" style="background:var(--hh-3)"></i>Corporatie ${fP0(x.corp)}</span><span><i class="sw" style="background:var(--hh-2)"></i>Overige verhuur ${fP0(x.ovh)}</span></div>
       ${o ? '' : '<p class="small muted" style="margin:0">Klik een buurt op de kaart of in de tabel.</p>'}`;
     bindTips($('#dossier'));
     $('#dossier').querySelectorAll('[data-naar]').forEach(k => k.addEventListener('click', () => kiesBuurt(k.dataset.naar === 'gm' ? null : k.dataset.naar, true)));
@@ -830,7 +849,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     selCode = code;
     const o = code ? (S.b.buurten.find(x => x.code === code) || S.b.wijken.find(x => x.code === code)) : null;
     renderDossier(o);
-    if (gjLayer) gjLayer.setStyle(gjLayer.options.style);
+    if (gjLayer) { gjLayer.setStyle(gjLayer.options.style); if (code) gjLayer.getLayers().forEach(l => { if (l.feature.properties.buurtcode === code) l.bringToFront(); }); }
     if (vanTabel && gjLayer && !code && gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] });
     if (vanTabel && gjLayer && code) {
       const ls = gjLayer.getLayers().filter(l => /^WK/.test(code) ? l.feature.properties.wijkcode === code : l.feature.properties.buurtcode === code);
