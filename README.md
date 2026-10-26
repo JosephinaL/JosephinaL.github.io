@@ -1,4 +1,6 @@
-# Van open data naar een bruikbaar informatieproduct, voor elke gemeente
+# Open Data Atelier
+
+Van open data naar een bruikbaar informatieproduct, voor elke gemeente. Door Josephine Linders.
 
 **Site:** https://josephinal.github.io
 
