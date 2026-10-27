@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Veilig Thuis per gemeente · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Adviezen en meldingen bij Veilig Thuis per Nederlandse gemeente: aard van het geweld, wie meldt en wat er daarna gebeurt, live uit CBS-open data.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --grijs: #b9c4c5;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; font-size: .9rem; max-width: 100%; }
+.info p { margin: 0; max-width: 90ch; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.herken { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.jaren { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .ax { stroke: var(--line); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .val { fill: var(--fg); font: 600 11px var(--f-mono); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart-kop .laatst { font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .tick { display: inline-block; width: 0; height: 12px; border-left: 2px solid var(--fg); vertical-align: -1px; margin-right: 6px; }
+
+/* rijen met een balk en een streep voor Nederland */
+.rijen { display: grid; gap: 8px; }
+.rij { display: grid; grid-template-columns: minmax(120px, 13em) minmax(0, 1fr) 8.5em; gap: 4px 12px; align-items: center; font-size: .9rem; }
+.rij .naam { min-width: 0; }
+.rij .baan { position: relative; height: 16px; background: var(--sunk); border-radius: 3px; }
+.rij .baan i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.rij .baan b { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--fg); }
+.rij .w { text-align: right; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rij .w .muted { font-family: var(--f-body); }
+@media (max-width: 520px) { .rij { grid-template-columns: minmax(0, 1fr) 7.5em; } .rij .baan { grid-column: 1 / -1; grid-row: 2; } }
+
+/* gestapelde balk gemeente tegen Nederland */
+.stapel { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 6px 12px; align-items: center; font-size: .88rem; }
+.stapel .s { display: flex; height: 22px; border-radius: 3px; overflow: hidden; background: var(--sunk); }
+.stapel .s i { display: block; height: 100%; }
+.stapel .s i + i { border-left: 1px solid var(--surface); }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 14px 10px; }
+.scroll { overflow: auto; max-height: 520px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; white-space: nowrap; z-index: 1; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tr.grp td { font-weight: 600; background: var(--sunk); }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.hulp { font-size: .85rem; color: var(--muted); }
+
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Huiselijk geweld · open data</span>
+      <h1 id="title">Veilig Thuis per gemeente</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+
+  <section class="intro" id="intro">
+    <p>Hoe vaak vragen inwoners en professionals in je gemeente Veilig Thuis om advies, en hoe vaak doen ze een melding? Over welk geweld gaat het, wie meldt, en wat gebeurt er daarna? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen, met Nederland als enige referentie. Er is geen ranglijst van gemeenten.</p>
+    <p class="muted small">De cijfers komen live van het CBS op het moment dat je een gemeente kiest. Ze gaan over het werk van Veilig Thuis, niet over hoeveel geweld er is.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="info"><p><b>Lees dit eerst.</b> Een melding is een vermoeden dat iemand bij Veilig Thuis neerlegt. Meer meldingen kan betekenen dat er meer geweld is, maar ook dat mensen het eerder zien en sneller melden. De cijfers laten het bereik en het werk van Veilig Thuis zien, niet de omvang van huiselijk geweld.</p></div>
+      <div class="top3" id="top3"></div>
+      <div class="info" id="kleinInfo" hidden><p id="kleinTxt"></p></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vijf mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit zijn adviezen en meldingen bij Veilig Thuis. Meldingen die alleen bij de politie, het wijkteam of de huisarts bleven, tellen niet mee. Een advies is een vraag om raad zonder persoonsgegevens; een melding noemt wel de betrokkenen.</li>
+          <li><b>Een andere toewijzing of periode.</b> Veilig Thuis wijst elk advies en elke melding toe aan een gemeente, op basis van de eigen registratie. Een gemeentelijke rapportage per kwartaal, of naar de gemeente van de melder, komt anders uit. Het laatste halfjaar is voorlopig.</li>
+          <li><b>Registratie bij de bron.</b> De 26 Veilig Thuis-organisaties registreren niet allemaal op dezelfde manier, bijvoorbeeld wat een advies is en wat een melding, of hoe vaak een melding "niet ingedeeld" blijft. Verschillen met Nederland kunnen daardoor komen, niet door de gemeente.</li>
+          <li><b>Afronding.</b> Het CBS rondt alle aantallen af op vijftallen en laat kleine aantallen weg (–). Percentages op deze pagina zijn berekend uit die afgeronde aantallen.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/84847NED/table" target="_blank" rel="noopener">de CBS-tabel zelf</a>, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente of van Veilig Thuis, en het CBS is niet verantwoordelijk voor de bewerking.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <!-- door de jaren -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2>Adviezen en meldingen</h2></div>
+        <div class="seg" id="trendSeg" role="group" aria-label="Toon aantal of per 100.000 inwoners">
+          <button type="button" data-m="n" aria-pressed="true">Aantal</button>
+          <button type="button" data-m="p" aria-pressed="false">Per 100.000 inwoners</button>
+        </div>
+      </div>
+      <div class="duo" id="trend"></div>
+
+      <!-- het gekozen jaar -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Eén jaar</span><h2 id="jaarKop">In het gekozen jaar</h2></div>
+        <div class="jaren" id="jaren" role="group" aria-label="Kies een jaar"></div>
+      </div>
+      <div class="info" id="verdeelInfo" hidden><p id="verdeelTxt"></p></div>
+      <div class="duo" id="verdeel">
+        <div class="chart">
+          <div class="chart-kop"><h3>Waar gaat het over</h3>
+            <div class="seg" id="aardSeg" role="group" aria-label="Meldingen of adviezen">
+              <button type="button" data-m="m" aria-pressed="true">Meldingen</button>
+              <button type="button" data-m="a" aria-pressed="false">Adviezen</button>
+            </div>
+          </div>
+          <div class="noemer" id="aardNoemer"></div>
+          <div class="rijen" id="aard"></div>
+          <div class="legend"><span><span class="sw" style="background:var(--accent)"></span><span id="aardGm">gemeente</span></span><span><span class="tick"></span>Nederland</span></div>
+        </div>
+        <div class="chart">
+          <div class="chart-kop"><h3>Wie meldt of vraagt advies</h3>
+            <div class="seg" id="wieSeg" role="group" aria-label="Meldingen of adviezen">
+              <button type="button" data-m="m" aria-pressed="true">Meldingen</button>
+              <button type="button" data-m="a" aria-pressed="false">Adviezen</button>
+            </div>
+          </div>
+          <div class="noemer" id="wieNoemer"></div>
+          <div class="rijen" id="wie"></div>
+          <div class="legend"><span><span class="sw" style="background:var(--accent)"></span><span id="wieGm">gemeente</span></span><span><span class="tick"></span>Nederland</span></div>
+        </div>
+        <div class="chart">
+          <div class="chart-kop"><h3>Wat Veilig Thuis na een melding doet</h3></div>
+          <div class="noemer">Uitkomst van de veiligheidsbeoordeling, als deel van de meldingen</div>
+          <div class="stapel" id="beoordeling"></div>
+          <div class="legend" id="beoordelingLeg"></div>
+        </div>
+        <div class="chart">
+          <div class="chart-kop"><h3>Was Veilig Thuis er al bij?</h3></div>
+          <div class="noemer">Meldingen naar eerdere betrokkenheid van Veilig Thuis in de drie jaar ervoor (vanaf 2022)</div>
+          <div class="stapel" id="eerder"></div>
+          <div class="legend" id="eerderLeg"></div>
+        </div>
+      </div>
+      <details class="tabelview" id="tabel"><summary>Toon alle cijfers van dit jaar als tabel</summary>
+        <div class="tools"><button class="btn" id="csvBtn" type="button">Download als CSV</button><span class="small muted">Aantallen zoals het CBS ze publiceert, afgerond op vijftallen.</span></div>
+        <div class="scroll" id="tabelIn"></div>
+      </details>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Advies</b>: iemand vraagt Veilig Thuis om raad over een vermoeden van huiselijk geweld of kindermishandeling. Veilig Thuis onderneemt zelf niets richting de betrokkenen.</li>
+            <li><b>Melding</b>: iemand legt een vermoeden bij Veilig Thuis neer, met de gegevens van de betrokkenen. Veilig Thuis beoordeelt dan binnen vijf werkdagen hoe veilig de situatie is.</li>
+            <li><b>Per 100.000 inwoners</b>: zoals het CBS het publiceert. Zo is je gemeente te leggen naast Nederland, ongeacht de grootte.</li>
+            <li><b>Aard van het geweld</b>: als deel van alle meldingen of adviezen. Eén melding kan over meer vormen gaan, dus de percentages tellen op tot meer dan 100.</li>
+            <li><b>Wie meldt</b>: de organisatie van de melder of adviesvrager. "Burgers" zijn mensen die niet vanuit hun werk melden: betrokkenen zelf, familie, buren.</li>
+            <li><b>Na de melding</b>: overdragen betekent dat de hulp naar het lokale veld gaat, zoals het wijkteam of een hulpverlener die al betrokken is. Vervolgstappen bij Veilig Thuis betekent onderzoek of het zelf regelen van voorwaarden en hulp.</li>
+            <li><b>Eerder betrokken</b>: een hermelding gaat over iemand die in de drie jaar ervoor al bij Veilig Thuis bekend was. Een vervolgmelding komt binnen terwijl Veilig Thuis nog bij het gezin betrokken is.</li>
+            <li><b>Onveilig</b>: de veiligheidstaxatie van Veilig Thuis. Acute en structurele onveiligheid kunnen bij dezelfde melding allebei voorkomen.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Geen omvang</b>: een stijging kan meer geweld betekenen, maar ook betere signalering, een campagne of een andere werkwijze van Veilig Thuis. De cijfers zeggen het verschil, niet de oorzaak.</li>
+            <li><b>Kleine aantallen</b>: het CBS rondt af op vijftallen en laat kleine aantallen weg (–). Onder de 100 meldingen in een jaar toont de pagina geen verdeling naar aard, melder of uitkomst: een paar meldingen meer of minder verschuift een percentage dan al flink.</li>
+            <li><b>Registratie per regio</b>: elke gemeente valt onder één van 26 Veilig Thuis-organisaties. Die registreren niet allemaal hetzelfde. Een afwijking van Nederland kan een registratieverschil van de regio zijn.</li>
+            <li><b>Voorlopig</b>: het laatste halfjaar is voorlopig. Het CBS stelt de cijfers later bij.</li>
+            <li><b>Geen wijken</b>: het CBS publiceert deze cijfers per gemeente, niet per wijk. Dat past bij het onderwerp: een kaart die wijken aanwijst stigmatiseert snel.</li>
+            <li><b>Geen kosten</b>: gemeenten boeken Veilig Thuis in het sociaal domein, maar niet op een eigen Iv3-taakveld. De kosten zijn daarom niet uit de open data te halen.</li>
+          </ul>
+          <p class="hulp">Zelf hulp nodig of zorgen om iemand? Bel Veilig Thuis op 0800-2000 (gratis, dag en nacht). Bij acuut gevaar: 112.</p>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle producten</a></p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const PRODUCT = 'Veilig Thuis per gemeente';
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const T = { kern: '84847NED', wie: '84849NED', aard: '84851NED', beoord: '84852NED', eerder: '85361NED' };
+  const MIN_MELD = 100; // ondergrens (meldingen in een jaar) voor een verdeling
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const fmt = v => v == null ? '–' : nf.format(Math.round(v));
+  const pct = (a, b) => a == null || !b ? null : 100 * a / b;
+  const fP = v => v == null ? '–' : nf.format(Math.round(v)) + '%';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tr = s => String(s == null ? '' : s).trim();
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- ophalen ----------
+  async function getJSON(u) {
+    let last;
+    for (let i = 0; i < 3; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  const odata = async (t, q) => (await getJSON(CBS + t + '/' + q.replace(/ /g, '%20'))).value;
+  const regioFilter = c => `(RegioS eq 'GM${c}' or RegioS eq 'NL01  ') and substringof('JJ',Perioden)`;
+
+  // ---------- staat ----------
+  let S = null;
+  let trendModus = 'n', aardModus = 'm', wieModus = 'm';
+  const fouten = new Set();
+
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Het CBS gaf om ${t} geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#melding').hidden = false;
+  }
+
+  // per tabel: d[regio][jaar] = rij, of d[regio][jaar][categorie] = rij
+  function groepeer(rows, dimKey) {
+    const d = { gm: {}, nl: {} };
+    rows.forEach(r => {
+      const reg = tr(r.RegioS) === 'NL01' ? 'nl' : 'gm';
+      const j = +r.Perioden.slice(0, 4);
+      if (dimKey) { ((d[reg][j] = d[reg][j] || {}))[tr(r[dimKey])] = r; }
+      else d[reg][j] = r;
+    });
+    return d;
+  }
+  const LADERS = {
+    kern: { naam: 'adviezen en meldingen', q: c => `TypedDataSet?$filter=${regioFilter(c)}&$select=RegioS,Perioden,GestarteAdviezen_1,OntvangenMeldingenTotaal_2,GestarteAdviezen_13,OntvangenMeldingenTotaal_14`, dim: null },
+    wie: { naam: 'wie meldt', q: c => `TypedDataSet?$filter=${regioFilter(c)}`, dim: 'KenmerkenAdviezenMeldingen' },
+    aard: { naam: 'aard van het geweld', q: c => `TypedDataSet?$filter=${regioFilter(c)}&$select=RegioS,Perioden,KenmerkenAdviezenMeldingenDiensten,GestarteAdviezen_1,OntvangenMeldingen_2`, dim: 'KenmerkenAdviezenMeldingenDiensten' },
+    beoord: { naam: 'na de melding', q: c => `TypedDataSet?$filter=${regioFilter(c)}&$select=RegioS,Perioden,Veiligheidstaxatie,Veiligheidsbeoordeling,OntvangenMeldingen_1`, dim: null },
+    eerder: { naam: 'eerdere betrokkenheid', q: c => `TypedDataSet?$filter=${regioFilter(c)}`, dim: null }
+  };
+  async function laad(k) {
+    const L = LADERS[k];
+    try {
+      const rows = await odata(T[k], L.q(S.g.c));
+      if (k === 'beoord') {
+        const d = { gm: {}, nl: {} };
+        rows.forEach(r => {
+          const reg = tr(r.RegioS) === 'NL01' ? 'nl' : 'gm', j = +r.Perioden.slice(0, 4);
+          const t = tr(r.Veiligheidstaxatie), b = tr(r.Veiligheidsbeoordeling);
+          const o = (d[reg][j] = d[reg][j] || { taxatie: {}, beoordeling: {} });
+          if (b === 'T001596') o.taxatie[t] = r.OntvangenMeldingen_1;
+          if (t === 'T001594') o.beoordeling[b] = r.OntvangenMeldingen_1;
+        });
+        S[k] = d;
+      } else S[k] = groepeer(rows, L.dim);
+    } catch (e) { S[k] = null; fouten.add(L.naam); toonMelding(); }
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = 'Veilig Thuis ' + g.n + ' · Open Data Atelier';
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    if (location.hash !== '#gm=' + g.c) history.replaceState(null, '', '#gm=' + g.c);
+    S = { g, jaar: null, opgehaald: null };
+    fouten.clear(); toonMelding();
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
+    ['#top3', '#trend', '#aard', '#wie', '#beoordeling', '#eerder', '#jaren', '#tabelIn', '#beoordelingLeg', '#eerderLeg'].forEach(s => { $(s).innerHTML = ''; });
+    $('#kleinInfo').hidden = true; $('#verdeelInfo').hidden = true;
+    voortgang(0, 2, 'Adviezen en meldingen ophalen…');
+    await laad('kern');
+    if (S.g !== g) return;
+    S.opgehaald = new Date();
+    renderKern(); renderTrend();
+    voortgang(1, 2, 'Aard, melders en vervolg ophalen…');
+    await Promise.all(['wie', 'aard', 'beoord', 'eerder'].map(laad));
+    if (S.g !== g) return;
+    renderKern();
+    const jaren = beschikbareJaren();
+    renderJaren(jaren);
+    const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
+    kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[jaren.length - 1]);
+    renderVoet(); vulMeld();
+    voortgang(2, 2, '');
+  }
+  function beschikbareJaren() {
+    const k = S.kern && S.kern.nl || {};
+    return Object.keys(k).map(Number).sort();
+  }
+  const laatsteJaar = () => { const j = beschikbareJaren(); return j[j.length - 1]; };
+
+  // ---------- kern ----------
+  function renderKern() {
+    const g = S.g, j = laatsteJaar();
+    const gm = S.kern && S.kern.gm[j], nl = S.kern && S.kern.nl[j];
+    const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    if (!S.kern) { $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'de kerncijfers konden niet worden opgehaald'; return; }
+    if (!gm || gm.OntvangenMeldingenTotaal_2 == null) {
+      $('#leadBig').textContent = `${g.n}: geen cijfers`;
+      $('#leadSub').textContent = `Het CBS publiceert voor ${g.n} geen aantallen over ${j}: te weinig adviezen en meldingen om ze zonder herleidbaarheid te tonen.`;
+      $('#top3').innerHTML = ''; return;
+    }
+    $('#leadBig').textContent = `${g.n}: ${fmt(gm.OntvangenMeldingenTotaal_2)} meldingen en ${fmt(gm.GestarteAdviezen_1)} adviezen bij Veilig Thuis in ${j}`;
+    $('#leadSub').textContent = `Nederland: ${fmt(nl.OntvangenMeldingenTotaal_2)} meldingen en ${fmt(nl.GestarteAdviezen_1)} adviezen`;
+    let h = unit('Meldingen per 100.000 inwoners', fmt(gm.OntvangenMeldingenTotaal_14), `Nederland ${fmt(nl.OntvangenMeldingenTotaal_14)}. Adviezen: ${fmt(gm.GestarteAdviezen_13)}, Nederland ${fmt(nl.GestarteAdviezen_13)}.`);
+    const klein = gm.OntvangenMeldingenTotaal_2 < MIN_MELD;
+    if (!klein) {
+      const w = S.wie && S.wie.gm[j], wn = S.wie && S.wie.nl[j];
+      if (w && wn) h += unit('Gemeld door de politie', fP(pct(w.A049693 && w.A049693.OntvangenMeldingen_2, w.T001597.OntvangenMeldingen_2)),
+        `van de meldingen, Nederland ${fP(pct(wn.A049693.OntvangenMeldingen_2, wn.T001597.OntvangenMeldingen_2))}. Door burgers: ${fP(pct(w.A049715 && w.A049715.OntvangenMeldingen_2, w.T001597.OntvangenMeldingen_2))}.`);
+      const e = S.eerder && S.eerder.gm[j], en = S.eerder && S.eerder.nl[j];
+      if (e && en && e.OntvangenMeldingenTotaal_1) {
+        const al = (e.Totaal_3 || 0) + (e.Totaal_6 || 0), aln = (en.Totaal_3 || 0) + (en.Totaal_6 || 0);
+        h += unit('Al bekend bij Veilig Thuis', fP(pct(al, e.OntvangenMeldingenTotaal_1)), `van de meldingen ging over iemand die er al was: hermelding of vervolgmelding. Nederland ${fP(pct(aln, en.OntvangenMeldingenTotaal_1))}.`);
+      }
+      const b = S.beoord && S.beoord.gm[j], bn = S.beoord && S.beoord.nl[j];
+      if (b && bn) {
+        const tot = b.taxatie.T001594, totn = bn.taxatie.T001594;
+        h += unit('Structureel onveilig', fP(pct(b.taxatie.A049565, tot)), `volgens de taxatie van Veilig Thuis, Nederland ${fP(pct(bn.taxatie.A049565, totn))}. Acuut onveilig: ${fP(pct(b.taxatie.A049564, tot))}, Nederland ${fP(pct(bn.taxatie.A049564, totn))}.`);
+      }
+    }
+    $('#top3').innerHTML = h;
+    $('#kleinInfo').hidden = !klein;
+    if (klein) $('#kleinTxt').textContent = `${g.n} had in ${j} minder dan ${MIN_MELD} meldingen. Omdat het CBS afrondt op vijftallen, laat de pagina dan geen percentages en verdelingen zien. De aantallen door de jaren staan hieronder wel.`;
+  }
+
+  // ---------- door de jaren ----------
+  document.querySelectorAll('#trendSeg button').forEach(b => b.addEventListener('click', () => {
+    trendModus = b.dataset.m;
+    document.querySelectorAll('#trendSeg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    renderTrend();
+  }));
+  function kolommen(titel, noemer, jaren, vals, ref) {
+    const W = 520, H = 200, L = 44, R = 8, Tp = 18, B = 24;
+    const alle = vals.concat(ref || []).filter(v => v != null);
+    if (!alle.length) return `<div class="chart"><div class="chart-kop"><h3>${titel}</h3></div><p class="small muted">Geen cijfers gepubliceerd.</p></div>`;
+    const max = Math.max(...alle) * 1.12 || 1;
+    const stap = Math.pow(10, Math.floor(Math.log10(max))); const s = max / stap > 5 ? stap * 2 : max / stap > 2 ? stap : stap / 2;
+    const y = v => Tp + (H - Tp - B) * (1 - v / max);
+    const bw = (W - L - R) / jaren.length;
+    let svg = '';
+    for (let v = 0; v <= max; v += s) svg += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text class="lbl" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${nf.format(v)}</text>`;
+    jaren.forEach((j, i) => {
+      const x = L + i * bw, v = vals[i];
+      if (v != null) svg += `<rect x="${x + bw * .18}" y="${y(v)}" width="${bw * .64}" height="${y(0) - y(v)}" rx="2" fill="var(--accent)"><title>${j}: ${fmt(v)}</title></rect>`;
+      else svg += `<text class="lbl" x="${x + bw / 2}" y="${y(0) - 4}" text-anchor="middle">–</text>`;
+      svg += `<text class="lbl" x="${x + bw / 2}" y="${H - 6}" text-anchor="middle">${j}</text>`;
+    });
+    if (ref) {
+      const pts = jaren.map((j, i) => ref[i] == null ? null : [L + i * bw + bw / 2, y(ref[i])]).filter(Boolean);
+      svg += `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+      pts.forEach(p => { svg += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--fg)"/>`; });
+    }
+    const li = vals.length - 1;
+    return `<div class="chart"><div class="chart-kop"><h3>${titel}</h3><span class="laatst">${fmt(vals[li])} <span class="muted">in ${jaren[li]}</span></span></div>
+      <div class="noemer">${noemer}</div>
+      <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(titel)} per jaar">${svg}</svg>
+      <div class="legend"><span><span class="sw" style="background:var(--accent)"></span>${esc(S.g.n)}</span>${ref ? '<span><svg width="22" height="10" style="vertical-align:middle;margin-right:6px"><line x1="0" x2="22" y1="5" y2="5" stroke="currentColor" stroke-width="1.5" stroke-dasharray="4 3"/></svg>Nederland</span>' : ''}</div></div>`;
+  }
+  function renderTrend() {
+    if (!S || !S.kern) { $('#trend').innerHTML = ''; return; }
+    const jaren = beschikbareJaren();
+    const r = (reg, k) => jaren.map(j => S.kern[reg][j] ? S.kern[reg][j][k] : null);
+    const p = trendModus === 'p';
+    $('#trend').innerHTML =
+      kolommen('Meldingen', p ? 'per 100.000 inwoners · een vermoeden met de gegevens van de betrokkenen' : 'aantal · een vermoeden met de gegevens van de betrokkenen', jaren, r('gm', p ? 'OntvangenMeldingenTotaal_14' : 'OntvangenMeldingenTotaal_2'), p ? r('nl', 'OntvangenMeldingenTotaal_14') : null) +
+      kolommen('Adviezen', p ? 'per 100.000 inwoners · een vraag om raad, zonder actie richting de betrokkenen' : 'aantal · een vraag om raad, zonder actie richting de betrokkenen', jaren, r('gm', p ? 'GestarteAdviezen_13' : 'GestarteAdviezen_1'), p ? r('nl', 'GestarteAdviezen_13') : null);
+  }
+
+  // ---------- jaar ----------
+  function renderJaren(jaren) {
+    $('#jaren').innerHTML = jaren.map(j => `<button class="btn linkish" type="button" data-j="${j}">${j}</button>`).join('');
+    $('#jaren').querySelectorAll('button').forEach(b => b.addEventListener('click', () => kiesJaar(+b.dataset.j)));
+  }
+  function kiesJaar(j) {
+    S.jaar = j;
+    $('#jaren').querySelectorAll('button').forEach(b => { b.classList.toggle('primary', +b.dataset.j === j); b.setAttribute('aria-pressed', +b.dataset.j === j); });
+    $('#jaarKop').textContent = `In ${j}`;
+    const h = '#gm=' + S.g.c + (j !== laatsteJaar() ? '&jaar=' + j : '');
+    if (location.hash !== h) history.replaceState(null, '', h);
+    renderVerdeling(); renderTabel();
+  }
+
+  const AARD = [['A049506', 'Kindermishandeling'], ['A049508', '(Ex-)partnergeweld'], ['A049507', 'Geweld tegen ouders'], ['A049509', 'Ouderenmishandeling'], ['A049510', 'Ander huiselijk geweld'], ['A049511', 'Andere problemen, geen geweld']];
+  const WIE = [['A049715', 'Burgers', ['A049715']], ['A049692', 'Politie en justitie', ['A049692']], ['A049663', 'Gezondheidszorg', ['A049663']], ['A049673', 'Geestelijke gezondheidszorg', ['A049673']], ['A049678', 'Onderwijs en leerplicht', ['A049678', 'A049686']], ['A049677', 'Kinderopvang', ['A049677']], ['A049687', 'Jeugdzorg', ['A049687']], ['A049714', 'Andere organisatie', ['A049714', 'A049712', 'A049713']]];
+  const BEOORD = [['A049599', 'Overgedragen aan het lokale veld', 'var(--seq-5)'], ['A049598', 'Vervolgstappen bij Veilig Thuis', 'var(--seq-3)'], ['A049605', 'Regionaal maatwerk', 'var(--seq-2)'], ['A049604', 'Geen vervolgstappen nodig', 'var(--grijs)']];
+  const EERDER = [['k_1eMeldingGeenBetrokkenenBekendVT_2', 'Eerste melding', 'var(--seq-1)'], ['Totaal_3', 'Hermelding (bekend in 3 jaar ervoor)', 'var(--seq-3)'], ['Totaal_6', 'Vervolgmelding (Veilig Thuis nog betrokken)', 'var(--seq-5)'], ['MeldingNietIngedeeld_10', 'Niet ingedeeld', 'var(--grijs)']];
+
+  function rijen(el, items) {
+    el.innerHTML = items.map(([naam, a, b, an, bn]) => {
+      const p = pct(a, b), q = pct(an, bn);
+      return `<div class="rij"><span class="naam">${esc(naam)}</span><span class="baan">${p != null ? `<i style="width:${Math.min(100, p)}%"></i>` : ''}${q != null ? `<b style="left:${Math.min(100, q)}%"></b>` : ''}</span><span class="w">${fP(p)} <span class="muted">· ${fP(q)}</span></span></div>`;
+    }).join('');
+  }
+  function stapels(el, legEl, rijenData, cats) {
+    el.innerHTML = rijenData.map(([naam, vals, tot]) => `<span>${esc(naam)}</span><div class="s" role="img" aria-label="${esc(naam)}: ${cats.map((c, i) => c[1] + ' ' + fP(pct(vals[i], tot))).join(', ')}">${cats.map((c, i) => { const p = pct(vals[i], tot); return p ? `<i style="width:${p}%;background:${c[2]}" title="${esc(c[1])}: ${fP(p)} (${fmt(vals[i])})"></i>` : ''; }).join('')}</div>`).join('');
+    legEl.innerHTML = cats.map((c, i) => `<span><span class="sw" style="background:${c[2]}"></span>${esc(c[1])} ${rijenData.map(r => fP(pct(r[1][i], r[2]))).join(' · ')}</span>`).join('');
+  }
+
+  ['aard', 'wie'].forEach(k => document.querySelectorAll(`#${k}Seg button`).forEach(b => b.addEventListener('click', () => {
+    if (k === 'aard') aardModus = b.dataset.m; else wieModus = b.dataset.m;
+    document.querySelectorAll(`#${k}Seg button`).forEach(x => x.setAttribute('aria-pressed', x === b));
+    renderVerdeling();
+  })));
+
+  function renderVerdeling() {
+    const j = S.jaar, g = S.g;
+    const kern = S.kern && S.kern.gm[j];
+    const meld = kern && kern.OntvangenMeldingenTotaal_2;
+    const klein = meld == null || meld < MIN_MELD;
+    $('#verdeel').hidden = klein;
+    $('#verdeelInfo').hidden = !klein;
+    if (klein) { $('#verdeelTxt').textContent = meld == null ? `Het CBS publiceert voor ${g.n} geen cijfers over ${j}.` : `${g.n} had in ${j} ${fmt(meld)} meldingen, minder dan ${MIN_MELD}. Een verdeling naar aard, melder en uitkomst is dan niet betrouwbaar te tonen.`; return; }
+    $('#aardGm').textContent = $('#wieGm').textContent = g.n;
+
+    // aard
+    const a = S.aard && S.aard.gm[j], an = S.aard && S.aard.nl[j];
+    const ka = aardModus === 'm' ? 'OntvangenMeldingen_2' : 'GestarteAdviezen_1';
+    if (a && an && a.A049505) {
+      $('#aardNoemer').textContent = `Deel van de ${aardModus === 'm' ? 'meldingen' : 'adviezen'} (${fmt(a.A049505[ka])}). Een melding kan over meer vormen gaan.`;
+      rijen($('#aard'), AARD.map(([c, n]) => [n, a[c] && a[c][ka], a.A049505[ka], an[c] && an[c][ka], an.A049505[ka]]));
+    } else { $('#aardNoemer').textContent = ''; $('#aard').innerHTML = '<p class="small muted">Niet beschikbaar.</p>'; }
+
+    // wie
+    const w = S.wie && S.wie.gm[j], wn = S.wie && S.wie.nl[j];
+    const kw = wieModus === 'm' ? 'OntvangenMeldingen_2' : 'GestarteAdviezen_1';
+    const som = (o, codes) => { let s = 0, ok = false; codes.forEach(c => { if (o[c] && o[c][kw] != null) { s += o[c][kw]; ok = true; } }); return ok ? s : null; };
+    if (w && wn && w.T001597) {
+      $('#wieNoemer').textContent = `Organisatie van wie ${wieModus === 'm' ? 'meldt' : 'advies vraagt'}, deel van ${fmt(w.T001597[kw])}. Onbekend telt niet mee in de rijen.`;
+      rijen($('#wie'), WIE.map(([, n, codes]) => [n, som(w, codes), w.T001597[kw], som(wn, codes), wn.T001597[kw]]));
+    } else { $('#wieNoemer').textContent = ''; $('#wie').innerHTML = '<p class="small muted">Niet beschikbaar.</p>'; }
+
+    // na de melding
+    const b = S.beoord && S.beoord.gm[j], bn = S.beoord && S.beoord.nl[j];
+    if (b && bn) stapels($('#beoordeling'), $('#beoordelingLeg'), [[g.n, BEOORD.map(c => b.beoordeling[c[0]]), b.beoordeling.T001596], ['Nederland', BEOORD.map(c => bn.beoordeling[c[0]]), bn.beoordeling.T001596]], BEOORD);
+    else { $('#beoordeling').innerHTML = '<p class="small muted">Niet beschikbaar.</p>'; $('#beoordelingLeg').innerHTML = ''; }
+
+    // eerder betrokken
+    const e = S.eerder && S.eerder.gm[j], en = S.eerder && S.eerder.nl[j];
+    if (e && en && e.OntvangenMeldingenTotaal_1) stapels($('#eerder'), $('#eerderLeg'), [[g.n, EERDER.map(c => e[c[0]]), e.OntvangenMeldingenTotaal_1], ['Nederland', EERDER.map(c => en[c[0]]), en.OntvangenMeldingenTotaal_1]], EERDER);
+    else { $('#eerder').innerHTML = `<p class="small muted">${j < 2022 ? 'Het CBS publiceert dit vanaf 2022.' : 'Niet beschikbaar.'}</p>`; $('#eerderLeg').innerHTML = ''; }
+  }
+
+  // ---------- tabel en CSV ----------
+  function tabelRijen() {
+    const j = S.jaar, R = [];
+    const gr = t => R.push({ grp: t });
+    const r = (naam, gm, nl) => R.push({ naam, gm, nl });
+    const k = S.kern, kg = k && k.gm[j] || {}, kn = k && k.nl[j] || {};
+    gr('Totaal');
+    r('Meldingen', kg.OntvangenMeldingenTotaal_2, kn.OntvangenMeldingenTotaal_2);
+    r('Meldingen per 100.000 inwoners', kg.OntvangenMeldingenTotaal_14, kn.OntvangenMeldingenTotaal_14);
+    r('Adviezen', kg.GestarteAdviezen_1, kn.GestarteAdviezen_1);
+    r('Adviezen per 100.000 inwoners', kg.GestarteAdviezen_13, kn.GestarteAdviezen_13);
+    const a = S.aard && S.aard.gm[j] || {}, an = S.aard && S.aard.nl[j] || {};
+    gr('Meldingen naar aard (meer vormen per melding mogelijk)');
+    AARD.forEach(([c, n]) => r(n, a[c] && a[c].OntvangenMeldingen_2, an[c] && an[c].OntvangenMeldingen_2));
+    gr('Adviezen naar aard');
+    AARD.forEach(([c, n]) => r(n, a[c] && a[c].GestarteAdviezen_1, an[c] && an[c].GestarteAdviezen_1));
+    const w = S.wie && S.wie.gm[j] || {}, wn = S.wie && S.wie.nl[j] || {};
+    const som = (o, codes, kk) => { let s = 0, ok = false; codes.forEach(c => { if (o[c] && o[c][kk] != null) { s += o[c][kk]; ok = true; } }); return ok ? s : null; };
+    gr('Meldingen naar organisatie melder');
+    WIE.forEach(([, n, codes]) => r(n, som(w, codes, 'OntvangenMeldingen_2'), som(wn, codes, 'OntvangenMeldingen_2')));
+    gr('Adviezen naar organisatie adviesvrager');
+    WIE.forEach(([, n, codes]) => r(n, som(w, codes, 'GestarteAdviezen_1'), som(wn, codes, 'GestarteAdviezen_1')));
+    const b = S.beoord && S.beoord.gm[j], bn = S.beoord && S.beoord.nl[j];
+    gr('Meldingen naar uitkomst veiligheidsbeoordeling');
+    BEOORD.forEach(([c, n]) => r(n, b && b.beoordeling[c], bn && bn.beoordeling[c]));
+    r('Nog niet beoordeeld', b && b.beoordeling.A049606, bn && bn.beoordeling.A049606);
+    gr('Meldingen naar veiligheidstaxatie (meer per melding mogelijk)');
+    r('Acute onveiligheid', b && b.taxatie.A049564, bn && bn.taxatie.A049564);
+    r('Structurele onveiligheid', b && b.taxatie.A049565, bn && bn.taxatie.A049565);
+    r('Vermoeden van structurele onveiligheid', b && b.taxatie.A049566, bn && bn.taxatie.A049566);
+    const e = S.eerder && S.eerder.gm[j], en = S.eerder && S.eerder.nl[j];
+    gr('Meldingen naar eerdere betrokkenheid Veilig Thuis');
+    EERDER.forEach(([c, n]) => r(n, e && e[c], en && en[c]));
+    return R;
+  }
+  function renderTabel() {
+    const R = tabelRijen();
+    $('#tabelIn').innerHTML = `<table><thead><tr><th>${S.jaar}</th><th class="r">${esc(S.g.n)}</th><th class="r">Nederland</th></tr></thead><tbody>${R.map(x => x.grp ? `<tr class="grp"><td colspan="3">${esc(x.grp)}</td></tr>` : `<tr><td>${esc(x.naam)}</td><td class="r">${fmt(x.gm)}</td><td class="r">${fmt(x.nl)}</td></tr>`).join('')}</tbody></table>`;
+  }
+  $('#csvBtn').addEventListener('click', () => {
+    let groep = '';
+    const regels = [['groep', 'onderwerp', 'jaar', S.g.n, 'Nederland']];
+    tabelRijen().forEach(x => { if (x.grp) groep = x.grp; else regels.push([groep, x.naam, S.jaar, x.gm == null ? '' : x.gm, x.nl == null ? '' : x.nl]); });
+    const csv = '﻿' + regels.map(r => r.map(v => /[;"\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(';')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = `veilig_thuis_${S.jaar}_${S.g.n.replace(/[^\w-]+/g, '_').toLowerCase()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  // ---------- melden ----------
+  function vulMeld() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+  }
+
+  // ---------- voet ----------
+  function renderVoet() {
+    const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+    const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
+    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Veilig Thuis (CC-BY 4.0): kerncijfers ${link(T.kern)}, organisatie van de melder ${link(T.wie)}, aard van het geweld ${link(T.aard)}, veiligheidsbeoordeling en -taxatie ${link(T.beoord)}, eerdere betrokkenheid ${link(T.eerder)}. Jaarcijfers 2019 tot en met ${laatsteJaar() || '–'}; het CBS publiceert tweemaal per jaar, het laatste halfjaar voorlopig. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', () => { if (S) kies(S.g); });
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  vulMeld();
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=(\d{4})/) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>

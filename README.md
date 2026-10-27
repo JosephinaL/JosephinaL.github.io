@@ -23,11 +23,13 @@ Informatieproducten voor gemeentelijke vraagstukken, gebouwd op openbare registr
 | Huishoudens en vergrijzing | [huishoudens.html](https://josephinal.github.io/huishoudens.html) | Hoe zijn de huishoudens samengesteld, hoe snel vergrijst de gemeente sinds 1995, en in welke buurten? | CBS (Regionale kerncijfers, Kerncijfers wijken en buurten), PDOK |
 | Woningvoorraad en leegstand | [woningen.html](https://josephinal.github.io/woningen.html) | Hoeveel woningen zijn er, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg? | CBS (Woningvoorraad, Levensloop van woningen, Kerncijfers wijken en buurten), PDOK |
 | Bouwstroom | [bouwstroom.html](https://josephinal.github.io/bouwstroom.html) | Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? | BAG, Officiële bekendmakingen (gemeenteblad), CBS |
-| **Sociaal domein** | | | |
-| Jeugdzorg per wijk | [jeugdzorg.html](https://josephinal.github.io/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
+| **Sociaal domein · ondersteuning en meedoen** | | | |
 | Wmo per wijk | [wmo.html](https://josephinal.github.io/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
 | Schulden per wijk | [schulden.html](https://josephinal.github.io/schulden.html) | Hoeveel huishoudens hebben problematische schulden, bij welke schuldeisers, wie zijn het en in welke wijken? | CBS (Schuldenproblematiek in beeld), PDOK |
 | Inburgering per gemeente | [inburgering.html](https://josephinal.github.io/inburgering.html) | Wie werd inburgeringsplichtig onder de Wet inburgering 2021, hoe ver is elke jaargroep en in welke leerroute? | DUO (WI 2021 Instroom, Uitstroom en Leerroute), CBS (Regionale kerncijfers) |
+| **Sociaal domein · jeugd en veilig thuis** | | | |
+| Jeugdzorg per wijk | [jeugdzorg.html](https://josephinal.github.io/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
+| Veilig Thuis per gemeente | [veiligthuis.html](https://josephinal.github.io/veiligthuis.html) | Hoe vaak vragen inwoners en professionals Veilig Thuis om advies of doen ze een melding, over welk geweld, wie meldt en wat gebeurt er daarna? | CBS (Beleidsinformatie Veilig Thuis) |
 | **Werkbank** | | | |
 | Eigen lijst op de kaart | [eigenlijst.html](https://josephinal.github.io/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed in eigen beheer, eruit naast de BAG en open data? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
 
@@ -36,7 +38,7 @@ Informatieproducten voor gemeentelijke vraagstukken, gebouwd op openbare registr
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Wmo, schulden, bevolking en wonen (CBS), inburgering (DUO), vergunningen (gemeenteblad).
+2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, bevolking en wonen (CBS), inburgering (DUO), vergunningen (gemeenteblad).
 3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving. Eigen lijst op de kaart is daar het gereedschap voor.
 4. **Antwoord:** navolgbaar per object.
 
