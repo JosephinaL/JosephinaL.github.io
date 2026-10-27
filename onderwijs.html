@@ -599,7 +599,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
   function renderVoet() {
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
-    $('#foot').innerHTML = `Bronnen: <a href="https://onderwijsdata.duo.nl/datasets">DUO Open Onderwijsdata</a> (CC-BY): leerlingen per vestiging (telling ${D.meta.leerling}), leerlingenprognoses per vestiging, historische leerlingaantallen per gemeente en adressen van vestigingen (stand ${D.meta.adres.split('-').reverse().join('-')}). Buurt en ligging: <a href="https://www.pdok.nl">PDOK</a> Locatieserver (BAG, CBS-buurtindeling), opgehaald ${t}. Achtergrondkaart: PDOK BRT.<br>Josephine Linders · Basisonderwijs per buurt · versie ${VERSIE} · data samengesteld 22 oktober 2026`;
+    $('#foot').innerHTML = `Bronnen: <a href="https://onderwijsdata.duo.nl/datasets">DUO Open Onderwijsdata</a> (CC-BY): leerlingen per vestiging (telling ${D.meta.leerling}), leerlingenprognoses per vestiging, historische leerlingaantallen per gemeente en adressen van vestigingen (stand ${D.meta.adres.split('-').reverse().join('-')}). Buurt en ligging: <a href="https://www.pdok.nl">PDOK</a> Locatieserver (BAG, CBS-buurtindeling), opgehaald ${t}. Achtergrondkaart: PDOK BRT.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Basisonderwijs per buurt · versie ${VERSIE} · data samengesteld 22 oktober 2026`;
   }
 
   // ---------- start ----------

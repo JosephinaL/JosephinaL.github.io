@@ -782,7 +782,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const rs = S.reeks;
     const per = rs ? `${rs[0].j}–${rs[rs.length - 1].j}` : '';
     const j = S.b ? S.b.jaar : (S.jaren[0] || '');
-    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Gemeente door de jaren: Regionale kerncijfers Nederland, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a> (${per}, peildatum 1 januari). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Huishoudens en vergrijzing · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Gemeente door de jaren: Regionale kerncijfers Nederland, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a> (${per}, peildatum 1 januari). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Huishoudens en vergrijzing · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
