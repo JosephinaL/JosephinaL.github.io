@@ -751,6 +751,29 @@ ul.plain { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
 .privacy { border: 1px solid var(--st-bag); border-left-width: 4px; border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; font-size: .9rem; background: color-mix(in srgb, var(--st-bag) 6%, var(--surface)); }
 .privacy.zacht { border-color: var(--st-label_c); background: color-mix(in srgb, var(--st-label_c) 7%, var(--surface)); }
 .privacy p { margin: 0; }
+/* GGM-invoercontract */
+.ggm details { display: grid; gap: 10px; }
+.ggm summary { cursor: pointer; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; list-style: none; }
+.ggm summary::-webkit-details-marker { display: none; }
+.ggm summary h2::before { content: '▸ '; color: var(--muted); }
+.ggm details[open] summary h2::before { content: '▾ '; }
+.ggm .ggmbody { display: grid; gap: 10px; margin-top: 10px; }
+.ggm td:first-child, .ggmtoets td:first-child { font-family: var(--f-mono); font-size: .82rem; }
+.ggm td:not(:first-child), .ggmtoets td:last-child { white-space: normal; min-width: 12em; }
+.ggm td[colspan] { font-family: var(--f-body); white-space: normal; }
+.ggmtoets { border: 1px solid var(--accent); border-left-width: 4px; border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; font-size: .9rem; background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+.ggmtoets.meldingen { border-color: var(--st-label_c); background: color-mix(in srgb, var(--st-label_c) 7%, var(--surface)); }
+.ggmtoets p { margin: 0; }
+.ggmtoets ul { margin: 0; padding-left: 1.2em; }
+.ggmtoets .ok { color: var(--st-in_orde); font-weight: 600; }
+.ggmtoets .nok { color: var(--st-bag); font-weight: 600; }
+@media (max-width: 640px) {
+  .ggmtoets table, .ggmtoets tbody, .ggmtoets tr, .ggmtoets td { display: block; width: auto; min-width: 0; }
+  .ggmtoets thead { display: none; }
+  .ggmtoets tr { border-bottom: 1px solid var(--line); padding: 6px 0; }
+  .ggmtoets td { border: 0; padding: 2px 0; white-space: normal; }
+  .ggmtoets td.num::before { content: 'gevuld: '; color: var(--muted); font-family: var(--f-body); }
+}
 .privacy ul { margin: 0; padding-left: 1.2em; }
 
 table { border-collapse: collapse; width: 100%; font-size: .88rem; }
@@ -883,6 +906,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         <button class="btn linkish" id="voorbeeldBtn" type="button">Probeer met een voorbeeld: vastgoed Amsterdam</button>
       </div>
       <span class="small muted" id="leesInfo">Excel-bestand? Kopieer de kolommen en plak ze hierboven, of sla op als CSV.</span>
+      <span class="small">Komt je lijst uit een datawarehouse op het Gemeentelijk Gegevensmodel? Zie het <a href="#ggm" id="ggmLink">GGM-invoercontract</a>.</span>
     </div>
     <div class="card belofte">
       <h2>Wat er met je lijst gebeurt</h2>
@@ -891,9 +915,31 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         <li>Naar buiten gaan alleen <b>zoekvragen naar openbare diensten</b>: BAG-ID's en adressen (postcode, huisnummer, straat) naar PDOK, pand-ID's naar RIVM. Namen, gebruik, oppervlakte en alle andere kolommen gaan nergens heen.</li>
         <li>De pagina kan technisch niets anders bereiken dan PDOK en RIVM: dat legt haar beveiligingsregel (Content-Security-Policy) vast. Lettertypen komen van Google Fonts, zonder gegevens uit je lijst.</li>
         <li>Geschikt voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed. Bij lijsten over inwoners zijn ook de adressen als zoekvraag al gevoelig; daarvoor is deze versie niet bedoeld.</li>
+        <li>Volgt de lijst het <a href="#ggm">GGM-invoercontract</a>, dan gaan alleen BAG-ID's naar buiten: de pagina zoekt dan niet op adres.</li>
         <li>Daarom kijkt de pagina vóór het koppelen naar kolomkoppen en inhoud. Wijst iets op persoonsgegevens of op een lijst over mensen, dan koppelt ze niet: BSN, geboortedatum, e-mail, telefoon, IBAN, veelvoorkomende voor- en achternamen, of een kolomkop met cliënt, bewoner, inwoner of patiënt. Wijst een kolomkop op andere gegevens over inwoners (Wmo, huishouden, uitkering, huurder en dergelijke), of lijkt een naamkolom op persoonsnamen, dan pas na jouw bevestiging. Deze controle is een vangnet, geen garantie: de verantwoordelijkheid voor wat je inleest blijft bij jou.</li>
       </ul>
     </div>
+  </section>
+
+  <section class="card ggm" id="ggm">
+    <details id="ggmDetails">
+      <summary><h2>GGM-invoercontract</h2><span class="small muted">voor extracten uit een datawarehouse op het Gemeentelijk Gegevensmodel (GGM)</span></summary>
+      <div class="ggmbody">
+        <p class="small">Een datamart op het GGM levert kolommen met vaste namen. Heten de kolommen zoals hieronder, dan herkent de pagina het bestand zonder vragen: geen rollen kiezen, geen vertaalslag. Eerst toetst ze het bestand tegen dit contract en meldt ze per kolom wat niet klopt, met regelnummers. Daarna koppel je zoals altijd.</p>
+        <ul class="plain small">
+          <li><b>Sleutel:</b> per regel minstens één BAG-identificatie (verblijfsobject, pand of nummeraanduiding). Een regel zonder BAG-ID koppelt niet: met dit contract zoekt de pagina niet op adres.</li>
+          <li><b>Wat naar buiten gaat:</b> alleen BAG-identificaties, als zoekvraag naar PDOK (BAG en Locatieserver), en pand-ID's naar RIVM voor het energielabel. Geen adressen, namen, oppervlakten, bedragen of andere kolommen.</li>
+          <li><b>Andere kolommen</b> mogen erbij. Ze blijven in de browser en komen mee in het dossier en de download. Een kolom uit een GGM-entiteit over personen (natuurlijkpersoon, ingeschrevenpersoon, ingezetene) stopt het koppelen.</li>
+          <li>Kolomnamen in de vorm <span class="mono">entiteit.attribuut</span>. Hoofdletters, punt, underscore of spatie als scheiding maken niet uit: <span class="mono">VASTGOEDOBJECT_NAAM</span> werkt ook.</li>
+        </ul>
+        <div class="scroll" style="max-height:none"><table><thead><tr><th>Kolom</th><th>Type</th><th>Op deze pagina</th></tr></thead><tbody id="ggmBody"></tbody></table></div>
+        <div class="rij">
+          <button class="btn" id="ggmKopBtn" type="button">Kopregel downloaden (CSV)</button>
+          <button class="btn linkish" id="ggmTestBtn" type="button">Probeer met de synthetische testset</button>
+        </div>
+        <p class="small muted" id="ggmBron"></p>
+      </div>
+    </details>
   </section>
 
   <section class="card kolommen" id="kolommen" hidden>
@@ -901,8 +947,9 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       <h2>Kolommen</h2>
       <span class="small muted" id="kolInfo"></span>
     </div>
-    <p class="small">De pagina heeft de kolommen herkend. Klopt een rol niet, kies dan een andere. Een kolom met BAG-ID's mag meer ID's per cel bevatten; een weggevallen voorloopnul wordt aangevuld.</p>
+    <p class="small" id="kolUitleg">De pagina heeft de kolommen herkend. Klopt een rol niet, kies dan een andere. Een kolom met BAG-ID's mag meer ID's per cel bevatten; een weggevallen voorloopnul wordt aangevuld.</p>
     <div class="scroll" style="max-height:340px"><table><thead><tr><th>Kolom</th><th>Rol</th><th>Voorbeeld</th></tr></thead><tbody id="kolBody"></tbody></table></div>
+    <div class="ggmtoets" id="ggmToets" role="status" hidden></div>
     <div class="privacy" id="privacy" role="alert" hidden></div>
     <div class="rij">
       <button class="btn primary" id="goBtn" type="button">Koppelen aan de BAG</button>
@@ -983,6 +1030,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
             <li><b>Postcode en huisnummer</b>, met huisletter en toevoeging als die er zijn, via de PDOK Locatieserver. Bestaat de huisletter of toevoeging niet in de BAG, dan koppelt de pagina aan het hoofdnummer en zegt dat in het dossier.</li>
             <li><b>Straat en huisnummer</b> binnen de gekozen gemeente, alleen als de straatnaam exact overeenkomt.</li>
             <li>Meer regels op hetzelfde verblijfsobject (bijvoorbeeld verhuurde units) komen op de kaart samen op één plek.</li>
+            <li><b>Met het <a href="#ggm">GGM-invoercontract</a></b> alleen op BAG-ID: een regel zonder BAG-ID koppelt dan niet, en er gaat geen adres naar buiten.</li>
           </ul>
         </div>
         <div class="card">
@@ -1310,6 +1358,9 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         } else if (k.lig.length) {
           const d = (await ls('adresseerbaarobject_id:' + k.lig[0]))[0];
           if (d) { r.lig = d; r.ls = d; r.koppeling = 'ligplaats of standplaats'; } else r.reden = 'Ligplaats of standplaats niet gevonden';
+        } else if (opts.alleenIds) {
+          // GGM-invoercontract: alleen BAG-identificaties gaan naar buiten, nooit adressen.
+          r.reden = k.ids.length ? 'Geen bruikbaar BAG-ID (alleen pand-, verblijfsobject- of nummeraanduiding-ID werkt)' : 'Geen BAG-ID; volgens het GGM-invoercontract wordt niet op adres gezocht';
         } else if (k.pc && /^\d{4}[A-Z]{2}$/.test(k.pc) && k.hnr) {
           const keus = kiesAdres(await ls(`postcode:${k.pc} AND huisnummer:${k.hnr}`), k);
           if (keus.doc) { zetAdres(r, keus, 'postcode en huisnummer'); }
@@ -1606,7 +1657,9 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     [/voornaam|achternaam|tussenvoegsel|voorletter|geslachtsnaam|roepnaam/i, 'kolomkop wijst op persoonsnamen'],
     [/e-?mail|telefoon|mobiel|gsm/i, 'kolomkop wijst op contactgegevens van een persoon'],
     [/iban|rekening.?n(umme)?r|bankrekening/i, 'kolomkop wijst op een rekeningnummer'],
-    [/cli[eëé]nt|bewoner|inwoner|pati[eëé]nt/i, 'kolomkop wijst op een lijst over cliënten, bewoners, inwoners of patiënten']
+    [/cli[eëé]nt|bewoner|inwoner|pati[eëé]nt/i, 'kolomkop wijst op een lijst over cliënten, bewoners, inwoners of patiënten'],
+    // GGM-entiteiten over personen (een niet-natuurlijk persoon is een organisatie en telt niet)
+    [/(?<!niet[\s._-]?)natuurlijk[\s._-]?persoon|ingeschreven[\s._-]?persoon|(?<![a-z])(niet[\s._-]?)?ingezetene|nadaanvulling[\s._-]?brp/i, 'kolomkop komt uit een GGM-entiteit over personen']
   ];
   const KOP_ZACHT = /aanvrager|huishouden|gezin|\bwmo\b|jeugd|uitkering|schuld|bijstand|participatie|indicatie|beschikking|zorgvraag|melder|overlast|leerling|huurder|persoon|leeftijd|geslacht|nationaliteit|burger/i;
   // Veelvoorkomende Nederlandse voornamen en achternamen (kleine letters). Bedoeld als vangnet, niet als volledige lijst.
@@ -1654,7 +1707,93 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     return { hard, zacht };
   }
 
-  root.EigenLijst = { controleerPrivacy, elfproef, leesTekst, herkenRollen, sleutels, splitsAdres, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal };
+  // ---------- GGM-invoercontract ----------
+  // Kolomnamen volgen het Gemeentelijk Gegevensmodel (GGM) v2.5.1, domein 9 Interne Organisatie › Vastgoed,
+  // in de vorm entiteit.attribuut. Een extract uit een datawarehouse op het GGM levert ze zonder vertaalslag.
+  // Hoofdletters, punt, underscore of spatie als scheiding maken niet uit.
+  const GGM = {
+    versie: '2.5.1', domein: 'Vastgoed (9 Interne Organisatie)', peildatum: '11 oktober 2026',
+    bron: 'https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel',
+    kolommen: [
+      { naam: 'verblijfsobject.identificatie', type: 'bagid', ot: '01', sleutel: true, rol: 'id', uitleg: 'BAG-ID van het verblijfsobject' },
+      { naam: 'pand.identificatie', type: 'bagid', ot: '10', sleutel: true, rol: 'id', uitleg: 'BAG-ID van het pand' },
+      { naam: 'nummeraanduiding.identificatie', type: 'bagid', ot: '20', sleutel: true, rol: 'id', uitleg: 'BAG-ID van het adres' },
+      { naam: 'vastgoedobject.identificatie', type: 'tekst', max: 80, rol: 'overig', uitleg: 'eigen objectnummer' },
+      { naam: 'vastgoedobject.naam', type: 'tekst', max: 80, rol: 'naam', uitleg: 'naam van het object' },
+      { naam: 'vastgoedobject.objecttype', type: 'tekst', max: 80, rol: 'gebruik', uitleg: 'soort object; getoetst tegen het BAG-gebruiksdoel' },
+      { naam: 'vastgoedobject.verhuurbaarvloeroppervlak', type: 'geheel', rol: 'opp', uitleg: 'VVO in m²; getoetst tegen de BAG-oppervlakte' },
+      { naam: 'vastgoedobject.brutovloeroppervlakte', type: 'geheel', rol: 'overig', uitleg: 'BVO in m²' },
+      { naam: 'vastgoedobject.oppervlaktekantoor', type: 'geheel', rol: 'overig', uitleg: 'kantooroppervlak in m²' },
+      { naam: 'vastgoedobject.bouwjaar', type: 'jaar', rol: 'overig', uitleg: 'bouwjaar volgens de eigen administratie' },
+      { naam: 'vastgoedobject.energielabel', type: 'label', rol: 'overig', uitleg: 'energielabel volgens de eigen administratie' },
+      { naam: 'vastgoedobject.portefeuille', type: 'tekst', max: 80, rol: 'overig', uitleg: 'portefeuille' },
+      { naam: 'vastgoedobject.deelportefeuille', type: 'tekst', max: 80, rol: 'overig', uitleg: 'deelportefeuille' },
+      { naam: 'vastgoedobject.objectstatus', type: 'tekst', max: 255, rol: 'overig', uitleg: 'status in de eigen administratie' },
+      { naam: 'verhuurbaar_eenheid.identificatie', type: 'tekst', max: 80, rol: 'overig', uitleg: 'nummer van de verhuurbare eenheid' },
+      { naam: 'verhuurbaar_eenheid.naam', type: 'tekst', max: 80, rol: 'overig', uitleg: 'naam van de verhuurbare eenheid' },
+      { naam: 'verhuurbaar_eenheid.nettooppervlak', type: 'geheel', rol: 'overig', uitleg: 'netto oppervlak in m²' }
+    ],
+    TYPE: { bagid: 'BAG-ID, 16 cijfers', tekst: 'tekst', geheel: 'geheel getal', jaar: 'jaartal', label: 'A++++ t/m G, LEEG, ONBEKEND' }
+  };
+  const normKop = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+  const GGM_INDEX = new Map(GGM.kolommen.map(c => [normKop(c.naam), c]));
+  const GGM_ENT = ['verblijfsobject', 'pand', 'nummeraanduiding', 'vastgoedobject', 'verhuurbaareenheid'];
+  // Herkent een GGM-extract: minstens één sleutelkolom uit het contract. Geeft per kolom het contractveld (of null).
+  function herkenGGM(kop) {
+    const veld = kop.map(k => GGM_INDEX.get(normKop(k)) || null);
+    return veld.some(c => c && c.sleutel) ? veld : null;
+  }
+  // Toetst het bestand tegen het contract. Meldt regelnummers, nooit waarden.
+  function toetsGGM(kop, regels, veld) {
+    const jaarNu = new Date().getFullYear();
+    const kolommen = [], fouten = [], zonderSleutel = [], onbekend = [];
+    const dubbel = new Map();
+    const telFout = (c, nr, reden) => { c.fout++; if (c.voorbeelden.length < 5) c.voorbeelden.push(nr); c.reden.add(reden); };
+    veld.forEach((c, i) => {
+      if (!c) {
+        const n = normKop(kop[i]);
+        if (GGM_ENT.some(e => n.startsWith(e))) onbekend.push(kop[i]);
+        return;
+      }
+      const t = { naam: c.naam, kop: kop[i], type: c.type, gevuld: 0, fout: 0, aangevuld: 0, voorbeelden: [], reden: new Set() };
+      regels.forEach((r, j) => {
+        const v = String(r[i] ?? '').trim(), nr = j + 1;
+        if (!v) return;
+        t.gevuld++;
+        if (c.type === 'bagid') {
+          const ids = v.split(/[\s,;|]+/).filter(Boolean);
+          for (const x of ids) {
+            if (!/^\d{15,16}$/.test(x)) { telFout(t, nr, 'geen 16 cijfers'); continue; }
+            const id = x.length === 15 ? '0' + x : x;
+            if (x.length === 15) t.aangevuld++;
+            if (id.slice(4, 6) !== c.ot) telFout(t, nr, `objecttype ${id.slice(4, 6)} in plaats van ${c.ot}`);
+          }
+        } else if (c.type === 'geheel') {
+          const g = getal(v);
+          if (g == null || g < 0) telFout(t, nr, 'geen getal');
+          else if (!Number.isInteger(g)) telFout(t, nr, 'geen geheel getal');
+        } else if (c.type === 'jaar') {
+          if (!/^\d{4}$/.test(v) || +v < 1000 || +v > jaarNu + 5) telFout(t, nr, 'geen jaartal');
+        } else if (c.type === 'label') {
+          if (!/^(A\+{0,4}|[B-G]|LEEG|ONBEKEND)$/i.test(v.replace(/\s/g, ''))) telFout(t, nr, 'geen geldig energielabel');
+        } else if (c.type === 'tekst' && c.max && v.length > c.max) telFout(t, nr, `langer dan ${c.max} tekens`);
+        if (c.naam === 'vastgoedobject.identificatie') { if (!dubbel.has(v)) dubbel.set(v, []); dubbel.get(v).push(nr); }
+      });
+      t.reden = [...t.reden];
+      kolommen.push(t);
+    });
+    const sleutelI = veld.map((c, i) => (c && c.sleutel ? i : -1)).filter(i => i >= 0);
+    regels.forEach((r, j) => { if (!sleutelI.some(i => /\d{15,16}/.test(r[i] || ''))) zonderSleutel.push(j + 1); });
+    const dubbeleIds = [...dubbel.values()].filter(a => a.length > 1);
+    const ontbreekt = GGM.kolommen.filter(c => !veld.includes(c)).map(c => c.naam);
+    const nFout = kolommen.reduce((s, c) => s + c.fout, 0);
+    return { kolommen, zonderSleutel, dubbeleIds, onbekend, ontbreekt, nFout,
+      oordeel: nFout || zonderSleutel.length || dubbeleIds.length ? 'meldingen' : 'voldoet' };
+  }
+  // Rollen voor de rekenkern: contractvelden krijgen hun vaste rol, al het andere 'overig' (geen adresrol: er wordt niet op adres gezocht).
+  const rollenGGM = veld => veld.map(c => (c ? c.rol : 'overig'));
+
+  root.EigenLijst = { controleerPrivacy, elfproef, leesTekst, herkenRollen, sleutels, splitsAdres, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal, GGM, herkenGGM, toetsGGM, rollenGGM };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>
@@ -1698,12 +1837,27 @@ Toren,Durgerdammerdijk,76,,,1026CB,AMSTERDAM,Toren,1.0,,0363010000627684
 ,Molenpad,15,B,3,1016GL,AMSTERDAM,Atelier / Werkplaats,17.0,,0363010010914371
 Lesruimte ROC,Karspeldreef,505,,,1102BX,AMSTERDAM,Kantoorfunctie,133.23,MBO/HBO/Universiteit,"0363010011211289,0363010011211289"
 Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbeheer,0363010000665565`;
+// Synthetische testset voor het GGM-invoercontract: echte BAG-objecten in Zwolle (willekeurige kantoorpanden),
+// alle andere waarden verzonnen. Met opzet een paar fouten en signalen. Geen vastgoed van een gemeente.
+const GGM_TEST = `vastgoedobject.identificatie;vastgoedobject.naam;vastgoedobject.objecttype;verblijfsobject.identificatie;pand.identificatie;nummeraanduiding.identificatie;vastgoedobject.verhuurbaarvloeroppervlak;vastgoedobject.bouwjaar;vastgoedobject.energielabel;vastgoedobject.portefeuille;toelichting testset
+TST-001;Testobject 01;Kantoor;0193010000010054;;;3100;1998;C;Fictief kantoren;in orde
+TST-002;Testobject 02;Kantoor;193010000012965;;;640;2004;B;Fictief kantoren;voorloopnul weggevallen, wordt aangevuld
+TST-003;Testobject 03;Kantoor;;0193100000001960;;1900;2008;A;Fictief kantoren;alleen pand-ID
+TST-004;Testobject 04;Kantoor;;;0193200000018993;230;1925;D;Fictief kantoren;alleen nummeraanduiding-ID
+TST-005;Testobject 05;Opslag;0193010000013755;;;3200;1972;;Fictief bedrijfsruimte;eigen soort wijkt af van de BAG
+TST-006;Testobject 06;Kantoor;0193100000032230;;;650;1930;C;Fictief monumenten;pand-ID in de kolom verblijfsobject
+TST-007;Testobject 07;Kantoor;0193010000016093;;;1950;2008;H;Fictief kantoren;ongeldig energielabel
+TST-008;Testobject 08;Kantoor;0193010000012729;;;ca. 1500;1990;C;Fictief kantoren;oppervlakte als tekst
+TST-009;Testobject 09;Grond;;;;;;;Fictief gronden;geen BAG-ID, wordt niet gezocht
+TST-010;Testobject 10;Kantoor;0193010000018124;;;9000;2008;A;Fictief kantoren;eigen VVO veel groter dan de BAG
+TST-011;Testobject 11;Kantoor;0193010000016517;;;260;1985;E;Fictief kantoren;in orde
+TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;in orde`;
 </script>
 <script>(function () {
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.2.3';
+  const VERSIE = '0.3.0';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
@@ -1763,8 +1917,11 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     if (!kop.length || !regels.length) { $('#leesInfo').textContent = 'Geen regels gevonden. Plak de lijst met een kopregel erboven.'; $('#kolommen').hidden = true; return false; }
     // Een andere lijst inlezen maakt een getoonde uitkomst ongeldig: die verdwijnt.
     if (state.res) wisUitkomst();
-    state.kop = kop; state.regels = regels; state.rol = E.herkenRollen(kop, regels); state.bron = bron || '';
-    state.bronNaam = bron === 'voorbeeld' ? 'Voorbeeld: vastgoed Amsterdam' : bron && bron !== 'geplakt' ? bron : 'Geplakte lijst';
+    // GGM-invoercontract: herkend aan de kolomnamen; rollen liggen dan vast en er wordt niet op adres gezocht.
+    state.ggm = E.herkenGGM(kop);
+    state.ggmToets = state.ggm ? E.toetsGGM(kop, regels, state.ggm) : null;
+    state.kop = kop; state.regels = regels; state.rol = state.ggm ? E.rollenGGM(state.ggm) : E.herkenRollen(kop, regels); state.bron = bron || '';
+    state.bronNaam = bron === 'voorbeeld' ? 'Voorbeeld: vastgoed Amsterdam' : bron === 'ggmtest' ? 'Synthetische testset GGM-invoercontract' : bron && bron !== 'geplakt' ? bron : 'Geplakte lijst';
     $('#leesInfo').textContent = `${fmt(regels.length)} regels en ${kop.length} kolommen gelezen.`;
     renderKolommen();
     $('#kolommen').hidden = false;
@@ -1779,7 +1936,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   }
   function nieuweLijst() {
     wisUitkomst();
-    state.kop = state.regels = state.rol = state.privacy = null; state.bron = ''; $('#privacy').hidden = true;
+    state.kop = state.regels = state.rol = state.privacy = state.ggm = state.ggmToets = null; state.bron = ''; $('#privacy').hidden = true; $('#ggmToets').hidden = true;
     $('#lijst').value = ''; $('#kolommen').hidden = true; $('#kolBody').innerHTML = '';
     $('#leesInfo').textContent = 'Excel-bestand? Kopieer de kolommen en plak ze hierboven, of sla op als CSV.';
     $('#wisBtn').hidden = true;
@@ -1812,6 +1969,9 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
 
   function renderKolommen() {
     const rollen = Object.entries(E.ROLLEN);
+    if (state.ggm) { renderKolommenGGM(); return; }
+    $('#ggmToets').hidden = true;
+    $('#kolUitleg').textContent = KOL_UITLEG;
     $('#kolBody').innerHTML = state.kop.map((k, i) => {
       const vb = state.regels.map(r => r[i]).filter(Boolean).slice(0, 3).join(' · ');
       return `<tr><td>${esc(k)}</td><td><select data-i="${i}" aria-label="Rol van kolom ${esc(k)}">${rollen.map(([r, t]) => `<option value="${r}" ${state.rol[i] === r ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></td><td class="vb" title="${esc(vb)}">${esc(vb)}</td></tr>`;
@@ -1831,6 +1991,57 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     renderPrivacy();
     updateGo();
   }
+  const KOL_UITLEG = $('#kolUitleg').textContent;
+  // ---------- GGM-invoercontract ----------
+  // Rollen liggen vast; per kolom staat welk contractveld het is. Daarboven de toets, met regelnummers, nooit waarden.
+  function renderKolommenGGM() {
+    $('#kolBody').innerHTML = state.kop.map((k, i) => {
+      const c = state.ggm[i];
+      const vb = state.regels.map(r => r[i]).filter(Boolean).slice(0, 3).join(' · ');
+      const rol = c ? `<span class="mono small">${esc(c.naam)}</span><br><span class="small muted">${esc(c.rol === 'overig' ? c.uitleg : E.ROLLEN[c.rol])}</span>` : '<span class="small muted">niet in het contract: blijft in de browser, komt mee in dossier en download</span>';
+      return `<tr><td>${esc(k)}</td><td>${rol}</td><td class="vb" title="${esc(vb)}">${esc(vb)}</td></tr>`;
+    }).join('');
+    $('#kolInfo').textContent = 'GGM-invoercontract herkend: koppelen alleen op BAG-ID, niet op adres.';
+    $('#kolUitleg').textContent = 'De kolomnamen volgen het GGM-invoercontract; de rollen liggen daarmee vast. Een weggevallen voorloopnul in een BAG-ID wordt aangevuld.';
+    renderGGMToets();
+    renderPrivacy();
+    updateGo();
+  }
+  const regelLijst = a => a.length <= 8 ? a.join(', ') : a.slice(0, 8).join(', ') + ` en ${a.length - 8} meer`;
+  function renderGGMToets() {
+    const t = state.ggmToets, box = $('#ggmToets');
+    box.className = 'ggmtoets' + (t.oordeel === 'voldoet' ? '' : ' meldingen'); box.hidden = false;
+    const rij = c => {
+      const status = c.fout ? `<span class="nok">${fmt(c.fout)} ${c.fout === 1 ? 'melding' : 'meldingen'}</span>: ${esc(c.reden.join('; '))}${c.type === 'bagid' && c.reden.some(x => /objecttype/.test(x)) ? ' (wordt toch gekoppeld op het objecttype van het ID)' : ''}, regel ${regelLijst(c.voorbeelden)}${c.fout > c.voorbeelden.length ? ' …' : ''}` : '<span class="ok">in orde</span>';
+      const extra = c.aangevuld ? `; ${fmt(c.aangevuld)} ${c.aangevuld === 1 ? 'ID' : 'ID\'s'} van 15 cijfers aangevuld met een voorloopnul` : '';
+      return `<tr><td>${esc(c.naam)}</td><td class="num">${fmt(c.gevuld)}</td><td>${status}${extra}</td></tr>`;
+    };
+    const punten = [];
+    if (t.zonderSleutel.length) punten.push(`<li><b>${fmt(t.zonderSleutel.length)} ${t.zonderSleutel.length === 1 ? 'regel' : 'regels'} zonder BAG-ID</b> (regel ${regelLijst(t.zonderSleutel)}): koppelt niet; er wordt niet op adres gezocht.</li>`);
+    if (t.dubbeleIds.length) punten.push(`<li><b>Dubbel objectnummer</b> in vastgoedobject.identificatie: regels ${t.dubbeleIds.slice(0, 4).map(a => a.join(' en ')).join('; ')}${t.dubbeleIds.length > 4 ? ' …' : ''}.</li>`);
+    if (t.onbekend.length) punten.push(`<li>Lijkt op het GGM, maar staat niet in het contract: <span class="mono">${t.onbekend.map(esc).join(', ')}</span>. Komt mee als gewone kolom.</li>`);
+    box.innerHTML = `<p><b>${t.oordeel === 'voldoet' ? 'Het bestand voldoet aan het GGM-invoercontract.' : 'Het bestand volgt het GGM-invoercontract, met meldingen.'}</b> ${fmt(state.regels.length)} regels, ${fmt(t.kolommen.length)} van ${fmt(E.GGM.kolommen.length)} contractkolommen. Er is nog niets verstuurd.</p>
+      <div class="scroll" style="max-height:none"><table><thead><tr><th>Contractkolom</th><th>Gevuld</th><th>Toets</th></tr></thead><tbody>${t.kolommen.map(rij).join('')}</tbody></table></div>
+      ${punten.length ? `<ul class="small">${punten.join('')}</ul>` : ''}
+      <p class="small muted">Meldingen houden het koppelen niet tegen; een regel met een ongeldig ID koppelt alleen niet. Herstel in de bron (de datamart) en lees opnieuw in.</p>`;
+  }
+  function vulGGM() {
+    const G = E.GGM;
+    $('#ggmBody').innerHTML = G.kolommen.map(c => `<tr><td>${esc(c.naam)}${c.sleutel ? ' <b>*</b>' : ''}</td><td class="small">${esc(c.type === 'bagid' ? `BAG-ID, objecttype ${c.ot}` : c.type === 'tekst' ? `tekst, max. ${c.max}` : G.TYPE[c.type])}</td><td class="small">${esc(c.uitleg)}${c.rol !== 'overig' && c.rol !== 'id' ? ` <span class="muted">(rol: ${esc(E.ROLLEN[c.rol])})</span>` : ''}</td></tr>`).join('')
+      + '<tr><td colspan="3" class="small muted"><b>*</b> sleutel: per regel minstens één van de drie. Alle andere kolommen zijn optioneel.</td></tr>';
+    $('#ggmBron').innerHTML = `Bron van de kolomnamen en typen: <a href="${G.bron}" rel="noopener">Gemeentelijk Gegevensmodel</a> v${G.versie}, domein ${esc(G.domein)}, tabellen VASTGOEDOBJECT, VERHUURBAAR_EENHEID, VERBLIJFSOBJECT, PAND en NUMMERAANDUIDING; laatste wijziging in de repository ${G.peildatum}. Het model valt onder EUPL-1.2 (Gemeente Delft); deze pagina neemt alleen kolomnamen en typen over. Synthetische testset: twaalf regels op echte BAG-objecten in Zwolle (willekeurige kantoorpanden), met verzonnen naam, soort, oppervlakte, bouwjaar, label en portefeuille, en met opzet een paar fouten en signalen. Geen vastgoed van een gemeente.`;
+  }
+  vulGGM();
+  $('#ggmLink').onclick = () => { $('#ggmDetails').open = true; };
+  document.querySelectorAll('a[href="#ggm"]').forEach(a => a.addEventListener('click', () => { $('#ggmDetails').open = true; }));
+  $('#ggmKopBtn').onclick = () => bewaar(new Blob(['\ufeff' + E.GGM.kolommen.map(c => c.naam).join(';') + '\n'], { type: 'text/csv;charset=utf-8' }), 'ggm-invoercontract-vastgoed.csv');
+  $('#ggmTestBtn').onclick = () => {
+    if (!state.gemeenten) return;
+    $('#lijst').value = GGM_TEST;
+    kiesGemeente(vind('GM0193'));
+    if (lees(GGM_TEST, 'ggmtest')) $('#kolommen').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   // ---------- privacycontrole ----------
   // Draait bij het inlezen, vóór elk verzoek naar buiten. Hard: niet koppelen. Zacht: pas na bevestiging.
   function renderPrivacy() {
@@ -1872,6 +2083,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     const items = {}; let cur = null; const t0 = Date.now();
     try {
       const res = await E.analyse(gm, state.kop, state.regels, [...state.rol], {
+        alleenIds: !!state.ggm,
         step: (k, msg) => {
           if (cur && items[cur]) items[cur].className = 'ok';
           if (k === 'klaar') return;
@@ -1920,11 +2132,11 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
     $('#meldingTekst').innerHTML = esc(mel.join(' ')) + (ander ? `${mel.length ? '<br>' : ''}<b>${fmt(tel[0][1])} van de ${fmt(totaal)} gekoppelde regels liggen in ${esc(ander.naam)}, niet in ${esc(res.gm.naam)}.</b> Buurten, kaartgrens en het zoeken op straat volgen de gekozen gemeente. <button class="btn primary" id="wisselBtn" type="button">Kies ${esc(ander.naam)} en koppel opnieuw</button>` : '');
     if (ander) $('#wisselBtn').onclick = () => { kiesGemeente(ander); run(); };
     state.niveau = 'object'; document.querySelector('input[name=niveau][value=object]').checked = true;
-    $('#titelInput').value = state.bron === 'voorbeeld' ? 'Gemeentelijk vastgoed Amsterdam (voorbeeld)' : `Eigen lijst op de kaart · ${res.gm.naam}`;
+    $('#titelInput').value = state.bron === 'voorbeeld' ? 'Gemeentelijk vastgoed Amsterdam (voorbeeld)' : state.bron === 'ggmtest' ? 'Synthetische testset GGM-invoercontract (verzonnen gegevens)' : `Eigen lijst op de kaart · ${res.gm.naam}`;
     drawMap(); renderAll(); renderDeel();
     $('#dossier').innerHTML = '<span class="eyebrow">Object</span><p class="muted" style="margin:0">Klik een object op de kaart of een regel in de tabel om te zien hoe het gekoppeld is en waarom het een signaal heeft.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Gekoppeld ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Lijst: ${state.bron === 'voorbeeld' ? 'voorbeeld, 39 verhuurbare eenheden uit de open dataset Gemeentelijk Vastgoed van de gemeente Amsterdam (api.data.amsterdam.nl), opgehaald 24 oktober 2026' : 'eigen invoer, alleen in deze browser (geen open data)'}. Bronnen: BAG (Kadaster, via PDOK; live), adressen (PDOK Locatieserver), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks, enkele weken achter), rijksmonumenten (RCE, via PDOK), buurten en wijken ${res.wbJaar || '–'} (CBS, via PDOK). Signalen zijn indicatief.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br><a href="./">Josephine Linders</a> · Eigen lijst op de kaart · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Gekoppeld ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Lijst: ${state.bron === 'voorbeeld' ? 'voorbeeld, 39 verhuurbare eenheden uit de open dataset Gemeentelijk Vastgoed van de gemeente Amsterdam (api.data.amsterdam.nl), opgehaald 24 oktober 2026' : state.bron === 'ggmtest' ? `synthetische testset volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed): echte BAG-objecten in Zwolle, alle andere waarden verzonnen; geen vastgoed van een gemeente` : state.ggm ? `eigen invoer volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed), alleen in deze browser (geen open data); alleen BAG-ID's als zoekvraag verstuurd` : 'eigen invoer, alleen in deze browser (geen open data)'}. Bronnen: BAG (Kadaster, via PDOK; live), adressen (PDOK Locatieserver), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks, enkele weken achter), rijksmonumenten (RCE, via PDOK), buurten en wijken ${res.wbJaar || '–'} (CBS, via PDOK). Signalen zijn indicatief.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br><a href="./">Josephine Linders</a> · Eigen lijst op de kaart · versie ${VERSIE}`;
     $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function counts() {
@@ -2183,7 +2395,7 @@ Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbe
   function meld(t) { $('#deelInfo').textContent = t; clearTimeout(meld.t); meld.t = setTimeout(() => { $('#deelInfo').textContent = ''; }, 5000); }
   function datumTekst() { return new Date(state.res.opgehaald).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }); }
   function bronTekst() {
-    const lijst = state.bron === 'voorbeeld' ? 'lijst: Gemeente Amsterdam, Gemeentelijk Vastgoed (open data)' : 'lijst: eigen gegevens van de gemeente';
+    const lijst = state.bron === 'voorbeeld' ? 'lijst: Gemeente Amsterdam, Gemeentelijk Vastgoed (open data)' : state.bron === 'ggmtest' ? 'lijst: synthetische testset (verzonnen gegevens op echte BAG-objecten)' : 'lijst: eigen gegevens van de gemeente';
     return `Bronnen: ${lijst}; BAG (Kadaster); energielabels (RIVM, afgeleid uit EP-Online van RVO); rijksmonumenten (RCE); buurten (CBS ${state.res.wbJaar || ''}); achtergrondkaart (Kadaster, via PDOK). Gekoppeld op ${datumTekst()}. Signalen zijn indicatief, geen vaststelling.` + (state.niveau === 'buurt' ? ' Aantallen van 1 of 2 zijn afgeschermd.' : '');
   }
   const makerTekst = () => $('#makerCheck').checked ? 'Gemaakt met Eigen lijst op de kaart · josephinal.github.io' : '';
