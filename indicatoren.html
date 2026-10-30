@@ -13,6 +13,7 @@
   --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
   --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --strook: #34494c; --warn: #d2462c;
   --open: #0f5c66; --keten: #9a5b00; --intern: #6a4c93;
+  --open-vis: #1a8a3f; --keten-vis: #f2d01c; --intern-vis: #f0a018;
   --open-bg: #e3f1f2; --keten-bg: #f6ecdc; --intern-bg: #eee8f5;
   --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
   --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -24,12 +25,14 @@
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --strook: #3a5256; --warn: #ef6a4f;
   --open: #5fb7c2; --keten: #e0a24a; --intern: #b49ad8;
+  --open-vis: #57a83a; --keten-vis: #f2d01c; --intern-vis: #f0a018;
   --open-bg: #183236; --keten-bg: #33281a; --intern-bg: #2a2336;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --strook: #3a5256; --warn: #ef6a4f;
   --open: #5fb7c2; --keten: #e0a24a; --intern: #b49ad8;
+  --open-vis: #57a83a; --keten-vis: #f2d01c; --intern-vis: #f0a018;
   --open-bg: #183236; --keten-bg: #33281a; --intern-bg: #2a2336;
   color-scheme: dark; }
 
@@ -65,26 +68,50 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .btn.klein { padding: 3px 10px; font-size: .85rem; }
 .btn-sm { padding: 7px 14px; font-size: .92rem; white-space: nowrap; }
 
-.intro { max-width: 72ch; }
-.intro p { margin: 0 0 8px; }
+.intro { display: grid; gap: 8px; max-width: 62ch; padding: 8px 0 4px; }
+.intro .groot { font-size: clamp(1.45rem, 2.6vw, 1.9rem); font-stretch: 100%; line-height: 1.15; font-weight: 700; }
+.intro p { margin: 0; }
+.intro .lead { color: var(--muted); font-size: 1.05rem; }
 .gmregel { font-size: .85rem; color: var(--muted); margin: 0; }
 
-/* overzicht: negen domeinen als tegels, zoals Gemeentebeeld */
-.dtegels { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
-@media (min-width: 700px) { .dtegels { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dtegel { min-height: 300px; } }
-@media (min-width: 1200px) { .dtegels { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.dtegel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; min-width: 0; transition: border-color .15s ease, transform .15s ease; }
-.dtegel.actief:hover { border-color: var(--accent); }
-@media (prefers-reduced-motion: no-preference) { .dtegel.actief:hover { transform: translateY(-2px); } }
-.dtegel.leeg h3, .dtegel.leeg p { color: var(--muted); }
-.dtegel .meta { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
-.dtegel h3 { font-size: 1.15rem; font-weight: 800; margin-top: 4px; }
-.dtegel .vis { min-height: 28px; display: flex; flex-direction: column; justify-content: center; }
-.strook { display: flex; align-items: center; min-height: 26px; border-radius: 3px; padding: 3px 8px; background: var(--sunk); font-size: .84rem; flex-wrap: wrap; column-gap: .3em; line-height: 1.25; }
-.dtegel.actief .strook { background: var(--strook); color: #ffffff; }
-.strook span { white-space: nowrap; }
-.strook span + span::before { content: '·'; margin-right: .3em; }
-.dtegel > p { margin: 0; color: var(--muted); font-size: .95rem; }
+/* overzicht: planken per Iv3-domein, tegels per thema, zoals Gemeentebeeld */
+.shelves { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; }
+.shelf { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.shelf-head { display: flex; flex-direction: column; justify-content: end; gap: 2px; border-bottom: 1px solid var(--line); padding-bottom: 8px; min-width: 0; }
+.shelf-head h3 { font-size: 1.05rem; font-stretch: 100%; }
+.shelf-head span { font-size: .88rem; color: var(--muted); }
+.rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 640px) { .rail { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 1100px) {
+  .shelves { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; margin-top: -32px; }
+  .shelf { grid-column: span 1; grid-row: span 2; grid-template-columns: subgrid; grid-template-rows: subgrid; row-gap: 0; }
+  .shelf:has(.tile + .tile), .shelf:has(.tile.breed) { grid-column: span 2; }
+  .shelf:has(.tile + .tile + .tile) { grid-column: span 3; }
+  .shelf:has(.tile + .tile + .tile + .tile) { grid-column: span 4; }
+  .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
+  .rail { grid-column: 1 / -1; grid-template-columns: subgrid; }
+  .tile.breed { grid-column: 1 / -1; }
+}
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; min-width: 0; transition: border-color .15s ease, transform .15s ease; }
+.tile:not(.breed):hover { border-color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .tile:not(.breed):hover { transform: translateY(-2px); } }
+.tile h4 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0; text-wrap: balance; }
+.tile .meta { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.tile > p { margin: 0; color: var(--muted); font-size: .95rem; }
+.tile .cijfers { display: block; margin-top: 6px; font-size: .88rem; }
+.tile .vis { display: grid; gap: 6px; align-content: center; min-height: 28px; }
+.blokjes { display: flex; flex-wrap: wrap; gap: 3px 8px; }
+.blokjes .stap { display: inline-flex; gap: 3px; }
+.blokjes i { display: block; width: 18px; height: 18px; border-radius: 3px; }
+.blokjes i.open, .legenda i.open { background: var(--open-vis); }
+.blokjes i.keten, .legenda i.keten { background: var(--keten-vis); }
+.blokjes i.intern, .legenda i.intern { background: var(--intern-vis); }
+.legenda { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: .84rem; color: var(--fg); }
+.legenda span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+.legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.tile.breed { background: transparent; border-style: dashed; grid-template-rows: auto 1fr; }
+.binnenkort { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: 6px 20px; font-size: .92rem; color: var(--muted); }
+.binnenkort b { font-family: var(--f-mono); font-weight: 400; font-size: .8rem; display: inline-block; min-width: 1.4em; }
 .tile-links { display: flex; flex-wrap: wrap-reverse; align-items: center; gap: 6px 16px; padding-top: 4px; }
 .tile-links .btn-start { white-space: nowrap; }
 .btn-start { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--accent); color: var(--accent-fg); text-decoration: none; font-weight: 700; padding: 7px 14px; font-size: .92rem; border-radius: var(--r); border: 0; cursor: pointer; }
@@ -126,9 +153,9 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .teller .n { font-family: var(--f-display); font-stretch: 85%; font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .teller .t { font-weight: 600; }
 .teller .s { font-size: .8rem; color: var(--muted); }
-.teller[data-b="open"] { border-top-color: var(--open); }
-.teller[data-b="keten"] { border-top-color: var(--keten); }
-.teller[data-b="intern"] { border-top-color: var(--intern); }
+.teller[data-b="open"] { border-top-color: var(--open-vis); }
+.teller[data-b="keten"] { border-top-color: var(--keten-vis); }
+.teller[data-b="intern"] { border-top-color: var(--intern-vis); }
 .teller[aria-pressed="true"] { outline: 2px solid var(--fg); outline-offset: -2px; }
 .filterregel { font-size: .85rem; color: var(--muted); margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
 
@@ -138,9 +165,9 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .ketenstap > h2 .muted { font-family: var(--f-body); font-stretch: 100%; font-size: .85rem; font-weight: 400; }
 .kaarten { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 12px; }
 .kaart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; border-left: 4px solid var(--line); }
-.kaart[data-b="open"] { border-left-color: var(--open); }
-.kaart[data-b="keten"] { border-left-color: var(--keten); }
-.kaart[data-b="intern"] { border-left-color: var(--intern); }
+.kaart[data-b="open"] { border-left-color: var(--open-vis); }
+.kaart[data-b="keten"] { border-left-color: var(--keten-vis); }
+.kaart[data-b="intern"] { border-left-color: var(--intern-vis); }
 .kaart .kop { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
 .badge { font-size: .74rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
 .badge.open { background: var(--open-bg); color: var(--open); }
@@ -199,14 +226,14 @@ footer p { margin: 0 0 6px; }
   </header>
 
   <section class="intro">
-    <p><b>Welke indicatoren horen bij een beleidsdomein, en waar staan ze?</b> Dit kompas geeft geen cijfers. Per indicator staat wat hij meet, wat hij níet zegt, op welk niveau hij bestaat en waar je hem vindt: in open data, bij een ketenpartner of alleen in de eigen registratie van de gemeente.</p>
-    <p>Wat open is, hoef je niet uit te vragen. Wat intern is, kun je met de uitvraag onderaan in één keer aan je informatie-afdeling vragen, met definitie en gegevensobject erbij.</p>
+    <span class="eyebrow">Thema's per Iv3-domein</span>
+    <h2 class="groot">Welke indicatoren horen bij een beleidsdomein, en waar staan ze?</h2>
+    <p class="lead">Geen cijfers, wel de weg ernaartoe. Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden.</p>
     <p class="gmregel" id="gmRegel"></p>
   </section>
 
-  <section id="overzicht" aria-label="Domeinen">
-    <div class="dkop" style="margin-bottom:12px"><span class="eyebrow">Negen domeinen, ingedeeld naar de Iv3-hoofdtaakvelden</span><p class="small muted">Kies een domein. Onder Meer weten staat hoeveel indicatoren er zijn en waar ze staan.</p></div>
-    <div class="dtegels" id="dtegels"></div>
+  <section id="overzicht" aria-label="Thema's per domein">
+    <div class="shelves" id="shelves"></div>
     <div class="infos" id="infos"></div>
   </section>
   <nav class="kruimel" id="kruimel" aria-label="Kruimelpad" hidden></nav>
@@ -258,7 +285,7 @@ footer p { margin: 0 0 6px; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.2';
+  const VERSIE = '0.3';
   const PRODUCT = 'Indicatorenkompas';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -304,16 +331,14 @@ footer p { margin: 0 0 6px; }
     ['8', 'Volkshuisvesting, leefomgeving en stedelijke vernieuwing', 'Ruimtelijke ordening, wonen en bouwen, grondexploitatie.']
   ];
 
-  const DV = {
-    '6': { lang: 'Twee thema\'s zijn uitgewerkt: maatschappelijke ondersteuning (Wmo) en huiselijk geweld en kindermishandeling. Per indicator staat wat hij zegt en wat niet, waartegen je hem legt, en of hij in open data staat, bij een ketenpartner ligt of alleen in de eigen registratie bestaat. Voor beleidsmedewerkers in het sociaal domein en hun informatie-afdeling.' }
-  };
   const D = {
     wmo: {
       tv: '6', kort: 'Wmo', naam: 'Maatschappelijke ondersteuning (Wmo)',
       taakvelden: '6.21 toegang Wmo · 6.60 hulpmiddelen · 6.711–6.714 maatwerkdienstverlening 18+ · 6.791 pgb Wmo · 6.811 beschermd wonen · 6.812 maatschappelijke- en vrouwenopvang',
       scope: 'Ondersteuning thuis voor volwassenen. Beschermd wonen en opvang liggen vaak bij een centrumgemeente en staan alleen in de geldkaart.',
       lees: 'Maatwerk is niet het hele bereik. Ondersteuning via algemene voorzieningen, zonder beschikking, staat in geen enkele landelijke bron. Een gemeente die veel via de wijk regelt, heeft minder maatwerk zonder minder te doen.',
-      atelier: 'wmo.html',
+      atelier: 'wmo.html', atelierNaam: 'Wmo per wijk', tvkort: '6.21 · 6.6 · 6.7 · 6.8',
+      tegel: 'Wmo', oms: 'Ondersteuning thuis voor volwassenen: van wie het nodig heeft tot wat het oplevert.',
       kaarten: [
         { k: 'context', b: 'open', naam: 'Ouderen: 75 en 80 jaar of ouder',
           def: 'Aantal en aandeel inwoners van 75 en 80 jaar of ouder.',
@@ -434,7 +459,8 @@ footer p { margin: 0 0 6px; }
       taakvelden: '6.21 en 6.23 toegang (waaronder Veilig Thuis) · 6.812 vrouwenopvang · 6.821 jeugdbescherming · raakt 1.2 openbare orde en veiligheid',
       scope: 'Een thema dat over meer taakvelden loopt. Indeling naar de thema\'s van de landelijke Impactmonitor huiselijk geweld en kindermishandeling.',
       lees: 'Meldingen zijn geen omvang. Meer meldingen kan betekenen dat er beter gesignaleerd wordt. Alleen sturen op het aantal meldingen is niet zinvol.',
-      atelier: 'veiligthuis.html',
+      atelier: 'veiligthuis.html', atelierNaam: 'Veilig Thuis per gemeente', tvkort: '6.21 · 6.23 · 6.8 · 1.2',
+      tegel: 'Huiselijk geweld en kindermishandeling', oms: 'Van signaal en melding via Veilig Thuis tot veiligheid op langere termijn.',
       kaarten: [
         { k: 'context', b: 'open', naam: 'Omvang huiselijk en seksueel geweld',
           def: 'Aandeel van de bevolking dat in de afgelopen periode slachtoffer was.',
@@ -575,29 +601,43 @@ footer p { margin: 0 0 6px; }
   function themasVan(nr) { return Object.entries(D).filter(([, d]) => d.tv === nr); }
   function renderOverzicht() {
     const gmDeel = S.gm ? '&gm=' + S.gm : '';
-    $('#dtegels').innerHTML = TV.map(([nr, naam, oms]) => {
-      const th = themasVan(nr);
-      if (!th.length) return `<article class="dtegel leeg"><div class="vis" aria-hidden="true"><div class="strook"></div></div><h3>${esc(naam)}</h3><span class="meta">Iv3 ${nr} · nog niet uitgewerkt</span><p>${esc(oms)}</p></article>`;
-      const t = { open: 0, keten: 0, intern: 0 }; let n = 0;
-      th.forEach(([, d]) => { const x = telling(d); t.open += x.open; t.keten += x.keten; t.intern += x.intern; n += d.kaarten.length; });
-      const strook = `<div class="strook" aria-label="${n} indicatoren: ${t.open} open, ${t.keten} bij een ketenpartner, ${t.intern} intern"><span>${t.open} open data</span><span>${t.keten} vanuit de keten</span><span>${t.intern} intern opvragen</span></div>`;
-      return `<article class="dtegel actief"><div class="vis">${strook}</div><h3>${esc(naam)}</h3><span class="meta">Iv3 ${nr} · ${th.length === 1 ? '1 thema' : th.length + " thema's"}</span><p>${esc(oms)}</p>
-        <div class="tile-links"><a class="btn-start" data-nav href="#domein=${th[0][0]}${gmDeel}">Open de indicatoren <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-${nr}">Meer weten</button></div></article>`;
-    }).join('');
-    $('#infos').innerHTML = TV.filter(([nr]) => themasVan(nr).length).map(([nr, naam]) => {
-      const th = themasVan(nr);
-      const t = { open: 0, keten: 0, intern: 0 }; let n = 0;
-      th.forEach(([, d]) => { const x = telling(d); t.open += x.open; t.keten += x.keten; t.intern += x.intern; n += d.kaarten.length; });
-      return `<article class="product" id="info-${nr}" aria-labelledby="h-info-${nr}" hidden>
-        <div class="product-body"><h3 id="h-info-${nr}">${esc(naam)}</h3>
-          <p>${esc((DV[nr] || {}).lang || '')}</p>
-          <div class="facts"><div><b>${n}</b><span>indicatoren in ${th.length === 1 ? '1 thema' : th.length + " thema's"}</span></div><div><b>${t.open}</b><span>staan in open data</span></div><div><b>${t.intern} · ${t.keten}</b><span>alleen intern · bij een ketenpartner</span></div></div>
-          <a class="btn-start" data-nav href="#domein=${th[0][0]}${gmDeel}">Open de indicatoren <span aria-hidden="true">→</span></a></div>
-        <div class="product-aside"><span class="eyebrow">Wat erin staat</span>
-          <ol>${th.map(([key, d]) => { const x = telling(d); return `<li><a data-nav href="#domein=${key}${gmDeel}">${esc(d.naam)}</a>: ${d.kaarten.length} indicatoren, waarvan ${x.open} open, ${x.keten} bij een ketenpartner en ${x.intern} intern.</li>`; }).join('')}</ol>
+    const legenda = t => `<span class="legenda"><span><i class="open"></i>${t.open} open data</span><span><i class="keten"></i>${t.keten} vanuit de keten</span><span><i class="intern"></i>${t.intern} intern opvragen</span></span>`;
+    const blokjes = d => `<span class="blokjes" role="img" aria-label="${d.kaarten.length} indicatoren in de volgorde van de keten">${KETEN.map(([k]) => {
+        const cs = d.kaarten.filter(c => c.k === k); return cs.length ? `<span class="stap">${cs.map(c => `<i class="${c.b}"></i>`).join('')}</span>` : ''; }).join('')}</span>`;
+    const tegel = ([key, d]) => {
+      const t = telling(d);
+      return `<article class="tile">
+        <div class="vis">${blokjes(d)}${legenda(t)}</div>
+        <h4>${esc(d.tegel)}</h4>
+        <span class="meta">${d.kaarten.length} indicatoren · ${KETEN.filter(([k]) => d.kaarten.some(c => c.k === k)).length} stappen in de keten</span>
+        <p>${esc(d.oms)}<span class="cijfers">Cijfers per gemeente: <a href="${esc(instLink(d.atelier))}">${esc(d.atelierNaam)}</a></span></p>
+        <div class="tile-links"><a class="btn-start" data-nav href="#domein=${key}${gmDeel}">Open de indicatoren <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-${key}">Meer weten</button></div>
+      </article>`;
+    };
+    const uitgewerkt = TV.filter(([nr]) => themasVan(nr).length);
+    const rest = TV.filter(([nr]) => !themasVan(nr).length);
+    $('#shelves').innerHTML = uitgewerkt.map(([nr, naam, oms]) => `<div class="shelf">
+        <div class="shelf-head"><h3>${nr} · ${esc(naam)}</h3><span>${esc(oms)}</span></div>
+        <div class="rail">${themasVan(nr).map(tegel).join('')}</div></div>`).join('')
+      + (rest.length ? `<div class="shelf">
+        <div class="shelf-head"><h3>Binnenkort</h3><span>De andere Iv3-hoofdtaakvelden, nog niet uitgewerkt</span></div>
+        <div class="rail"><div class="tile breed"><ul class="binnenkort">${rest.map(([nr, naam]) => `<li><b>${nr}</b> ${esc(naam)}</li>`).join('')}</ul></div></div></div>` : '');
+
+    $('#infos').innerHTML = Object.entries(D).map(([key, d]) => {
+      const t = telling(d);
+      const tvNaam = TV.find(x => x[0] === d.tv)[1];
+      return `<article class="product" id="info-${key}" aria-labelledby="h-info-${key}" hidden>
+        <div class="product-body"><span class="eyebrow">Iv3 ${esc(d.tv)} · ${esc(tvNaam)}</span><h3 id="h-info-${key}">${esc(d.naam)}</h3>
+          <p>${esc(d.scope)}</p>
+          <div class="facts"><div><b>${d.kaarten.length}</b><span>indicatoren</span></div><div><b>${t.open}</b><span>staan in open data</span></div><div><b>${t.keten} · ${t.intern}</b><span>vanuit de keten · intern opvragen</span></div></div>
+          <a class="btn-start" data-nav href="#domein=${key}${gmDeel}">Open de indicatoren <span aria-hidden="true">→</span></a></div>
+        <div class="product-aside"><span class="eyebrow">Per stap van de keten</span>
+          <ol>${KETEN.map(([k, kop]) => { const cs = d.kaarten.filter(c => c.k === k); if (!cs.length) return ''; const x = { open: 0, keten: 0, intern: 0 }; cs.forEach(c => x[c.b]++);
+            return `<li><b>${kop}</b>: ${cs.length} (${['open', 'keten', 'intern'].filter(b => x[b]).map(b => x[b] + ' ' + BRON[b]).join(', ')})</li>`; }).join('')}</ol>
+          <p class="small">Cijfers per gemeente: <a href="${esc(instLink(d.atelier))}">${esc(d.atelierNaam)}</a></p>
           <button class="sluit" type="button">Sluiten</button></div></article>`;
     }).join('');
-    const mores = document.querySelectorAll('#dtegels .more'), infos = document.querySelectorAll('#infos .product');
+    const mores = document.querySelectorAll('#shelves .more'), infos = document.querySelectorAll('#infos .product');
     const toon = id => {
       infos.forEach(a => { a.hidden = a.id !== id; });
       mores.forEach(m => m.setAttribute('aria-expanded', String(m.getAttribute('aria-controls') === id)));
@@ -640,7 +680,7 @@ footer p { margin: 0 0 6px; }
     if (!d) { renderOverzicht(); schrijfHash(); return; }
     const tvNaam = TV.find(t => t[0] === d.tv)[1];
     const themas = themasVan(d.tv);
-    $('#kruimel').innerHTML = `<a data-nav href="#${S.gm ? 'gm=' + S.gm : ''}" id="naarOverzicht">← Alle domeinen</a><span class="sep">›</span><span>${esc(d.tv)} ${esc(tvNaam)}</span><span class="sep">›</span><b>${esc(d.kort)}</b>`;
+    $('#kruimel').innerHTML = `<a data-nav href="#${S.gm ? 'gm=' + S.gm : ''}" id="naarOverzicht">← Alle thema's</a><span class="sep">›</span><span>${esc(d.tv)} ${esc(tvNaam)}</span><span class="sep">›</span><b>${esc(d.kort)}</b>`;
 
     $('#dkop').innerHTML = `<span class="eyebrow">Iv3 ${esc(d.tv)} · ${esc(tvNaam)}</span>
       <h2>${esc(d.naam)}</h2>
