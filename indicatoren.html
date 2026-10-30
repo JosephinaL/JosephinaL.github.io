@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Indicatorenkompas · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Welke indicatoren horen bij een beleidsdomein, wat zeggen ze en wat niet, en waar staan ze: in open data, bij een ketenpartner of alleen in de eigen registratie. Zonder cijfers, voor elke gemeente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --open: #0f5c66; --keten: #9a5b00; --intern: #6a4c93;
+  --open-bg: #e3f1f2; --keten-bg: #f6ecdc; --intern-bg: #eee8f5;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --open: #5fb7c2; --keten: #e0a24a; --intern: #b49ad8;
+  --open-bg: #183236; --keten-bg: #33281a; --intern-bg: #2a2336;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --open: #5fb7c2; --keten: #e0a24a; --intern: #b49ad8;
+  --open-bg: #183236; --keten-bg: #33281a; --intern-bg: #2a2336;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+code, .mono { font-family: var(--f-mono); font-size: .84em; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; text-decoration: none; color: inherit; display: inline-block; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.klein { padding: 3px 10px; font-size: .85rem; }
+
+.intro { max-width: 72ch; }
+.intro p { margin: 0 0 8px; }
+.gmregel { font-size: .85rem; color: var(--muted); margin: 0; }
+
+/* domeinen */
+.domeinen { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; }
+.tv { display: grid; grid-template-columns: 2.2em minmax(0, 1fr); gap: 2px 10px; align-items: baseline; font-size: .92rem; }
+.tv .nr { font-family: var(--f-mono); color: var(--muted); font-size: .85rem; }
+.tv .naam { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.tv .leeg { color: var(--muted); font-size: .85rem; }
+.thema { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 2px 12px; cursor: pointer; font-size: .9rem; }
+.thema:hover { border-color: var(--accent); }
+.thema[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+@media (min-width: 900px) { .domeinen .lijst { columns: 2; column-gap: 32px; } .domeinen .tv { break-inside: avoid; margin-bottom: 4px; } }
+
+/* domeinkop */
+.dkop { display: grid; gap: 6px; }
+.dkop p { margin: 0; max-width: 80ch; }
+.lees { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: var(--r); padding: 10px 14px; max-width: 100%; }
+.lees p { margin: 0; max-width: 90ch; }
+
+/* tellers */
+.tellers { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+.teller { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 10px 14px; cursor: pointer; display: grid; gap: 2px; border-top: 4px solid var(--line); }
+.teller:hover { border-color: var(--accent); }
+.teller .n { font-family: var(--f-display); font-stretch: 85%; font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.teller .t { font-weight: 600; }
+.teller .s { font-size: .8rem; color: var(--muted); }
+.teller[data-b="open"] { border-top-color: var(--open); }
+.teller[data-b="keten"] { border-top-color: var(--keten); }
+.teller[data-b="intern"] { border-top-color: var(--intern); }
+.teller[aria-pressed="true"] { outline: 2px solid var(--fg); outline-offset: -2px; }
+.filterregel { font-size: .85rem; color: var(--muted); margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+
+/* kaarten */
+.keten { display: grid; gap: 10px; }
+.keten > h2 { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.keten > h2 .muted { font-family: var(--f-body); font-stretch: 100%; font-size: .85rem; font-weight: 400; }
+.kaarten { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 12px; }
+.kaart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; border-left: 4px solid var(--line); }
+.kaart[data-b="open"] { border-left-color: var(--open); }
+.kaart[data-b="keten"] { border-left-color: var(--keten); }
+.kaart[data-b="intern"] { border-left-color: var(--intern); }
+.kaart .kop { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.badge { font-size: .74rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.badge.open { background: var(--open-bg); color: var(--open); }
+.badge.keten { background: var(--keten-bg); color: var(--keten); }
+.badge.intern { background: var(--intern-bg); color: var(--intern); }
+.kaart .def { margin: 0; }
+.zz { display: grid; gap: 6px; }
+@media (min-width: 640px) { .zz { grid-template-columns: 1fr 1fr; gap: 10px; } }
+.zz div { background: var(--sunk); border-radius: 4px; padding: 6px 10px; font-size: .9rem; }
+.zz b { display: block; font-size: .76rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.zz .niet { box-shadow: inset 3px 0 0 var(--warn); }
+dl.meta { display: grid; grid-template-columns: minmax(7.5em, max-content) minmax(0, 1fr); gap: 3px 12px; margin: 0; font-size: .88rem; }
+dl.meta dt { color: var(--muted); }
+dl.meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+@media (max-width: 460px) { dl.meta { grid-template-columns: minmax(0, 1fr); } dl.meta dd { margin-bottom: 4px; } }
+.kaart .acties { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding-top: 4px; border-top: 1px solid var(--line); }
+
+.uitvraag { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--intern); border-radius: var(--r); padding: 12px 16px; display: grid; gap: 8px; }
+.uitvraag p { margin: 0; max-width: 80ch; }
+.uitvraag .knoppen { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul, .card ol { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+.card p { margin: 0; }
+.meldpunt .knoppen { display: flex; flex-wrap: wrap; gap: 8px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+footer p { margin: 0 0 6px; }
+#citeer { overflow-wrap: anywhere; }
+
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./">← Open Data Atelier</a>
+      <span class="eyebrow">Wat meet je? · indicatoren per domein</span>
+      <h1>Indicatorenkompas</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente voor de links (mag leeg)</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Kies</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+
+  <section class="intro">
+    <p><b>Welke indicatoren horen bij een beleidsdomein, en waar staan ze?</b> Dit kompas geeft geen cijfers. Per indicator staat wat hij meet, wat hij níet zegt, op welk niveau hij bestaat en waar je hem vindt: in open data, bij een ketenpartner of alleen in de eigen registratie van de gemeente.</p>
+    <p>Wat open is, hoef je niet uit te vragen. Wat intern is, kun je met de uitvraag onderaan in één keer aan je informatie-afdeling vragen, met definitie en gegevensobject erbij.</p>
+    <p class="gmregel" id="gmRegel"></p>
+  </section>
+
+  <nav class="domeinen" aria-label="Domeinen">
+    <span class="eyebrow">Domeinen, ingedeeld naar de Iv3-hoofdtaakvelden</span>
+    <div class="lijst" id="domeinLijst"></div>
+  </nav>
+
+  <section class="dkop" id="dkop" aria-live="polite"></section>
+  <div class="tellers" id="tellers" role="group" aria-label="Filter op bron"></div>
+  <p class="filterregel" id="filterregel"></p>
+  <div id="kaarten" class="wrap" style="gap:20px"></div>
+
+  <section class="uitvraag" id="uitvraag"></section>
+
+  <section class="cols">
+    <div class="card">
+      <h3>Zo is het kompas opgebouwd</h3>
+      <ul>
+        <li><b>Drie soorten bron.</b> <span class="badge open">open</span> staat in open data (meestal CBS, met tabelnummer). <span class="badge keten">ketenpartner</span> heeft een andere organisatie, zoals Veilig Thuis of een welzijnsorganisatie. <span class="badge intern">intern</span> staat alleen in de registratie van de gemeente.</li>
+        <li><b>Volgorde van de keten.</b> Context (de situatie in de gemeente), inspanning (geld, capaciteit), bereik en prestatie (wie wordt bereikt, hoe snel), uitkomst (wat het oplevert).</li>
+        <li><b>Herkomst.</b> Elke indicator zegt waarom hij erin staat: verplicht in het BBV, een wettelijke plicht, een landelijke monitor, een handreiking, of een voorstel van het atelier. Zonder herkomst is "relevant" een mening.</li>
+        <li><b>Vergelijkbaar en norm.</b> Open is niet hetzelfde als vergelijkbaar. Elke kaart zegt of je de indicator tussen gemeenten of door de jaren kunt leggen, en waartegen.</li>
+        <li><b>Gegevensobject.</b> Bij interne indicatoren staat waar de gegevens zitten in het Gemeentelijk Gegevensmodel (GGM) v2.5.1, als <code>entiteit.attribuut</code>. Alleen de namen zijn overgenomen.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Let op bij het gebruik</h3>
+      <ul>
+        <li><b>Geen volledige lijst.</b> Per domein staan de indicatoren die het meest bijdragen aan een beleidsvraag, niet alles wat te meten is.</li>
+        <li><b>Tabelnummers wijzigen.</b> Het CBS publiceert sommige reeksen elk jaar in een nieuwe tabel. Bij een kaart staat het nummer van de laatste stand; de reeks loopt vaak via voorgangers terug.</li>
+        <li><b>Het GGM verschilt per domein.</b> Voor de Wmo dekt het de interne indicatoren; bij huiselijk geweld ontbreken attributen. Waar iets ontbreekt, staat dat op de kaart.</li>
+        <li><b>Nog in opbouw.</b> Twee thema's zijn uitgewerkt. Andere domeinen volgen.</li>
+      </ul>
+    </div>
+    <div class="card meldpunt">
+      <h3>Mis je een indicator of klopt er iets niet?</h3>
+      <p>Stuur het door, met het domein en de kaart. Geen persoonsgegevens.</p>
+      <div class="knoppen">
+        <a class="btn primary" id="meldMail" href="./#samenwerken">Meld het per e-mail</a>
+        <a class="btn" id="meldGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+      </div>
+      <p class="small muted">GitHub is openbaar en vraagt een gratis account.</p>
+    </div>
+  </section>
+
+  <footer id="foot"></footer>
+  <p class="terug-onder"><a class="terug" href="./#producten">← Naar de instrumenten in Gemeentebeeld</a></p>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '0.1';
+  const PRODUCT = 'Indicatorenkompas';
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const cbs = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table" target="_blank" rel="noopener">CBS ${id}</a>`;
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  const byCode = new Map(GM.map(g => [g.c, g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), byCode.get(c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- inhoud ----------
+  const KETEN = [
+    ['context', 'Context', 'de situatie in de gemeente'],
+    ['inspanning', 'Inspanning', 'geld en capaciteit'],
+    ['bereik', 'Bereik en prestatie', 'wie wordt bereikt, hoe snel'],
+    ['uitkomst', 'Uitkomst', 'wat het oplevert']
+  ];
+  const BRON = { open: 'open', keten: 'ketenpartner', intern: 'intern' };
+  const BRON_UITLEG = { open: 'staat in open data', keten: 'ligt bij een ketenpartner', intern: 'alleen in de eigen registratie' };
+
+  const TV = [
+    ['0', 'Bestuur en ondersteuning'], ['1', 'Veiligheid'], ['2', 'Verkeer, vervoer en waterstaat'], ['3', 'Economie'],
+    ['4', 'Onderwijs'], ['5', 'Sport, cultuur en recreatie'], ['6', 'Sociaal domein'], ['7', 'Volksgezondheid en milieu'],
+    ['8', 'Volkshuisvesting, leefomgeving en stedelijke vernieuwing']
+  ];
+
+  const D = {
+    wmo: {
+      tv: '6', kort: 'Wmo', naam: 'Maatschappelijke ondersteuning (Wmo)',
+      taakvelden: '6.21 toegang Wmo · 6.60 hulpmiddelen · 6.711–6.714 maatwerkdienstverlening 18+ · 6.791 pgb Wmo · 6.811 beschermd wonen · 6.812 maatschappelijke- en vrouwenopvang',
+      scope: 'Ondersteuning thuis voor volwassenen. Beschermd wonen en opvang liggen vaak bij een centrumgemeente en staan alleen in de geldkaart.',
+      lees: 'Maatwerk is niet het hele bereik. Ondersteuning via algemene voorzieningen, zonder beschikking, staat in geen enkele landelijke bron. Een gemeente die veel via de wijk regelt, heeft minder maatwerk zonder minder te doen.',
+      atelier: 'wmo.html',
+      kaarten: [
+        { k: 'context', b: 'open', naam: 'Ouderen: 75 en 80 jaar of ouder',
+          def: 'Aantal en aandeel inwoners van 75 en 80 jaar of ouder.',
+          zegt: 'Hoe groot de groep is waar de meeste Wmo-vraag vandaan komt.',
+          niet: 'Hoeveel van hen ondersteuning nodig hebben.',
+          niveau: 'Gemeente; wijk en buurt voor 65-plussers. Jaarlijks, peildatum 1 januari.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `${cbs('70072ned')} (gemeente); Kerncijfers wijken en buurten (wijk, buurt).`,
+          herkomst: 'Voorstel atelier (noemer voor de andere kaarten).',
+          inst: ['huishoudens.html', 'Huishoudens en vergrijzing'] },
+        { k: 'context', b: 'open', naam: 'Volwassenen en ouderen met een beperking',
+          def: 'Geschat aandeel met een beperking in horen, zien of mobiliteit.',
+          zegt: 'De vraagkant, los van wat de gemeente registreert.',
+          niet: 'Wie ondersteuning krijgt of wil. Het is een modelschatting uit een steekproef, geen telling.',
+          niveau: 'Gemeente, wijk, buurt. Elke twee jaar; laatste meting 2024.',
+          norm: 'Nederland.', vgl: 'Ja, binnen de marge van het model.',
+          bron: () => 'RIVM, Gezondheid per wijk en buurt (tabel 50150NED), op basis van de Gezondheidsmonitor Volwassenen en Ouderen (<a href="https://data.overheid.nl/dataset/70128-gezondheid-per-wijk-en-buurt--2012-2016-2020-2022-2024--indeling-2024-" target="_blank" rel="noopener">vindplaats op data.overheid.nl</a>).',
+          herkomst: 'Landelijke monitor.' },
+        { k: 'bereik', b: 'open', naam: 'Maatwerkarrangementen Wmo per 10.000 inwoners',
+          def: 'Aantal maatwerkarrangementen per 10.000 inwoners.',
+          zegt: 'Hoeveel individuele ondersteuning de gemeente toekent.',
+          niet: 'Of dat te veel of te weinig is. Algemene voorzieningen tellen niet mee.',
+          niveau: 'Gemeente; per 1.000 inwoners ook per wijk. Halfjaar en jaar.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, met de kanttekening over algemene voorzieningen.',
+          bron: () => `<a href="https://www.waarstaatjegemeente.nl" target="_blank" rel="noopener">waarstaatjegemeente.nl</a> (BBV) en ${cbs('85896NED')}.`,
+          herkomst: 'Verplicht in het BBV (indicator 32).',
+          inst: ['wmo.html', 'Wmo per wijk'] },
+        { k: 'bereik', b: 'open', naam: 'Cliënten naar type ondersteuning',
+          def: 'Cliënten per type maatwerkvoorziening (hulp bij het huishouden, begeleiding, dagbesteding, hulpmiddelen, verblijf en opvang), ook naar financieringsvorm en aantal voorzieningen per cliënt.',
+          zegt: 'Waaruit de ondersteuning bestaat.',
+          niet: 'De werkelijke verdeling als de gemeente niet per type aan het CBS doorgeeft. In een deel van de gemeenten springt een type van jaar op jaar door registratie, niet door beleid.',
+          niveau: 'Gemeente; wijk voor zeven hoofdtypen. Halfjaar en jaar, vanaf 2017.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt: registratie per type verschilt per gemeente en per jaar.',
+          bron: () => `${cbs('85896NED')}, ${cbs('86050NED')} (detail), ${cbs('86060NED')} (aantal voorzieningen), ${cbs('86157NED')} (financieringsvorm per wijk, één tabel per jaar).`,
+          herkomst: 'Landelijke monitor (Gemeentelijke Monitor Sociaal Domein).',
+          inst: ['wmo.html', 'Wmo per wijk'] },
+        { k: 'bereik', b: 'open', naam: 'Instroom en uitstroom',
+          def: 'Voorzieningen die in het jaar beginnen en eindigen, naast de stand, per type.',
+          zegt: 'Of groei uit meer nieuwe cliënten komt of uit langere trajecten.',
+          niet: 'Waarom. Daarvoor is de reden van beëindiging.',
+          niveau: 'Gemeente. Halfjaar en jaar, 2017–2025.',
+          norm: 'Eigen gemeente door de jaren; Nederland.', vgl: 'Beperkt: dezelfde registratiekanttekening als bij de typen.',
+          bron: () => `${cbs('86051NED')}.`,
+          herkomst: 'Landelijke monitor.' },
+        { k: 'bereik', b: 'keten', naam: 'Gebruik van algemene voorzieningen',
+          def: 'Deelnemers aan voorzieningen zonder beschikking: inloop, ontmoeting, mantelzorgondersteuning, welzijn op recept.',
+          zegt: 'De andere helft van "algemeen vóór maatwerk". Zonder deze kaart lijkt het maatwerk het hele bereik.',
+          niet: 'Of het maatwerk voorkomt.',
+          niveau: 'Gemeente, wijk.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Nee: elke gemeente telt anders.',
+          bron: () => 'Welzijnsorganisatie, via de subsidieverantwoording. Geen landelijke registratie.',
+          ggm: 'Geen eigen entiteit gevonden in de domeinen Generiek Jeugd en Wmo en Sociale Teams.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'intern', naam: 'Doorlooptijd van melding tot beschikking',
+          def: 'Dagen tussen melding en afgerond onderzoek, en tussen aanvraag en beschikking.',
+          zegt: 'Of de gemeente de wettelijke termijnen haalt.',
+          niet: 'Of de beslissing passend was.',
+          niveau: 'Gemeente, wijkteam.',
+          norm: 'Wettelijke termijn: onderzoek binnen zes weken na de melding, beschikking binnen twee weken na de aanvraag (Wmo 2015, art. 2.3.2 en 2.3.5).',
+          vgl: 'Ja, als de startdatum overal op dezelfde manier wordt vastgelegd.',
+          bron: () => 'Registratie van de Wmo-toegang.',
+          ggm: '<code>aanvraagofmelding.datumaanmaak</code>; <code>aom_aanvraagwmojeugd.datumstartaanvraag</code>, <code>.datumbeschikking</code>, <code>.maximaledoorlooptijd</code>, <code>.redenafsluiting</code>; <code>beschikking.datumafgifte</code>.',
+          herkomst: 'Wettelijke plicht.' },
+        { k: 'bereik', b: 'intern', naam: 'Wachttijd van beschikking tot start ondersteuning',
+          def: 'Dagen tussen beschikking (of toewijzing aan de aanbieder) en de eerste levering.',
+          zegt: 'Of er een gat valt tussen toekennen en leveren, per type en per aanbieder.',
+          niet: 'De oorzaak: personeelstekort, keuze van de cliënt of administratie.',
+          niveau: 'Gemeente, aanbieder.',
+          norm: 'Eigen afspraak in het contract met aanbieders.', vgl: 'Beperkt.',
+          bron: () => 'Berichtenverkeer met aanbieders (toewijzing en start levering).',
+          ggm: '<code>beschikking.datumafgifte</code>; <code>toewijzing.datumtoewijzing</code>, <code>.datumstarttoewijzing</code>; <code>levering.datumstart</code>; <code>verzoek_om_toewijzing.datumontvangst</code>.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'inspanning', b: 'open', naam: 'Lasten Wmo per inwoner en per cliënt',
+          def: 'Lasten op de Wmo-taakvelden per inwoner, per 65-plusser en per cliënt; ondersteuning thuis apart van beschermd wonen en opvang.',
+          zegt: 'Wat de gemeente zelf uitgeeft, door de jaren heen.',
+          niet: 'Kosten per type ondersteuning. Toegang (6.21) zit er niet in, en beschermd wonen en opvang hangen af van de rol als centrumgemeente.',
+          niveau: 'Gemeente. Begroting en jaarrekening.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt: boekingspraktijk, en de taakvelden zijn in 2023 en 2025 opnieuw ingedeeld.',
+          bron: () => 'CBS, onbewerkte Iv3-data gemeenten (<a href="https://dataderden.cbs.nl" target="_blank" rel="noopener">dataderden.cbs.nl</a>).',
+          herkomst: 'Voorstel atelier.',
+          inst: ['wmo.html', 'Wmo per wijk'] },
+        { k: 'inspanning', b: 'open', naam: 'Uitgaven per type voorziening en eigen bijdragen',
+          def: 'Begrote en gerealiseerde uitgaven aan maatwerkvoorzieningen per type, en inkomsten uit eigen bijdragen naar inkomen.',
+          zegt: 'Hoe het geld over de typen verdeeld is, los van de Iv3-boeking, en wat het abonnementstarief opbrengt.',
+          niet: 'Kosten per cliënt per type. Deel niet door de cliënten per type: in een deel van de gemeenten passen die registraties niet op elkaar.',
+          niveau: 'Gemeente. Jaarlijks, 2017–2025.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt.',
+          bron: () => `${cbs('84580NED')} (Monitor Abonnementstarief) en ${cbs('85967NED')}.`,
+          herkomst: 'Landelijke monitor.' },
+        { k: 'uitkomst', b: 'open', naam: 'Reden van beëindiging',
+          def: 'Beëindigde ondersteuning naar reden: volgens plan, overlijden, verhuizing, voortzetting in de Wlz, Zvw of sociale basis, eenzijdig door cliënt of aanbieder, en andere.',
+          zegt: 'Het dichtst bij een uitkomst dat open data over de Wmo heeft. "Volgens plan" en "voortgezet in de sociale basis" zijn andere uitkomsten dan "eenzijdig beëindigd".',
+          niet: 'Of het doel bereikt is. De reden is een code van de aanbieder.',
+          niveau: 'Gemeente. Halfjaar en jaar, 2017–2025.',
+          norm: 'Nederland.', vgl: 'Beperkt: de codering verschilt per aanbieder.',
+          bron: () => `${cbs('86061NED')}.`,
+          herkomst: 'Landelijke monitor.' },
+        { k: 'uitkomst', b: 'open', naam: 'Doorstroom naar de Wlz',
+          def: 'Aandeel Wmo-cliënten van het ene jaar dat het jaar erna zorg uit de Wet langdurige zorg krijgt, en hoeveel beide tegelijk hadden.',
+          zegt: 'Hoe zwaar de Wmo-groep is, en hoe vaak de gemeente het voorportaal van de langdurige zorg is.',
+          niet: 'Of de overgang op tijd kwam.',
+          niveau: 'Gemeente, naar leeftijd, geslacht en inkomen. Eén tabel per jaarpaar.',
+          norm: 'Nederland.', vgl: 'Ja.',
+          bron: () => `${cbs('86387NED')} (2024 → 2025) en voorgangers.`,
+          herkomst: 'Landelijke monitor.' },
+        { k: 'uitkomst', b: 'open', naam: 'Cliëntervaring Wmo',
+          def: 'Uitkomsten van het jaarlijkse cliëntervaringsonderzoek over ten minste toegankelijkheid, kwaliteit van de ondersteuning en effect op zelfredzaamheid en participatie.',
+          zegt: 'Hoe cliënten de ondersteuning ervaren.',
+          niet: 'Hoe de gemeente zich tot andere verhoudt. Sinds 2021 kiest elke gemeente doelgroep en methode zelf.',
+          niveau: 'Gemeente. Jaarlijks, aanlevering vóór 1 juli.',
+          norm: 'Eigen gemeente door de jaren, alleen bij dezelfde methode.', vgl: 'Nee, tussen gemeenten niet.',
+          bron: () => '<a href="https://www.waarstaatjegemeente.nl" target="_blank" rel="noopener">waarstaatjegemeente.nl</a> (Gemeentelijke Monitor Sociaal Domein) en de eigen rapportage van de gemeente.',
+          herkomst: 'Wettelijke plicht (Wmo 2015, art. 2.5.1).' }
+      ]
+    },
+    hg: {
+      tv: '6', kort: 'Huiselijk geweld', naam: 'Huiselijk geweld en kindermishandeling',
+      taakvelden: '6.21 en 6.23 toegang (waaronder Veilig Thuis) · 6.812 vrouwenopvang · 6.821 jeugdbescherming · raakt 1.2 openbare orde en veiligheid',
+      scope: 'Een thema dat over meer taakvelden loopt. Indeling naar de thema\'s van de landelijke Impactmonitor huiselijk geweld en kindermishandeling.',
+      lees: 'Meldingen zijn geen omvang. Meer meldingen kan betekenen dat er beter gesignaleerd wordt. Alleen sturen op het aantal meldingen is niet zinvol.',
+      atelier: 'veiligthuis.html',
+      kaarten: [
+        { k: 'context', b: 'open', naam: 'Omvang huiselijk en seksueel geweld',
+          def: 'Aandeel van de bevolking dat in de afgelopen periode slachtoffer was.',
+          zegt: 'Hoe groot het probleem is, los van wie het ziet.',
+          niet: 'Iets over de eigen gemeente. Alleen landelijk.',
+          niveau: 'Land.', norm: 'Geen (alleen landelijk).', vgl: 'Niet per gemeente.',
+          bron: () => 'CBS en WODC, Prevalentiemonitor huiselijk en seksueel geweld.',
+          herkomst: 'Landelijke monitor (Impactmonitor, thema omvang).' },
+        { k: 'context', b: 'open', naam: 'Jongeren met jeugdbescherming',
+          def: 'Aandeel jongeren tot 18 jaar met een kinderbeschermingsmaatregel.',
+          zegt: 'Het zwaarste ingrijpen rond onveiligheid bij kinderen.',
+          niet: 'Dat elke maatregel over huiselijk geweld gaat.',
+          niveau: 'Gemeente, wijk. Halfjaar en jaar.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `${cbs('85099NED')} en de wijktabellen per jaar.`,
+          herkomst: 'Verplicht in het BBV (indicator 30).',
+          inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
+        { k: 'bereik', b: 'open', naam: 'Meldingen en adviezen bij Veilig Thuis',
+          def: 'Binnengekomen meldingen en adviezen per 100.000 inwoners.',
+          zegt: 'Hoeveel onveiligheid in beeld komt bij Veilig Thuis.',
+          niet: 'Hoeveel geweld er is. Meer meldingen kan betere signalering betekenen.',
+          niveau: 'Gemeente. Halfjaar en jaar, sinds 2019.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt: registratie en toewijzing per Veilig Thuis-organisatie.',
+          bron: () => `${cbs('84847NED')}.`,
+          herkomst: 'Landelijke monitor (Impactmonitor, bereik Veilig Thuis).',
+          inst: ['veiligthuis.html', 'Veilig Thuis per gemeente'] },
+        { k: 'bereik', b: 'open', naam: 'Wie meldt',
+          def: 'Meldingen naar de organisatie van de melder: politie, zorg, onderwijs, burgers en andere.',
+          zegt: 'Welke signaleerders actief zijn en welke stil blijven.',
+          niet: 'Of een stille groep niets ziet of niet meldt.',
+          niveau: 'Gemeente.', norm: 'Nederland.', vgl: 'Beperkt: registratie per Veilig Thuis-organisatie.',
+          bron: () => `${cbs('84849NED')}.`,
+          herkomst: 'Landelijke monitor; meldcodebeleid.',
+          inst: ['veiligthuis.html', 'Veilig Thuis per gemeente'] },
+        { k: 'bereik', b: 'open', naam: 'Aard van het geweld',
+          def: 'Aandeel meldingen per vorm: kindermishandeling, partnergeweld, ouderenmishandeling en andere. Een melding kan over meer vormen gaan.',
+          zegt: 'Waar het werk van Veilig Thuis over gaat.',
+          niet: 'De verdeling van het geweld zelf.',
+          niveau: 'Gemeente.', norm: 'Nederland.', vgl: 'Beperkt: registratie per Veilig Thuis-organisatie.',
+          bron: () => `${cbs('84851NED')}.`,
+          herkomst: 'Landelijke monitor (Impactmonitor, kenmerken van het geweld).',
+          inst: ['veiligthuis.html', 'Veilig Thuis per gemeente'] },
+        { k: 'bereik', b: 'open', naam: 'Acuut en structureel onveilig',
+          def: 'Aandeel meldingen met de veiligheidstaxatie acuut onveilig, en structureel onveilig. Die overlappen; niet optellen.',
+          zegt: 'De zwaarte van wat binnenkomt.',
+          niet: 'Of de veiligheid daarna hersteld is.',
+          niveau: 'Gemeente.', norm: 'Nederland.', vgl: 'Beperkt: taxatie per Veilig Thuis-organisatie.',
+          bron: () => `${cbs('84852NED')}.`,
+          herkomst: 'Landelijke monitor.',
+          inst: ['veiligthuis.html', 'Veilig Thuis per gemeente'] },
+        { k: 'bereik', b: 'open', naam: 'Overgedragen aan het lokale veld',
+          def: 'Aandeel meldingen dat Veilig Thuis na de veiligheidsbeoordeling overdraagt aan lokale hulp.',
+          zegt: 'Hoeveel werk bij het lokale team terechtkomt. Het scharnier naar de interne kaarten.',
+          niet: 'Of het lokale team het oppakt.',
+          niveau: 'Gemeente.', norm: 'Nederland.', vgl: 'Beperkt: registratie per Veilig Thuis-organisatie.',
+          bron: () => `${cbs('84852NED')}.`,
+          herkomst: 'Landelijke monitor.',
+          inst: ['veiligthuis.html', 'Veilig Thuis per gemeente'] },
+        { k: 'bereik', b: 'intern', naam: 'Tijd van overdracht tot start hulp',
+          def: 'Werkdagen tussen overdracht door Veilig Thuis en start van een traject bij het lokale team.',
+          zegt: 'Of er een gat valt tussen Veilig Thuis en lokale hulp. Langer wachten vergroot de kans op nieuw geweld.',
+          niet: 'Of de hulp passend was.',
+          niveau: 'Gemeente, wijk.',
+          norm: 'Eigen afspraak in de regio; er is geen wettelijke termijn.', vgl: 'Ja, als de startdatum overal op dezelfde manier wordt vastgelegd.',
+          bron: () => 'Registratie van het lokale of sociale team.',
+          ggm: '<code>caseaanmelding.datum</code> naar <code>sociaalteamdossier.datumstart</code>; soort via <code>sociaalteamdossier.heeft_soort_sociaalteamdossiersoort_id</code>. De datum van overdracht door Veilig Thuis heeft geen eigen attribuut: spreek af hoe de aanmelding de bron Veilig Thuis vastlegt.',
+          herkomst: 'Handreiking (Regioplan, lokale procesindicatoren); koppeling voorstel atelier.' },
+        { k: 'inspanning', b: 'keten', naam: 'Tijdelijke huisverboden',
+          def: 'Aantal opgelegde tijdelijke huisverboden.',
+          zegt: 'Hoe vaak de burgemeester ingrijpt.',
+          niet: 'Of het verbod effect had.',
+          niveau: 'In de Impactmonitor per regio; een open bron per gemeente is nog niet gevonden.',
+          norm: 'Geen.', vgl: 'Onbekend tot er een bron per gemeente is.',
+          bron: () => 'Veilig Thuis-regio en politie.',
+          herkomst: 'Landelijke monitor; handreiking (Regioplan).' },
+        { k: 'inspanning', b: 'open', naam: 'Lasten toegang en opvang per inwoner',
+          def: 'Lasten op 6.21 en 6.23 (toegang, waaronder Veilig Thuis) en 6.812 (maatschappelijke- en vrouwenopvang), per inwoner.',
+          zegt: 'Wat de gemeente in dit veld uitgeeft, door de jaren heen.',
+          niet: 'Wat Veilig Thuis kost. 6.21 en 6.23 bevatten alle toegang, en opvang ligt vaak bij de centrumgemeente.',
+          niveau: 'Gemeente. Begroting en jaarrekening, vanaf indeling 2025.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt: boekingspraktijk en rol als centrumgemeente.',
+          bron: () => 'CBS, onbewerkte Iv3-data gemeenten (<a href="https://dataderden.cbs.nl" target="_blank" rel="noopener">dataderden.cbs.nl</a>).',
+          herkomst: 'Voorstel atelier.',
+          inst: ['iv3spiegel.html', 'Iv3-spiegel'] },
+        { k: 'uitkomst', b: 'open', naam: 'Al bekend bij Veilig Thuis',
+          def: 'Aandeel meldingen over betrokkenen die in de drie jaar ervoor al gemeld waren (hermelding), of waar Veilig Thuis nog betrokken was (vervolgmelding).',
+          zegt: 'Hoe vaak onveiligheid terugkomt. Het enige open signaal over herhaling.',
+          niet: 'Of een nieuwe melding over hetzelfde geweld gaat.',
+          niveau: 'Gemeente, vanaf 2022.', norm: 'Nederland.', vgl: 'Beperkt: "niet ingedeeld" verschilt sterk per regio.',
+          bron: () => `${cbs('85361NED')}.`,
+          herkomst: 'Landelijke monitor.',
+          inst: ['veiligthuis.html', 'Veilig Thuis per gemeente'] },
+        { k: 'uitkomst', b: 'intern', naam: 'Trajecten afgesloten met veiligheid hersteld',
+          def: 'Aandeel afgesloten trajecten met een veiligheidsdoel waarbij de veiligheid bij afsluiting als hersteld is beoordeeld.',
+          zegt: 'Het dichtst bij een uitkomst dat een gemeente zelf kan meten.',
+          niet: 'Of het zo blijft. Daarvoor is de kaart "Al bekend bij Veilig Thuis".',
+          niveau: 'Gemeente.', norm: 'Eigen gemeente door de jaren.', vgl: 'Nee: de beoordeling is lokaal.',
+          bron: () => 'Registratie van het lokale team of het jeugdteam.',
+          ggm: '<code>sociaalteamdossier.status</code>, <code>.datumeinde</code>; <code>doelstelling</code> met <code>doelstellingsoort</code>. Een veiligheidsoordeel bij afsluiting heeft geen eigen attribuut in GGM v2.5.1: dat moet bij de uitvraag worden afgesproken.',
+          herkomst: 'Handreiking (Regioplan, resultaten lokale hulpverlening).' }
+      ]
+    }
+  };
+
+  // ---------- staat ----------
+  const S = { d: 'wmo', b: null, gm: null };
+  function leesHash() {
+    const h = new URLSearchParams(location.hash.slice(1));
+    if (h.get('domein') && D[h.get('domein')]) S.d = h.get('domein');
+    const b = h.get('bron'); S.b = b && BRON[b] ? b : null;
+    const g = h.get('gm'); if (g && byCode.get(g.replace(/^GM/i, ''))) S.gm = g.replace(/^GM/i, '');
+  }
+  function schrijfHash() {
+    const p = ['domein=' + S.d]; if (S.b) p.push('bron=' + S.b); if (S.gm) p.push('gm=' + S.gm);
+    // In een voorvertoning (sandbox, about:srcdoc) mag replaceState niet; de pagina werkt dan zonder link per stand.
+    try { if (location.hash !== '#' + p.join('&')) history.replaceState(null, '', '#' + p.join('&')); } catch (e) { return; }
+    // replaceState geeft geen hashchange: werk de bronvermelding zelf bij
+    const c = document.querySelector('#citeer span');
+    if (c) c.textContent = c.textContent.replace(/https?:\/\/\S+(?= \(geraadpleegd)/, location.href);
+  }
+  try { const g = localStorage.getItem('jl-gemeente'); if (g && byCode.get(g)) S.gm = g; } catch (e) {}
+  leesHash();
+
+  // ---------- gemeente ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const v = $('#gmInput').value.trim().toLowerCase();
+    if (!v) { S.gm = null; } else {
+      const g = byName.get(v); if (!g) { $('#gmRegel').textContent = 'Die gemeente ken ik niet. Kies er een uit de lijst.'; return; }
+      S.gm = g.c; try { localStorage.setItem('jl-gemeente', g.c); } catch (e2) {}
+    }
+    render();
+  });
+  function instLink(href) { return href + (S.gm ? '#gm=' + S.gm : ''); }
+
+  // ---------- render ----------
+  function renderDomeinen() {
+    $('#domeinLijst').innerHTML = TV.map(([nr, naam]) => {
+      const th = Object.entries(D).filter(([, d]) => d.tv === nr);
+      const knoppen = th.length
+        ? th.map(([key, d]) => `<button type="button" class="thema" data-d="${key}" aria-pressed="${S.d === key}">${esc(d.kort)}</button>`).join('')
+        : '<span class="leeg">nog niet uitgewerkt</span>';
+      return `<div class="tv"><span class="nr">${nr}</span><span class="naam"><span>${esc(naam)}</span>${knoppen}</span></div>`;
+    }).join('');
+    document.querySelectorAll('.thema').forEach(b => b.addEventListener('click', () => { S.d = b.dataset.d; S.b = null; render(); $('#dkop').scrollIntoView({ block: 'start', behavior: 'smooth' }); }));
+  }
+
+  function telling(d) { const t = { open: 0, keten: 0, intern: 0 }; d.kaarten.forEach(c => t[c.b]++); return t; }
+
+  function kaartHtml(c) {
+    const rij = (dt, dd) => dd ? `<dt>${dt}</dt><dd>${dd}</dd>` : '';
+    const inst = c.inst ? `<a class="btn klein" href="${esc(instLink(c.inst[0]))}">Bekijk in ${esc(c.inst[1])}${S.gm ? ' · ' + esc(byCode.get(S.gm).n) : ''} →</a>` : '';
+    return `<article class="kaart" data-b="${c.b}">
+      <div class="kop"><span class="badge ${c.b}">${BRON[c.b]}</span><h3>${esc(c.naam)}</h3></div>
+      <p class="def">${esc(c.def)}</p>
+      <div class="zz"><div><b>Wat het zegt</b>${esc(c.zegt)}</div><div class="niet"><b>Wat het níet zegt</b>${esc(c.niet)}</div></div>
+      <dl class="meta">
+        ${rij('Niveau', esc(c.niveau))}
+        ${rij('Norm', esc(c.norm))}
+        ${rij('Vergelijkbaar', esc(c.vgl))}
+        ${rij('Bron', c.bron())}
+        ${rij('Gegevensobject', c.ggm || '')}
+        ${rij('Herkomst', esc(c.herkomst))}
+      </dl>
+      ${inst ? `<div class="acties">${inst}</div>` : ''}
+    </article>`;
+  }
+
+  function render() {
+    const d = D[S.d];
+    renderDomeinen();
+    $('#gmInput').value = S.gm ? byCode.get(S.gm).n : '';
+    $('#gmRegel').textContent = S.gm
+      ? `Links naar instrumenten openen op ${byCode.get(S.gm).n}. Het kompas zelf is voor elke gemeente gelijk.`
+      : 'Kies je hierboven een gemeente, dan openen de links naar de instrumenten meteen op die gemeente. Het kompas zelf is voor elke gemeente gelijk.';
+
+    $('#dkop').innerHTML = `<span class="eyebrow">${esc(d.tv)} ${esc(TV.find(t => t[0] === d.tv)[1])}</span>
+      <h2>${esc(d.naam)}</h2>
+      <p class="small muted">Iv3-taakvelden: ${esc(d.taakvelden)}</p>
+      <p>${esc(d.scope)}</p>
+      <div class="lees"><p><b>Lees dit eerst.</b> ${esc(d.lees)}</p></div>`;
+
+    const t = telling(d);
+    $('#tellers').innerHTML = ['open', 'keten', 'intern'].map(b => `<button type="button" class="teller" data-b="${b}" aria-pressed="${S.b === b}">
+        <span class="n">${t[b]}</span><span class="t">${BRON[b] === 'open' ? 'Open' : BRON[b] === 'intern' ? 'Intern' : 'Ketenpartner'}</span><span class="s">${BRON_UITLEG[b]}</span></button>`).join('');
+    document.querySelectorAll('.teller').forEach(btn => btn.addEventListener('click', () => { S.b = S.b === btn.dataset.b ? null : btn.dataset.b; render(); }));
+    $('#filterregel').innerHTML = S.b
+      ? `Alleen <b>${BRON[S.b]}</b> (${t[S.b]} van ${d.kaarten.length}). <button type="button" class="btn klein" id="toonAlles">Toon alle ${d.kaarten.length}</button>`
+      : `${d.kaarten.length} indicatoren. Klik op een teller om alleen die bron te zien.`;
+    const ta = $('#toonAlles'); if (ta) ta.addEventListener('click', () => { S.b = null; render(); });
+
+    $('#kaarten').innerHTML = KETEN.map(([k, kop, uitleg]) => {
+      const cs = d.kaarten.filter(c => c.k === k && (!S.b || c.b === S.b));
+      if (!cs.length) return '';
+      return `<section class="keten"><h2>${kop} <span class="muted">${uitleg}</span></h2><div class="kaarten">${cs.map(kaartHtml).join('')}</div></section>`;
+    }).join('');
+
+    renderUitvraag(d);
+    renderMeld(d);
+    renderVoet();
+    schrijfHash();
+  }
+
+  // ---------- uitvraag ----------
+  function plat(s) { const e = document.createElement('div'); e.innerHTML = s; return e.textContent.replace(/\s+/g, ' ').trim(); }
+  function uitvraagTekst(d) {
+    const gm = S.gm ? byCode.get(S.gm).n : '[gemeente]';
+    const intern = d.kaarten.filter(c => c.b === 'intern');
+    const keten = d.kaarten.filter(c => c.b === 'keten');
+    const open = d.kaarten.filter(c => c.b === 'open');
+    const regels = [];
+    regels.push(`Uitvraag indicatoren ${d.naam} · ${gm}`, '');
+    regels.push('Onderstaande indicatoren staan niet in open data. Graag per indicator: of de gegevens in onze registratie zitten, sinds wanneer, en op welk niveau (gemeente, wijk).', '');
+    intern.forEach((c, i) => {
+      regels.push(`${i + 1}. ${c.naam}`, `   Definitie: ${c.def}`, `   Niveau: ${c.niveau}`, `   Norm: ${c.norm}`);
+      if (c.ggm) regels.push(`   Gegevensobject (GGM v2.5.1): ${plat(c.ggm)}`);
+      regels.push('');
+    });
+    if (keten.length) {
+      regels.push('Bij een ketenpartner (navragen, niet bij de informatie-afdeling):');
+      keten.forEach(c => regels.push(`- ${c.naam}: ${plat(c.bron())}`));
+      regels.push('');
+    }
+    regels.push('Al open beschikbaar (niet uitvragen):');
+    open.forEach(c => regels.push(`- ${c.naam}: ${plat(c.bron())}`));
+    regels.push('', `Opgesteld met het Indicatorenkompas van Josephine Linders, ${location.href}`);
+    return regels.join('\n');
+  }
+  function renderUitvraag(d) {
+    const intern = d.kaarten.filter(c => c.b === 'intern');
+    $('#uitvraag').innerHTML = `<h2>Uitvraag aan je informatie-afdeling</h2>
+      <p>${intern.length} van de ${d.kaarten.length} indicatoren in dit domein staan alleen in de eigen registratie. De uitvraag zet ze onder elkaar met definitie, niveau, norm en gegevensobject, en noemt wat al open is, zodat dat niet dubbel wordt gevraagd.</p>
+      <div class="knoppen"><button type="button" class="btn primary" id="kopieerUit">Kopieer de uitvraag</button><span class="small muted" id="kopieerOk"></span></div>`;
+    $('#kopieerUit').addEventListener('click', () => {
+      const v = uitvraagTekst(d);
+      const ok = () => { $('#kopieerOk').textContent = 'Gekopieerd. Plak het in een mail of document.'; };
+      try {
+        if (navigator.clipboard) navigator.clipboard.writeText(v).then(ok, () => window.prompt('Kopieer de uitvraag:', v));
+        else window.prompt('Kopieer de uitvraag:', v);
+      } catch (e) { window.prompt('Kopieer de uitvraag:', v); }
+    });
+  }
+
+  function renderMeld(d) {
+    const titel = `${PRODUCT}: ${d.naam}`;
+    const body = `Pagina: ${location.href}\nVersie: ${VERSIE}\n\nWelke indicator of kaart:\n\nWat mis je of wat klopt er niet:\n\nWaar komt dat vandaan (bron, wet, monitor):\n`;
+    $('#meldMail').href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+    $('#meldGh').href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+
+  function renderVoet() {
+    $('#foot').innerHTML = `<p>Bronnen van de indicatoren: CBS (StatLine, CC-BY 4.0), RIVM (Gezondheid per wijk en buurt, CC-BY 4.0), waarstaatjegemeente.nl (VNG), Iv3-informatievoorschrift gemeenten 2025, Wmo 2015, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling, Regioplan (handreiking lokale procesindicatoren, 2022). Gegevensobjecten: <a href="https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel" target="_blank" rel="noopener">Gemeentelijk Gegevensmodel</a> v2.5.1 (EUPL-1.2, Gemeente Delft); alleen entiteit- en attribuutnamen overgenomen. Tabelnummers gecontroleerd op 30 oktober 2026.</p>
+      <p>Geen officiële publicatie van een gemeente. Bewerking door Josephine Linders, op eigen titel.</p>
+      <p>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bronnen. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+      <p>Josephine Linders · ${PRODUCT} · versie ${VERSIE}</p>`;
+  }
+
+  window.addEventListener('hashchange', () => { leesHash(); render(); });
+  render();
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>
