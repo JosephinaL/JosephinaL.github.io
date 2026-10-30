@@ -33,6 +33,10 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 | **Werkbank** | | | |
 | Eigen lijst op de kaart | [eigenlijst.html](https://josephinal.github.io/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed in eigen beheer, eruit naast de BAG en open data? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
 
+## Indicatorenkompas
+
+[indicatoren.html](https://josephinal.github.io/indicatoren.html) staat naast de instrumenten en is zelf geen instrument: het rekent niet en toont geen cijfers. Per thema staat welke indicatoren ertoe doen, wat ze zeggen en wat niet, op welk niveau ze bestaan en waar ze staan: in open data (met tabelnummer), bij een ketenpartner of alleen in de eigen registratie van de gemeente. Interne indicatoren verwijzen naar het Gemeentelijk Gegevensmodel (GGM) v2.5.1; een knop zet ze in één uitvraag voor de informatie-afdeling. Ingedeeld naar de Iv3-hoofdtaakvelden, net als de instrumenten; nu uitgewerkt: Wmo en huiselijk geweld en kindermishandeling. Bronnen van de indicatoren: CBS (StatLine), RIVM, waarstaatjegemeente.nl, Iv3-informatievoorschrift 2025, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling.
+
 ## Werkwijze
 
 Vier lagen:

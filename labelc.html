@@ -1601,7 +1601,7 @@ footer { font-size: .8rem; color: var(--muted); }
   // ---------- ophalen ----------
   const STEPS = ['woonplaatsen', 'vbo', 'pand', 'overig', 'monumenten', 'labels', 'wijken'];
   async function run(gm) {
-    history.replaceState(null, '', '#' + gm.code);
+    try { history.replaceState(null, '', '#' + gm.code); } catch (e) {}
     $('#intro').hidden = true;
     store.set('jl-gemeente', gm.code.replace(/^GM/, ''));
     state.gm = gm;

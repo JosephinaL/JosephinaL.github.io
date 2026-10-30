@@ -176,6 +176,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     <p>Hoe vaak vragen inwoners en professionals in je gemeente Veilig Thuis om advies, en hoe vaak doen ze een melding? Over welk geweld gaat het, wie meldt, en wat gebeurt er daarna? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen, met Nederland als enige referentie. Er is geen ranglijst van gemeenten.</p>
     <p class="muted small">De cijfers komen live van het CBS op het moment dat je een gemeente kiest. Ze gaan over het werk van Veilig Thuis, niet over hoeveel geweld er is.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+    <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=hg">Welke indicatoren horen bij huiselijk geweld, en waar staan ze? Indicatorenkompas →</a></p>
   </section>
 
   <section id="result" hidden>
@@ -294,6 +295,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
+      <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=hg">Welke indicatoren horen bij huiselijk geweld, en waar staan ze? Indicatorenkompas →</a></p>
       <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
   </section>
@@ -409,7 +411,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     $('#gmInput').value = g.n;
     document.title = 'Veilig Thuis ' + g.n + ' · Open Data Atelier';
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    if (location.hash !== '#gm=' + g.c) history.replaceState(null, '', '#gm=' + g.c);
+    try { if (location.hash !== '#gm=' + g.c) history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
     S = { g, jaar: null, opgehaald: null };
     fouten.clear(); toonMelding();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
@@ -525,7 +527,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     $('#jaren').querySelectorAll('button').forEach(b => { b.classList.toggle('primary', +b.dataset.j === j); b.setAttribute('aria-pressed', +b.dataset.j === j); });
     $('#jaarKop').textContent = `In ${j}`;
     const h = '#gm=' + S.g.c + (j !== laatsteJaar() ? '&jaar=' + j : '');
-    if (location.hash !== h) history.replaceState(null, '', h);
+    try { if (location.hash !== h) history.replaceState(null, '', h); } catch (e) {}
     renderVerdeling(); renderTabel();
   }
 

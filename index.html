@@ -135,6 +135,15 @@ nav a:hover { color: var(--accent); }
 .btn-sm { padding: 7px 14px; font-size: .92rem; }
 .more { background: none; border: 0; padding: 4px 0; color: var(--accent); font: inherit; font-size: .92rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .more[aria-expanded="true"] { font-weight: 700; }
+.kompas-vis { display: grid; gap: 10px; }
+.kompas-rij { display: grid; grid-template-columns: minmax(0, 12em) minmax(0, 1fr); gap: 4px 14px; align-items: center; font-size: .95rem; }
+@media (max-width: 520px) { .kompas-rij { grid-template-columns: minmax(0, 1fr); } }
+.kblok { display: flex; flex-wrap: wrap; gap: 3px 8px; }
+.kstap { display: inline-flex; gap: 3px; }
+.kblok i { display: block; width: 16px; height: 16px; border-radius: 3px; }
+.klegenda { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: .88rem; color: var(--muted); }
+.klegenda span { display: inline-flex; align-items: center; gap: 6px; }
+.klegenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .product.open { box-shadow: 0 0 0 2px var(--accent); }
 .close { justify-self: start; background: none; border: 1px solid var(--line); border-radius: var(--r); padding: 5px 12px; color: var(--ink); font: inherit; font-size: .9rem; cursor: pointer; }
 .btns { display: flex; flex-wrap: wrap; gap: 10px; }
@@ -183,6 +192,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
     <nav aria-label="Hoofdmenu">
       <a href="#werkwijze">Werkwijze</a>
       <a href="#producten">Instrumenten</a>
+      <a href="#kompas">Wat meet je?</a>
       <a href="#over">Over</a>
       <a href="#samenwerken">Samenwerken</a>
       <button class="theme" id="themeBtn" type="button" aria-label="Wissel licht en donker">◐</button>
@@ -725,6 +735,34 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
           <li>Geen eigen lijst bij de hand? Het voorbeeld gebruikt het open vastgoedregister van Amsterdam.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="section" id="kompas" aria-labelledby="h-kompas">
+    <div class="section-head">
+      <span class="eyebrow">Wat meet je? · Indicatorenkompas</span>
+      <h2 id="h-kompas">Weten wat je meet, voordat je gaat tellen</h2>
+      <p class="lead">Welke indicatoren horen bij een beleidsdomein, en waar staan ze? Per thema: wat een indicator zegt, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden. Geen cijfers, wel de weg ernaartoe.</p>
+    </div>
+    <article class="product" aria-labelledby="h-kompas-p">
+      <div class="product-body">
+        <h3 id="h-kompas-p">Indicatorenkompas</h3>
+        <div class="kompas-vis" role="img" aria-label="Wmo: 13 indicatoren, 10 open, 1 bij een ketenpartner, 2 intern. Huiselijk geweld en kindermishandeling: 12 indicatoren, 9 open, 1 bij een ketenpartner, 2 intern.">
+          <div class="kompas-rij"><span>Wmo</span><span class="kblok"><span class="kstap"><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i></span><span class="kstap"><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i></span><span class="kstap"><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i><i style="background:#f2d01c"></i><i style="background:#f0a018"></i><i style="background:#f0a018"></i></span><span class="kstap"><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i></span></span></div>
+          <div class="kompas-rij"><span>Huiselijk geweld en kindermishandeling</span><span class="kblok"><span class="kstap"><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i></span><span class="kstap"><i style="background:#f2d01c"></i><i style="background:#1a8a3f"></i></span><span class="kstap"><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i><i style="background:#1a8a3f"></i><i style="background:#f0a018"></i></span><span class="kstap"><i style="background:#1a8a3f"></i><i style="background:#f0a018"></i></span></span></div>
+          <div class="klegenda"><span><i style="background:#1a8a3f"></i>open data</span><span><i style="background:#f2d01c"></i>vanuit de keten</span><span><i style="background:#f0a018"></i>intern opvragen</span></div>
+        </div>
+        <p>Een blokje per indicator, in de volgorde van de keten: context, inspanning, bereik, uitkomst. Wat open is, hoef je niet uit te vragen; wat intern is, vraag je met één tekst aan je informatie-afdeling, met definitie en gegevensobject uit het GGM erbij.</p>
+        <a class="btn" href="indicatoren.html">Open het kompas <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo hangt het samen</span>
+        <ol>
+          <li>Ingedeeld naar de Iv3-hoofdtaakvelden, net als de planken van Gemeentebeeld.</li>
+          <li>Elke indicator met cijfers in een instrument linkt erheen, op de gemeente die je kiest.</li>
+          <li>Nu uitgewerkt: Wmo en huiselijk geweld in het sociaal domein. De andere domeinen volgen.</li>
+        </ol>
       </div>
     </article>
   </section>
