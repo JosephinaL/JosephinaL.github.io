@@ -1,14 +1,14 @@
 # Open Data Atelier
 
-Van open data naar een bruikbaar informatieproduct, voor elke gemeente. Door Josephine Linders.
+Van open data naar een bruikbaar instrument, voor elke gemeente. Door Josephine Linders.
 
 **Site:** https://josephinal.github.io
 
-Informatieproducten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. Elk product werkt voor alle 342 Nederlandse gemeenten: kies een gemeente en de pagina rekent ter plekke. Geen installatie, geen account.
+Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. Geen rapporten en geen dashboards: met een instrument kies je zelf waar je kijkt. Elk instrument werkt voor alle 342 Nederlandse gemeenten: kies een gemeente en de pagina rekent ter plekke. Geen installatie, geen account.
 
-## Producten
+## Instrumenten
 
-| Product | Pagina | Vraag | Bronnen |
+| Instrument | Pagina | Vraag | Bronnen |
 |---|---|---|---|
 | **Fysieke leefomgeving** | | | |
 | Label C-kantoren | [labelc.html](https://josephinal.github.io/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
@@ -50,7 +50,7 @@ Drie principes:
 
 ## Techniek
 
-- Elk product is één zelfstandig HTML-bestand, zonder buildstap.
+- Elk instrument is één zelfstandig HTML-bestand, zonder buildstap.
 - De data komt live uit openbare API's (PDOK, RIVM, RCE, CBS, Officiële bekendmakingen) of staat inline, zoals bij DUO (onderwijs en inburgering), waar de API geen verzoeken van andere sites toestaat, en bij Schuldenproblematiek in beeld, dat alleen als download bij een CBS-dashboard bestaat.
 - Bron en peildatum staan op elke pagina.
 - Gehost via GitHub Pages.
@@ -85,4 +85,4 @@ Deze gebruiksregel geldt voor de pagina's zelf: opbouw, code, teksten en rekenwi
 
 ## Auteur
 
-**Josephine Linders**, domeinoverstijgende informatieanalyse. De producten zijn op eigen titel gemaakt.
+**Josephine Linders**, domeinoverstijgende informatieanalyse. De instrumenten zijn op eigen titel gemaakt.
