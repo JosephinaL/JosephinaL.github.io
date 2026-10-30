@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeugdzorg per wijk · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Jeugdzorggebruik, kosten, verwijzers en huishoudsamenstelling per Nederlandse gemeente en wijk, live uit CBS-open data.">
+<meta name="description" content="Jeugdzorggebruik, kosten, verwijzers, huishoudsamenstelling en de jeugdregels van de gemeente per Nederlandse gemeente en wijk, live uit open data van het CBS en lokaleregelgeving.overheid.nl.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
@@ -178,6 +178,23 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+
+/* regels van de gemeente */
+.regels { display: grid; gap: 12px; }
+.regels .rg-kop { margin: 0; max-width: 90ch; }
+.regels .rg-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.rg-groep { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 10px; align-content: start; }
+.rg-groep h3 { font-size: .95rem; }
+.rg-item { display: grid; gap: 3px; border-left: 3px solid var(--line); padding-left: 10px; }
+.rg-item.nieuw { border-left-color: var(--accent); }
+.rg-item a.rg-titel { color: var(--fg); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.rg-item a.rg-titel:hover, .rg-item a.rg-titel:focus-visible { color: var(--accent); text-decoration: underline; }
+.rg-item .rg-sub { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+.rg-item .rg-nieuw { display: inline-block; font-size: .72rem; font-weight: 600; color: var(--accent-fg); background: var(--accent); border-radius: 999px; padding: 0 7px; margin-left: 6px; vertical-align: 1px; }
+.rg-jaren { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: .78rem; color: var(--muted); }
+.rg-jaren button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 0 8px; font: 500 .76rem var(--f-mono); color: var(--accent); cursor: pointer; }
+.rg-jaren button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.rg-jaren span.rg-buiten { font-family: var(--f-mono); padding: 0 4px; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
@@ -203,8 +220,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   </header>
 
   <section class="intro" id="intro">
-    <p>Hoeveel jongeren in je gemeente krijgen jeugdzorg, wat kost dat en wie verwijst ze? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen en de verdeling over de wijken. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor. Alleen Nederland als geheel staat erbij als referentiepunt.</p>
-    <p class="muted small">De cijfers komen live van het CBS op het moment dat je een gemeente kiest.</p>
+    <p>Hoeveel jongeren in je gemeente krijgen jeugdzorg, wat kost dat, wie verwijst ze en welke regels had de gemeente? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen en de verdeling over de wijken. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor. Alleen Nederland als geheel staat erbij als referentiepunt.</p>
+    <p class="muted small">De cijfers komen live van het CBS en de regels van lokaleregelgeving.overheid.nl, op het moment dat je een gemeente kiest.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
 
@@ -239,6 +256,13 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <div class="chart" id="kostenChart"></div>
         <div class="chart" id="kostenVorm"></div>
       </div>
+
+      <!-- regels -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Regels van de gemeente</span><h2 id="regelsKop">Welke jeugdregels golden</h2></div>
+        <p class="small muted">Uit de officiële regelgeving van de gemeente. Volgt het laatst gekozen jaar bij de kosten of de wijken; klik een jaar bij een regeling om de pagina naar dat jaar te zetten.</p>
+      </div>
+      <div class="regels" id="regels"></div>
 
       <!-- wijken -->
       <div class="sectiekop">
@@ -289,6 +313,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Verwijzers</b>: wie een jeugdhulptraject startte. Een jongere kan meer trajecten hebben. Jeugdbescherming en jeugdreclassering hebben geen verwijzer en tellen hier niet mee.</li>
             <li><b>Huishouden bij de hulpvraag</b>: in welk huishouden de jongere woonde toen de jeugdzorg begon. Eenouder, bij een paar, of ander huishouden (zoals pleegzorg, zelfstandig of in een instelling). Het CBS koppelt dit per jongere. Het aandeel eenouder is gedeeld door de som van de drie groepen.</li>
             <li><b>Referentie</b>: de doorgetrokken streep is Nederland, de gestippelde de eigen gemeente. "Opvallend" noemt een wijk als het aandeel eenouder 5 procentpunt of meer van Nederland afwijkt, het aandeel huishoudens met kinderen 8 procentpunt of meer van de gemeente, of de inkomensmaat een kwart of meer hoger of lager ligt dan in de gemeente.</li>
+            <li><b>Regels</b>: alle regelingen van de gemeente in lokaleregelgeving.overheid.nl die de Jeugdwet noemen, of in de titel over jeugdhulp, jeugdzorg, jeugdbescherming, pleegzorg of pgb gaan. Regelingen alleen over de Wmo, organisatieregelingen (toezicht, mandaat, adviesraad) en jeugdgezondheidszorg, kinderopvang en leerlingenvervoer tellen niet mee. De indeling (verordening, beleidsregels, nadere regels, bedragen) volgt de titel. Een regeling gold in een jaar als een versie dat jaar of eerder inging en niet vóór 1 januari eindigde. Lokaleregelgeving.overheid.nl vult de einddatum niet altijd in; daarom geldt een regeling ook als vervangen zodra een nieuwere met dezelfde naam (zonder jaartal), of een nieuwe jeugdverordening, ingaat.</li>
             <li><b>Context van de wijk</b>: uit Kerncijfers wijken en buurten. Huishoudens met kinderen als deel van alle huishoudens. Vanaf 2024 meet het CBS armoede als "personen in armoede"; tot en met 2023 als "huishoudens onder of rond het sociaal minimum". De pagina noemt steeds welke maat en welk jaar.</li>
           </ul>
         </div>
@@ -298,11 +323,13 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Reeksbreuk</b>: tussen 2020 en 2021 is de CBS-reeks herzien. De lijnen lopen daar niet door.</li>
             <li><b>Kleine aantallen</b>: het CBS rondt af op 5 en laat kleine aantallen weg (–). Woont er in een wijk of buurt minder dan 150 jongeren tot 23 jaar, dan toont deze pagina geen percentage. Een paar jongeren meer of minder verschuift het percentage dan al flink.</li>
             <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Het CBS stelt ze later nog bij.</li>
+            <li><b>Lopend jaar</b>: in het najaar publiceert het CBS de wijkcijfers over het eerste halfjaar van het lopende jaar. Dat jaar staat bij de jaarknoppen als "(deel)" en is niet te vergelijken met hele jaren. De pagina opent op het laatste hele jaar.</li>
             <li><b>Kosten ontbreken soms</b>: niet elke gemeente levert haar kosten aan het CBS. Gemeenten verdelen de kosten ook niet allemaal op dezelfde manier over de vormen.</li>
             <li><b>Geen jeugd-ggz apart</b>: jeugdhulp is één begrip. Psychische hulp, opvoedhulp en hulp bij een beperking zijn niet te onderscheiden.</li>
             <li><b>Geen koppeling per gezin in de context</b>: het huishouden bij de hulpvraag is per jongere bekend. De inkomens- en huishoudcijfers van de wijk gelden voor alle bewoners. Valt een hoog aandeel eenouder samen met veel armoede in de wijk, dan zegt dat iets over de wijk, niet over de gezinnen in de jeugdzorg zelf.</li>
             <li><b>Ouder contextjaar</b>: het CBS publiceert inkomenscijfers per wijk later dan de jeugdzorgcijfers. Ontbreken ze voor het gekozen jaar, dan toont de pagina het meest recente jaar dat er wel is. Is de wijkindeling tussendoor gewijzigd, dan blijft de context van een gewijzigde wijk leeg.</li>
             <li><b>Kleine aantallen bij huishouden</b>: onder de 50 jongeren met jeugdzorg in een wijk toont de pagina geen aandeel eenouder.</li>
+            <li><b>Regels en cijfers</b>: een nieuwe verordening of beleidsregel valt soms samen met een verandering in gebruik of kosten. Dat is gelijktijdigheid, geen bewezen oorzaak; lees de regeling zelf. De indeling gebeurt op de titel: een regeling met een ongewone titel kan ontbreken of in de verkeerde groep staan.</li>
             <li><b>Geen oordeel</b>: een hoger percentage kan betekenen dat de hulp goed bereikbaar is, of dat er meer nodig is. De cijfers zeggen het verschil, niet de oorzaak.</li>
           </ul>
         </div>
@@ -317,7 +344,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.2';
+  const VERSIE = '1.3';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOG = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title,Modified';
   const T = { trendOud: '84134NED', trendNieuw: '85099NED', kosten: '83454NED' };
@@ -430,7 +457,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   function toonMelding() {
     if (!fouten.size) { $('#melding').hidden = true; return; }
     const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-    $('#meldingTekst').textContent = `Het CBS gaf om ${t} geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#meldingTekst').textContent = `Om ${t} kwam er geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
     $('#melding').hidden = false;
   }
 
@@ -440,23 +467,25 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     $('#gmInput').value = g.n;
     document.title = 'Jeugdzorg ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    S = { g, trend: null, kosten: null, w: null, wJaar: null, opgehaald: null };
+    S = { g, trend: null, kosten: null, w: null, wJaar: null, opgehaald: null, rJaar: null, regels: null, regelsFout: false, regelsOp: null };
     selWijk = null; kostJaar = null; fouten.clear(); toonMelding();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
     $('#top3').innerHTML = ''; $('#multiples').innerHTML = ''; $('#kostenChart').innerHTML = ''; $('#kostenVorm').innerHTML = '';
     $('#tblWrap').innerHTML = ''; $('#dossier').innerHTML = ''; $('#jaren').innerHTML = '';
     voortgang(0, 4, 'Tabellen zoeken bij het CBS…');
+    laadRegelsS(); // loopt los van de rest
     await ontdek();
     if (S.g !== g) return;
     voortgang(1, 4, 'Gebruik en kosten ophalen…');
     await Promise.all([laadTrend(), laadKosten()]);
     if (S.g !== g) return;
-    renderKern(); renderTrend(); renderKosten();
+    renderKern(); renderTrend(); renderKosten(); renderRegels();
     voortgang(3, 4, 'Wijken ophalen…');
     const jaren = Object.keys(WIJK).map(Number).sort((a, b) => b - a);
     const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
     renderJaren(jaren);
-    await kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[0], true);
+    const heel = jaren.filter(j => j < new Date().getFullYear()); // het lopende jaar heeft alleen halfjaarcijfers
+    await kiesJaar(jaren.includes(gevraagd) ? gevraagd : (heel[0] || jaren[0]), true);
     voortgang(4, 4, '');
   }
 
@@ -486,6 +515,159 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       const jaren = Object.keys(d).map(Number).filter(j => d[j].A045561 && d[j].A045561.g != null).sort();
       S.kosten = { d, jaren };
     } catch (e) { S.kosten = null; fouten.add('kosten'); toonMelding(); }
+  }
+
+  // ---------- regels van de gemeente (CVDR, lokaleregelgeving.overheid.nl) ----------
+  const CVDR = 'https://zoekservice.overheid.nl/sru/Search?x-connection=cvdr&operation=searchRetrieve&version=1.2&maximumRecords=1000';
+  const RG_SOORT = [
+    { k: 'ver', t: 'Verordening' },
+    { k: 'bel', t: 'Beleidsregels' },
+    { k: 'nad', t: 'Nadere regels en uitvoering' },
+    { k: 'fin', t: 'Bedragen, tarieven en pgb' },
+    { k: 'ov', t: 'Overig' }
+  ];
+  const RG_NIET = /toezicht|mandaat|adviesraad|cli[eë]ntenraad|participatie|recreatie|gemeenschappelijke regeling|centrumgemeenteregeling|aanwijzing|delegatie|klacht|bezwaar|archief|subsidieplafond|privacy|bibob|integriteit|controleprotocol|jeugdgezondheid|leerlingenvervoer|kinderopvang|peuter|speelruimte|jongerenwerk|jeugdlintje|jeugdraad/;
+  const RG_WEL = /jeugdhulp|jeugdwet|jeugdzorg|jeugdbescherming|jeugdreclassering|pleegzorg|persoonsgebonden budget|\bpgb\b|sociaal domein/;
+  const RG_JEUGD = /jeugd|pleegzorg/;
+  function rgSoort(t) {
+    if (/financieel besluit|tarie|ouderbijdrage|eigen bijdrage|persoonsgebonden budget|\bpgb\b|normbedrag|indexering|vergoeding/.test(t)) return 'fin';
+    if (/^verordening/.test(t)) return 'ver';
+    if (/beleidsregel/.test(t)) return 'bel';
+    if (/nadere regel|uitvoeringsregel|uitvoeringsbesluit|^regeling|^besluit/.test(t)) return 'nad';
+    if (/verordening/.test(t)) return 'ver';
+    return 'ov';
+  }
+  // titel zonder jaartal, wijzigingsnummer, lidwoorden en schrijfwijze: dezelfde regeling in een nieuwe versie heeft dezelfde kern
+  const rgKern = t => t.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\b(19|20)\d{2}\b/g, ' ')
+    .replace(/[^a-zà-ÿ ]/g, ' ').replace(/\b(beleidsregels)\b/g, 'beleidsregel').replace(/\bnadere regels\b/g, 'nadere regel')
+    .replace(/\b(eerste|tweede|derde|vierde|wijziging|gewijzigd|wet|gemeente|de|het|van|voor|en|of|wmo|jeugdwet|centrumgemeente|centrum)\b/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+  // regelingen van één gemeente over de Jeugdwet, alle versies; naam zoals het CBS hem schrijft, anders zonder toevoeging ("Hengelo (O.)" heet in CVDR "Hengelo")
+  async function laadRegels(g) {
+    const namen = [...new Set([g.n, g.n.replace(/\s*\([^)]*\)\s*$/, '')])];
+    let recs = [], naam = null;
+    for (const nm of namen) {
+      const qq = `dcterms.creator="${nm.replace(/"/g, '')}" and (keyword all "jeugdhulp" or keyword all "jeugdwet")`;
+      let start = 1, n = 0; recs = [];
+      do {
+        const r0 = await fetch(`${CVDR}&startRecord=${start}&query=${encodeURIComponent(qq)}`);
+        if (!r0.ok) throw new Error('HTTP ' + r0.status);
+        const x = new DOMParser().parseFromString(await r0.text(), 'application/xml');
+        const nEl = x.getElementsByTagNameNS('*', 'numberOfRecords')[0];
+        if (!nEl) throw new Error('geen SRU-antwoord');
+        n = +nEl.textContent;
+        for (const r of x.getElementsByTagNameNS('*', 'record')) {
+          const g1 = tag => { const e = r.getElementsByTagName(tag)[0]; return e ? e.textContent.trim() : ''; };
+          const src = [...r.getElementsByTagName('dcterms:source')].map(e => (e.getAttribute('resourceIdentifier') || '') + ' ' + e.textContent).join(' ');
+          recs.push({ id: g1('dcterms:identifier'), titel: g1('dcterms:alternative') || g1('dcterms:title'), lang: g1('dcterms:title'), in: g1('overheidrg:inwerkingtredingDatum'), uit: g1('overheidrg:uitwerkingtredingDatum'), url: g1('preferred_url'), jw: /BWBR0034925/.test(src) });
+        }
+        start += 1000;
+      } while (start <= Math.min(n, 5000));
+      if (n) { naam = nm; break; }
+    }
+    const werken = new Map();
+    recs.forEach(r => {
+      if (!r.id || !/^\d{4}-\d{2}-\d{2}$/.test(r.in)) return;
+      const t = (r.titel + ' ' + r.lang).toLowerCase();
+      if (RG_NIET.test(r.titel.toLowerCase())) return;
+      if (!(r.jw || RG_WEL.test(t))) return;
+      // alleen over de Wmo of het sociaal domein in het algemeen, zonder jeugd in de titel en zonder de Jeugdwet als grondslag: niet
+      if (!RG_JEUGD.test(t) && !r.jw) return;
+      const w = r.id.split('_')[0];
+      if (!werken.has(w)) werken.set(w, { w, versies: [] });
+      werken.get(w).versies.push(r);
+    });
+    const lijst = [...werken.values()].map(o => {
+      o.versies.sort((a, b) => a.in.localeCompare(b.in));
+      const l = o.versies[o.versies.length - 1];
+      o.titel = l.titel.replace(/\s+/g, ' ').trim(); o.soort = rgSoort(o.titel.toLowerCase()); o.kern = rgKern(o.titel);
+      o.hoofd = o.soort === 'ver' && /^verordening/i.test(o.titel) && /jeugd|sociaal domein/i.test(o.titel);
+      o.start = o.versies[0].in;
+      const per = o.titel.match(/\b(20\d{2})\s*[-–]\s*(20\d{2})\b/); o.totJaar = per ? +per[2] : null; // "beleid 2016-2019"
+      return o;
+    }).filter(o => (o.versies[o.versies.length - 1].in >= '2015-01-01')); // de Jeugdwet geldt sinds 2015
+    return { naam, lijst, n: recs.length };
+  }
+  // de versie die in jaar j gold: de laatste die in of vóór dat jaar inging en niet vóór 1 januari eindigde
+  // (de einddatum is de eerste dag dat de versie niet meer geldt); CVDR vult die niet altijd in, dus een regeling
+  // geldt ook niet meer zodra een nieuwere met dezelfde kern (of, bij de verordening, een nieuwe verordening) vóór dat jaar inging
+  function rgVersieIn(o, j, lijst) {
+    const begin = j + '-01-01', eind = j + '-12-31';
+    if (o.totJaar && o.totJaar < j) return null;
+    const opvolger = lijst.find(p => p !== o && p.start > o.start && p.start < begin && (p.kern === o.kern || (o.hoofd && p.hoofd)));
+    if (opvolger) return null;
+    const v = o.versies.filter(x => x.in <= eind && (!x.uit || x.uit > begin));
+    return v.length ? v[v.length - 1] : null;
+  }
+  const rgNieuwIn = (o, j) => o.versies.filter(x => x.in.slice(0, 4) === String(j));
+  const fDat = s => { const d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }); };
+  const rgSleutel = o => o.hoofd ? '#verordening' : o.kern;
+  async function laadRegelsS() {
+    const g = S.g;
+    S.regels = null; S.regelsFout = false; renderRegels();
+    try {
+      const R = await laadRegels(g);
+      if (S.g !== g) return;
+      S.regels = R; S.regelsOp = new Date();
+    } catch (e) {
+      if (S.g !== g) return;
+      S.regelsFout = true; fouten.add('regels (lokaleregelgeving.overheid.nl)'); toonMelding();
+    }
+    renderRegels(); if (S.w) renderVoet();
+  }
+  // het jaar van de regels: het laatst gekozen jaar (wijken of kosten), anders het laatste jaar met gebruikscijfers
+  const regelJaar = () => S.rJaar || S.wJaar || (S.trend && S.trend.jaren.length ? S.trend.jaren[S.trend.jaren.length - 1] : new Date().getFullYear() - 1);
+  const jaarKiesbaar = y => !!WIJK[y] || !!(S.kosten && S.kosten.jaren.includes(y));
+  // een jaar bij een regeling zet de pagina op dat jaar: de wijken als dat jaar er is, en de kosten als dat jaar er is
+  function zetJaar(y) {
+    S.rJaar = y;
+    if (S.kosten && S.kosten.jaren.includes(y) && kostJaar !== y) { kostJaar = y; renderKosten(); }
+    renderRegels();
+    if (WIJK[y] && S.wJaar !== y) kiesJaar(y);
+  }
+  // per jaar één regel per regeling: de nieuwste versie, met de voorgangers die in dat jaar zijn vervangen
+  function regelsIn(j) {
+    const L = S.regels ? S.regels.lijst : [];
+    const groepen = new Map();
+    L.filter(o => rgVersieIn(o, j, L)).forEach(o => { const k = rgSleutel(o); if (!groepen.has(k)) groepen.set(k, []); groepen.get(k).push(o); });
+    const volg = Object.fromEntries(RG_SOORT.map((s, i) => [s.k, i]));
+    return [...groepen.entries()].map(([k, gr]) => {
+      gr.sort((a, b) => a.start.localeCompare(b.start));
+      const o = gr[gr.length - 1];
+      const familie = L.filter(p => rgSleutel(p) === k);
+      const jaren = [...new Set(familie.flatMap(p => p.versies.map(x => +x.in.slice(0, 4))))].filter(y => y >= 2015).sort((a, b) => a - b);
+      return { o, v: rgVersieIn(o, j, L), voor: gr.slice(0, -1), nieuw: gr.some(p => rgNieuwIn(p, j).length), jaren };
+    }).sort((a, b) => volg[a.o.soort] - volg[b.o.soort] || a.o.titel.localeCompare(b.o.titel, 'nl'));
+  }
+  function regelItem(x, j) {
+    const v = x.v;
+    const voor = x.voor.map(p => `<span class="rg-sub">vervangt ${esc(p.titel)}, die gold tot ${fDat(x.o.start)}</span>`).join('');
+    const jaren = x.jaren.map(y => jaarKiesbaar(y)
+      ? `<button type="button" data-j="${y}" aria-pressed="${y === j}" title="Zet de pagina op ${y}">${y}</button>`
+      : `<span class="rg-buiten" title="buiten de jaren op deze pagina">${y}</span>`).join('');
+    return `<div class="rg-item${x.nieuw ? ' nieuw' : ''}">
+      <span><a class="rg-titel" href="${esc(v.url)}" target="_blank" rel="noopener">${esc(x.o.titel)} ↗</a>${x.nieuw ? `<span class="rg-nieuw">nieuw in ${j}</span>` : ''}</span>
+      <span class="rg-sub">deze versie geldt sinds ${fDat(v.in)}${v.uit ? `, tot ${fDat(v.uit)}` : ''}</span>${voor}
+      ${jaren ? `<span class="rg-jaren">nieuwe versie in ${jaren}</span>` : ''}
+    </div>`;
+  }
+  function renderRegels() {
+    const el = $('#regels'); if (!el || !S) return;
+    const j = regelJaar();
+    $('#regelsKop').textContent = `Welke jeugdregels golden in ${j}`;
+    if (S.regelsFout) { el.innerHTML = '<p class="small muted" style="margin:0">De regels konden niet worden opgehaald bij lokaleregelgeving.overheid.nl. De rest van de pagina werkt wel.</p>'; return; }
+    if (!S.regels) { el.innerHTML = '<p class="small muted" style="margin:0">Regels ophalen bij lokaleregelgeving.overheid.nl…</p>'; return; }
+    const gr = regelsIn(j);
+    const zoek = `<a href="https://lokaleregelgeving.overheid.nl/" target="_blank" rel="noopener">lokaleregelgeving.overheid.nl</a>`;
+    if (!gr.length) { el.innerHTML = `<p class="small muted" style="margin:0">Geen regels over jeugdhulp van ${esc(S.g.n)} gevonden die in ${j} golden. Zoek zelf op ${zoek}.</p>`; return; }
+    const nNieuw = gr.filter(x => x.nieuw).length;
+    const kop = `<p class="rg-kop small">${fmt(gr.length)} ${gr.length === 1 ? 'regeling' : 'regelingen'} golden in ${j}; ${nNieuw ? `van ${fmt(nNieuw)} ging in ${j} een nieuwe versie in (gekleurde rand)` : `geen ervan kreeg in ${j} een nieuwe versie`}. Elke titel opent de versie die toen gold.</p>`;
+    const kol = RG_SOORT.map(s => {
+      const items = gr.filter(x => x.o.soort === s.k);
+      return items.length ? `<div class="rg-groep"><h3>${s.t}</h3>${items.map(x => regelItem(x, j)).join('')}</div>` : '';
+    }).join('');
+    el.innerHTML = kop + `<div class="rg-cols">${kol}</div>`;
+    el.querySelectorAll('.rg-jaren button').forEach(b => b.addEventListener('click', () => { const y = +b.dataset.j; if (y !== regelJaar()) zetJaar(y); }));
   }
 
   // ---------- kern ----------
@@ -639,7 +821,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       const html = `<b>${j}</b>${j === jaren[jaren.length - 1] ? ' <span class="muted">voorlopig</span>' : ''}<br>Gerealiseerd <span class="num">${fMln(t.g)}</span> · <span class="num">${fE(t.pi)}</span> per inwoner<br>Begroot <span class="num">${fMln(t.b)}</span>${t.b && t.g ? ` · verschil <span class="num">${(t.g >= t.b ? '+' : '−') + nf1.format(Math.abs(100 * (t.g - t.b) / t.b))}%</span>` : ''}${jz && jz.n ? `<br>Per jongere met jeugdzorg <span class="num">${fE(t.g * 1000 / jz.n)}</span>` : ''}`;
       rc.addEventListener('pointermove', e => toonTip(e, html));
       rc.addEventListener('pointerleave', verbergTip);
-      rc.addEventListener('click', () => { kostJaar = j; verbergTip(); renderKosten(); });
+      rc.addEventListener('click', () => { kostJaar = j; S.rJaar = j; verbergTip(); renderKosten(); renderRegels(); });
     });
     // verdeling over vormen
     const d = k.d[kostJaar];
@@ -652,7 +834,9 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
   // ---------- wijken ----------
   function renderJaren(jaren) {
-    $('#jaren').innerHTML = jaren.map(j => `<button class="btn linkish" type="button" data-j="${j}" aria-pressed="false">${j}</button>`).join('');
+    // een tabel voor het lopende jaar bevat alleen halfjaarcijfers: als deeljaar markeren
+    const nu = new Date().getFullYear();
+    $('#jaren').innerHTML = jaren.map(j => `<button class="btn linkish" type="button" data-j="${j}" aria-pressed="false"${j >= nu ? ' title="Alleen een deel van het jaar, voorlopig"' : ''}>${j}${j >= nu ? ' (deel)' : ''}</button>`).join('');
     $('#jaren').querySelectorAll('button').forEach(b => b.addEventListener('click', () => kiesJaar(+b.dataset.j)));
   }
   function markeerJaar(j) {
@@ -662,7 +846,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     });
   }
   async function kiesJaar(j, eerste) {
-    const g = S.g; S.wJaar = j; selWijk = null; markeerJaar(j);
+    const g = S.g; S.wJaar = j; S.rJaar = j; selWijk = null; markeerJaar(j); renderRegels();
     try { history.replaceState(null, '', '#gm=' + g.c + '&jaar=' + j); } catch (e) {}
     $('#wijkKop').textContent = `Jeugdzorg per wijk · ${j}`;
     $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Wijken ophalen…</p>';
@@ -671,9 +855,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (S.g !== g || S.wJaar !== j) return;
     S.w = w; S.opgehaald = new Date();
     toonMelding();
+    $('#wijkKop').textContent = `Jeugdzorg per wijk · ${w && w.perLabel ? w.perLabel : j}`;
+    // deeljaar: halfjaarcijfers zijn niet te vergelijken met hele jaren
+    const deel = w && w.perLabel && w.perLabel !== String(j);
+    if (deel) {
+      const heel = Object.keys(WIJK).map(Number).filter(y => y < j).sort((a, b) => b - a)[0];
+      $('#wijkInfoTxt').textContent = `Voor ${j} zijn er alleen cijfers over ${w.perLabel.toLowerCase()} (voorlopig). Het aantal jongeren in een halfjaar is lager dan in een heel jaar: vergelijk dit niet met de andere jaren.${heel ? ' Kies ' + heel + ' voor het laatste hele jaar.' : ''}`;
+      $('#wijkInfoBtn').hidden = !heel; $('#wijkInfoBtn').textContent = heel ? 'Toon ' + heel : '';
+      $('#wijkInfoBtn').onclick = () => kiesJaar(heel);
+      $('#wijkInfo').hidden = false;
+    }
     // hint als er voor dit jaar nog geen percentages zijn
     const metPct = w && w.heeftPct;
-    if (w && !metPct) {
+    if (deel) { /* melding staat er al */ } else if (w && !metPct) {
       const ouder = Object.keys(KWB).map(Number).filter(y => y < j && WIJK[y]).sort((a, b) => b - a)[0];
       $('#wijkInfoTxt').textContent = `Voor ${j} heeft het CBS de percentages per wijk en buurt nog niet gepubliceerd. De kaart toont daarom aantallen. Het aandeel eenouder is er wel: kies boven de kaart "% eenouder".${ouder ? ' Kies ' + ouder + ' voor de percentages.' : ''}`;
       $('#wijkInfoBtn').hidden = !ouder; $('#wijkInfoBtn').textContent = ouder ? 'Toon ' + ouder : '';
@@ -1113,7 +1307,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
     const w = S.w || {};
-    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}${w.ctx ? `, context (huishoudens en inkomen) uit Kerncijfers wijken en buurten ${w.ctx.jaar} ${link(w.ctx.tabel)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}${w.ctx ? `, context (huishoudens en inkomen) uit Kerncijfers wijken en buurten ${w.ctx.jaar} ${link(w.ctx.tabel)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -1123,6 +1317,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (was.includes('kosten')) await laadKosten();
     if (S.g !== g) return;
     renderKern(); renderTrend(); renderKosten();
+    if (was.includes('regels (lokaleregelgeving.overheid.nl)')) await laadRegelsS();
     if (was.includes('wijken')) await kiesJaar(S.wJaar);
     toonMelding();
   });
