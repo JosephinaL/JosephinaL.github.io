@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wmo per wijk · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Wmo-maatwerkvoorzieningen per Nederlandse gemeente en wijk: gebruik, wie, wat het kost (Iv3) en de leeftijd van de wijk. Live uit CBS-open data.">
+<meta name="description" content="Wmo-maatwerkvoorzieningen per Nederlandse gemeente en wijk: gebruik, wie, wat het kost (Iv3), de leeftijd van de wijk en de regels van de gemeente. Live uit open data van het CBS en lokaleregelgeving.overheid.nl.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,500..800&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
@@ -105,6 +105,25 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .chart-kop .laatst .muted { font-family: var(--f-body); font-weight: 400; font-size: .85rem; }
 .chart .noemer { font-size: .78rem; color: var(--muted); }
 .chart .sprong { font-size: .78rem; color: var(--warn); margin: 0; }
+.chart .sprong .rg-tegelijk { display: block; color: var(--muted); margin-top: 2px; }
+.chart .sprong .rg-tegelijk a { color: var(--accent); }
+
+/* regels van de gemeente */
+.regels { display: grid; gap: 12px; }
+.regels .rg-kop { margin: 0; max-width: 90ch; }
+.regels .rg-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.rg-groep { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 10px; align-content: start; }
+.rg-groep h3 { font-size: .95rem; }
+.rg-item { display: grid; gap: 3px; border-left: 3px solid var(--line); padding-left: 10px; }
+.rg-item.nieuw { border-left-color: var(--accent); }
+.rg-item a.rg-titel { color: var(--fg); font-weight: 600; text-decoration: none; overflow-wrap: anywhere; }
+.rg-item a.rg-titel:hover, .rg-item a.rg-titel:focus-visible { color: var(--accent); text-decoration: underline; }
+.rg-item .rg-sub { font-size: .8rem; color: var(--muted); overflow-wrap: anywhere; }
+.rg-item .rg-nieuw { display: inline-block; font-size: .72rem; font-weight: 600; color: var(--accent-fg); background: var(--accent); border-radius: 999px; padding: 0 7px; margin-left: 6px; vertical-align: 1px; }
+.rg-jaren { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; font-size: .78rem; color: var(--muted); }
+.rg-jaren button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 0 8px; font: 500 .76rem var(--f-mono); color: var(--accent); cursor: pointer; }
+.rg-jaren button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.rg-jaren span.rg-buiten { font-family: var(--f-mono); padding: 0 4px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
 .legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
 .legend .tick { display: inline-block; width: 14px; height: 0; border-top: 2px solid var(--fg); vertical-align: middle; margin-right: 6px; }
@@ -210,8 +229,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   </header>
 
   <section class="intro" id="intro">
-    <p>Hoeveel inwoners van je gemeente krijgen ondersteuning uit de Wet maatschappelijke ondersteuning (Wmo), wie zijn dat, wat kost het en hoe verdeelt het zich over de wijken? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor.</p>
-    <p class="muted small">De cijfers komen live van het CBS op het moment dat je een gemeente kiest.</p>
+    <p>Hoeveel inwoners van je gemeente krijgen ondersteuning uit de Wet maatschappelijke ondersteuning (Wmo), wie zijn dat, wat kost het, hoe verdeelt het zich over de wijken en welke regels had de gemeente? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor.</p>
+    <p class="muted small">De cijfers komen live van het CBS en de regels van lokaleregelgeving.overheid.nl, op het moment dat je een gemeente kiest.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
 
@@ -268,6 +287,14 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <div class="chart" id="geldDetail"></div>
       </div>
 
+      <!-- regels -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Regels van de gemeente</span><h2 id="regelsKop">Welke Wmo-regels golden</h2></div>
+        <p class="small muted">Uit de officiële regelgeving van de gemeente. Volgt het gekozen jaar; klik een jaar bij een regeling om de hele pagina naar dat jaar te zetten.</p>
+      </div>
+      <p class="alleengm" id="regelsNoot" hidden></p>
+      <div class="regels" id="regels"></div>
+
       <!-- wijken -->
       <div class="sectiekop">
         <div><span class="eyebrow">Per wijk</span><h2 id="wijkKop">Wmo per wijk</h2></div>
@@ -317,6 +344,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Inkomen</b>: het besteedbaar inkomen van het huishouden, gecorrigeerd voor de grootte ervan, ingedeeld in vijf landelijke groepen van elk 20% van de huishoudens.</li>
             <li><b>Lasten</b>: alle lasten op de Iv3-taakvelden voor Wmo-maatwerk, uit de jaarrekening; voor een jaar zonder jaarrekening de begroting. <i>Thuis</i> = hulpmiddelen en diensten plus maatwerkdienstverlening 18+ (huishoudelijke hulp, begeleiding, dagbesteding, overig, pgb). <i>Beschermd wonen en opvang</i> = geëscaleerde zorg 18+. Toegang en wijkteams (6.2, 6.21) tellen niet mee.</li>
             <li><b>Type per wijk</b>: kies je een type voor de kaart, dan kleurt elke wijk naar het aandeel van dat type in de Wmo-cliënten van de wijk (aantal met dat type gedeeld door alle cliënten). Per 1.000 inwoners bestaat per wijk alleen voor het totaal. Omdat een cliënt bij meer typen kan meetellen, tellen de aandelen op tot meer dan 100%.</li>
+            <li><b>Regels</b>: alle regelingen van de gemeente in lokaleregelgeving.overheid.nl die de Wet maatschappelijke ondersteuning noemen, of in de titel over Wmo, beschermd wonen, opvang, hulpmiddelen, mantelzorg, pgb of eigen bijdrage gaan. Organisatieregelingen (toezicht, mandaat, adviesraad, cliëntenraad) en regelingen alleen over jeugd tellen niet mee, net als regels onder de Wmo van vóór 2015. De indeling (verordening, beleidsregels, nadere regels, bedragen, beschermd wonen en opvang) volgt de titel. Een regeling gold in een jaar als een versie dat jaar of eerder inging en niet vóór 1 januari eindigde. Lokaleregelgeving.overheid.nl vult de einddatum niet altijd in; daarom geldt een regeling ook als vervangen zodra een nieuwere met dezelfde naam (zonder jaartal), of een nieuwe Wmo-verordening, ingaat.</li>
             <li><b>Per cliënt</b>: lasten thuis gedeeld door de cliënten zonder verblijf en opvang. Per 65-plusser: lasten thuis gedeeld door de inwoners van 65 jaar of ouder op 1 januari.</li>
           </ul>
         </div>
@@ -330,6 +358,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Alle jaren zijn volgens de verbeterde CBS-methode van december 2025 en dus onderling vergelijkbaar; oudere publicaties wijken af.</li>
             <li><b>Beschermd wonen</b>: de lasten liggen vaak bij een centrumgemeente die het voor de regio regelt. Daarom staan ze in de grafiek apart en tellen ze niet mee in de kerncijfers per inwoner, per 65-plusser en per cliënt.</li>
             <li><b>Een wijk kiezen</b>: kies je een wijk, dan volgt de hele pagina die wijk waar het CBS cijfers per wijk publiceert: de kerncijfers, het gebruik en de typen door de jaren, de kaart, de spreiding en de tabel. Leeftijd en inkomen van de cliënten en de lasten bestaan alleen voor de hele gemeente; dat staat er dan bij. Per wijk is per 1.000 inwoners alleen voor het totaal bekend, de typen zijn aantallen.</li>
+            <li><b>Regels en cijfers</b>: bij een sprong in een type noemt de pagina de regels die in dat jaar een nieuwe versie kregen. Dat is gelijktijdigheid, geen bewezen oorzaak: een nieuwe verordening kan de registratie veranderen, of iets heel anders regelen. Lees de regeling zelf. Veel gemeenten passen hun regels bijna elk jaar aan. De indeling van regelingen gebeurt op de titel; een regeling met een ongewone titel kan ontbreken of in de verkeerde groep staan.</li>
             <li><b>Geen oordeel</b>: meer cliënten kan betekenen dat de hulp goed bereikbaar is, of dat er meer nodig is. De cijfers laten het verschil zien, niet de oorzaak.</li>
           </ul>
         </div>
@@ -344,7 +373,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.3';
+  const VERSIE = '1.4';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
   const CAT = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title';
@@ -462,7 +491,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   function toonMelding() {
     if (!fouten.size) { $('#melding').hidden = true; return; }
     const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
-    $('#meldingTekst').textContent = `Het CBS gaf om ${t} geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#meldingTekst').textContent = `Om ${t} kwam er geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
     $('#melding').hidden = false;
   }
 
@@ -472,7 +501,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     $('#gmInput').value = g.n;
     document.title = 'Wmo ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    S = { g, trend: null, bev: null, geld: null, w: null, wJaar: null, wJaren: [], wAll: {}, opgehaald: null };
+    S = { g, trend: null, bev: null, geld: null, w: null, wJaar: null, wJaren: [], wAll: {}, opgehaald: null, regels: null, regelsFout: false, regelsOp: null };
     selWijk = null; geldJaar = null; WC = {}; fouten.clear(); toonMelding();
     $('#focusbar').hidden = true; renderNoten();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
@@ -481,6 +510,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     await ontdek();
     if (S.g !== g) return;
     voortgang(1, 4, 'Gebruik, inwoners en lasten ophalen…');
+    laadRegelsS(); // loopt los van de rest; tekent zichzelf en de sprongregels als het klaar is
     await Promise.all([laadTrend(), laadBev()]);
     if (S.g !== g) return;
     renderKern(); renderTrend(); renderWie();
@@ -614,6 +644,168 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   }
   const geldWaarde = j => { const x = S.geld && S.geld.d[j]; return x ? (x.rek || x.begr) : null; };
   const isRek = j => !!(S.geld && S.geld.d[j] && S.geld.d[j].rek);
+
+  // ---------- regels van de gemeente (CVDR, lokaleregelgeving.overheid.nl) ----------
+  const CVDR = 'https://zoekservice.overheid.nl/sru/Search?x-connection=cvdr&operation=searchRetrieve&version=1.2&maximumRecords=1000';
+  const RG_SOORT = [
+    { k: 'ver', t: 'Verordening' },
+    { k: 'bel', t: 'Beleidsregels' },
+    { k: 'nad', t: 'Nadere regels en uitvoering' },
+    { k: 'fin', t: 'Bedragen, tarieven en eigen bijdrage' },
+    { k: 'bw', t: 'Beschermd wonen en opvang' },
+    { k: 'ov', t: 'Overig' }
+  ];
+  const RG_NIET = /toezicht|mandaat|adviesraad|cli[eë]ntenraad|participatie|recreatie|gemeenschappelijke regeling|centrumgemeenteregeling|aanwijzing|delegatie|klacht|bezwaar|archief|subsidieplafond|privacy|bibob|integriteit|controleprotocol/;
+  const RG_WEL = /\bwmo\b|maatschappelijke ondersteuning|beschermd wonen|beschermd thuis|maatschappelijke opvang|vrouwenopvang|huishoudelijke (hulp|ondersteuning)|hulpmiddel|woonvoorziening|vervoersvoorziening|regiotaxi|mantelzorg|persoonsgebonden budget|\bpgb\b|eigen bijdrage|normbedrag/;
+  function rgSoort(t) {
+    if (/beschermd wonen|beschermd thuis|opvang/.test(t)) return 'bw';
+    if (/financieel besluit|tarie|eigen bijdrage|persoonsgebonden budget|\bpgb\b|normbedrag|indexering/.test(t)) return 'fin';
+    if (/^verordening/.test(t)) return 'ver';
+    if (/beleidsregel/.test(t)) return 'bel';
+    if (/nadere regel|uitvoeringsregel|uitvoeringsbesluit|^regeling|^besluit/.test(t)) return 'nad';
+    if (/verordening/.test(t)) return 'ver';
+    return 'ov';
+  }
+  // titel zonder jaartal, wijzigingsnummer, lidwoorden en schrijfwijze: dezelfde regeling in een nieuwe versie heeft dezelfde kern
+  const rgKern = t => t.toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\b(19|20)\d{2}\b/g, ' ')
+    .replace(/[^a-zà-ÿ ]/g, ' ').replace(/\b(beleidsregels)\b/g, 'beleidsregel').replace(/\bnadere regels\b/g, 'nadere regel')
+    .replace(/\b(eerste|tweede|derde|vierde|wijziging|gewijzigd|wet|gemeente|de|het|van|voor|en|of|wmo|centrumgemeente|centrum)\b/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+  // regelingen van één gemeente over de Wmo, alle versies; naam zoals het CBS hem schrijft, anders zonder toevoeging ("Hengelo (O.)" heet in CVDR "Hengelo")
+  async function laadRegels(g) {
+    const namen = [...new Set([g.n, g.n.replace(/\s*\([^)]*\)\s*$/, '')])];
+    let recs = [], naam = null;
+    for (const nm of namen) {
+      const qq = `dcterms.creator="${nm.replace(/"/g, '')}" and (keyword all "maatschappelijke ondersteuning" or keyword all "wmo")`;
+      let start = 1, n = 0; recs = [];
+      do {
+        const r0 = await fetch(`${CVDR}&startRecord=${start}&query=${encodeURIComponent(qq)}`);
+        if (!r0.ok) throw new Error('HTTP ' + r0.status);
+        const x = new DOMParser().parseFromString(await r0.text(), 'application/xml');
+        const nEl = x.getElementsByTagNameNS('*', 'numberOfRecords')[0];
+        if (!nEl) throw new Error('geen SRU-antwoord');
+        n = +nEl.textContent;
+        for (const r of x.getElementsByTagNameNS('*', 'record')) {
+          const g1 = tag => { const e = r.getElementsByTagName(tag)[0]; return e ? e.textContent.trim() : ''; };
+          const src = [...r.getElementsByTagName('dcterms:source')].map(e => (e.getAttribute('resourceIdentifier') || '') + ' ' + e.textContent).join(' ');
+          recs.push({ id: g1('dcterms:identifier'), titel: g1('dcterms:alternative') || g1('dcterms:title'), lang: g1('dcterms:title'), in: g1('overheidrg:inwerkingtredingDatum'), uit: g1('overheidrg:uitwerkingtredingDatum'), url: g1('preferred_url'), wmo: /BWBR0035362/.test(src) });
+        }
+        start += 1000;
+      } while (start <= Math.min(n, 5000));
+      if (n) { naam = nm; break; }
+    }
+    const werken = new Map();
+    recs.forEach(r => {
+      if (!r.id || !/^\d{4}-\d{2}-\d{2}$/.test(r.in)) return;
+      const t = (r.titel + ' ' + r.lang).toLowerCase();
+      if (RG_NIET.test(r.titel.toLowerCase())) return;
+      if (!(r.wmo || RG_WEL.test(t))) return;
+      if (/jeugd/.test(t) && !/\bwmo\b|maatschappelijke ondersteuning|beschermd wonen|opvang/.test(t)) return;
+      const w = r.id.split('_')[0];
+      if (!werken.has(w)) werken.set(w, { w, versies: [] });
+      werken.get(w).versies.push(r);
+    });
+    const lijst = [...werken.values()].map(o => {
+      o.versies.sort((a, b) => a.in.localeCompare(b.in));
+      const l = o.versies[o.versies.length - 1];
+      o.titel = l.titel.replace(/\s+/g, ' ').trim(); o.soort = rgSoort(o.titel.toLowerCase()); o.kern = rgKern(o.titel);
+      o.hoofd = o.soort === 'ver' && /^verordening/i.test(o.titel) && /maatschappelijke ondersteuning|\bwmo\b/i.test(o.titel);
+      o.start = o.versies[0].in;
+      const per = o.titel.match(/\b(20\d{2})\s*[-–]\s*(20\d{2})\b/); o.totJaar = per ? +per[2] : null; // "beleid 2016-2019"
+      return o;
+    }).filter(o => (o.versies[o.versies.length - 1].in >= '2015-01-01')); // regels onder de Wmo van vóór 2015 zijn met die wet vervallen
+    return { naam, lijst, n: recs.length };
+  }
+  // de versie die in jaar j gold: de laatste die in of vóór dat jaar inging en niet vóór 1 januari eindigde;
+  // CVDR vult de einddatum niet altijd in, dus een regeling geldt ook niet meer zodra een nieuwere met dezelfde kern
+  // (of, bij de verordening zelf, een nieuwere verordening) vóór 1 januari van dat jaar inging
+  function rgVersieIn(o, j, lijst) {
+    const begin = j + '-01-01', eind = j + '-12-31';
+    if (o.totJaar && o.totJaar < j) return null;
+    const opvolger = lijst.find(p => p !== o && p.start > o.start && p.start < begin && (p.kern === o.kern || (o.hoofd && p.hoofd)));
+    if (opvolger) return null;
+    const v = o.versies.filter(x => x.in <= eind && (!x.uit || x.uit > begin)); // de einddatum is de eerste dag dat de versie niet meer geldt
+    return v.length ? v[v.length - 1] : null;
+  }
+  const rgNieuwIn = (o, j) => o.versies.filter(x => x.in.slice(0, 4) === String(j));
+  const rgJaren = o => [...new Set(o.versies.map(x => +x.in.slice(0, 4)))];
+  const fDat = s => { const d = new Date(s + 'T12:00:00'); return isNaN(d) ? s : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' }); };
+  const rgSleutel = o => o.hoofd ? '#verordening' : o.kern;
+  async function laadRegelsS() {
+    const g = S.g;
+    S.regels = null; S.regelsFout = false; renderRegels();
+    try {
+      const R = await laadRegels(g);
+      if (S.g !== g) return;
+      S.regels = R; S.regelsOp = new Date();
+    } catch (e) {
+      if (S.g !== g) return;
+      S.regelsFout = true; fouten.add('regels (lokaleregelgeving.overheid.nl)'); toonMelding();
+    }
+    renderRegels(); if (S.trend) renderTrend(); if (S.w) renderVoet();
+  }
+  // het jaar van de regels: het gekozen jaar, anders het laatste jaar met gebruikscijfers
+  const regelJaar = () => S.wJaar || (S.trend && S.trend.jaren.length ? S.trend.jaren[S.trend.jaren.length - 1] : new Date().getFullYear() - 1);
+  // per jaar één regel per regeling: de nieuwste versie, met de voorgangers die in dat jaar zijn vervangen
+  function regelsIn(j) {
+    const L = S.regels ? S.regels.lijst : [];
+    const groepen = new Map();
+    L.filter(o => rgVersieIn(o, j, L)).forEach(o => { const k = rgSleutel(o); if (!groepen.has(k)) groepen.set(k, []); groepen.get(k).push(o); });
+    const volg = Object.fromEntries(RG_SOORT.map((s, i) => [s.k, i]));
+    return [...groepen.entries()].map(([k, gr]) => {
+      gr.sort((a, b) => a.start.localeCompare(b.start));
+      const o = gr[gr.length - 1];
+      const familie = L.filter(p => rgSleutel(p) === k);
+      const jaren = [...new Set(familie.flatMap(p => p.versies.map(x => +x.in.slice(0, 4))))].filter(y => y >= 2015).sort((a, b) => a - b);
+      return { o, v: rgVersieIn(o, j, L), voor: gr.slice(0, -1), nieuw: gr.some(p => rgNieuwIn(p, j).length), jaren };
+    }).sort((a, b) => volg[a.o.soort] - volg[b.o.soort] || a.o.titel.localeCompare(b.o.titel, 'nl'));
+  }
+  function regelItem(x, j) {
+    const v = x.v;
+    const voor = x.voor.map(p => `<span class="rg-sub">vervangt ${esc(p.titel)}, die gold tot ${fDat(x.o.start)}</span>`).join('');
+    const jaren = x.jaren.map(y => S.wJaren.includes(y)
+      ? `<button type="button" data-j="${y}" aria-pressed="${y === j}" title="Zet de pagina op ${y}">${y}</button>`
+      : `<span class="rg-buiten" title="buiten de jaren op deze pagina">${y}</span>`).join('');
+    return `<div class="rg-item${x.nieuw ? ' nieuw' : ''}">
+      <span><a class="rg-titel" href="${esc(v.url)}" target="_blank" rel="noopener">${esc(x.o.titel)} ↗</a>${x.nieuw ? `<span class="rg-nieuw">nieuw in ${j}</span>` : ''}</span>
+      <span class="rg-sub">deze versie geldt sinds ${fDat(v.in)}${v.uit ? `, tot ${fDat(v.uit)}` : ''}</span>${voor}
+      ${jaren ? `<span class="rg-jaren">nieuwe versie in ${jaren}</span>` : ''}
+    </div>`;
+  }
+  function renderRegels() {
+    const el = $('#regels'); if (!el || !S) return;
+    const j = regelJaar();
+    $('#regelsKop').textContent = `Welke Wmo-regels golden in ${j}`;
+    const fo = focusWijk(), nt = $('#regelsNoot');
+    if (fo) { nt.innerHTML = `<b>${esc(fo.naam)}</b>: regels gelden voor de hele gemeente. Hieronder staan de regels van ${esc(S.g.n)}.`; nt.hidden = false; } else nt.hidden = true;
+    if (S.regelsFout) { el.innerHTML = '<p class="small muted" style="margin:0">De regels konden niet worden opgehaald bij lokaleregelgeving.overheid.nl. De rest van de pagina werkt wel.</p>'; return; }
+    if (!S.regels) { el.innerHTML = '<p class="small muted" style="margin:0">Regels ophalen bij lokaleregelgeving.overheid.nl…</p>'; return; }
+    const gr = regelsIn(j);
+    const zoek = `<a href="https://lokaleregelgeving.overheid.nl/" target="_blank" rel="noopener">lokaleregelgeving.overheid.nl</a>`;
+    if (!gr.length) { el.innerHTML = `<p class="small muted" style="margin:0">Geen Wmo-regels van ${esc(S.g.n)} gevonden die in ${j} golden. Zoek zelf op ${zoek}.</p>`; return; }
+    const nNieuw = gr.filter(x => x.nieuw).length;
+    const kop = `<p class="rg-kop small">${fmt(gr.length)} ${gr.length === 1 ? 'regeling' : 'regelingen'} golden in ${j}; ${nNieuw ? `van ${fmt(nNieuw)} ging in ${j} een nieuwe versie in (gekleurde rand)` : `geen ervan kreeg in ${j} een nieuwe versie`}. Elke titel opent de versie die toen gold.</p>`;
+    const kol = RG_SOORT.map(s => {
+      const items = gr.filter(x => x.o.soort === s.k);
+      return items.length ? `<div class="rg-groep"><h3>${s.t}</h3>${items.map(x => regelItem(x, j)).join('')}</div>` : '';
+    }).join('');
+    el.innerHTML = kop + `<div class="rg-cols">${kol}</div>`;
+    el.querySelectorAll('.rg-jaren button').forEach(b => b.addEventListener('click', () => { const y = +b.dataset.j; if (y !== S.wJaar) kiesJaar(y); }));
+  }
+  // bij een sprong in een type: welke regels kregen in het jaar van de sprong een nieuwe versie
+  function regelsBijSprong(spr) {
+    if (!S.regels || !spr) return '';
+    const L = S.regels.lijst, j = spr[1], gezien = new Set(), hits = [];
+    L.filter(o => o.soort !== 'ov').forEach(o => {
+      const v = rgNieuwIn(o, j); if (!v.length) return;
+      const k = rgSleutel(o); if (gezien.has(k)) return; gezien.add(k);
+      hits.push({ o, v: v[v.length - 1] });
+    });
+    if (!hits.length) return `<span class="rg-tegelijk">In ${j} kreeg geen Wmo-regel van de gemeente een nieuwe versie (volgens lokaleregelgeving.overheid.nl).</span>`;
+    hits.sort((a, b) => a.v.in.localeCompare(b.v.in));
+    const toon = hits.slice(0, 3).map(h => `<a href="${esc(h.v.url)}" target="_blank" rel="noopener">${esc(h.o.titel)}</a> (${fDat(h.v.in)})`).join(', ');
+    return `<span class="rg-tegelijk">In ${j} gingen ook nieuwe versies in van: ${toon}${hits.length > 3 ? ` en ${hits.length - 3} meer` : ''}. Tegelijk is geen oorzaak; lees wat er veranderde. <a href="#regelsKop">Alle regels ↓</a></span>`;
+  }
 
   // ---------- kern ----------
   // reeks van één wijk over de opgehaalde wijkjaren
@@ -789,7 +981,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     s += `<rect class="vang" x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/></svg>`;
     const legenda = sch ? `<div class="legend"><span><i class="tick" style="border-color:var(--accent)"></i>${esc(opt.lijnNaam || 'wijk')}</span><span><i class="tick" style="border-top-style:dashed;border-color:var(--muted)"></i>${esc(opt.schaduwNaam || 'gemeente')}</span></div>` : '';
     const kopKnop = opt.naarKaart ? `<button type="button" class="btn linkish naarkaart" aria-pressed="${kaartMaat === opt.naarKaart}" title="Kleur de wijkkaart naar dit type en zet de wijken op volgorde">${kaartMaat === opt.naarKaart ? 'Staat op de kaart ✓' : 'Per wijk op de kaart ↓'}</button>` : '';
-    el.innerHTML = kop + s + legenda + kopKnop + (spr ?`<p class="sprong">Sprong tussen ${spr[0]} en ${spr[1]}: waarschijnlijk een andere registratie bij de gemeente, geen echte verandering. Kijk naar het totaal.</p>` : '');
+    el.innerHTML = kop + s + legenda + kopKnop + (spr ?`<p class="sprong">Sprong tussen ${spr[0]} en ${spr[1]}: waarschijnlijk een andere registratie bij de gemeente, geen echte verandering. Kijk naar het totaal.${regelsBijSprong(spr)}</p>` : '');
     const svg = el.querySelector('svg'), hl = svg.querySelector('.hl'), hd = svg.querySelector('.hd');
     if (opt.kies) svg.classList.add('kiesbaar');
     const dichtst = e => {
@@ -961,7 +1153,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     $('#wijkInfoTxt').textContent = info.join(' ');
     $('#wijkInfo').hidden = !info.length;
     S.bounded = false;
-    renderFocus(); renderKern(); renderTrend(); renderNoten();
+    renderFocus(); renderKern(); renderTrend(); renderNoten(); renderRegels();
     renderKaart(); renderDossier(focusWijk()); renderSpreiding(); renderTabel(); renderVoet();
   }
   const WTYPE = { T001024: 'n', A048188: 'zv', A019507: 'hh', A019506: 'ot', A019509: 'hm', A019508: 'vo', A050370: 'ov' };
@@ -1170,7 +1362,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const o = code ? S.w.wijken.find(x => x.code === code) : null;
     selWijk = o ? code : null;
     zetHash();
-    renderFocus(); renderKern(); renderTrend(); renderNoten();
+    renderFocus(); renderKern(); renderTrend(); renderNoten(); renderRegels();
     renderDossier(o); renderKaart(); renderSpreiding();
     if (vanElders && gjLayer && o) gjLayer.eachLayer(l => { if (l.feature && l.feature.properties.wijkcode === code) map.fitBounds(l.getBounds(), { maxZoom: 15, padding: [24, 24] }); });
     if (vanElders && gjLayer && !o && gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] });
@@ -1251,7 +1443,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
     const ivj = S.geld ? S.geld.jaren : [];
     const w = S.w || {};
-    $('#foot').innerHTML = `Bronnen: CBS, Gemeentelijke Monitor Sociaal Domein, Wmo (CC-BY 4.0): cliënten naar type en persoonskenmerken ${link(T.trend)}, per wijk ${w.tabel ? link(w.tabel) : '–'}. Inwoners en 65-plussers per gemeente: CBS ${link(T.bev)} (1 januari). Lasten: CBS, onbewerkte Iv3-data gemeenten ${ivj.length ? ivj[0] + '–' + ivj[ivj.length - 1] : ''} (<a href="https://dataderden.cbs.nl">dataderden.cbs.nl</a>), jaarrekening, anders begroting; tweede plaatsing waar die er is. Wijkgrenzen, inwoners en 65-plussers per wijk: CBS Wijken en buurten ${w.geo ? w.jaar : ''} via <a href="https://www.pdok.nl">PDOK</a>. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Wmo per wijk · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS, Gemeentelijke Monitor Sociaal Domein, Wmo (CC-BY 4.0): cliënten naar type en persoonskenmerken ${link(T.trend)}, per wijk ${w.tabel ? link(w.tabel) : '–'}. Inwoners en 65-plussers per gemeente: CBS ${link(T.bev)} (1 januari). Lasten: CBS, onbewerkte Iv3-data gemeenten ${ivj.length ? ivj[0] + '–' + ivj[ivj.length - 1] : ''} (<a href="https://dataderden.cbs.nl">dataderden.cbs.nl</a>), jaarrekening, anders begroting; tweede plaatsing waar die er is. Wijkgrenzen, inwoners en 65-plussers per wijk: CBS Wijken en buurten ${w.geo ? w.jaar : ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Wmo per wijk · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -1262,6 +1454,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (was.includes('lasten (Iv3)')) await laadGeld();
     if (S.g !== g) return;
     renderKern(); renderTrend(); renderWie(); renderGeld();
+    if (was.includes('regels (lokaleregelgeving.overheid.nl)')) await laadRegelsS();
     if (was.includes('wijken')) await kiesJaar(S.wJaar);
     toonMelding();
   });
