@@ -110,7 +110,29 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .legend .tick { display: inline-block; width: 14px; height: 0; border-top: 2px solid var(--fg); vertical-align: middle; margin-right: 6px; }
 .legend .tickv { display: inline-block; width: 0; height: 12px; border-left: 2px solid var(--fg); vertical-align: middle; margin: 0 6px 0 4px; }
 
-#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 300px; }
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.sectiekop { scroll-margin-top: 72px; }
+.focus { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 1px; }
+.focus .fl { font-size: .82rem; color: var(--muted); }
+.focus .fv { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.focus .fc { font-size: .82rem; color: var(--muted); }
+.focus .fv small { font-size: 1rem; font-weight: 700; margin-left: 6px; }
+.dossier dl .uit { color: var(--fg); font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier dl dt.uit { box-shadow: -6px 0 0 color-mix(in srgb, var(--accent) 12%, transparent); }
+th.uit, td.uit { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+#kaartType { padding: 5px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+#kaartType.aan { border-color: var(--accent); background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.naarkaart { justify-self: start; }
+.naarkaart[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.maplegend .regwaarsch { color: var(--warn); flex-basis: 100%; }
+.alleengm { margin: 0; font-size: .85rem; color: var(--muted); border-left: 3px solid var(--line); padding: 2px 0 2px 10px; max-width: 90ch; }
+.alleengm b { color: var(--fg); font-weight: 600; }
+.chart svg.kiesbaar rect.vang { cursor: pointer; }
+#tip { position: fixed; z-index: 1100; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 300px; }
 #tip b { font-weight: 600; }
 #tip .num { font-family: var(--f-mono); }
 
@@ -201,12 +223,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       </div>
       <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
 
+      <div class="focusbar" id="focusbar" hidden>
+        <label class="eyebrow" for="focusSel">Kijk naar</label>
+        <select id="focusSel"></select>
+        <span class="muted small" id="focusTxt"></span>
+        <button class="btn linkish" type="button" id="focusTerug" hidden>← Hele gemeente</button>
+      </div>
+
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
       <div class="top3" id="top3"></div>
 
       <!-- gebruik -->
       <div class="sectiekop">
-        <div><span class="eyebrow">Door de jaren</span><h2>Gebruik van Wmo-maatwerk</h2></div>
+        <div><span class="eyebrow">Door de jaren</span><h2 id="trendKop">Gebruik van Wmo-maatwerk</h2></div>
         <div class="seg" id="segTrend" role="group" aria-label="Toon per 1.000 inwoners of aantal">
           <button type="button" data-m="n" aria-pressed="true">Aantal</button>
           <button type="button" data-m="p" aria-pressed="false">Per 1.000 inwoners</button>
@@ -222,6 +251,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <div><span class="eyebrow">Wie</span><h2 id="wieKop">Wie krijgt Wmo-maatwerk?</h2></div>
         <p class="small muted">Per 1.000 inwoners in dezelfde groep. De streep is het eerste jaar van de reeks.</p>
       </div>
+      <p class="alleengm" id="wieNoot" hidden></p>
       <div class="twee">
         <div class="chart" id="wieLeeftijd"></div>
         <div class="chart" id="wieInkomen"></div>
@@ -232,6 +262,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <div><span class="eyebrow">Door de jaren</span><h2>Wat de gemeente uitgeeft aan Wmo-maatwerk</h2></div>
         <p class="small muted">Lasten uit de jaarrekening (Iv3). Klik op een jaar voor de verdeling over de taakvelden.</p>
       </div>
+      <p class="alleengm" id="geldNoot" hidden></p>
       <div class="geld">
         <div class="chart" id="geldChart"></div>
         <div class="chart" id="geldDetail"></div>
@@ -250,6 +281,15 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
               <button type="button" data-k="wmo" aria-pressed="true">Wmo per 1.000 inwoners</button>
               <button type="button" data-k="oud" aria-pressed="false">65 jaar of ouder</button>
             </div>
+            <label class="small muted" for="kaartType">of per type</label>
+            <select id="kaartType" aria-label="Kleur de kaart naar een type ondersteuning">
+              <option value="">kies een type…</option>
+              <option value="hh">Hulp bij het huishouden</option>
+              <option value="ot">Ondersteuning thuis</option>
+              <option value="hm">Hulpmiddelen en diensten</option>
+              <option value="vo">Verblijf en opvang</option>
+              <option value="ov">Overig</option>
+            </select>
           </div>
           <div id="map" role="region" aria-label="Kaart van de wijken"></div>
           <div class="maplegend" id="mapLegend"></div>
@@ -276,6 +316,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Per 1.000 inwoners</b>: zoals het CBS rekent. Bij leeftijd en inkomen per 1.000 inwoners in díe groep.</li>
             <li><b>Inkomen</b>: het besteedbaar inkomen van het huishouden, gecorrigeerd voor de grootte ervan, ingedeeld in vijf landelijke groepen van elk 20% van de huishoudens.</li>
             <li><b>Lasten</b>: alle lasten op de Iv3-taakvelden voor Wmo-maatwerk, uit de jaarrekening; voor een jaar zonder jaarrekening de begroting. <i>Thuis</i> = hulpmiddelen en diensten plus maatwerkdienstverlening 18+ (huishoudelijke hulp, begeleiding, dagbesteding, overig, pgb). <i>Beschermd wonen en opvang</i> = geëscaleerde zorg 18+. Toegang en wijkteams (6.2, 6.21) tellen niet mee.</li>
+            <li><b>Type per wijk</b>: kies je een type voor de kaart, dan kleurt elke wijk naar het aandeel van dat type in de Wmo-cliënten van de wijk (aantal met dat type gedeeld door alle cliënten). Per 1.000 inwoners bestaat per wijk alleen voor het totaal. Omdat een cliënt bij meer typen kan meetellen, tellen de aandelen op tot meer dan 100%.</li>
             <li><b>Per cliënt</b>: lasten thuis gedeeld door de cliënten zonder verblijf en opvang. Per 65-plusser: lasten thuis gedeeld door de inwoners van 65 jaar of ouder op 1 januari.</li>
           </ul>
         </div>
@@ -288,6 +329,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
             <li><b>Kleine aantallen</b>: het CBS rondt af op 5 en laat kleine aantallen weg (–). Per wijk is daardoor vaak alleen het totaal bekend.</li>
             <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Alle jaren zijn volgens de verbeterde CBS-methode van december 2025 en dus onderling vergelijkbaar; oudere publicaties wijken af.</li>
             <li><b>Beschermd wonen</b>: de lasten liggen vaak bij een centrumgemeente die het voor de regio regelt. Daarom staan ze in de grafiek apart en tellen ze niet mee in de kerncijfers per inwoner, per 65-plusser en per cliënt.</li>
+            <li><b>Een wijk kiezen</b>: kies je een wijk, dan volgt de hele pagina die wijk waar het CBS cijfers per wijk publiceert: de kerncijfers, het gebruik en de typen door de jaren, de kaart, de spreiding en de tabel. Leeftijd en inkomen van de cliënten en de lasten bestaan alleen voor de hele gemeente; dat staat er dan bij. Per wijk is per 1.000 inwoners alleen voor het totaal bekend, de typen zijn aantallen.</li>
             <li><b>Geen oordeel</b>: meer cliënten kan betekenen dat de hulp goed bereikbaar is, of dat er meer nodig is. De cijfers laten het verschil zien, niet de oorzaak.</li>
           </ul>
         </div>
@@ -302,7 +344,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.2';
+  const VERSIE = '1.3';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
   const CAT = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title';
@@ -392,6 +434,25 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   let sortKey = null, sortDir = 1, selWijk = null;
   let map = null, layer = null, gjLayer = null;
   const fouten = new Set();
+  // wijkcijfers per jaar: één keer ophalen, daarna hergebruiken (voor de kaart én voor de reeks per wijk)
+  let WC = {};
+  function laadWijkC(c, j) {
+    const k = c + ':' + j;
+    if (!WC[k]) WC[k] = laadWijk(c, j).then(res => {
+      if (res.fout) delete WC[k];
+      else if (S && S.g.c === c) { S.wAll[j] = res; if (selWijk && S.wJaar !== j) { renderKern(); renderTrend(); } }
+      return res;
+    });
+    return WC[k];
+  }
+  // de gekozen wijk (in het getoonde wijkjaar), of null voor de hele gemeente
+  const focusWijk = () => selWijk && S && S.w ? S.w.wijken.find(x => x.code === selWijk) || null : null;
+  const wijkNaam = code => { const o = S && S.w && S.w.wijken.find(x => x.code === code); if (o) return o.naam; for (const r of Object.values((S && S.wAll) || {})) { const z = r.wijken.find(x => x.code === code); if (z) return z.naam; } return code; };
+  function zetHash() {
+    if (!S) return;
+    const h = '#gm=' + S.g.c + (S.wJaar ? '&jaar=' + S.wJaar : '') + (selWijk ? '&wijk=' + selWijk : '') + (kaartMaat !== 'wmo' ? '&kaart=' + kaartMaat : '');
+    try { if (location.hash !== h) history.replaceState(null, '', h); } catch (e) {}
+  }
 
   function voortgang(stap, totaal, txt) {
     $('#progress').hidden = stap >= totaal;
@@ -411,8 +472,9 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     $('#gmInput').value = g.n;
     document.title = 'Wmo ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    S = { g, trend: null, bev: null, geld: null, w: null, wJaar: null, opgehaald: null };
-    selWijk = null; geldJaar = null; fouten.clear(); toonMelding();
+    S = { g, trend: null, bev: null, geld: null, w: null, wJaar: null, wJaren: [], wAll: {}, opgehaald: null };
+    selWijk = null; geldJaar = null; WC = {}; fouten.clear(); toonMelding();
+    $('#focusbar').hidden = true; renderNoten();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
     ['#top3', '#panTot', '#typenNoot', '#multiples', '#trendTabelIn', '#wieLeeftijd', '#wieInkomen', '#geldChart', '#geldDetail', '#tblWrap', '#dossier', '#jaren', '#spreiding'].forEach(s => { $(s).innerHTML = ''; });
     voortgang(0, 4, 'Tabellen zoeken bij het CBS…');
@@ -428,9 +490,22 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     voortgang(3, 4, 'Wijken ophalen…');
     const jaren = Object.keys(WIJK).map(Number).sort((a, b) => b - a).slice(0, AANTAL_JAREN);
     const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
+    const gevraagdeWijk = (location.hash.match(/wijk=(WK\d+)/) || [])[1] || null;
+    const gevraagdeKaart = (location.hash.match(/kaart=(\w+)/) || [])[1];
+    if (gevraagdeKaart && (gevraagdeKaart === 'oud' || isType(gevraagdeKaart))) {
+      kaartMaat = gevraagdeKaart;
+      document.querySelectorAll('#segKaart button').forEach(x => x.setAttribute('aria-pressed', x.dataset.k === kaartMaat));
+      $('#kaartType').value = isType(kaartMaat) ? kaartMaat : ''; $('#kaartType').classList.toggle('aan', isType(kaartMaat));
+      renderTrend();
+    }
+    S.wJaren = jaren.slice().sort((a, b) => a - b);
     renderJaren(jaren);
     await kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[0]);
+    if (S.g !== g) return;
     voortgang(4, 4, '');
+    if (gevraagdeWijk && S.w && S.w.wijken.some(x => x.code === gevraagdeWijk)) kiesWijk(gevraagdeWijk, true);
+    // de andere wijkjaren alvast ophalen: nodig om een wijk door de jaren te volgen
+    jaren.forEach(j => laadWijkC(g.c, j));
   }
 
   // gebruik en persoonskenmerken (85896NED): één verzoek
@@ -541,8 +616,36 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   const isRek = j => !!(S.geld && S.geld.d[j] && S.geld.d[j].rek);
 
   // ---------- kern ----------
+  // reeks van één wijk over de opgehaalde wijkjaren
+  function wijkReeks(code) {
+    const uit = {};
+    Object.entries(S.wAll || {}).forEach(([j, r]) => { const o = r.wijken.find(x => x.code === code); if (o) uit[+j] = o; });
+    return uit;
+  }
+  const unitHtml = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+  function renderKernWijk(o) {
+    const w = S.w, gm = w.gm || {};
+    $('#leadBig').textContent = `${o.naam}: ${fmt(o.n)} inwoners met Wmo-maatwerk in ${w.jaar}`;
+    $('#leadSub').textContent = `${fmt(o.p)} per 1.000 inwoners · ${S.g.n}: ${fmt(gm.p)}${voorlopig(w.jaar) ? ' · ' + w.jaar + ' voorlopig' : ''}`;
+    let h = '';
+    const rk = wijkReeks(o.code);
+    const jp = Object.keys(rk).map(Number).filter(j => rk[j].p != null && j <= w.jaar).sort();
+    if (jp.length > 1) {
+      const a = jp[0], b = jp[jp.length - 1], dp = rk[b].p - rk[a].p;
+      h += unitHtml(`Sinds ${a}`, (dp > 0 ? '+' : dp < 0 ? '−' : '±') + nf.format(Math.abs(dp)) + ' per 1.000', `${fmt(rk[a].p)} → ${fmt(rk[b].p)} per 1.000 inwoners in de wijk; ${fmt(rk[a].n)} → ${fmt(rk[b].n)} cliënten.`);
+    } else {
+      h += unitHtml('Door de jaren', '–', Object.keys(S.wAll).length < S.wJaren.length ? 'Eerdere jaren van deze wijk worden nog opgehaald.' : 'Voor deze wijk is maar één jaar met cijfers bekend, of de wijk had eerder een andere indeling.');
+    }
+    const aandeelCl = o.n != null && gm.n ? 100 * o.n / gm.n : null, aandeelInw = o.inw != null && gm.inw ? 100 * o.inw / gm.inw : null;
+    h += unitHtml(`Deel van de gemeente · ${w.jaar}`, aandeelCl == null ? '–' : nf1.format(aandeelCl) + '% van de cliënten', aandeelInw == null ? `${fmt(o.n)} van ${fmt(gm.n)} cliënten in ${esc(S.g.n)}.` : `en ${nf1.format(aandeelInw)}% van de inwoners. ${fmt(o.n)} van ${fmt(gm.n)} cliënten.`);
+    h += unitHtml(`65 jaar of ouder · ${w.jaar}`, o.oud == null ? '–' : fPct(o.oud), o.oud == null ? 'Voor dit jaar staat het aandeel 65-plussers per wijk nog niet bij PDOK.' : `van de inwoners van de wijk; ${esc(S.g.n)}: ${fPct(gm.oud)}. Leeftijd verklaart veel van het Wmo-gebruik.`);
+    h += unitHtml('Lasten', '–', 'Bestaan alleen voor de hele gemeente: de Iv3 kent geen wijken. Zie verderop.');
+    $('#top3').innerHTML = h;
+  }
   function renderKern() {
     const g = S.g;
+    const fo = focusWijk();
+    if (fo) { renderKernWijk(fo); return; }
     const tz = S.trend && S.trend.d.T001024 || {};
     const jt = Object.keys(tz).map(Number).filter(j => tz[j].n != null).sort();
     const laatst = jt[jt.length - 1], eerst = jt[0];
@@ -586,21 +689,27 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     }
     return null;
   }
+  // jaar kiezen vanuit een grafiek: hetzelfde als de jaarknoppen bij de wijken
+  const kiesJaarVanGrafiek = j => { kiesJaar(j); };
   function renderTrend() {
     const box = $('#multiples');
+    const fo = focusWijk();
+    $('#trendKop').textContent = fo ? `Gebruik van Wmo-maatwerk · ${fo.naam}` : 'Gebruik van Wmo-maatwerk';
+    if (fo) { renderTrendWijk(fo); return; }
     if (!S.trend) { box.innerHTML = '<p class="muted small">Geen gebruikscijfers opgehaald.</p>'; $('#trendTabelIn').innerHTML = ''; return; }
     const { d, jaren } = S.trend;
     const typen = PANELEN.filter(k => k !== 'T001024');
     const tot = d.T001024 || {};
     const totJ = jaren.filter(j => tot[j] && tot[j].n != null);
-    const lj = totJ[totJ.length - 1];
-    lijn($('#panTot'), TYPES.find(t => t.k === 'T001024'), jaren, jaren.map(j => tot[j] || null), null, { H: 180, sub: 'alle inwoners met minstens één Wmo-maatwerkvoorziening; elke cliënt telt één keer' });
+    const lj = totJ.includes(S.wJaar) ? S.wJaar : totJ[totJ.length - 1]; // het gekozen jaar, anders het laatste
+    const kiesOpt = { mark: S.wJaar, kies: S.wJaren.length ? kiesJaarVanGrafiek : null };
+    lijn($('#panTot'), TYPES.find(t => t.k === 'T001024'), jaren, jaren.map(j => tot[j] || null), null, { H: 180, sub: 'alle inwoners met minstens één Wmo-maatwerkvoorziening; elke cliënt telt één keer', ...kiesOpt });
     box.innerHTML = typen.map((p, i) => `<div class="chart deel" id="pan${i}"></div>`).join('');
     typen.forEach((k, i) => {
       const def = TYPES.find(t => t.k === k);
       const reeks = jaren.map(j => d[k] && d[k][j] ? d[k][j] : null);
       const laatst = lj && d[k] && d[k][lj] && d[k][lj].n != null ? d[k][lj].n : null;
-      lijn($('#pan' + i), def, jaren, reeks, sprong(reeks, jaren), { deel: laatst != null && tot[lj].n ? Math.round(100 * laatst / tot[lj].n) : null, deelJaar: lj });
+      lijn($('#pan' + i), def, jaren, reeks, sprong(reeks, jaren), { deel: laatst != null && tot[lj].n ? Math.round(100 * laatst / tot[lj].n) : null, deelJaar: lj, naarKaart: WTYPE[k], ...kiesOpt });
     });
     const som = lj ? typen.reduce((a, k) => a + ((d[k] && d[k][lj] && d[k][lj].n) || 0), 0) : 0;
     $('#typenNoot').innerHTML = lj ? `Een cliënt met meer soorten ondersteuning telt bij elk type mee. Samen tellen de vijf typen daarom op tot meer dan het totaal: in ${lj} <span class="num">${fmt(som)}</span> tegen <span class="num">${fmt(tot[lj].n)}</span> cliënten. Elke grafiek heeft een eigen schaal.` : '';
@@ -609,45 +718,112 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       rij.map(r => `<tr class="${r.k === 'T001024' ? 'gm' : r.inTabel ? 'sub' : ''}"><td>${esc(r.t)}</td>${jaren.map(j => { const x = d[r.k] && d[r.k][j]; return `<td class="r">${x && x.n != null ? fmt(x.n) + ' <span class="muted">' + fmt(x.p) + '‰</span>' : '–'}</td>`; }).join('')}</tr>`).join('') +
       '</tbody></table><p class="small muted" style="padding:0 12px">Aantal cliënten en per 1.000 inwoners (‰). * voorlopig.</p>';
   }
+  // dezelfde grafieken voor één wijk; de gemeente als stippellijn waar dat te vergelijken is
+  function renderTrendWijk(fo) {
+    const box = $('#multiples');
+    const rk = wijkReeks(fo.code);
+    const gmT = S.trend ? S.trend.d.T001024 || {} : {};
+    const alle = [...S.wJaren, ...(S.trend ? S.trend.jaren : [])];
+    const jaren = []; for (let j = Math.min(...alle); j <= Math.max(...alle); j++) jaren.push(j);
+    const nogBezig = Object.keys(S.wAll).length < S.wJaren.length;
+    const bezig = nogBezig ? 'Eerdere jaren van deze wijk worden nog opgehaald.' : '';
+    const kiesOpt = { mark: S.wJaar, kies: kiesJaarVanGrafiek };
+    const totDef = TYPES.find(t => t.k === 'T001024');
+    const tot = jaren.map(j => rk[j] ? { n: rk[j].n, p: rk[j].p } : null);
+    const pOpt = modus === 'p'
+      ? { schaduw: jaren.map(j => gmT[j] || null), lijnNaam: fo.naam, schaduwNaam: S.g.n }
+      : { noot: `In aantallen staat ${esc(S.g.n)} er niet naast, die is veel groter. Kies <i>Per 1.000 inwoners</i> om de wijk naast de gemeente te zien.` };
+    lijn($('#panTot'), totDef, jaren, tot, null, { H: 180, titel: `Wmo-maatwerk totaal · ${fo.naam}`, sub: 'inwoners van de wijk met minstens één Wmo-maatwerkvoorziening', ...pOpt, ...kiesOpt, leeg: bezig || 'Geen cijfers voor deze wijk, of door het CBS weggelaten vanwege kleine aantallen.' });
+    const typen = PANELEN.filter(k => k !== 'T001024');
+    const lj = (() => { const js = jaren.filter(j => rk[j] && rk[j].n != null); return js.includes(S.wJaar) ? S.wJaar : js[js.length - 1]; })();
+    box.innerHTML = typen.map((p, i) => `<div class="chart deel" id="pan${i}"></div>`).join('');
+    typen.forEach((k, i) => {
+      const def = TYPES.find(t => t.k === k), wk = WTYPE[k];
+      const reeks = jaren.map(j => rk[j] ? { n: rk[j][wk], p: null } : null);
+      const laatst = lj && rk[lj] && rk[lj][wk] != null ? rk[lj][wk] : null;
+      lijn($('#pan' + i), def, jaren, reeks, sprong(reeks, jaren), { sleutel: 'n', deel: laatst != null && rk[lj].n ? Math.round(100 * laatst / rk[lj].n) : null, deelJaar: lj, deelVan: 'de cliënten in de wijk', naarKaart: wk, ...kiesOpt, leeg: bezig || 'Geen cijfers voor deze wijk: het CBS laat kleine aantallen weg.' });
+    });
+    $('#typenNoot').innerHTML = `Per wijk publiceert het CBS de typen alleen als aantal, niet per 1.000 inwoners, en het laat kleine aantallen weg (–). Een cliënt met meer soorten ondersteuning telt bij elk type mee. Elke grafiek heeft een eigen schaal.${bezig ? ' ' + bezig : ''}`;
+    const rij = TYPES.filter(t => WTYPE[t.k]);
+    const wj = jaren.filter(j => rk[j]);
+    $('#trendTabelIn').innerHTML = wj.length ? `<table><thead><tr><th>Type · ${esc(fo.naam)}</th>${wj.map(j => `<th class="r">${j}${voorlopig(j) ? '*' : ''}</th>`).join('')}</tr></thead><tbody>` +
+      rij.map(r => `<tr class="${r.k === 'T001024' ? 'gm' : ''}"><td>${esc(r.t)}</td>${wj.map(j => { const v = rk[j][WTYPE[r.k]]; return `<td class="r">${v != null ? fmt(v) + (r.k === 'T001024' && rk[j].p != null ? ' <span class="muted">' + fmt(rk[j].p) + '‰</span>' : '') : '–'}</td>`; }).join('')}</tr>`).join('') +
+      '</tbody></table><p class="small muted" style="padding:0 12px">Aantal cliënten in de wijk; bij het totaal ook per 1.000 inwoners (‰). * voorlopig.</p>' : '<p class="small muted" style="padding:0 12px">Nog geen jaren opgehaald.</p>';
+  }
+  // opt.titel: andere kop; opt.sleutel: 'n' of 'p' in plaats van de gekozen modus; opt.schaduw: tweede reeks (de gemeente) als stippellijn;
+  // opt.schaduwNaam: naam in de tooltip; opt.mark: het gekozen jaar; opt.kies(j): klik op een jaar kiest dat jaar voor de pagina
   function lijn(el, p, jaren, reeks, spr, opt) {
     opt = opt || {};
     const W = Math.max(240, Math.round((el.clientWidth || 360) - 30)), H = opt.H || 150, L = 46, R = 14, Tp = 12, B = 24;
-    const sleutel = modus;
+    const sleutel = opt.sleutel || modus;
     const vals = reeks.map(r => r ? r[sleutel] : null);
+    const sch = opt.schaduw ? opt.schaduw.map(r => r ? r[sleutel] : null) : null;
     const ok = vals.filter(v => v != null);
     const lastI = (() => { for (let i = vals.length - 1; i >= 0; i--) if (vals[i] != null) return i; return -1; })();
-    const kopWaarde = lastI >= 0 ? fmt(vals[lastI]) + ` <span class="muted">${modus === 'p' ? 'per 1.000 · ' : ''}${jaren[lastI]}</span>` : '–';
-    const deel = opt.deel != null ? `<span class="noemer"><b>${nf.format(opt.deel)}%</b> van alle cliënten in ${opt.deelJaar}</span>` : '';
-    const kop = `<div class="chart-kop"><h3>${esc(p.t)}</h3><span class="laatst">${kopWaarde}</span></div>${deel}<span class="noemer">${opt.sub ? esc(opt.sub) + ' · ' : p.sub ? esc(p.sub) + ' · ' : ''}${modus === 'p' ? 'per 1.000 inwoners' : 'aantal cliënten, afgerond op 5'}</span>`;
-    if (!ok.length) { el.innerHTML = kop + '<p class="small muted" style="margin:0">Geen cijfers, of door het CBS weggelaten vanwege kleine aantallen.</p>'; return; }
-    const hi = Math.max(...ok) * 1.18 || 1;
+    // het getal in de kop volgt het gekozen jaar; zonder keuze (of zonder cijfer in dat jaar) het laatste jaar
+    const kopI = opt.mark != null && jaren.indexOf(opt.mark) >= 0 && vals[jaren.indexOf(opt.mark)] != null ? jaren.indexOf(opt.mark) : lastI;
+    const kopWaarde = kopI >= 0 ? fmt(vals[kopI]) + ` <span class="muted">${sleutel === 'p' ? 'per 1.000 · ' : ''}${jaren[kopI]}</span>` : '–';
+    const deel = opt.deel != null ? `<span class="noemer"><b>${nf.format(opt.deel)}%</b> van ${opt.deelVan || 'alle cliënten'} in ${opt.deelJaar}</span>` : '';
+    const kop = `<div class="chart-kop"><h3>${esc(opt.titel || p.t)}</h3><span class="laatst">${kopWaarde}</span></div>${deel}<span class="noemer">${opt.sub ? esc(opt.sub) + ' · ' : p.sub ? esc(p.sub) + ' · ' : ''}${sleutel === 'p' ? 'per 1.000 inwoners' : 'aantal cliënten, afgerond op 5'}</span>${opt.noot ? `<span class="noemer">${opt.noot}</span>` : ''}`;
+    if (!ok.length) { el.innerHTML = kop + `<p class="small muted" style="margin:0">${opt.leeg || 'Geen cijfers, of door het CBS weggelaten vanwege kleine aantallen.'}</p>`; return; }
+    const hi = Math.max(...ok, ...(sch ? sch.filter(v => v != null) : [])) * 1.18 || 1;
     const x = j => L + (W - L - R) * (j - jaren[0]) / Math.max(1, jaren[jaren.length - 1] - jaren[0]);
     const y = v => Tp + (H - Tp - B) * (1 - v / hi);
     const stap = nice(hi / 3);
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(p.t)} per jaar">`;
     for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${nf.format(t)}</text>`;
-    jaren.forEach(j => { if (jaren.length <= 6 || j % 2 === 1 || j === jaren[jaren.length - 1]) s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle">${j}</text>`; });
+    if (opt.mark != null && jaren.includes(opt.mark)) s += `<rect x="${x(opt.mark) - 9}" y="${Tp}" width="18" height="${H - Tp - B}" rx="3" fill="var(--accent)" fill-opacity="0.12"/>`;
+    jaren.forEach(j => { if (jaren.length <= 6 || j % 2 === 1 || j === jaren[jaren.length - 1]) s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle" ${j === opt.mark ? 'style="fill:var(--fg);font-weight:600"' : ''}>${j}</text>`; });
+    if (sch) {
+      let sp = '', so = false;
+      jaren.forEach((j, i) => { if (sch[i] == null) { so = false; return; } sp += (so ? 'L' : 'M') + x(j).toFixed(1) + ' ' + y(sch[i]).toFixed(1) + ' '; so = true; });
+      s += `<path d="${sp}" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" stroke-linejoin="round"/>`;
+    }
     let pad = '', open = false;
     jaren.forEach((j, i) => { if (vals[i] == null) { open = false; return; } pad += (open ? 'L' : 'M') + x(j).toFixed(1) + ' ' + y(vals[i]).toFixed(1) + ' '; open = true; });
     s += `<path d="${pad}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
     jaren.forEach((j, i) => { if (vals[i] != null && (i === 0 || vals[i - 1] == null) && (i === vals.length - 1 || vals[i + 1] == null)) s += `<circle cx="${x(j)}" cy="${y(vals[i])}" r="3" fill="var(--accent)"/>`; });
     if (lastI >= 0) s += `<circle cx="${x(jaren[lastI])}" cy="${y(vals[lastI])}" r="4" fill="${voorlopig(jaren[lastI]) ? 'var(--surface)' : 'var(--accent)'}" stroke="var(--accent)" stroke-width="2"/>`;
     s += `<line class="hl" x1="0" x2="0" y1="${Tp}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/><circle class="hd" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" visibility="hidden"/>`;
-    s += `<rect x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/></svg>`;
-    el.innerHTML = kop + s + (spr ? `<p class="sprong">Sprong tussen ${spr[0]} en ${spr[1]}: waarschijnlijk een andere registratie bij de gemeente, geen echte verandering. Kijk naar het totaal.</p>` : '');
+    const kiesbaar = j => !!opt.kies && S.wJaren.includes(j);
+    s += `<rect class="vang" x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/></svg>`;
+    const legenda = sch ? `<div class="legend"><span><i class="tick" style="border-color:var(--accent)"></i>${esc(opt.lijnNaam || 'wijk')}</span><span><i class="tick" style="border-top-style:dashed;border-color:var(--muted)"></i>${esc(opt.schaduwNaam || 'gemeente')}</span></div>` : '';
+    const kopKnop = opt.naarKaart ? `<button type="button" class="btn linkish naarkaart" aria-pressed="${kaartMaat === opt.naarKaart}" title="Kleur de wijkkaart naar dit type en zet de wijken op volgorde">${kaartMaat === opt.naarKaart ? 'Staat op de kaart ✓' : 'Per wijk op de kaart ↓'}</button>` : '';
+    el.innerHTML = kop + s + legenda + kopKnop + (spr ?`<p class="sprong">Sprong tussen ${spr[0]} en ${spr[1]}: waarschijnlijk een andere registratie bij de gemeente, geen echte verandering. Kijk naar het totaal.</p>` : '');
     const svg = el.querySelector('svg'), hl = svg.querySelector('.hl'), hd = svg.querySelector('.hd');
-    const zet = e => {
+    if (opt.kies) svg.classList.add('kiesbaar');
+    const dichtst = e => {
       const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) * W / r.width;
       let bi = 0, bd = 1e9; jaren.forEach((j, i) => { const dd = Math.abs(x(j) - px); if (dd < bd) { bd = dd; bi = i; } });
+      return bi;
+    };
+    const zet = e => {
+      const bi = dichtst(e), j = jaren[bi];
       const rr = reeks[bi];
-      hl.setAttribute('x1', x(jaren[bi])); hl.setAttribute('x2', x(jaren[bi])); hl.setAttribute('visibility', 'visible');
-      if (vals[bi] != null) { hd.setAttribute('cx', x(jaren[bi])); hd.setAttribute('cy', y(vals[bi])); hd.setAttribute('visibility', 'visible'); } else hd.setAttribute('visibility', 'hidden');
-      toonTip(e, `<b>${esc(p.t)} · ${jaren[bi]}</b>${voorlopig(jaren[bi]) ? ' <span class="muted">voorlopig</span>' : ''}<br><span class="num">${rr ? fmt(rr.n) : '–'}</span> cliënten · <span class="num">${rr ? fmt(rr.p) : '–'}</span> per 1.000`);
+      hl.setAttribute('x1', x(j)); hl.setAttribute('x2', x(j)); hl.setAttribute('visibility', 'visible');
+      if (vals[bi] != null) { hd.setAttribute('cx', x(j)); hd.setAttribute('cy', y(vals[bi])); hd.setAttribute('visibility', 'visible'); } else hd.setAttribute('visibility', 'hidden');
+      const sr = opt.schaduw && opt.schaduw[bi];
+      const hint = opt.kies ? (j === opt.mark ? '<br><span class="muted">dit jaar is gekozen</span>' : kiesbaar(j) ? `<br><span class="muted">klik om ${j} te kiezen voor de hele pagina</span>` : '<br><span class="muted">voor dit jaar zijn er geen wijkcijfers</span>') : '';
+      toonTip(e, `<b>${esc(opt.titel || p.t)} · ${j}</b>${voorlopig(j) ? ' <span class="muted">voorlopig</span>' : ''}<br><span class="num">${rr ? fmt(rr.n) : '–'}</span> cliënten${sleutel === 'p' || (rr && rr.p != null) ? ` · <span class="num">${rr ? fmt(rr.p) : '–'}</span> per 1.000` : ''}${sch ? `<br>${esc(opt.schaduwNaam || 'gemeente')}: <span class="num">${sr ? fmt(sr[sleutel]) : '–'}</span>${sleutel === 'p' ? ' per 1.000' : ''}` : ''}${hint}`);
     };
     const weg = () => { hl.setAttribute('visibility', 'hidden'); hd.setAttribute('visibility', 'hidden'); verbergTip(); };
     svg.addEventListener('pointermove', zet); svg.addEventListener('pointerdown', zet); svg.addEventListener('pointerleave', weg);
+    if (opt.kies) svg.addEventListener('click', e => { const j = jaren[dichtst(e)]; if (kiesbaar(j) && j !== opt.mark) { verbergTip(); opt.kies(j); } });
+    const nk = el.querySelector('.naarkaart');
+    if (nk) nk.addEventListener('click', () => kiesKaartMaat(opt.naarKaart, { scroll: true, sorteer: true }));
   }
   function nice(v) { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
+
+  // ---------- wat niet per wijk bestaat: zeggen, niet stil laten staan ----------
+  function renderNoten() {
+    const fo = focusWijk();
+    const wn = $('#wieNoot'), gn = $('#geldNoot');
+    if (!fo) { wn.hidden = true; gn.hidden = true; return; }
+    const gm = S.w.gm || {};
+    wn.innerHTML = `<b>${esc(fo.naam)}</b>: leeftijd en inkomen van de cliënten publiceert het CBS alleen voor de hele gemeente. Hieronder staat daarom ${esc(S.g.n)}.${fo.oud != null ? ` Wat per wijk wel bekend is: ${fPct(fo.oud)} van de inwoners van de wijk is 65 jaar of ouder, tegen ${fPct(gm.oud)} in de hele gemeente.` : ''}`;
+    gn.innerHTML = `<b>${esc(fo.naam)}</b>: de Iv3 kent geen wijken, de lasten bestaan alleen voor de hele gemeente. Hieronder staat daarom ${esc(S.g.n)}.${fo.n != null && gm.n ? ` De wijk heeft ${nf1.format(100 * fo.n / gm.n)}% van de Wmo-cliënten in ${S.w.jaar}.` : ''}`;
+    wn.hidden = false; gn.hidden = false;
+  }
 
   // ---------- wie ----------
   function renderWie() {
@@ -729,7 +905,11 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       const html = `<b>${j}</b> · ${isRek(j) ? 'jaarrekening' : 'begroting'}<br>${GROEP.map(gr => `${gr.t}: <span class="num">${fE(pi(v[gr.k], j))}</span> per inwoner`).join('<br>')}<br>Totaal <span class="num">${fMln(v.thuisTot + v.bw)}</span>${b && isRek(j) ? `<br>Begroot <span class="num">${fMln(b.thuisTot + b.bw)}</span>` : ''}`;
       rc.addEventListener('pointermove', e => toonTip(e, html));
       rc.addEventListener('pointerleave', verbergTip);
-      rc.addEventListener('click', () => { geldJaar = j; verbergTip(); renderGeld(); });
+      rc.addEventListener('click', () => {
+        geldJaar = j; verbergTip(); renderGeld();
+        // hetzelfde jaar ook voor de wijken, als daar cijfers voor zijn
+        if (S.wJaren.includes(j) && S.wJaar !== j) kiesJaar(j);
+      });
     });
     // detail
     const bev = S.bev && (S.bev[geldJaar] || S.bev[geldJaar - 1]);
@@ -756,23 +936,33 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   function markeerJaar(j) {
     $('#jaren').querySelectorAll('button').forEach(b => { const on = +b.dataset.j === j; b.setAttribute('aria-pressed', on); b.classList.toggle('primary', on); });
   }
+  // het jaar geldt voor de hele pagina: kaart, tabel, dossier, de markering in de grafieken en, waar het kan, de lasten
   async function kiesJaar(j) {
-    const g = S.g; S.wJaar = j; selWijk = null; markeerJaar(j);
-    try { history.replaceState(null, '', '#gm=' + g.c + '&jaar=' + j); } catch (e) {}
+    const g = S.g; S.wJaar = j; markeerJaar(j);
+    zetHash();
     $('#wijkKop').textContent = `Wmo per wijk · ${j}`;
     $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Wijken ophalen…</p>';
+    if (S.geld && S.geld.jaren.includes(j) && geldWaarde(j) && geldJaar !== j) { geldJaar = j; renderGeld(); }
+    renderTrend();
     fouten.delete('wijken');
-    const w = await laadWijk(g.c, j);
+    const w = await laadWijkC(g.c, j);
     if (S.g !== g || S.wJaar !== j) return;
+    if (w.fout) fouten.add('wijken');
     S.w = w; S.opgehaald = new Date();
     toonMelding();
     const info = [];
     if (!w.geo) info.push(`Voor ${j} zijn er geen wijkgrenzen bij PDOK (alleen 2023 en later). De tabel werkt wel, met de wijkindeling van ${j}.`);
     else if (!w.heeftOud) info.push(`Voor ${j} staat het aandeel 65-plussers per wijk nog niet bij PDOK.`);
+    // de gekozen wijk blijft gekozen, als ze in dit jaar bestaat
+    if (selWijk && !w.wijken.some(x => x.code === selWijk)) {
+      info.push(`${wijkNaam(selWijk)} komt in de wijkindeling van ${j} niet voor. De pagina toont daarom weer de hele gemeente.`);
+      selWijk = null; zetHash();
+    }
     $('#wijkInfoTxt').textContent = info.join(' ');
     $('#wijkInfo').hidden = !info.length;
     S.bounded = false;
-    renderKaart(); renderDossier(null); renderSpreiding(); renderTabel(); renderVoet();
+    renderFocus(); renderKern(); renderTrend(); renderNoten();
+    renderKaart(); renderDossier(focusWijk()); renderSpreiding(); renderTabel(); renderVoet();
   }
   const WTYPE = { T001024: 'n', A048188: 'zv', A019507: 'hh', A019506: 'ot', A019509: 'hm', A019508: 'vo', A050370: 'ov' };
   async function laadWijk(c, j) {
@@ -789,8 +979,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         per.set(code, o);
       });
       per.forEach(o => { if (/^GM/.test(o.code)) { o.naam = S.g.n; res.gm = o; } else res.wijken.push(o); });
-    } catch (e) { fouten.add('wijken'); }
-    if (j >= 2023) {
+    } catch (e) { res.fout = true; }
+    if (j >= 2023 && !res.fout) {
       try {
         const gj = await getJSON(`https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/wijken/items?f=json&gemeentecode=GM${c}&limit=1000`, 2);
         if (gj && gj.features && gj.features.length) {
@@ -817,12 +1007,33 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   }
 
   // ---------- kaart ----------
-  document.querySelectorAll('#segKaart button').forEach(b => b.addEventListener('click', () => {
-    kaartMaat = b.dataset.k;
-    document.querySelectorAll('#segKaart button').forEach(x => x.setAttribute('aria-pressed', x === b));
-    renderKaart();
-  }));
-  const maatVan = o => !o ? null : kaartMaat === 'wmo' ? o.p : o.oud;
+  // kaartmaten: totaal per 1.000, 65-plussers, of één type als aandeel van de cliënten in de wijk
+  const KTYPE = { hh: 'A019507', ot: 'A019506', hm: 'A019509', vo: 'A019508', ov: 'A050370' };
+  const isType = k => !!KTYPE[k];
+  const typeNaam = k => (TYPES.find(t => t.k === KTYPE[k]) || {}).t || k;
+  const aandeelType = (o, k) => o && o[k] != null && o.n ? 100 * o[k] / o.n : null;
+  function kiesKaartMaat(k, opt) {
+    opt = opt || {};
+    kaartMaat = k;
+    document.querySelectorAll('#segKaart button').forEach(x => x.setAttribute('aria-pressed', x.dataset.k === k));
+    $('#kaartType').value = isType(k) ? k : '';
+    $('#kaartType').classList.toggle('aan', isType(k));
+    if (opt.sorteer && isType(k)) { sortKey = '_a'; sortDir = -1; }
+    if (!isType(k) && sortKey === '_a') sortKey = null;
+    zetHash();
+    if (S && S.w) { renderKaart(); renderDossier(focusWijk()); renderTabel(); }
+    if (S && S.trend) renderTrend(); // de knop "per wijk" in de typegrafieken toont welke maat aan staat
+    if (opt.scroll) { const kop = document.querySelector('#wijkKop'); if (kop) kop.closest('.sectiekop').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+  }
+  document.querySelectorAll('#segKaart button').forEach(b => b.addEventListener('click', () => kiesKaartMaat(b.dataset.k)));
+  $('#kaartType').addEventListener('change', e => kiesKaartMaat(e.target.value || 'wmo', { sorteer: true }));
+  const maatVan = o => !o ? null : kaartMaat === 'wmo' ? o.p : kaartMaat === 'oud' ? o.oud : aandeelType(o, kaartMaat);
+  // sprong in de gemeentereeks van een type: dan toont de kaart registratie, niet per se de werkelijke spreiding
+  function sprongType(k) {
+    if (!S.trend || !KTYPE[k]) return null;
+    const d = S.trend.d[KTYPE[k]] || {};
+    return sprong(S.trend.jaren.map(j => d[j] || null), S.trend.jaren);
+  }
   function klassen() {
     const v = S.w.wijken.map(maatVan).filter(x => x != null);
     if (!v.length) return null;
@@ -862,19 +1073,29 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       onEachFeature: (f, ly) => {
         const o = byCode.get(f.properties.wijkcode);
         const nm = o ? o.naam : (f.properties.wijknaam || f.properties.wijkcode);
-        ly.bindTooltip(`<b>${esc(nm)}</b><br>${o ? fmt(o.n) : '–'} Wmo-cliënten · ${o ? fmt(o.p) : '–'} per 1.000<br>${o && o.oud != null ? fPct(o.oud) : '–'} is 65 jaar of ouder`, { sticky: true });
+        const ta = isType(kaartMaat) ? aandeelType(o, kaartMaat) : null;
+        ly.bindTooltip(`<b>${esc(nm)}</b><br>${o ? fmt(o.n) : '–'} Wmo-cliënten · ${o ? fmt(o.p) : '–'} per 1.000<br>${o && o.oud != null ? fPct(o.oud) : '–'} is 65 jaar of ouder${isType(kaartMaat) ? `<br>${esc(typeNaam(kaartMaat))}: ${o ? fmt(o[kaartMaat]) : '–'}${ta != null ? ' (' + nf.format(Math.round(ta)) + '%)' : ''}` : ''}`, { sticky: true });
         ly.on('click', () => kiesWijk(f.properties.wijkcode, false));
       }
     }).addTo(layer);
     const passen = !S.bounded; S.bounded = true;
     if (kl) {
-      const fm = v => kaartMaat === 'wmo' ? nf.format(Math.round(v)) : nf.format(Math.round(v)) + '%';
-      let h = `<span>${kaartMaat === 'wmo' ? 'Wmo-cliënten per 1.000 inwoners' : 'Inwoners van 65 jaar of ouder'}:</span>`;
+      // bij een kleine spreiding één decimaal, anders worden de klassen "2%–2%"
+      const fijn = isType(kaartMaat) && kl.n > 1 && kl.grenzen[kl.n] - kl.grenzen[0] < 10;
+      const fm = v => kaartMaat === 'wmo' ? nf.format(Math.round(v)) : (fijn ? nf1.format(v) : nf.format(Math.round(v))) + '%';
+      let h = `<span>${kaartMaat === 'wmo' ? 'Wmo-cliënten per 1.000 inwoners' : kaartMaat === 'oud' ? 'Inwoners van 65 jaar of ouder' : esc(typeNaam(kaartMaat)) + ', aandeel van de Wmo-cliënten in de wijk'}:</span>`;
       if (kl.n === 1) h += `<span><i class="sw" style="background:${css('--seq-3')}"></i>${fm(kl.grenzen[0])}</span>`;
       else for (let i = 0; i < kl.n; i++) h += `<span><i class="sw" style="background:${kleurVoor(kl.grenzen[i] + 1e-9, kl)}"></i>${fm(kl.grenzen[i])}–${fm(kl.grenzen[i + 1])}</span>`;
       h += `<span><i class="sw" style="background:${css('--sunk')};border-style:dashed"></i>geen cijfer</span>`;
+      if (isType(kaartMaat)) {
+        const spr = sprongType(kaartMaat);
+        const zonder = w.wijken.filter(o => aandeelType(o, kaartMaat) == null).length;
+        h += spr
+          ? `<span class="regwaarsch">${esc(typeNaam(kaartMaat))} sprong in ${esc(S.g.n)} tussen ${spr[0]} en ${spr[1]}: waarschijnlijk een andere registratie. De kaart toont wat de gemeente als dit type registreert, niet per se waar de ondersteuning werkelijk zit.</span>`
+          : `<span class="regwaarsch" style="color:var(--muted)">De kaart toont wat de gemeente als dit type registreert.${zonder ? ` ${zonder} van de ${w.wijken.length} wijken zonder cijfer: kleine aantallen laat het CBS weg.` : ''}</span>`;
+      }
       $('#mapLegend').innerHTML = h;
-    } else $('#mapLegend').innerHTML = '<span>Geen cijfers voor deze maat in dit jaar.</span>';
+    } else $('#mapLegend').innerHTML = `<span>Geen cijfers voor ${isType(kaartMaat) ? esc(typeNaam(kaartMaat).toLowerCase()) + ' per wijk' : 'deze maat'} in dit jaar${isType(kaartMaat) ? ': het CBS laat kleine aantallen weg, of de gemeente registreert dit type niet apart' : ''}.</span>`;
     setTimeout(() => { map.invalidateSize(); if (passen) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); }, 60);
   }
 
@@ -915,34 +1136,66 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!w || (!w.gm && !w.wijken.length)) { $('#dossier').innerHTML = '<span class="eyebrow">Wijk</span><p class="muted" style="margin:0">Geen wijkcijfers beschikbaar voor dit jaar.</p>'; return; }
     const x = o || w.gm;
     if (!x) { $('#dossier').innerHTML = ''; return; }
-    const rij = (t, v) => `<dt>${t}</dt><dd>${v}</dd>`;
+    // rij; de rij van de kaartmaat is gemarkeerd (zelfde patroon als Woningvoorraad)
+    const rij = (t, v, k) => { const u = k && k === kaartMaat ? ' class="uit"' : ''; return `<dt${u}>${t}</dt><dd${u}>${v}</dd>`; };
+    const metAandeel = k => x[k] == null ? '–' : fmt(x[k]) + (aandeelType(x, k) != null ? ` <span class="muted">· ${nf.format(Math.round(aandeelType(x, k)))}%</span>` : '');
+    // de gekozen kaartmaat bovenaan, met de gemeente ter vergelijking
+    const gm = w.gm;
+    const waardeMaat = (y, k) => k === 'wmo' ? (y.p == null ? '–' : fmt(y.p)) : k === 'oud' ? fPct(y.oud) : (aandeelType(y, k) == null ? '–' : nf.format(Math.round(aandeelType(y, k))) + '%');
+    const fl = kaartMaat === 'wmo' ? 'Wmo-cliënten per 1.000 inwoners' : kaartMaat === 'oud' ? '65 jaar of ouder' : `${typeNaam(kaartMaat)}, aandeel van de cliënten`;
+    const fsub = isType(kaartMaat) && x[kaartMaat] != null ? `<small>${fmt(x[kaartMaat])} cliënten</small>` : kaartMaat === 'wmo' && x.n != null ? `<small>${fmt(x.n)} cliënten</small>` : '';
+    const vgl = o && gm ? `${esc(S.g.n)}: ${waardeMaat(gm, kaartMaat)}` : 'hele gemeente';
+    const focusBlok = `<div class="focus"><span class="fl">${esc(fl)}</span><span class="fv">${waardeMaat(x, kaartMaat)}${fsub}</span><span class="fc">${vgl}</span></div>`;
     $('#dossier').innerHTML = `<span class="eyebrow">${o ? 'Wijk' : 'Hele gemeente'} · ${w.jaar}${voorlopig(w.jaar) ? ' voorlopig' : ''}</span><h2>${esc(x.naam)}</h2>
+      ${focusBlok}
       <dl>
         ${rij('Wmo-cliënten', fmt(x.n))}
-        ${rij('Per 1.000 inwoners', fmt(x.p))}
+        ${rij('Per 1.000 inwoners', fmt(x.p), 'wmo')}
         ${rij('Inwoners', fmt(x.inw))}
-        ${rij('65 jaar of ouder', fPct(x.oud))}
+        ${rij('65 jaar of ouder', fPct(x.oud), 'oud')}
         ${rij('Zonder verblijf en opvang', fmt(x.zv))}
-        ${rij('Hulp bij het huishouden', fmt(x.hh))}
-        ${rij('Ondersteuning thuis', fmt(x.ot))}
-        ${rij('Hulpmiddelen en diensten', fmt(x.hm))}
-        ${rij('Verblijf en opvang', fmt(x.vo))}
-        ${rij('Overig', fmt(x.ov))}
+        ${rij('Hulp bij het huishouden', metAandeel('hh'), 'hh')}
+        ${rij('Ondersteuning thuis', metAandeel('ot'), 'ot')}
+        ${rij('Hulpmiddelen en diensten', metAandeel('hm'), 'hm')}
+        ${rij('Verblijf en opvang', metAandeel('vo'), 'vo')}
+        ${rij('Overig', metAandeel('ov'), 'ov')}
       </dl>
-      <p class="small muted" style="margin:0">Een cliënt met meer typen telt bij elk type mee. – = weggelaten vanwege kleine aantallen.</p>
+      <p class="small muted" style="margin:0">Achter een type het aandeel van de cliënten. Een cliënt met meer typen telt bij elk type mee. – = weggelaten vanwege kleine aantallen.</p>
       ${o ? `<button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>` : '<p class="small muted" style="margin:0">Klik een wijk op de kaart, in de spreiding of in de tabel.</p>'}`;
     const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesWijk(null));
   }
+  // één keuze, alle blokken luisteren: wat per wijk bestaat beweegt mee, de rest zegt waarom niet
   function kiesWijk(code, vanElders) {
-    selWijk = code;
+    if (!S || !S.w) return;
     const o = code ? S.w.wijken.find(x => x.code === code) : null;
+    selWijk = o ? code : null;
+    zetHash();
+    renderFocus(); renderKern(); renderTrend(); renderNoten();
     renderDossier(o); renderKaart(); renderSpreiding();
-    if (vanElders && gjLayer && code) gjLayer.eachLayer(l => { if (l.feature && l.feature.properties.wijkcode === code) map.fitBounds(l.getBounds(), { maxZoom: 15, padding: [24, 24] }); });
-    document.querySelectorAll('#tblWrap tbody tr').forEach(r => r.classList.toggle('sel', !!code && r.dataset.code === code));
+    if (vanElders && gjLayer && o) gjLayer.eachLayer(l => { if (l.feature && l.feature.properties.wijkcode === code) map.fitBounds(l.getBounds(), { maxZoom: 15, padding: [24, 24] }); });
+    if (vanElders && gjLayer && !o && gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] });
+    document.querySelectorAll('#tblWrap tbody tr').forEach(r => r.classList.toggle('sel', !!selWijk && r.dataset.code === selWijk));
   }
 
+  // ---------- balk bovenaan: welke keuze volgt de pagina ----------
+  function renderFocus() {
+    const bar = $('#focusbar');
+    if (!S || !S.w || !S.w.wijken.length) { bar.hidden = true; return; }
+    const fo = focusWijk();
+    const opties = S.w.wijken.slice().sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
+    $('#focusSel').innerHTML = `<option value="">Hele gemeente: ${esc(S.g.n)}</option>` + opties.map(o => `<option value="${esc(o.code)}">${esc(o.naam)}</option>`).join('');
+    $('#focusSel').value = fo ? fo.code : '';
+    $('#focusTxt').textContent = fo
+      ? `De pagina volgt deze wijk in ${S.w.jaar}, waar het CBS cijfers per wijk heeft. Wat alleen voor de hele gemeente bestaat, zegt dat.`
+      : `Kies een wijk hier, op de kaart, in de spreiding of in de tabel. De hele pagina volgt dan die wijk.`;
+    $('#focusTerug').hidden = !fo;
+    bar.hidden = false;
+  }
+  $('#focusSel').addEventListener('change', e => kiesWijk(e.target.value || null, true));
+  $('#focusTerug').addEventListener('click', () => kiesWijk(null, true));
+
   // ---------- tabel ----------
-  const COLS = [
+  const COLS0 = [
     { k: 'naam', t: 'Wijk' }, { k: 'n', t: 'Wmo-cliënten', r: 1 }, { k: 'p', t: 'Per 1.000', r: 1 }, { k: 'oud', t: '65+ (%)', r: 1 }, { k: 'inw', t: 'Inwoners', r: 1 },
     { k: 'hh', t: 'Huishouden', r: 1 }, { k: 'ot', t: 'Ondersteuning thuis', r: 1 }, { k: 'hm', t: 'Hulpmiddelen', r: 1 }, { k: 'vo', t: 'Verblijf en opvang', r: 1 }, { k: 'ov', t: 'Overig', r: 1 }
   ];
@@ -951,15 +1204,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!S || !S.w) return;
     const w = S.w;
     const zoek = $('#search').value.trim().toLowerCase();
-    let rest = w.wijken.slice();
+    // bij een type op de kaart: kolom met het aandeel van dat type, direct na de naam
+    const tk = isType(kaartMaat) ? kaartMaat : null;
+    const COLS = tk ? [COLS0[0], { k: '_a', t: `${TYPES.find(t => t.k === KTYPE[tk]).kort} (% cliënten)`, r: 1, uit: 1 }, ...COLS0.slice(1).map(c => c.k === tk ? { ...c, uit: 1 } : c)] : COLS0;
+    const metA = r => tk ? { ...r, _a: aandeelType(r, tk) } : r;
+    let rest = w.wijken.map(metA);
     if (zoek) rest = rest.filter(r => [r.naam, r.code].join(' ').toLowerCase().includes(zoek));
     if (sortKey) rest.sort((a, b) => { const x = a[sortKey], y = b[sortKey]; if (x == null) return 1; if (y == null) return -1; return (typeof x === 'string' ? x.localeCompare(y, 'nl') : x - y) * sortDir; });
     else rest.sort((a, b) => a.code.localeCompare(b.code));
-    const rs = (w.gm ? [{ ...w.gm, isGm: true }] : []).concat(rest);
+    const rs = (w.gm ? [{ ...metA(w.gm), isGm: true }] : []).concat(rest);
     if (!rs.length) { $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Geen cijfers voor dit jaar.</p>'; $('#rowCount').textContent = ''; return; }
-    const cel = (r, c) => c.k === 'naam' ? esc(r.naam) : c.k === 'oud' ? (r.oud == null ? '–' : nf.format(r.oud)) : fmt(r[c.k]);
-    $('#tblWrap').innerHTML = `<table><thead><tr>${COLS.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.t}</th>`).join('')}</tr></thead>
-      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selWijk ? 'sel' : ''}" data-code="${esc(r.code)}">${COLS.map(c => `<td class="${c.r ? 'r' : ''}">${cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    const cel = (r, c) => c.k === 'naam' ? esc(r.naam) : c.k === 'oud' ? (r.oud == null ? '–' : nf.format(r.oud)) : c.k === '_a' ? (r._a == null ? '–' : nf.format(Math.round(r._a))) : fmt(r[c.k]);
+    const kl = c => [c.r ? 'r' : '', c.uit ? 'uit' : ''].join(' ').trim();
+    $('#tblWrap').innerHTML = `<table><thead><tr>${COLS.map(c => `<th class="${kl(c)}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.t}</th>`).join('')}</tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selWijk ? 'sel' : ''}" data-code="${esc(r.code)}">${COLS.map(c => `<td class="${kl(c)}">${cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
     $('#rowCount').textContent = `${rest.length} wijken · ${w.jaar}`;
     $('#tblWrap').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
       const k = th.dataset.k;
@@ -1046,7 +1304,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';
