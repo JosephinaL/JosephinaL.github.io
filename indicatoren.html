@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Indicatorenkompas · Open Data Atelier</title>
+<title>Indicatoren belicht · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
 <meta name="description" content="Welke indicatoren horen bij een beleidsdomein, wat zeggen ze en wat niet, en waar staan ze: in open data, bij een ketenpartner of alleen in de eigen registratie. Zonder cijfers, voor elke gemeente.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -210,8 +210,8 @@ footer p { margin: 0 0 6px; }
   <header class="top">
     <div class="brand">
       <a class="terug" href="./">← Open Data Atelier</a>
-      <span class="eyebrow">Wat meet je? · indicatoren per domein</span>
-      <h1>Indicatorenkompas</h1>
+      <span class="eyebrow">Wat per beleidsdomein zichtbaar kan worden</span>
+      <h1>Indicatoren belicht</h1>
       <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
     </div>
     <form class="picker" id="pickForm">
@@ -249,7 +249,7 @@ footer p { margin: 0 0 6px; }
 
   <section class="cols">
     <div class="card">
-      <h3>Zo is het kompas opgebouwd</h3>
+      <h3>Zo is deze pagina opgebouwd</h3>
       <ul>
         <li><b>Drie soorten bron.</b> <span class="badge open">open</span> staat in open data (meestal CBS, met tabelnummer). <span class="badge keten">ketenpartner</span> heeft een andere organisatie, zoals Veilig Thuis of een welzijnsorganisatie. <span class="badge intern">intern</span> staat alleen in de registratie van de gemeente.</li>
         <li><b>Volgorde van de keten.</b> Context (de situatie in de gemeente), inspanning (geld, capaciteit), bereik en prestatie (wie wordt bereikt, hoe snel), uitkomst (wat het oplevert).</li>
@@ -286,7 +286,7 @@ footer p { margin: 0 0 6px; }
 (function () {
   'use strict';
   const VERSIE = '0.3';
-  const PRODUCT = 'Indicatorenkompas';
+  const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const cbs = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table" target="_blank" rel="noopener">CBS ${id}</a>`;
@@ -671,8 +671,8 @@ footer p { margin: 0 0 6px; }
   function render() {
     $('#gmInput').value = S.gm ? byCode.get(S.gm).n : '';
     $('#gmRegel').textContent = S.gm
-      ? `Links naar instrumenten openen op ${byCode.get(S.gm).n}. Het kompas zelf is voor elke gemeente gelijk.`
-      : 'Kies je hierboven een gemeente, dan openen de links naar de instrumenten meteen op die gemeente. Het kompas zelf is voor elke gemeente gelijk.';
+      ? `Links naar instrumenten openen op ${byCode.get(S.gm).n}. De indicatoren zelf zijn voor elke gemeente gelijk.`
+      : 'Kies je hierboven een gemeente, dan openen de links naar de instrumenten meteen op die gemeente. De indicatoren zelf zijn voor elke gemeente gelijk.';
     const d = S.d ? D[S.d] : null;
     $('#overzicht').hidden = !!d; $('#detail').hidden = !d; $('#kruimel').hidden = !d;
     renderMeld(d);
@@ -732,7 +732,7 @@ footer p { margin: 0 0 6px; }
     }
     regels.push('Al open beschikbaar (niet uitvragen):');
     open.forEach(c => regels.push(`- ${c.naam}: ${plat(c.bron())}`));
-    regels.push('', `Opgesteld met het Indicatorenkompas van Josephine Linders, ${location.href}`);
+    regels.push('', `Opgesteld met Indicatoren belicht van Josephine Linders, ${location.href}`);
     return regels.join('\n');
   }
   function renderUitvraag(d) {
