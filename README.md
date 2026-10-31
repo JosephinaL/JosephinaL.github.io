@@ -37,6 +37,10 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 
 [indicatoren.html](https://josephinal.github.io/indicatoren.html) staat naast de instrumenten en is zelf geen instrument: het rekent niet en toont geen cijfers. Per thema staat welke indicatoren ertoe doen, wat ze zeggen en wat niet, op welk niveau ze bestaan en waar ze staan: in open data (met tabelnummer), bij een ketenpartner of alleen in de eigen registratie van de gemeente. Interne indicatoren verwijzen naar het Gemeentelijk Gegevensmodel (GGM) v2.5.1; een knop zet ze in één uitvraag voor de informatie-afdeling. Ingedeeld naar de Iv3-hoofdtaakvelden, net als de instrumenten; nu uitgewerkt: Wmo en huiselijk geweld en kindermishandeling. Bronnen van de indicatoren: CBS (StatLine), RIVM, waarstaatjegemeente.nl, Iv3-informatievoorschrift 2025, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling.
 
+## Registraties belicht
+
+[registraties.html](https://josephinal.github.io/registraties.html) staat naast de instrumenten en Indicatoren belicht. Het toont per registratie de signalen uit open data dat de registratie zichzelf tegenspreekt, lang onderweg blijft of waarden bevat die opvallen, per gemeente en per object. Eerste uitwerking: [Kwaliteit van de BAG](https://josephinal.github.io/bagkwaliteit.html), op basis van de BAG-GeoPackage van het Kadaster (PDOK, CC0), met per signaal de adressen en een link naar de BAG-viewer. Een signaal is een vraag, geen oordeel; de pagina is geen authentieke BAG.
+
 ## Werkwijze
 
 Vier lagen:
