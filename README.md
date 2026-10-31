@@ -39,7 +39,7 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 
 ## Registraties belicht
 
-[registraties.html](https://josephinal.github.io/registraties.html) staat naast de instrumenten en Indicatoren belicht. Het toont per registratie de signalen uit open data dat de registratie zichzelf tegenspreekt, lang onderweg blijft of waarden bevat die opvallen, per gemeente en per object. Eerste uitwerking: [Kwaliteit van de BAG](https://josephinal.github.io/bagkwaliteit.html), op basis van de BAG-GeoPackage van het Kadaster (PDOK, CC0), met per signaal de adressen en een link naar de BAG-viewer. Een signaal is een vraag, geen oordeel; de pagina is geen authentieke BAG.
+*Inzicht in de datakwaliteit van registraties.* [registraties.html](https://josephinal.github.io/registraties.html) staat naast de instrumenten en Indicatoren belicht. Het toont per registratie de signalen uit open data dat de registratie zichzelf tegenspreekt, lang onderweg blijft of waarden bevat die opvallen, per gemeente en per object. Eerste uitwerking: [Kwaliteit van de BAG](https://josephinal.github.io/bagkwaliteit.html), op basis van de BAG-GeoPackage van het Kadaster (PDOK, CC0), met per signaal de adressen en een link naar de BAG-viewer. Een signaal is een vraag, geen oordeel; de pagina is geen authentieke BAG.
 
 ## Werkwijze
 
