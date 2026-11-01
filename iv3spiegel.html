@@ -173,6 +173,14 @@ footer p{margin:0}
 .herken .meld a.btn { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); text-decoration: none; color: inherit; }
 .herken .meld a.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .herken .meld .klein { font-size: 13px; color: var(--muted); }
+
+/* inleiding zonder gekozen gemeente (sinds 1 nov 2026) */
+.intro { max-width: 70ch; display: grid; gap: 8px; }
+.intro p { margin: 0; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; }
+.snel span { color: var(--muted); }
+.snel button { font-size: 15px; padding: 5px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); cursor: pointer; }
+.snel button:hover, .snel button:focus-visible { border-color: var(--accent); }
 </style>
 
 <div class="wrap">
@@ -183,12 +191,16 @@ footer p{margin:0}
     <p class="lead">Elke gemeente legt haar geldzaken vast in hetzelfde schema, het Iv3. Kies een gemeente en zie hoe haar huishouding eruitziet: waar het geld heen gaat, waar het vandaan komt en of ze deed wat ze van plan was.</p>
     <div class="pick">
       <label for="gm">Gemeente</label>
-      <select id="gm"></select>
+      <select id="gm"><option value="" disabled selected>Kies een gemeente</option></select>
       <span class="note">342 gemeenten · cijfers over 2025</span>
     </div>
   </header>
 
-  <section class="whole" aria-labelledby="wtitle">
+  <section class="intro" id="intro">
+    <p class="snel" id="snel"><span>Of begin met</span><button type="button" data-gm="0518">Den Haag</button><button type="button" data-gm="1783">Westland</button><button type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section class="whole" aria-labelledby="wtitle" data-na-keuze hidden>
     <h2 id="wtitle"></h2>
     <p class="notice" id="missing" hidden></p>
     <p class="story" id="story"></p>
@@ -196,7 +208,7 @@ footer p{margin:0}
     <div class="flows" id="flows"></div>
   </section>
 
-  <details class="herken" id="herken">
+  <details class="herken" id="herken" data-na-keuze hidden>
     <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
     <ol>
       <li><b>Een ander begrip.</b> Dit zijn de lasten en baten zoals de gemeente ze in het Iv3 vastlegt, per taakveld, met overhead apart op taakveld 0.4 en de mutaties in reserves en het resultaat apart. Een begroting of jaarverslag in de eigen programma-indeling telt anders op.</li>
@@ -213,7 +225,7 @@ footer p{margin:0}
     </div>
   </details>
 
-  <section class="panel" aria-label="Drie vragen">
+  <section class="panel" aria-label="Drie vragen" data-na-keuze hidden>
     <div class="tabs" role="tablist" aria-label="Vraag">
       <button class="tab" role="tab" id="t-heen" data-v="heen" aria-controls="view">Waar gaat het geld heen?</button>
       <button class="tab" role="tab" id="t-van" data-v="van" aria-controls="view">Waar komt het geld vandaan?</button>
@@ -341,15 +353,30 @@ const nm = gm => G[gm].n.replace(" (gemeente)","");
 const tvName = t => TVN[t]||t;
 
 /* ---------- state ---------- */
-let gm = "GM0503", tab = "heen", tmPath = [], tmSel = null, planPath = [];
+let gm = null, tab = "heen", tmPath = [], tmSel = null, planPath = [];
 
 const sel = document.getElementById("gm");
 Object.keys(G).sort((a,b)=>nm(a).localeCompare(nm(b),"nl")).forEach(k=>{ const o=document.createElement("option"); o.value=k; o.textContent=nm(k); sel.appendChild(o); });
-const fromHash = (location.hash||"").replace("#","").toUpperCase();
-if (G[fromHash]) gm = fromHash;
-sel.value = gm;
-sel.addEventListener("change",()=>{ gm=sel.value; tmPath=[]; tmSel=null; planPath=[];
-  try{ history.replaceState(null,"","#"+gm.toLowerCase()); }catch(e){} render(); });
+/* gemeentekeuze zoals in de andere instrumenten: link (#gm=0503; oude vorm #gm0503 werkt ook), anders de laatst gekozen gemeente, anders de inleiding */
+function startGemeente(){
+  const h = (location.hash.match(/gm=?(\d{4})/i)||[])[1];
+  if (h && G["GM"+h]) return "GM"+h;
+  let b = null; try{ b = localStorage.getItem("jl-gemeente"); }catch(e){}
+  if (b && /^\d{4}$/.test(b) && G["GM"+b]) return "GM"+b;
+  return null;
+}
+function kies(k){
+  if (!G[k]) return;
+  gm = k; tmPath=[]; tmSel=null; planPath=[]; sel.value = k;
+  document.getElementById("intro").hidden = true;
+  document.querySelectorAll("[data-na-keuze]").forEach(e=>e.hidden=false);
+  const c = k.slice(2);
+  try{ localStorage.setItem("jl-gemeente", c); }catch(e){}
+  try{ history.replaceState(null,"","#gm="+c); }catch(e){}
+  render();
+}
+sel.addEventListener("change",()=>kies(sel.value));
+document.querySelectorAll("#snel [data-gm]").forEach(b=>b.addEventListener("click",()=>kies("GM"+b.dataset.gm)));
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>{ tab=b.dataset.v; renderTab(); }));
 
 /* ---------- helpers on data ---------- */
@@ -539,7 +566,7 @@ function viewPlan(){
   view.querySelectorAll("button.prow").forEach(b=>b.addEventListener("click",()=>{ planPath=[b.dataset.id]; viewPlan(); }));
 }
 
-render();
+{ const k = startGemeente(); if (k) kies(k); }
 </script>
 
 <!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->

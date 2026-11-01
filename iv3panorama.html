@@ -222,7 +222,7 @@ function row(g,ord,isNL){
     if(w>0) segs+=`<i style="width:${w}%;background:var(--${HC[i]})"></i>`; }
   const clipped = mode==="eur" && g.piTot>CAP;
   const val = mode==="pct" ? nf1.format(g.share[ord[0]])+"%" : "€ "+nf0.format(g.piTot);
-  const href = isNL ? null : SPIEGEL+"#"+g.code.toLowerCase();
+  const href = isNL ? null : SPIEGEL+"#gm="+g.code.slice(2);
   const tag = href ? "a" : "div";
   return `<${tag} class="r${isNL?" nl":""}${hit===g.code?" hit":""}" ${href?`href="${href}" target="_blank" rel="noopener" id="r-${g.code}"`:""} data-c="${g.code}">
     <span class="n">${g.name}</span><span class="bar">${segs}${clipped?'<span class="clip"></span>':""}</span><span class="v">${val}</span></${tag}>`;
