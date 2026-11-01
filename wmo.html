@@ -203,13 +203,14 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
-.herken { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
 .herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
 .herken > summary .muted { font-weight: 400; }
 .herken[open] > summary { margin-bottom: 10px; }
 .herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
 .herken .status { margin: 12px 0 0; max-width: 76ch; }
 .herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
 .herken .meld a.btn { text-decoration: none; color: inherit; }
 .herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
 .verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
