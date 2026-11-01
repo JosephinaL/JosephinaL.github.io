@@ -83,6 +83,10 @@ nav a:hover { color: var(--accent); }
 /* producten */
 .section { display: grid; gap: 28px; }
 .section-head { display: grid; gap: 8px; max-width: 62ch; }
+.manifest { display: grid; gap: 12px; max-width: 62ch; border-left: 3px solid var(--accent); padding-left: 20px; }
+.manifest h3 { font-size: 1.25rem; color: var(--accent); }
+.manifest p { color: var(--ink); }
+.manifest p.slot { font-style: italic; color: var(--muted); }
 .product { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); overflow: hidden; }
 @media (max-width: 820px) { .product { grid-template-columns: minmax(0, 1fr); } }
 .product-body { padding: 28px; display: grid; gap: 16px; align-content: start; }
@@ -237,6 +241,11 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
   </section>
 
   <section class="section" id="werkwijze" aria-labelledby="h-werk">
+    <div class="manifest">
+      <h3>Anders kijken. Verbanden ontdekken. Betekenis zichtbaar maken.</h3>
+      <p>Elke registratie vertelt een eigen verhaal. In de verbindingen ertussen ontstaat iets nieuws. Het Open Data Atelier is de plek om die verbindingen te onderzoeken. Niet alles hoeft daarbij sluitend te zijn: een ontbrekend gegeven of een onverwachte uitkomst is vaak het begin van de volgende vraag.</p>
+      <p class="slot">Soms is anders kijken genoeg om te zien wat er al die tijd al was.</p>
+    </div>
     <div class="section-head">
       <span class="eyebrow">Werkwijze</span>
       <h2 id="h-werk">Drie principes</h2>
