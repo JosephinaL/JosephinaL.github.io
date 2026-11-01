@@ -670,6 +670,10 @@ svg.leaflet-image-layer.leaflet-interactive path {
 		print-color-adjust: exact;
 		}
 	}
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script>/* Leaflet 1.9.4 (c) Volodymyr Agafonkin, BSD-2-Clause */
 /* @preserve
@@ -914,7 +918,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       <ul class="plain small">
         <li>De lijst wordt in deze browser gelezen en <b>niet bewaard</b>. Sluit je de pagina, dan is hij weg.</li>
         <li>Naar buiten gaan alleen <b>zoekvragen naar openbare diensten</b>: BAG-ID's en adressen (postcode, huisnummer, straat) naar PDOK, pand-ID's naar RIVM. Namen, gebruik, oppervlakte en alle andere kolommen gaan nergens heen.</li>
-        <li>De pagina kan technisch niets anders bereiken dan PDOK en RIVM: dat legt haar beveiligingsregel (Content-Security-Policy) vast. Lettertypen komen van Google Fonts, zonder gegevens uit je lijst.</li>
+        <li>De pagina kan technisch niets anders bereiken dan PDOK en RIVM, plus de bezoekersteller GoatCounter: dat legt haar beveiligingsregel (Content-Security-Policy) vast. GoatCounter telt alleen dat de pagina bezocht is, zonder gegevens uit je lijst. Lettertypen en kaartbibliotheek staan op deze site zelf.</li>
         <li>Geschikt voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed. Bij lijsten over inwoners zijn ook de adressen als zoekvraag al gevoelig; daarvoor is deze versie niet bedoeld.</li>
         <li>Volgt de lijst het <a href="#ggm">GGM-invoercontract</a>, dan gaan alleen BAG-ID's naar buiten: de pagina zoekt dan niet op adres.</li>
         <li>Daarom kijkt de pagina vóór het koppelen naar kolomkoppen en inhoud. Wijst iets op persoonsgegevens of op een lijst over mensen, dan koppelt ze niet: BSN, geboortedatum, e-mail, telefoon, IBAN, veelvoorkomende voor- en achternamen, of een kolomkop met cliënt, bewoner, inwoner of patiënt. Wijst een kolomkop op andere gegevens over inwoners (Wmo, huishouden, uitkering, huurder en dergelijke), of lijkt een naamkolom op persoonsnamen, dan pas na jouw bevestiging. Deze controle is een vangnet, geen garantie: de verantwoordelijkheid voor wat je inleest blijft bij jou.</li>
@@ -1056,8 +1060,20 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Twee soorten gegevens. <i>Jouw lijst</i>: wat je zelf inleest; die wordt in deze browser gelezen en niet bewaard. <i>Open bronnen</i>, live opgehaald op het moment van koppelen: BAG (Kadaster) via PDOK (dagstand), energielabels van het RIVM (afgeleid uit EP-Online van RVO, maandelijks, enkele weken achter), rijksmonumenten (RCE) en CBS-buurten en -wijken via PDOK. Het voorbeeld komt uit de open dataset Gemeentelijk Vastgoed van Amsterdam (opgehaald 24 oktober 2026); de kolomnamen van het GGM-invoercontract uit GGM v2.5.1. Het tijdstip van koppelen staat onder de uitkomst.</p>
+    <p><b>Licentie.</b> BAG: CC0. Energielabels (RIVM): Public Domain Mark 1.0. Rijksmonumenten (RCE), CBS-grenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0. Voorbeeld Amsterdam: "public" volgens de bron. GGM (Gemeente Delft): EUPL-1.2; alleen kolomnamen en typen overgenomen. Jouw lijst blijft van jou, ook in de downloads.</p>
+    <p><b>Methode.</b> Elke regel wordt gekoppeld op BAG-ID, anders op postcode en huisnummer, anders op straat en huisnummer binnen de gemeente; passen meer adressen, dan koppelt de pagina niet. Signalen leggen jouw lijst naast de BAG en de open data. De volledige uitleg staat na het koppelen onder "Zo is gekoppeld" en "Signalen".</p>
+    <p><b>Wat dit niet is.</b> Geen register en geen vaststelling: signalen zijn indicatief. Geen gereedschap voor lijsten over inwoners: de controle vooraf is een vangnet, geen garantie, en de verantwoordelijkheid voor wat je inleest blijft bij jou. De label C-toets is vereenvoudigd; de volledige toets staat in Label C-kantoren.</p>
+    <p><b>Bekende beperkingen.</b> Adressen en BAG-ID's gaan als zoekvraag naar PDOK, pand-ID's naar RIVM; daaraan is af te lezen welke objecten in de lijst staan. Met het GGM-invoercontract gaan alleen BAG-ID's naar buiten. Rijksmonumenten alleen op ligging. Excel-bestanden niet direct: plak de lijst of gebruik CSV.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. De open data is bewerkt; wat je zelf inleest is geen open data en geen publicatie van een gemeente.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een koppeling, een signaal of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Zet er geen regels uit je eigen lijst in. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
 </div>
 
@@ -2137,7 +2153,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
     drawMap(); renderAll(); renderDeel();
     $('#dossier').innerHTML = '<span class="eyebrow">Object</span><p class="muted" style="margin:0">Klik een object op de kaart of een regel in de tabel om te zien hoe het gekoppeld is en waarom het een signaal heeft.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Gekoppeld ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Lijst: ${state.bron === 'voorbeeld' ? 'voorbeeld, 39 verhuurbare eenheden uit de open dataset Gemeentelijk Vastgoed van de gemeente Amsterdam (api.data.amsterdam.nl), opgehaald 24 oktober 2026' : state.bron === 'ggmtest' ? `synthetische testset volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed): echte BAG-objecten in Zwolle, alle andere waarden verzonnen; geen vastgoed van een gemeente` : state.ggm ? `eigen invoer volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed), alleen in deze browser (geen open data); alleen BAG-ID's als zoekvraag verstuurd` : 'eigen invoer, alleen in deze browser (geen open data)'}. Bronnen: BAG (Kadaster, via PDOK; live), adressen (PDOK Locatieserver), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks, enkele weken achter), rijksmonumenten (RCE, via PDOK), buurten en wijken ${res.wbJaar || '–'} (CBS, via PDOK). Signalen zijn indicatief.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br><a href="./">Josephine Linders</a> · Eigen lijst op de kaart · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Gekoppeld ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Lijst: ${state.bron === 'voorbeeld' ? 'voorbeeld, 39 verhuurbare eenheden uit de open dataset Gemeentelijk Vastgoed van de gemeente Amsterdam (api.data.amsterdam.nl), opgehaald 24 oktober 2026' : state.bron === 'ggmtest' ? `synthetische testset volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed): echte BAG-objecten in Zwolle, alle andere waarden verzonnen; geen vastgoed van een gemeente` : state.ggm ? `eigen invoer volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed), alleen in deze browser (geen open data); alleen BAG-ID's als zoekvraag verstuurd` : 'eigen invoer, alleen in deze browser (geen open data)'}. Bronnen: BAG (Kadaster, via PDOK; live), adressen (PDOK Locatieserver), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks, enkele weken achter), rijksmonumenten (RCE, via PDOK), buurten en wijken ${res.wbJaar || '–'} (CBS, via PDOK). Signalen zijn indicatief.<br><a href="./">Josephine Linders</a> · Eigen lijst op de kaart · versie ${VERSIE}`;
     $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function counts() {
@@ -2589,7 +2605,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';

@@ -158,6 +158,10 @@ footer p { margin: 0 0 6px; }
 .strook { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
 .strook div { border-top: 4px solid var(--k); padding-top: 4px; font-size: .8rem; color: var(--muted); line-height: 1.3; }
 .strook b { display: block; font-family: var(--f-display); font-stretch: 85%; font-size: 1.15rem; color: var(--fg); font-variant-numeric: tabular-nums; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -245,11 +249,21 @@ footer p { margin: 0 0 6px; }
     </div>
   </section>
   <footer>
-    <p>Bron van de tegel: BAG (Kadaster) via PDOK, stand 30 september 2026. Bewerking door Josephine Linders, op eigen titel; geen officiële publicatie van een gemeente of van een bronhouder.</p>
-    <p>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p>Josephine Linders · Registraties belicht · versie 0.1</p>
   </footer>
-  <p class="terug-onder"><a class="terug" href="./">← Terug naar het Open Data Atelier</a></p>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Dit is een overzicht; elke tegel opent een pagina met een eigen verantwoording. Kwaliteit van de BAG: BAG (Kadaster) via PDOK, landelijk bestand stand 30 september 2026, documentdatum van nieuwe verblijfsobjecten stand 30 oktober 2026; maandelijks ververst, pas gepubliceerd na controle.</p>
+    <p><b>Licentie.</b> BAG: CC0. De bewerking valt onder de gebruiksregel hieronder.</p>
+    <p><b>Methode.</b> Per registratie een plank, per uitwerking een tegel. Een tegel laat zien welke signalen uit open data te halen zijn, voor elke gemeente; de uitleg per signaal staat op de pagina van de tegel.</p>
+    <p><b>Wat dit niet is.</b> Geen oordeel over een gemeente of een bronhouder, en geen vervanging van de eigen kwaliteitscontroles van de bronhouder. Een signaal is een aanleiding om na te gaan; wie de registratie bijhoudt, weet vaak meteen waarom iets zo staat.</p>
+    <p><b>Bekende beperkingen.</b> Open data ziet alleen wat geregistreerd is, als momentopname: mutaties die nog in verwerking zijn kunnen als signaal verschijnen. De plank "Binnenkort" toont uitwerkingen die nog niet gebouwd zijn.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Geen officiële publicatie van een gemeente of van een bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Mis je een registratie of klopt er iets niet? Meld het via <a href="./#samenwerken">Samenwerken</a> of openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./">← Terug naar het Open Data Atelier</a></p>
+  </section>
 </div>
 <script>
 (function () {

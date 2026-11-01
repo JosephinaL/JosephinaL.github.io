@@ -200,6 +200,10 @@ footer p { margin: 0 0 6px; }
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -278,7 +282,19 @@ footer p { margin: 0 0 6px; }
   </section>
 
   <footer id="foot"></footer>
-  <p class="terug-onder"><a class="terug" href="./#producten">← Naar de instrumenten in Gemeentebeeld</a></p>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De pagina haalt zelf geen cijfers op.</p>
+    <p><b>Licentie.</b> CBS en RIVM: CC BY 4.0. GGM (Gemeente Delft): EUPL-1.2; alleen namen van entiteiten en attributen overgenomen. De teksten op de kaarten vallen onder de gebruiksregel hieronder.</p>
+    <p><b>Methode.</b> Per thema de indicatoren in de volgorde van de beleidsketen. Elke kaart geeft definitie, wat de indicator wel en niet zegt, laagste niveau, bron (open, ketenpartner of intern), herkomst, norm en vergelijkbaarheid. Zie "Zo is deze pagina opgebouwd".</p>
+    <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen cijfers en geen oordeel over een gemeente. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
+    <p><b>Bekende beperkingen.</b> Twee thema's zijn uitgewerkt (Wmo, huiselijk geweld en kindermishandeling). Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Geen officiële publicatie van een gemeente, de VNG of een bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bronnen. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Mis je een indicator of klopt er iets niet? Gebruik de knoppen bij "Mis je een indicator" hierboven, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Naar de instrumenten in Gemeentebeeld</a></p>
+  </section>
 </div>
 
 <script>
@@ -758,8 +774,6 @@ footer p { margin: 0 0 6px; }
 
   function renderVoet() {
     $('#foot').innerHTML = `<p>Bronnen van de indicatoren: CBS (StatLine, CC-BY 4.0), RIVM (Gezondheid per wijk en buurt, CC-BY 4.0), waarstaatjegemeente.nl (VNG), Iv3-informatievoorschrift gemeenten 2025, Wmo 2015, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling, Regioplan (handreiking lokale procesindicatoren, 2022). Gegevensobjecten: <a href="https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel" target="_blank" rel="noopener">Gemeentelijk Gegevensmodel</a> v2.5.1 (EUPL-1.2, Gemeente Delft); alleen entiteit- en attribuutnamen overgenomen. Tabelnummers gecontroleerd op 30 oktober 2026.</p>
-      <p>Geen officiële publicatie van een gemeente. Bewerking door Josephine Linders, op eigen titel.</p>
-      <p>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bronnen. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
       <p>Josephine Linders · ${PRODUCT} · versie ${VERSIE}</p>`;
   }
 
@@ -789,7 +803,7 @@ footer p { margin: 0 0 6px; }
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';
