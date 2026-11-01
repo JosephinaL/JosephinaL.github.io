@@ -141,6 +141,10 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -257,8 +261,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> DUO, <a href="https://onderwijsdata.duo.nl/datasets/wi-2021">WI 2021 Instroom, Uitstroom en Leerroute</a> (Open Onderwijsdata), bijgewerkt 12 oktober 2026, stand eind september 2026. Opgehaald 24 oktober 2026 en in deze pagina opgenomen; DUO werkt maandelijks bij. Inwoners op 1 januari: CBS, Regionale kerncijfers Nederland (70072ned), live.</p>
+    <p><b>Licentie.</b> DUO verklaart de data vrij van auteursrechten; overnemen met DUO als bron. CBS: CC BY 4.0.</p>
+    <p><b>Methode.</b> Status volgt uit de uitstroomreden die DUO registreert; per 1.000 inwoners is de instroom van een jaar gedeeld door de inwoners op 1 januari. Wat DUO niet uitsplitst (cellen van 1 tot 4) staat apart als "niet uitgesplitst". De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen oordeel over hoe goed een gemeente het doet: de samenstelling van de groep verschilt per gemeente en staat niet in de bron. Geen bevolkingsbeeld en geen herkomst. Geen kosten: inburgering heeft geen eigen taakveld in de gemeentebegroting.</p>
+    <p><b>Bekende beperkingen.</b> Alleen de Wet inburgering 2021. Een inburgeraar telt bij de gemeente die DUO nu registreert, ook na verhuizing. In kleine gemeenten ontbreekt een groot deel van de uitsplitsing; onder 50% dekking toont de pagina geen kerncijfers over status en leerroute.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
 </div>
 <div id="tip" role="tooltip" hidden></div>
@@ -613,7 +629,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   // ---------- voet ----------
   function renderVoet() {
     renderHerken();
-    $('#foot').innerHTML = `Bron: DUO, <a href="https://onderwijsdata.duo.nl/datasets/wi-2021">WI 2021 Instroom, Uitstroom en Leerroute</a> (Open Onderwijsdata, uit het Informatiesysteem Inburgering), bijgewerkt ${BIJGEWERKT}, stand eind ${STAND}; opgehaald 24 oktober 2026 en opgenomen in deze pagina. DUO verklaart de data vrij van auteursrechten. Inwoners op 1 januari: CBS, Regionale kerncijfers Nederland (70072ned), live${S && S.inwFout ? ' (nu niet bereikbaar)' : ''}. De cijfers overnemen mag met DUO als bron.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Inburgering per gemeente · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bron: DUO, <a href="https://onderwijsdata.duo.nl/datasets/wi-2021">WI 2021 Instroom, Uitstroom en Leerroute</a> (Open Onderwijsdata, uit het Informatiesysteem Inburgering), bijgewerkt ${BIJGEWERKT}, stand eind ${STAND}; opgehaald 24 oktober 2026 en opgenomen in deze pagina. DUO verklaart de data vrij van auteursrechten. Inwoners op 1 januari: CBS, Regionale kerncijfers Nederland (70072ned), live${S && S.inwFout ? ' (nu niet bereikbaar)' : ''}. De cijfers overnemen mag met DUO als bron.<br>Josephine Linders · Inburgering per gemeente · versie ${VERSIE}`;
   }
 
   // ---------- hertekenen bij andere breedte ----------
@@ -653,7 +669,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';

@@ -998,7 +998,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
           </fieldset>
           <div class="deelopties">
             <label class="field"><span class="small muted">Titel boven kaart en tabel</span><input id="titelInput" type="text"></label>
-            <label class="check small"><input type="checkbox" id="makerCheck" checked> Vermeld "Gemaakt met Eigen lijst op de kaart · josephinal.github.io"</label>
+            <label class="check small"><input type="checkbox" id="makerCheck" checked> Vermeld "Gemaakt met Eigen lijst op de kaart · josephinelinders.nl"</label>
           </div>
         </div>
         <div class="rij">
@@ -2399,7 +2399,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
     const lijst = state.bron === 'voorbeeld' ? 'lijst: Gemeente Amsterdam, Gemeentelijk Vastgoed (open data)' : state.bron === 'ggmtest' ? 'lijst: synthetische testset (verzonnen gegevens op echte BAG-objecten)' : 'lijst: eigen gegevens van de gemeente';
     return `Bronnen: ${lijst}; BAG (Kadaster); energielabels (RIVM, afgeleid uit EP-Online van RVO); rijksmonumenten (RCE); buurten (CBS ${state.res.wbJaar || ''}); achtergrondkaart (Kadaster, via PDOK). Gekoppeld op ${datumTekst()}. Signalen zijn indicatief, geen vaststelling.` + (state.niveau === 'buurt' ? ' Aantallen van 1 of 2 zijn afgeschermd.' : '');
   }
-  const makerTekst = () => $('#makerCheck').checked ? 'Gemaakt met Eigen lijst op de kaart · josephinal.github.io' : '';
+  const makerTekst = () => $('#makerCheck').checked ? 'Gemaakt met Eigen lijst op de kaart · josephinelinders.nl' : '';
   const titel = () => $('#titelInput').value.trim() || `Eigen lijst op de kaart · ${state.res.gm.naam}`;
 
   // ---------- kaart als afbeelding ----------

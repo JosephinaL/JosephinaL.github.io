@@ -106,6 +106,10 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -183,8 +187,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="registraties.html">← Terug naar Registraties belicht</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> BAG (Kadaster) via PDOK: het landelijke <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-bestand</a> (GeoPackage), stand 30 september 2026, en de documentdatum van nieuwe verblijfsobjecten uit de BAG OGC API, stand 30 oktober 2026. Geteld en in deze pagina opgenomen; maandelijks ververst, pas gepubliceerd na controle.</p>
+    <p><b>Licentie.</b> BAG: CC0. Deze pagina is een afgeleid bestand, geen authentieke BAG.</p>
+    <p><b>Methode.</b> Acht controles op de hele BAG in drie groepen: tegenspraak, lang onderweg en opvallende waarden. Per signaal het aantal, per 10.000 verblijfsobjecten naast Nederland, en een lijst met link naar de BAG-viewer. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen vaststelling van fouten: een signaal is een aanleiding om na te gaan. Opvallende waarden kunnen werkafspraken zijn. Geen ranglijst en geen oordeel over een gemeente; wie veel bouwt of splitst heeft vanzelf meer lopend werk.</p>
+    <p><b>Bekende beperkingen.</b> Een momentopname vangt ook mutaties die nog in verwerking zijn. Het landelijke bestand geeft één pand per verblijfsobject. Nevenadressen, ligplaatsen en standplaatsen tellen niet mee. De leeftijd van een dubbel adres is een minimum.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="registraties.html">← Terug naar Registraties belicht</a></p>
   </section>
 </div>
 
@@ -372,7 +388,7 @@ const DATA = {"peil":"2026-09-30","leeftijd_peil":"2026-10-30","gm":{"0998":["Bu
 
   // ---------- voet ----------
   function renderVoet() {
-    $('#foot').innerHTML = `Bron: Basisregistratie Adressen en Gebouwen (BAG), Kadaster, via PDOK: <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-GeoPackage</a> (CC0), stand ${datum(DATA.peil)}; documentdatum van nieuwe verblijfsobjecten uit de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API</a>, stand ${datum(DATA.leeftijd_peil)}. Afgeleid bestand, geen authentieke BAG.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bron: Basisregistratie Adressen en Gebouwen (BAG), Kadaster, via PDOK: <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-GeoPackage</a> (CC0), stand ${datum(DATA.peil)}; documentdatum van nieuwe verblijfsobjecten uit de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API</a>, stand ${datum(DATA.leeftijd_peil)}. Afgeleid bestand, geen authentieke BAG.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
   // ---------- start ----------

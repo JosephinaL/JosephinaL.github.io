@@ -147,6 +147,10 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -294,9 +298,21 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=hg">Welke indicatoren horen bij huiselijk geweld, en waar staan ze? Indicatoren belicht →</a></p>
-      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS, Beleidsinformatie Veilig Thuis: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/84847NED/table">84847NED</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/84849NED/table">84849NED</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/84851NED/table">84851NED</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/84852NED/table">84852NED</a> en <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85361NED/table">85361NED</a>. Live opgehaald bij de gemeentekeuze; jaarcijfers vanaf 2019, het CBS publiceert tweemaal per jaar en het laatste halfjaar is voorlopig. Het tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0.</p>
+    <p><b>Methode.</b> Aantallen en cijfers per 100.000 inwoners zoals het CBS ze publiceert, afgerond op vijftallen. Percentages rekent deze pagina zelf uit die aantallen; onder de 100 meldingen in een jaar toont ze geen verdelingen. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen maat voor de omvang van huiselijk geweld: alleen wat bij Veilig Thuis binnenkomt. Een stijging kan meer geweld zijn, maar ook betere signalering. Geen wijken, geen ranglijst en geen oordeel over een gemeente of over Veilig Thuis.</p>
+    <p><b>Bekende beperkingen.</b> De 26 Veilig Thuis-organisaties registreren niet allemaal hetzelfde; een afwijking van Nederland kan een registratieverschil van de regio zijn. Het laatste halfjaar wordt nog bijgesteld. Geen kosten: Veilig Thuis heeft geen eigen Iv3-taakveld.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=hg">Welke indicatoren horen bij huiselijk geweld, en waar staan ze? Indicatoren belicht →</a></p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
 </div>
 
@@ -656,7 +672,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   function renderVoet() {
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
-    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Veilig Thuis (CC-BY 4.0): kerncijfers ${link(T.kern)}, organisatie van de melder ${link(T.wie)}, aard van het geweld ${link(T.aard)}, veiligheidsbeoordeling en -taxatie ${link(T.beoord)}, eerdere betrokkenheid ${link(T.eerder)}. Jaarcijfers 2019 tot en met ${laatsteJaar() || '–'}; het CBS publiceert tweemaal per jaar, het laatste halfjaar voorlopig. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Veilig Thuis (CC-BY 4.0): kerncijfers ${link(T.kern)}, organisatie van de melder ${link(T.wie)}, aard van het geweld ${link(T.aard)}, veiligheidsbeoordeling en -taxatie ${link(T.beoord)}, eerdere betrokkenheid ${link(T.eerder)}. Jaarcijfers 2019 tot en met ${laatsteJaar() || '–'}; het CBS publiceert tweemaal per jaar, het laatste halfjaar voorlopig. Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -694,7 +710,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';

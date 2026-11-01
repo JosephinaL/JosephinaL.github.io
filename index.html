@@ -780,7 +780,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
     try { localStorage.setItem('jl-theme', root.dataset.theme); } catch (e) {}
   };
   var adres = ['joselin', 'live.nl'].join('@');
-  document.getElementById('mailBtn').href = 'mailto:' + adres + '?subject=' + encodeURIComponent('Vraag via josephinal.github.io');
+  document.getElementById('mailBtn').href = 'mailto:' + adres + '?subject=' + encodeURIComponent('Vraag via josephinelinders.nl');
   var copy = document.getElementById('copyBtn'), copyLabel = copy.textContent;
   copy.onclick = function () {
     var toon = function () { copy.textContent = adres; };

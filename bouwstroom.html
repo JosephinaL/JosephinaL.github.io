@@ -185,6 +185,10 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -313,8 +317,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> BAG (Kadaster) via de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API van PDOK</a>, dagstand: de pagina haalt bij elke gemeentekeuze de stand van vandaag op, zonder de mutaties van de dag zelf. Omgevingsvergunningen uit het gemeenteblad (<a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a>, KOOP), laatste twaalf maanden, live. Buurten en wijken: CBS Wijk- en buurtkaart via PDOK. Het exacte tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Licentie.</b> BAG: CC0. Officiële bekendmakingen (KOOP): CC0. Wijk- en buurtgrenzen (CBS) en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+    <p><b>Methode.</b> De fase van een woning volgt uit de status van pand en verblijfsobject in de BAG; een woning is een verblijfsobject met woonfunctie. Bekendmakingen worden op tekst ingedeeld naar soort en stap. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen woningbouwprogramma en geen planning van de gemeente: alleen wat in de BAG en het gemeenteblad staat. Het signaal "verwacht jaar voorbij" is een aanleiding om na te gaan, geen vaststelling van vertraging. Geen vergelijking of oordeel over een gemeente.</p>
+    <p><b>Bekende beperkingen.</b> De BAG volgt de verwerking door de gemeente; gemeenten registreren de levensloop verschillend (sommige zetten panden nauwelijks op "bouw gestart"). Geen datum van de statuswijziging. Bekendmakingen tellen niet op en de tekstherkenning mist soms een publicatie.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
 </div>
 <div id="tip" role="tooltip" hidden></div>
@@ -1066,7 +1082,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     renderHerken();
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const bs = S.bagStamp ? new Date(S.bagStamp).toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-    $('#foot').innerHTML = `Bronnen: <a href="https://www.kadaster.nl/zakelijk/registraties/basisregistraties/bag">Basisregistratie Adressen en Gebouwen</a> (Kadaster, CC0), panden en verblijfsobjecten via de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API van PDOK</a>, dagelijks bijgewerkt${bs ? `; antwoord van ${bs}` : ''}. Bekendmakingen: <a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a> (KOOP, CC0), gemeenteblad, omgevingsvergunningen sinds ${S.bekVan ? dmy(S.bekVan) : '–'}${S.bekNaam ? ` (uitgever "${esc(S.bekNaam)}")` : ''}, via de SRU-dienst van overheid.nl. Buurten en wijken: CBS Wijk- en buurtkaart ${S.bjaar || ''} via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${S.bjaar}/ogc/v1">PDOK</a> (CC-BY 4.0). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Bouwstroom · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: <a href="https://www.kadaster.nl/zakelijk/registraties/basisregistraties/bag">Basisregistratie Adressen en Gebouwen</a> (Kadaster, CC0), panden en verblijfsobjecten via de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API van PDOK</a>, dagelijks bijgewerkt${bs ? `; antwoord van ${bs}` : ''}. Bekendmakingen: <a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a> (KOOP, CC0), gemeenteblad, omgevingsvergunningen sinds ${S.bekVan ? dmy(S.bekVan) : '–'}${S.bekNaam ? ` (uitgever "${esc(S.bekNaam)}")` : ''}, via de SRU-dienst van overheid.nl. Buurten en wijken: CBS Wijk- en buurtkaart ${S.bjaar || ''} via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${S.bjaar}/ogc/v1">PDOK</a> (CC-BY 4.0). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Bouwstroom · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -1103,7 +1119,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';
