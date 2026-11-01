@@ -6,13 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Iv3-panorama · Open Data Atelier</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<style>
-/* Lettertypen staan op deze site zelf, niet bij Google. Licentie: SIL Open Font License 1.1 (zie fonts/). */
-@font-face{font-family:"Newsreader";font-style:normal;font-display:swap;font-weight:200 800;src:url(fonts/newsreader-latin-opsz-normal.woff2) format("woff2-variations"),url(fonts/newsreader-latin-opsz-normal.woff2) format("woff2")}
-@font-face{font-family:"Public Sans";font-style:normal;font-display:swap;font-weight:400;src:url(fonts/public-sans-latin-400-normal.woff2) format("woff2")}
-@font-face{font-family:"Public Sans";font-style:normal;font-display:swap;font-weight:500;src:url(fonts/public-sans-latin-500-normal.woff2) format("woff2")}
-@font-face{font-family:"Public Sans";font-style:normal;font-display:swap;font-weight:600;src:url(fonts/public-sans-latin-600-normal.woff2) format("woff2")}
-</style>
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -25,8 +19,8 @@
   --accent:#1d5f74; --accent-ink:#ffffff; --mark:#141b21;
   --k0:#8a96a0; --k1:#2a78d6; --k2:#eb6834; --k3:#1baf7a; --k4:#eda100; --k5:#e87ba4; --k6:#1d5f74; --k7:#6250d6; --k8:#d23f3f;
   --stroke:#ffffff;
-  --f-display:"Newsreader", Georgia, "Times New Roman", serif;
-  --f-body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display:"Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body:"Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1417; --surface:#161d21; --fg:#e6ebee; --muted:#9aa7b0; --line:#2b353b; --soft:#1f282d;
@@ -46,7 +40,7 @@ button,select,input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 header{display:grid;gap:10px}
 .eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0}
-h1{font-family:var(--f-display);font-weight:600;font-size:clamp(40px,7vw,64px);line-height:1;margin:0;text-wrap:balance}
+h1{font-family:var(--f-display);font-stretch:85%;font-weight:800;font-size:clamp(34px,5vw,52px);line-height:1;margin:0;text-wrap:balance}
 .lead{margin:6px 0 0;max-width:66ch;color:var(--muted);font-size:17px}
 .controls{display:grid;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:16px 18px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
 .crow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
@@ -80,7 +74,7 @@ h1{font-family:var(--f-display);font-weight:600;font-size:clamp(40px,7vw,64px);l
 .r.nl{height:24px;margin-bottom:8px;border-bottom:1px solid var(--line);padding-bottom:8px;box-sizing:content-box}
 .r.nl .n,.r.nl .v{color:var(--fg);font-weight:600;font-size:13px}
 .r.nl .bar{height:18px}
-.letter{font-family:var(--f-display);font-weight:600;font-size:17px;line-height:1;padding:12px 0 4px calc(var(--namew) - 2.4em);color:var(--fg);border-top:1px solid var(--soft);margin-top:4px}
+.letter{font-family:var(--f-display);font-stretch:85%;font-weight:600;font-size:17px;line-height:1;padding:12px 0 4px calc(var(--namew) - 2.4em);color:var(--fg);border-top:1px solid var(--soft);margin-top:4px}
 .letter:first-of-type{border-top:0}
 .r.hit{background:var(--soft);outline:2px solid var(--mark);outline-offset:1px}
 .r.hit .n,.r.hit .v{color:var(--fg);font-weight:600}
@@ -99,6 +93,23 @@ footer a{color:var(--accent)}
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+
+/* familie: Archivo (koppen) en Source Sans 3 (tekst), sinds 1 nov 2026 */
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); font-family: var(--f-display); font-stretch: 85%; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; color: var(--muted); }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; font-size: 14px; color: var(--muted); }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.herken .meld .klein { font-size: 13px; color: var(--muted); }
 </style>
 
 <div class="wrap">
@@ -130,16 +141,41 @@ footer a{color:var(--accent)}
   </div>
 
   <div class="weave" id="weave"></div>
+
+  <details class="herken" id="herken">
+    <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+    <ol>
+      <li><b>Een ander begrip.</b> Elke balk toont de lasten van een gemeente verdeeld over de negen hoofdtaakvelden van het Iv3, zonder mutaties in reserves en het resultaat. Een begroting of jaarverslag in de eigen programma-indeling verdeelt anders.</li>
+      <li><b>Een andere peildatum of versie.</b> Jaarrekening 2025 (bij Duiven en Rozendaal de begroting) zoals de gemeente die aan het CBS leverde. Het CBS publiceert twee keer; deze pagina gebruikt de verbeterde tweede versie waar die er is. Een jaarrekening die later in de raad is gewijzigd, of een eigen overzicht in een andere indeling, komt anders uit.</li>
+      <li><b>Boeking bij de gemeente.</b> Gemeenten boeken niet allemaal op dezelfde manier: de ene zet de kosten van de eigen organisatie op overhead (0.4), de andere op de taak zelf. Werk via een samenwerkingsverband staat als bijdrage op het taakveld van dat werk.</li>
+      <li><b>Een fout in deze bewerking.</b> Wijkt een balk af van <a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED" target="_blank" rel="noopener">de CBS-tabel zelf</a>, dan zit de fout hier. Meld het hieronder.</li>
+    </ol>
+    <p class="status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
+    <div class="meld">
+      <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+      <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+      <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+      <span class="klein">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+    </div>
+  </details>
   <p class="caveat">Uitgaven volgens de jaarrekening 2025; bij Duiven en Rozendaal, die nog geen jaarrekening hebben aangeleverd, de begroting. Een andere verdeling betekent niet meteen een andere keuze. Gemeenten boeken soms anders: de ene zet kosten van de eigen organisatie op Bestuur en eigen organisatie (overhead), de andere op de taak zelf. Werk dat via een samenwerkingsverband loopt, staat als bijdrage op het taakveld van dat werk. Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal.</p>
 
   <footer>
-    <p class="terug-onder" style="margin:0"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
-    <p>Bron: CBS, Gemeenten 2025, onbewerkte Iv3-data (tabel 45071NED), opgehaald op 21 oktober 2026; inwoners op 1 januari 2025 (CBS, tabel 70072ned). De CBS-data zijn open data onder licentie CC BY 4.0. Lasten per hoofdtaakveld, zonder mutaties in reserves en het resultaat.</p>
-    <p>Gemaakt door Josephine Linders, oktober 2026. Hoort bij de <a id="splink" href="iv3spiegel.html">Iv3-spiegel</a>. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
-    <p>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
-    <p>Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a>, dan kan iedereen zien wat er gemeld en verbeterd is. Je hebt daarvoor een gratis GitHub-account nodig. <a href="https://github.com/josephinal/josephinal.github.io/issues">Bekijk eerdere meldingen</a>.</p>
-    <p><a href="colofon.html">Colofon en privacy</a></p>
+    <p>Josephine Linders · Iv3-panorama · hoort bij de <a id="splink" href="iv3spiegel.html">Iv3-spiegel</a></p>
   </footer>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS, Gemeenten 2025, onbewerkte Iv3-data (<a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED">45071NED</a>), opgehaald op 21 oktober 2026 en in deze pagina opgenomen; inwoners op 1 januari 2025 (CBS, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a>). Jaarrekening 2025; bij Duiven en Rozendaal, die die nog niet hadden aangeleverd, de begroting.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0.</p>
+    <p><b>Methode.</b> Lasten per hoofdtaakveld, als aandeel van de totale lasten of in euro per inwoner, zonder mutaties in reserves en het resultaat. De gemeenten staan op alfabet; sorteren op een hoofdgroep of op inwonertal kan.</p>
+    <p><b>Wat dit niet is.</b> Geen ranglijst en geen oordeel. Anders dan de Iv3-spiegel zet deze pagina gemeenten naast elkaar, zodat afwijkingen in de verdeling zichtbaar worden. Een andere verdeling is een vraag, niet meteen een andere keuze.</p>
+    <p><b>Bekende beperkingen.</b> Gemeenten boeken soms anders (overhead op 0.4 of op de taak zelf; werk via een samenwerkingsverband als bijdrage). Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal. Alleen 2025.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van het CBS.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een balk of een tekst? Gebruik het blok "Herken je je gemeente niet?" onder de balken, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
 </div>
 <div class="tip" id="tip" hidden></div>
 
@@ -238,7 +274,7 @@ render();
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';
@@ -259,6 +295,23 @@ render();
     anker.after(p);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+
+<script>
+/* herken je je gemeente niet? */
+(function () {
+  const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'), h = document.getElementById('herken');
+  if (!m || !gh || !h) return;
+  function vul() {
+    let naam = ''; try { naam = (document.getElementById('q').value || '').trim(); } catch (e) {}
+    const titel = 'Iv3-panorama' + (naam ? ' – ' + naam : '');
+    const body = 'Pagina: ' + location.href + (naam ? '\nGemeente: ' + naam : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  m.addEventListener('click', vul); gh.addEventListener('click', vul); h.addEventListener('toggle', vul);
 })();
 </script>
 </body>

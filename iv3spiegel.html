@@ -6,13 +6,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Iv3-spiegel · Open Data Atelier</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<style>
-/* Lettertypen staan op deze site zelf, niet bij Google. Licentie: SIL Open Font License 1.1 (zie fonts/). */
-@font-face{font-family:"Newsreader";font-style:normal;font-display:swap;font-weight:200 800;src:url(fonts/newsreader-latin-opsz-normal.woff2) format("woff2-variations"),url(fonts/newsreader-latin-opsz-normal.woff2) format("woff2")}
-@font-face{font-family:"Public Sans";font-style:normal;font-display:swap;font-weight:400;src:url(fonts/public-sans-latin-400-normal.woff2) format("woff2")}
-@font-face{font-family:"Public Sans";font-style:normal;font-display:swap;font-weight:500;src:url(fonts/public-sans-latin-500-normal.woff2) format("woff2")}
-@font-face{font-family:"Public Sans";font-style:normal;font-display:swap;font-weight:600;src:url(fonts/public-sans-latin-600-normal.woff2) format("woff2")}
-</style>
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -26,8 +20,8 @@
   --more:#c2410c; --less:#1f6fb8; --ghost:#c9d1d6;
   --k0:#8a96a0; --k1:#2a78d6; --k2:#eb6834; --k3:#1baf7a; --k4:#eda100; --k5:#e87ba4; --k6:#1d5f74; --k7:#6250d6; --k8:#d23f3f; --k9:#b3b9c3;
   --stroke:#ffffff;
-  --f-display:"Newsreader", Georgia, "Times New Roman", serif;
-  --f-body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-display:"Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body:"Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1417; --surface:#161d21; --fg:#e6ebee; --muted:#9aa7b0; --line:#2b353b; --soft:#1f282d;
@@ -52,7 +46,7 @@ button,select{font:inherit;color:inherit}
 /* kop */
 header{display:grid;gap:10px}
 .eyebrow{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0}
-h1{font-family:var(--f-display);font-weight:600;font-size:clamp(40px,7vw,64px);line-height:1;margin:0;position:relative;width:max-content;max-width:100%}
+h1{font-family:var(--f-display);font-stretch:85%;font-weight:800;font-size:clamp(34px,5vw,52px);line-height:1;margin:0;position:relative;width:max-content;max-width:100%}
 h1::after{content:attr(data-text);position:absolute;left:0;top:92%;transform:scaleY(-1);opacity:.22;pointer-events:none;
   -webkit-mask-image:linear-gradient(to top,rgb(0 0 0/.9),transparent 55%);mask-image:linear-gradient(to top,rgb(0 0 0/.9),transparent 55%)}
 .lead{margin:22px 0 0;max-width:62ch;color:var(--muted);font-size:17px}
@@ -63,14 +57,14 @@ h1::after{content:attr(data-text);position:absolute;left:0;top:92%;transform:sca
 
 /* geheel */
 .whole{display:grid;gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
-h2{font-family:var(--f-display);font-weight:600;font-size:clamp(24px,3.4vw,32px);line-height:1.15;margin:0;text-wrap:balance}
+h2{font-family:var(--f-display);font-stretch:85%;font-weight:700;font-size:clamp(24px,3.4vw,32px);line-height:1.15;margin:0;text-wrap:balance}
 h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0;font-weight:600}
 .story{margin:0;max-width:68ch;font-size:17px}
 .figs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .fig{padding:14px 16px 14px 0;display:grid;gap:2px;min-width:0}
 .fig+.fig{border-left:1px solid var(--line);padding-left:16px}
 .fig .lbl{font-size:13px;color:var(--muted);font-weight:600}
-.fig .big{font-family:var(--f-display);font-size:clamp(26px,3.6vw,34px);font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.fig .big{font-family:var(--f-display);font-stretch:85%;font-size:clamp(26px,3.6vw,34px);font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
 .fig .sm{font-size:13.5px;color:var(--muted);font-variant-numeric:tabular-nums}
 @media (max-width:620px){.figs{grid-template-columns:minmax(0,1fr)}.fig+.fig{border-left:0;border-top:1px solid var(--line);padding-left:0}}
 .flows{display:grid;gap:14px}
@@ -162,6 +156,23 @@ footer p{margin:0}
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+
+/* familie: Archivo (koppen) en Source Sans 3 (tekst), sinds 1 nov 2026 */
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); font-family: var(--f-display); font-stretch: 85%; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; color: var(--muted); }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; font-size: 14px; color: var(--muted); }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.herken .meld .klein { font-size: 13px; color: var(--muted); }
 </style>
 
 <div class="wrap">
@@ -185,14 +196,31 @@ footer p{margin:0}
     <div class="flows" id="flows"></div>
   </section>
 
+  <details class="herken" id="herken">
+    <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+    <ol>
+      <li><b>Een ander begrip.</b> Dit zijn de lasten en baten zoals de gemeente ze in het Iv3 vastlegt, per taakveld, met overhead apart op taakveld 0.4 en de mutaties in reserves en het resultaat apart. Een begroting of jaarverslag in de eigen programma-indeling telt anders op.</li>
+      <li><b>Een andere peildatum of versie.</b> Jaarrekening en begroting 2025 zoals de gemeente die aan het CBS leverde. Het CBS publiceert twee keer; deze pagina gebruikt de verbeterde tweede versie waar die er is. Een jaarrekening die later in de raad is gewijzigd, of een eigen overzicht in een andere indeling, komt anders uit.</li>
+      <li><b>Boeking bij de gemeente.</b> Gemeenten boeken niet allemaal op dezelfde manier: de ene zet de kosten van de eigen organisatie op overhead (0.4), de andere op de taak zelf. Werk via een samenwerkingsverband staat als bijdrage op het taakveld van dat werk.</li>
+      <li><b>Een fout in deze bewerking.</b> Wijkt een bedrag af van <a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED" target="_blank" rel="noopener">de CBS-tabel zelf</a>, dan zit de fout hier. Meld het hieronder.</li>
+    </ol>
+    <p class="status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
+    <div class="meld">
+      <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+      <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+      <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+      <span class="klein">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+    </div>
+  </details>
+
   <section class="panel" aria-label="Drie vragen">
     <div class="tabs" role="tablist" aria-label="Vraag">
-      <button class="tab" role="tab" id="t-heen" data-v="heen">Waar gaat het geld heen?</button>
-      <button class="tab" role="tab" id="t-van" data-v="van">Waar komt het geld vandaan?</button>
-      <button class="tab" role="tab" id="t-plan" data-v="plan">Deed de gemeente wat ze van plan was?</button>
+      <button class="tab" role="tab" id="t-heen" data-v="heen" aria-controls="view">Waar gaat het geld heen?</button>
+      <button class="tab" role="tab" id="t-van" data-v="van" aria-controls="view">Waar komt het geld vandaan?</button>
+      <button class="tab" role="tab" id="t-plan" data-v="plan" aria-controls="view">Deed de gemeente wat ze van plan was?</button>
     </div>
     <p class="finding" id="finding"></p>
-    <div id="view"></div>
+    <div id="view" role="tabpanel" aria-labelledby="t-heen" tabindex="0"></div>
     <p class="caveat" id="caveat"></p>
   </section>
 
@@ -211,15 +239,21 @@ footer p{margin:0}
   </details>
 
   <footer>
-    <p class="terug-onder" style="margin:0"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
-    <p>Bron: CBS, Gemeenten 2025, onbewerkte Iv3-data (tabel 45071NED), opgehaald op 21 oktober 2026; inwoners op 1 januari 2025 (CBS, tabel 70072ned). De CBS-data zijn open data onder licentie CC BY 4.0. Het CBS publiceert de cijfers twee keer; de tweede keer konden gemeenten een verbeterde versie aanleveren. Deze pagina gebruikt die verbeterde versie waar die er is, anders de eerste.</p>
-    <p>Mutaties in reserves (taakveld 0.10) en het resultaat (0.11) zijn apart gehouden van de lasten en baten. Overhead staat in Iv3 op taakveld 0.4 en is niet over de andere taakvelden verdeeld.</p>
-    <p>De spiegel laat één gemeente zien zoals zij zichzelf in het Iv3 vastlegt. Het is geen vergelijking met andere gemeenten en geen oordeel over beleid: een opvallend bedrag is een vraag, geen conclusie. Gemeenten boeken soms anders. De ene zet kosten van de eigen organisatie op overhead, de andere op de taak zelf. Werk dat via een samenwerkingsverband loopt, staat als bijdrage op het taakveld van dat werk.</p>
-    <p>Gemaakt door Josephine Linders, oktober 2026. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
-    <p>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
-    <p>Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a>, dan kan iedereen zien wat er gemeld en verbeterd is. Je hebt daarvoor een gratis GitHub-account nodig. <a href="https://github.com/josephinal/josephinal.github.io/issues">Bekijk eerdere meldingen</a>.</p>
-    <p><a href="colofon.html">Colofon en privacy</a></p>
+    <p>Josephine Linders · Iv3-spiegel</p>
   </footer>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS, Gemeenten 2025, onbewerkte Iv3-data (<a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED">45071NED</a>), opgehaald op 21 oktober 2026 en in deze pagina opgenomen; inwoners op 1 januari 2025 (CBS, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a>). Jaarrekening 2025, en waar die ontbreekt de begroting.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0.</p>
+    <p><b>Methode.</b> Bedragen per taakveld, eerst per inwoner, miljoenen ernaast. Het CBS publiceert de cijfers twee keer; de tweede keer konden gemeenten een verbeterde versie aanleveren. Deze pagina gebruikt die verbeterde versie waar die er is, anders de eerste. Mutaties in reserves (taakveld 0.10) en het resultaat (0.11) zijn apart gehouden van de lasten en baten. Overhead staat op taakveld 0.4 en is niet over de andere taakvelden verdeeld.</p>
+    <p><b>Wat dit niet is.</b> Geen vergelijking met andere gemeenten en geen oordeel over beleid: de spiegel laat één gemeente zien zoals zij zichzelf in het Iv3 vastlegt. Een opvallend bedrag is een vraag, geen conclusie. Wie gemeenten naast elkaar wil zien, gebruikt het <a href="iv3panorama.html">Iv3-panorama</a>.</p>
+    <p><b>Bekende beperkingen.</b> Gemeenten boeken soms anders: de ene zet kosten van de eigen organisatie op overhead, de andere op de taak zelf. Werk dat via een samenwerkingsverband loopt, staat als bijdrage op het taakveld van dat werk. Alleen 2025.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van het CBS.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een bedrag of een tekst? Gebruik het blok "Herken je je gemeente niet?" bovenaan, met de gemeente al ingevuld, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
 </div>
 
 <script>
@@ -364,7 +398,8 @@ function flow(title,tot,items,mx){
 
 /* ---------- tabs ---------- */
 function renderTab(){
-  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.v===tab)));
+  document.querySelectorAll(".tab").forEach(b=>{ const aan=b.dataset.v===tab; b.setAttribute("aria-selected",String(aan)); b.tabIndex=aan?0:-1; });
+  document.getElementById("view").setAttribute("aria-labelledby","t-"+tab);
   ({heen:viewHeen,van:viewVan,plan:viewPlan})[tab]();
 }
 
@@ -520,7 +555,7 @@ render();
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';
@@ -541,6 +576,23 @@ render();
     anker.after(p);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+
+<script>
+/* herken je je gemeente niet? */
+(function () {
+  const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'), h = document.getElementById('herken');
+  if (!m || !gh || !h) return;
+  function vul() {
+    let naam = ''; try { naam = nm(gm) + " (" + gm.slice(2) + ")"; } catch (e) {}
+    const titel = 'Iv3-spiegel' + (naam ? ' – ' + naam : '');
+    const body = 'Pagina: ' + location.href + (naam ? '\nGemeente: ' + naam : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  m.addEventListener('click', vul); gh.addEventListener('click', vul); h.addEventListener('toggle', vul);
 })();
 </script>
 </body>
