@@ -159,9 +159,12 @@ footer p { margin: 0 0 6px; }
 .strook div { border-top: 4px solid var(--k); padding-top: 4px; font-size: .8rem; color: var(--muted); line-height: 1.3; }
 .strook b { display: block; font-family: var(--f-display); font-stretch: 85%; font-size: 1.15rem; color: var(--fg); font-variant-numeric: tabular-nums; }
 .verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
-.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
 .verantwoording p { margin: 0; overflow-wrap: anywhere; }
 .verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>

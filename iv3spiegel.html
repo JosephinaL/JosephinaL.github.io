@@ -7,7 +7,10 @@
 <title>Iv3-spiegel · Open Data Atelier</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="fonts/fonts.css">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+</style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
@@ -159,7 +162,7 @@ footer p{margin:0}
 
 /* familie: Archivo (koppen) en Source Sans 3 (tekst), sinds 1 nov 2026 */
 .verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
-.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); font-family: var(--f-display); font-stretch: 85%; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; font-family: var(--f-display); font-stretch: 85%; }
 .verantwoording p { margin: 0; overflow-wrap: anywhere; }
 .verantwoording a { color: inherit; }
 .herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 10px 16px; }
