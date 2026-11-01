@@ -194,6 +194,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .rg-jaren button { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 0 8px; font: 500 .76rem var(--f-mono); color: var(--accent); cursor: pointer; }
 .rg-jaren button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
 .rg-jaren span.rg-buiten { font-family: var(--f-mono); padding: 0 4px; }
+.herken { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -234,6 +247,22 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
       <div class="top3" id="top3"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit zijn jongeren tot 23 jaar met jeugdhulp, jeugdbescherming of jeugdreclassering, zoals aanbieders die aan het CBS doorgeven. Het zijn personen, geen trajecten of beschikkingen. De kosten komen uit een CBS-uitvraag bij gemeenten, niet uit de eigen begroting of jaarrekening.</li>
+          <li><b>Een andere peildatum of indeling.</b> Jaarcijfers; het laatste jaar is voorlopig en een lopend jaar staat er als "(deel)". Tussen 2020 en 2021 heeft het CBS de reeks herzien. Wijken in de indeling van het gekozen jaar.</li>
+          <li><b>Registratie bij de bron.</b> Een jongere telt bij de gemeente volgens het woonplaatsbeginsel, niet waar hij verblijft. Aanbieders leveren aan; ontbreekt een aanlevering, dan ontbreken jongeren. Niet elke gemeente levert haar kosten aan.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85099NED/table" target="_blank" rel="noopener">de CBS-tabel zelf</a>, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
 
       <!-- gebruik -->
       <div class="sectiekop">
@@ -334,8 +363,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS, Beleidsinformatie Jeugd (84134NED tot 2020, 85099NED vanaf 2021, wijktabellen per jaar), kosten 83454NED, context per wijk uit de Kerncijfers wijken en buurten; regels van de gemeente uit de CVDR (overheid.nl); wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze. Jaarcijfers vanaf 2015, het laatste jaar voorlopig. Het tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0. CVDR (KOOP): CC0. Wijkgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
+    <p><b>Methode.</b> Aantallen en percentages zoals het CBS ze publiceert, afgerond op vijftallen. Kosten per jongere en het aandeel per huishoudtype rekent deze pagina zelf; percentages per wijk alleen bij minstens 150 jongeren. Nederland is het enige referentiepunt. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen maat voor de kwaliteit of de uitkomst van jeugdhulp, en geen ranglijst van gemeenten of wijken. Een wijk met veel eenoudergezinnen of armoede zegt iets over de wijk, niet over de gezinnen in de jeugdzorg. Een regel die tegelijk met een verandering inging, is geen bewezen oorzaak.</p>
+    <p><b>Bekende beperkingen.</b> Reeksbreuk 2020/2021. Geen jeugd-ggz apart. Kosten ontbreken bij gemeenten die niet aanleveren. Inkomenscijfers per wijk komen later dan de jeugdcijfers; de pagina toont dan het meest recente jaar.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
 </div>
 <div id="tip" role="tooltip" hidden></div>
@@ -344,6 +385,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 (function () {
   'use strict';
   const VERSIE = '1.3';
+  const PRODUCT = 'Jeugdzorg per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOG = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title,Modified';
   const T = { trendOud: '84134NED', trendNieuw: '85099NED', kosten: '83454NED' };
@@ -1302,11 +1344,23 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   });
 
   // ---------- voet ----------
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.href;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
   function renderVoet() {
+    renderHerken();
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
     const w = S.w || {};
-    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}${w.ctx ? `, context (huishoudens en inkomen) uit Kerncijfers wijken en buurten ${w.ctx.jaar} ${link(w.ctx.tabel)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}${w.ctx ? `, context (huishoudens en inkomen) uit Kerncijfers wijken en buurten ${w.ctx.jaar} ${link(w.ctx.tabel)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -1352,7 +1406,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';

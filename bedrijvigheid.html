@@ -4,7 +4,21 @@
 <meta charset="utf-8">
 <meta name="author" content="Josephine Linders">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}.herken { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.herken .meld a.btn { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+</style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
@@ -797,6 +811,23 @@ footer a{color:var(--accent)}
 
   <section class="answer" aria-live="polite" data-na-keuze hidden><h2 id="ans-h"></h2><p id="ans-p"></p><p class="why" id="ans-why"></p></section>
 
+      <details class="herken" id="herken" data-na-keuze hidden>
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Een werkadres is een adres in de BAG met een werkfunctie (winkel, kantoor, industrie en dergelijke) en zonder woonfunctie. Een vestiging is een adres waar een bedrijf actief is volgens het CBS; geen banen en geen personen. OZB per m² is de opbrengst OZB niet-woningen gedeeld door de werkruimte in de BAG, geen tarief.</li>
+          <li><b>Een andere peildatum of indeling.</b> BAG stand 30 september 2026, vestigingen 1 januari 2025, OZB uit de jaarrekening 2025. Buurten in de CBS-indeling 2025. Een eigen telling op een andere datum of in eigen gebieden komt anders uit.</li>
+          <li><b>Registratie bij de bron.</b> Het gebruiksdoel in de BAG wijkt soms af van het werkelijke gebruik. Gemeenten boeken de OZB niet allemaal op dezelfde manier, en OZB wordt ook geheven op objecten die hier niet als werkruimte tellen.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86165NED/table" target="_blank" rel="noopener">de CBS-tabel</a> of van de BAG, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het Kadaster en het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
   <div class="grid" data-na-keuze hidden>
     <div class="mapbox"><div id="map" role="region" aria-label="Kaart"></div><div class="legend" id="legend"></div></div>
     <aside>
@@ -819,11 +850,22 @@ footer a{color:var(--accent)}
   </details>
 
   <footer>
-    <p class="terug-onder" style="margin:0"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     <p>Bronnen: Kadaster, BAG (via PDOK), stand 30 september 2026; CBS, Kerncijfers wijken en buurten 2025 (tabel 86165NED) en Wijk- en buurtkaart 2025 (via PDOK); CBS, Iv3-jaarrekening gemeenten 2025 (tabel 45071NED); achtergrondkaart PDOK BRT grijs.</p>
-    <p>Gemaakt door <a href="./">Josephine Linders</a>, oktober 2026 · versie 1.2. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
-    <p>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p>Josephine Linders · Bedrijvigheid per buurt · versie 1.2</p>
   </footer>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Werkadressen, werkruimte en woningen: BAG (Kadaster), landelijk bestand via PDOK, stand 30 september 2026. Vestigingen en sectoren: CBS, Kerncijfers wijken en buurten 2025 (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86165NED/table" target="_blank" rel="noopener">86165NED</a>), peildatum 1 januari 2025. OZB: Iv3-jaarrekening gemeenten 2025 (CBS, 45071NED, taakveld 0.62). Buurten: CBS-indeling 2025 via PDOK. Samengesteld op 24 oktober 2026 en in deze pagina opgenomen; de volgende verversing volgt na de vestigingscijfers van 1 januari 2026.</p>
+    <p><b>Licentie.</b> BAG: CC0. CBS (kerncijfers, Iv3, buurtgrenzen): CC BY 4.0. Achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+    <p><b>Methode.</b> Elk BAG-adres is op zijn ligging aan een CBS-buurt toegekend. Mengverhouding is werkadressen gedeeld door werkadressen plus woningen; ondernemen vanuit huis is vestigingen per 100 woningen in woonbuurten; OZB per m² is de opbrengst gedeeld door de werkruimte. Definities en kanttekeningen staan bij "Bronnen, definities en waar je op moet letten".</p>
+    <p><b>Wat dit niet is.</b> Geen economische monitor: geen banen, omzet of personen. Anders dan bij de andere instrumenten staat hier wel een plaats tussen gemeenten, omdat mengverhouding en OZB per m² pas betekenis krijgen naast andere gemeenten. Die plaats is een vergelijking, geen oordeel over beleid of tarief.</p>
+    <p><b>Bekende beperkingen.</b> De werkruimte (BAG 2026) en de OZB-opbrengst (2025) zijn niet uit hetzelfde jaar. Een object met meer werkfuncties telt bij de eerste. Bij minder dan 20 vestigingen geeft het CBS geen verdeling naar sector.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder het antwoord het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
 </div>
 
 <script src="vendor/leaflet-1.9.4/leaflet.js"></script>
@@ -971,7 +1013,7 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",paint);
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';
@@ -992,6 +1034,25 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",paint);
     anker.after(p);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+
+<script>
+/* herken je je gemeente niet? */
+(function () {
+  const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'), sel = document.getElementById('gm');
+  if (!m || !gh || !sel) return;
+  function vul() {
+    const o = sel.selectedOptions && sel.selectedOptions[0];
+    const naam = o && o.value !== '' ? o.textContent : '';
+    const code = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || '';
+    const titel = 'Bedrijvigheid per buurt' + (naam ? ' – ' + naam : '');
+    const body = 'Pagina: ' + location.href + '\nVersie: 1.2\nGemeente: ' + (naam ? naam + (code ? ' (' + code + ')' : '') : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  m.addEventListener('click', vul); gh.addEventListener('click', vul); document.getElementById('herken').addEventListener('toggle', vul);
 })();
 </script>
 </body>

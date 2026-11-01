@@ -182,6 +182,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+.herken { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -222,6 +235,22 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
       <div class="top4" id="top4"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> "Leeg" is administratieve leegstand: geen inschrijving in de BRP, geen gebruiker in de WOZ-registratie en geen bedrijf in het Handelsregister. Dat is niet hetzelfde als een eigen leegstandsregister of de toepassing van een leegstandverordening. Corporatiewoningen gaan over eigendom, niet over de huurhoogte.</li>
+          <li><b>Een andere peildatum of indeling.</b> Stand op 1 januari; 1 januari 2025 is voorlopig. De buurtkaart gebruikt het nieuwste jaar waarin het CBS woningcijfers per buurt levert; dat loopt achter op de gemeentecijfers. Buurten in de indeling van dat jaar.</li>
+          <li><b>Registratie bij de bron.</b> De cijfers volgen BAG, BRP en WOZ. Een woning die niet goed in de BAG staat of een bewoner die niet ingeschreven is, verschuift het cijfer. De voorraad en de mutaties komen uit twee CBS-tabellen en kunnen tientallen woningen verschillen.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86286NED/table" target="_blank" rel="noopener">de CBS-tabel zelf</a>, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
 
       <!-- door de jaren -->
       <div class="sectiekop">
@@ -298,8 +327,20 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS: Voorraad woningen naar eigendom en bewoning (86286NED, stand 1 januari, 2021 tot nu) en Levensloop van woningen en niet-woningen (86098NED, per maand vanaf 2015); buurtcijfers en grenzen uit de Kerncijfers wijken en buurten via PDOK. Alles live opgehaald bij de gemeentekeuze. Het tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0. Wijk- en buurtgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
+    <p><b>Methode.</b> Aandelen leeg en ander gebruik rekent deze pagina zelf uit de CBS-aantallen; particuliere verhuur is de som van verhuur door personen, BV's en overige rechtspersonen. Aantallen per buurt zijn percentage maal woningen, dus bij benadering. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen telling van werkelijk leegstaande woningen ter plaatse en geen langdurige leegstand. Geen woningbehoefte en geen planning. Geen ranglijst en geen oordeel over een gemeente of eigenaar; Nederland staat er alleen als referentiepunt.</p>
+    <p><b>Bekende beperkingen.</b> Per buurt alleen "zonder ingeschreven bewoners" (leeg en ander gebruik samen). Buurtcijfers lopen een jaar achter. Hoe gemeenten na een herindeling in de reeks staan, is niet gecontroleerd.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
 </div>
 <div id="tip" role="tooltip" hidden></div>
@@ -307,7 +348,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.2';
+  const PRODUCT = 'Woningvoorraad en leegstand';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_VOOR = '86286NED';   // voorraad; eigendom, type eigenaar, status van bewoning, regio
   const T_MUT = '86098NED';    // levensloop van woningen en niet-woningen
@@ -919,11 +961,23 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   });
 
   // ---------- voet ----------
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.href;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
   function renderVoet() {
+    renderHerken();
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const vs = S.voor, ms = S.mut;
     const j = S.b ? S.b.jaar : (S.jaren[0] || '');
-    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Bewoning en eigendom: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_VOOR}/table">Voorraad woningen; eigendom, type eigenaar, status van bewoning</a> (${T_VOOR}${vs ? `, ${vs[0].j}–${vs[vs.length - 1].j}` : ''}, peildatum 1 januari). Erbij en eraf: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_MUT}/table">Levensloop van woningen en niet-woningen</a> (${T_MUT}${ms ? `, ${ms[0].j}–${S.ytd ? S.ytd.j + ' t/m ' + MAAND[S.ytd.tm - 1] : ms[ms.length - 1].j}` : ''}, uit de BAG). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Woningvoorraad en leegstand · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Bewoning en eigendom: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_VOOR}/table">Voorraad woningen; eigendom, type eigenaar, status van bewoning</a> (${T_VOOR}${vs ? `, ${vs[0].j}–${vs[vs.length - 1].j}` : ''}, peildatum 1 januari). Erbij en eraf: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_MUT}/table">Levensloop van woningen en niet-woningen</a> (${T_MUT}${ms ? `, ${ms[0].j}–${S.ytd ? S.ytd.j + ' t/m ' + MAAND[S.ytd.tm - 1] : ms[ms.length - 1].j}` : ''}, uit de BAG). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Woningvoorraad en leegstand · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -971,7 +1025,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!anker || document.getElementById('citeer')) return;
     var p = document.createElement('p');
     p.id = 'citeer';
-    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
     var s = document.createElement('span');
     var k = document.createElement('button');
     k.type = 'button';

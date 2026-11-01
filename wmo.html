@@ -203,6 +203,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
 .terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
 .terug-onder { margin: 16px 0 0; }
+.herken { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; color: var(--fg, inherit); }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -251,6 +264,22 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
       <div class="top3" id="top3"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit zijn inwoners met een Wmo-maatwerkvoorziening die de gemeente aan het CBS doorgeeft. Algemene voorzieningen zonder beschikking (zoals een inloop of de ondersteuning van het wijkteam zonder maatwerk) tellen niet mee. De lasten zijn de Iv3-taakvelden voor hulpmiddelen, ondersteuning thuis en beschermd wonen en opvang, zonder toegang en coördinatie.</li>
+          <li><b>Een andere peildatum of methode.</b> Jaarcijfers; het laatste jaar is voorlopig. Alle jaren volgen de verbeterde CBS-methode van december 2025: oudere CBS-publicaties en eigen rapportages volgens de oude methode tellen meer cliënten. Wijken in de indeling van het gekozen jaar.</li>
+          <li><b>Registratie bij de bron.</b> Gemeenten delen hun voorzieningen niet op dezelfde manier in. Een sprong in één type is meestal een andere registratie, geen echte verandering; het totaal is betrouwbaarder dan de typen. Zie "Let op bij het lezen".</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85896NED/table" target="_blank" rel="noopener">de CBS-tabel zelf</a>, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
 
       <!-- gebruik -->
       <div class="sectiekop">
@@ -364,9 +393,21 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         </div>
       </div>
       <footer id="foot"></footer>
-      <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=wmo">Welke Wmo-indicatoren zijn er, en waar staan ze? Indicatoren belicht →</a></p>
-      <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS, Gemeentelijke Monitor Sociaal Domein, Wmo (85896NED en de wijktabellen per jaar); inwoners en 65-plussers uit 70072ned; lasten uit de onbewerkte Iv3-data van gemeenten (CBS); regels van de gemeente uit de CVDR (overheid.nl); wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze. Cijfers tot en met 2025, het laatste jaar voorlopig; Iv3 2026 alleen als begroting. Het tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0. CVDR (KOOP): CC0. Wijkgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
+    <p><b>Methode.</b> Cliënten en cliënten per 1.000 inwoners zoals het CBS ze publiceert, afgerond op vijftallen. Lasten per inwoner, per 65-plusser en per cliënt rekent deze pagina zelf uit Iv3, alleen over ondersteuning thuis en hulpmiddelen. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen maat voor de kwaliteit of de toegankelijkheid van de ondersteuning: meer cliënten kan goede bereikbaarheid zijn of meer nodig. Geen ranglijst en geen vergelijking met andere gemeenten. Een regel die tegelijk met een sprong inging, is geen bewezen oorzaak.</p>
+    <p><b>Bekende beperkingen.</b> De typen hangen af van hoe de gemeente registreert; het totaal is betrouwbaarder. Per wijk is vaak alleen het totaal bekend. Beschermd wonen ligt vaak bij een centrumgemeente en telt daarom niet mee in de lasten per inwoner. Alleen de laatste vijf jaar.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=wmo">Welke Wmo-indicatoren zijn er, en waar staan ze? Indicatoren belicht →</a></p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
 </div>
 <div id="tip" role="tooltip" hidden></div>
@@ -375,6 +416,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 (function () {
   'use strict';
   const VERSIE = '1.4';
+  const PRODUCT = 'Wmo per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
   const CAT = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title';
@@ -1439,12 +1481,24 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
   });
 
   // ---------- voet ----------
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.href;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
   function renderVoet() {
+    renderHerken();
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
     const ivj = S.geld ? S.geld.jaren : [];
     const w = S.w || {};
-    $('#foot').innerHTML = `Bronnen: CBS, Gemeentelijke Monitor Sociaal Domein, Wmo (CC-BY 4.0): cliënten naar type en persoonskenmerken ${link(T.trend)}, per wijk ${w.tabel ? link(w.tabel) : '–'}. Inwoners en 65-plussers per gemeente: CBS ${link(T.bev)} (1 januari). Lasten: CBS, onbewerkte Iv3-data gemeenten ${ivj.length ? ivj[0] + '–' + ivj[ivj.length - 1] : ''} (<a href="https://dataderden.cbs.nl">dataderden.cbs.nl</a>), jaarrekening, anders begroting; tweede plaatsing waar die er is. Wijkgrenzen, inwoners en 65-plussers per wijk: CBS Wijken en buurten ${w.geo ? w.jaar : ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.<br>Josephine Linders · Wmo per wijk · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS, Gemeentelijke Monitor Sociaal Domein, Wmo (CC-BY 4.0): cliënten naar type en persoonskenmerken ${link(T.trend)}, per wijk ${w.tabel ? link(w.tabel) : '–'}. Inwoners en 65-plussers per gemeente: CBS ${link(T.bev)} (1 januari). Lasten: CBS, onbewerkte Iv3-data gemeenten ${ivj.length ? ivj[0] + '–' + ivj[ivj.length - 1] : ''} (<a href="https://dataderden.cbs.nl">dataderden.cbs.nl</a>), jaarrekening, anders begroting; tweede plaatsing waar die er is. Wijkgrenzen, inwoners en 65-plussers per wijk: CBS Wijken en buurten ${w.geo ? w.jaar : ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Wmo per wijk · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
