@@ -15,6 +15,7 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 | **Financiën** | | | |
 | Iv3-spiegel | [iv3spiegel.html](https://josephinelinders.nl/iv3spiegel.html) | Waar gaat het geld van een gemeente heen, en deed ze wat ze van plan was? | Iv3 (CBS) |
 | Iv3-panorama | [iv3panorama.html](https://josephinelinders.nl/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |
+| Rijksgeld per gemeente | [rijksgeld.html](https://josephinelinders.nl/rijksgeld.html) | Welk ministerie betaalt wat aan je gemeente? | Financiële instrumenten (Rijk), budgetten SZW, Iv3 (CBS) |
 | **Economie en ondernemen** | | | |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
 | **Onderwijs** | | | |

@@ -237,6 +237,11 @@ main > * { min-width: 0; }
         </div>
       </details>
 
+      <div id="opvBlok" hidden>
+        <div class="sectiekop"><h2>Opvallend</h2><p class="muted small">Regelingen waar deze gemeente minstens € 75 per inwoner boven Nederland zit, hoogstens vijf. Een afwijking kan een taak, een regionale rol of een lokale situatie zijn. Dit is geen oordeel.</p></div>
+        <div class="chart"><div class="rijen" id="opvallend"></div></div>
+      </div>
+
       <div class="sectiekop"><h2>Per ministerie</h2><p class="muted small">Open een regel voor de regelingen. De balk is het bedrag per inwoner; de streep is Nederland. Het gemeentefonds staat er niet in de balk bij, omdat het veel groter is dan de rest.</p></div>
       <div class="min-lijst" id="ministeries"></div>
 
@@ -258,6 +263,7 @@ main > * { min-width: 0; }
             <li><b>Koppeling</b>: het Rijk publiceert geen gemeentecode. Ontvangers zijn herkend op het KvK-nummer uit het gemeentefonds en op naam.</li>
             <li><b>Inburgering</b>: de regels bij Sociale Zaken tellen in de bron landelijk op tot nul; de betaling staat bij Justitie en Veiligheid. De pagina laat de regels bij Sociale Zaken weg.</li>
             <li><b>Per inwoner</b>: inwoners op 1 januari 2025 (CBS 70072ned).</li>
+            <li><b>Opvallend</b>: bedrag per inwoner per regeling tegenover Nederland, zonder de algemene uitkering. Beschermd wonen gaat bijvoorbeeld naar 43 gemeenten die het voor hun regio ontvangen.</li>
           </ul>
         </div>
         <div class="card">
@@ -316,6 +322,7 @@ main > * { min-width: 0; }
   BUIG.split(' ').forEach(x => { const q = x.split(':'); B[q[0].padStart(4, '0')] = +q[1]; });
   const somH = regels => { const m = new Map(); regels.forEach(([i, v]) => { const h = REG[i].h; m.set(h, (m.get(h) || 0) + v); }); return m; };
   const NL = somH(Object.values(P).flat());
+  const NLR = {}; Object.values(P).flat().forEach(([i, v]) => { NLR[i] = (NLR[i] || 0) + v; });
   const nlTot = [...NL.values()].reduce((a, b) => a + b, 0), nlFonds = NL.get('Gemeentefonds'), nlBuig = Object.values(B).reduce((a, b) => a + b, 0);
 
   // ---------- gemeenten ----------
@@ -397,7 +404,13 @@ main > * { min-width: 0; }
     $('#top3').innerHTML = kaart('Gemeentefonds · 2025', fMln(S.fonds), inw.gm ? `${fPi(pi(S.fonds))} per inwoner; Nederland ${fPi(nlPi(nlFonds))}` : 'algemene, integratie- en decentralisatie-uitkeringen')
       + kaart('Bijstandsbudget · 2026', fMln(S.buig), inw.gm ? `${fPi(pi(S.buig))} per inwoner; Nederland ${fPi(nlPi(nlBuig))}` : 'ander jaar dan de rest')
       + kaart('Overige betalingen · 2025 <span class="indic">indicatief</span>', fMln(S.overig), inw.gm ? `${fPi(pi(S.overig))} per inwoner; Nederland ${fPi(nlPi(nlTot - nlFonds))}` : 'specifieke uitkeringen en subsidies');
-    renderMin(pi, nlPi); renderIv3(); renderTabel(); renderVoet(); vulMeld();
+    renderOpv(pi, nlPi); renderMin(pi, nlPi); renderIv3(); renderTabel(); renderVoet(); vulMeld();
+  }
+  function renderOpv(pi, nlPi) {
+    const o = !S.inw.gm ? [] : S.regels.filter(([i]) => REG[i].r !== 'Algemene uitkering').map(([i, v]) => ({ i, v, p: pi(v), n: nlPi(NLR[i]) })).filter(x => x.p - x.n >= 75).sort((a, b) => (b.p - b.n) - (a.p - a.n)).slice(0, 5);
+    $('#opvBlok').hidden = !o.length;
+    const max = Math.max(1, ...o.map(x => x.p));
+    $('#opvallend').innerHTML = o.map(x => `<div class="rij"><span class="naam">${esc(REG[x.i].r)} <span class="muted small">· ${esc(REG[x.i].h)}</span></span><span class="baan"><i style="width:${100 * x.p / max}%"></i><b style="left:${100 * x.n / max}%"></b></span><span class="w">${fPi(x.p)} <span class="muted">/ ${fPi(x.n)}</span></span></div>`).join('') + (o.length ? '<div class="legend"><span><span class="sw" style="background:var(--accent)"></span>' + esc(S.g.n) + ' per inwoner</span><span><span class="tick"></span>Nederland</span></div>' : '');
   }
   function renderMin(pi, nlPi) {
     const open = new Set([...document.querySelectorAll('#ministeries details[open]')].map(d => d.dataset.h));
