@@ -10,11 +10,19 @@
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <style>
 /* Layout: één kolom die leest als een gesprek. Kop met gemeentekeuze, dan het geheel in drie getallen en twee balken, dan drie vragen als tabbladen. Bedragen eerst per inwoner, miljoenen ernaast. */
 :root{
@@ -41,7 +49,8 @@
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
-.wrap{max-width:1440px;margin:0 auto;display:grid;gap:28px}
+.wrap{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
+@media (max-width:360px){.pick select{min-width:0!important;width:100%}}
 a{color:var(--accent)}
 button,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -198,6 +207,8 @@ footer p{margin:0}
       <span class="note">342 gemeenten · cijfers over 2025</span>
     </div>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
     <p class="snel" id="snel"><span>Of begin met</span><button type="button" data-gm="0518">Den Haag</button><button type="button" data-gm="1783">Westland</button><button type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
@@ -269,6 +280,7 @@ footer p{margin:0}
     <p><b>Contact en correcties.</b> Fout gezien in een bedrag of een tekst? Gebruik het blok "Herken je je gemeente niet?" bovenaan, met de gemeente al ingevuld, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 
 <script>

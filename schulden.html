@@ -172,11 +172,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -195,6 +203,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
     </form>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
     <p>Hoeveel huishoudens in je gemeente hebben problematische schulden die in de registers van de overheid en de kredietregistratie zichtbaar zijn? Bij welke schuldeisers staan die schulden, wie zijn het, en hoe verdeelt het zich over de wijken? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen, met Nederland als enig vergelijkingspunt.</p>
@@ -236,7 +246,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         <div class="chart totaal" id="trendChart"></div>
         <div class="chart" id="instroomChart"></div>
       </div>
-      <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="trendTabel"></div></details>
+      <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="trendTabel" tabindex="0" role="region" aria-label="Tabel met cijfers; scroll met de pijltjestoetsen"></div></details>
 
       <!-- schuldeisers -->
       <div class="sectiekop">
@@ -278,7 +288,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       </div>
       <div class="panel">
         <div class="tools">
-          <input id="search" type="search" placeholder="Zoek wijk…">
+          <input id="search" type="search" placeholder="Zoek wijk…" aria-label="Zoek wijk">
           <span class="muted small" id="rowCount"></span>
           <span style="flex:1"></span>
           <button class="btn" id="csvWijk" type="button">CSV wijken</button>
@@ -332,6 +342,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 <div id="tip" role="tooltip" hidden></div>
 

@@ -672,6 +672,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script>/* Leaflet 1.9.4 (c) Volodymyr Agafonkin, BSD-2-Clause */
 /* @preserve
@@ -845,6 +852,7 @@ footer { font-size: .8rem; color: var(--muted); }
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -866,6 +874,8 @@ footer { font-size: .8rem; color: var(--muted); }
       <button class="btn" id="themeBtn" type="button" title="Licht of donker">◐</button>
     </form>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
     <p>Welke kantoren in je gemeente voldoen aan de energielabel C-plicht? Kies een gemeente. De pagina haalt dan elk kantoorpand op bij BAG, RCE en RIVM en deelt het in; dat duurt even. Wat open data niet weet, zoals gemeentelijke monumenten, voeg je daarna zelf toe. Die lijst blijft in je browser.</p>
@@ -916,7 +926,7 @@ footer { font-size: .8rem; color: var(--muted); }
           <span class="spacer"></span>
         </div>
         <div class="tools" id="tblTools">
-          <input id="search" type="search" placeholder="Zoek adres, pand-ID, wijk…">
+          <input id="search" type="search" placeholder="Zoek adres, pand-ID, wijk…" aria-label="Zoek adres, pand-ID, wijk">
           <span class="muted small" id="rowCount"></span>
           <span class="spacer" style="flex:1"></span>
           <button class="btn" id="csvBtn" type="button">CSV downloaden</button>
@@ -979,6 +989,7 @@ footer { font-size: .8rem; color: var(--muted); }
       <p><a href="colofon.html">Colofon en privacy</a></p>
       <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
     </div>
+</main>
 </div>
 
 <script>

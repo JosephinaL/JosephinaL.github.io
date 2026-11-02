@@ -10,11 +10,19 @@
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <style>
 /* Layout: een weefsel van 342 dunne regels. Kop met uitleg en bediening, daaronder Nederland als ijkregel en dan alle gemeenten. Kleuren gelijk aan de Iv3-spiegel. */
 :root{
@@ -122,6 +130,8 @@ footer a{color:var(--accent)}
     <h1>Iv3-panorama</h1>
     <p class="lead">Alle 342 gemeenten onder elkaar. Elke regel laat zien hoe een gemeente haar uitgaven over negen hoofdgroepen verdeelt. Waar een kleur breder of smaller is dan bij de rest, wijkt een gemeente af. De gemeenten staan op alfabet, zodat je je eigen gemeente snel vindt. Klik op een kleur om die vooraan in elke balk te zetten, of sorteer van hoog naar laag om te zien wie eruit springt. Klik op een regel om de Iv3-spiegel van die gemeente te openen.</p>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <div class="controls" aria-label="Bediening">
     <div class="crow">
@@ -179,6 +189,7 @@ footer a{color:var(--accent)}
     <p><b>Contact en correcties.</b> Fout gezien in een balk of een tekst? Gebruik het blok "Herken je je gemeente niet?" onder de balken, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 <div class="tip" id="tip" hidden></div>
 

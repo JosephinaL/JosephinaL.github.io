@@ -84,7 +84,7 @@ nav a:hover { color: var(--accent); }
 .section { display: grid; gap: 28px; }
 .section-head { display: grid; gap: 8px; max-width: 62ch; }
 .manifest { display: grid; gap: 12px; max-width: 62ch; border-left: 3px solid var(--accent); padding-left: 20px; }
-.manifest h3 { font-size: 1.25rem; color: var(--accent); }
+.manifest h2 { font-size: 1.25rem; color: var(--accent); }
 .manifest p { color: var(--ink); }
 .manifest p.slot { font-style: italic; color: var(--muted); }
 .product { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); overflow: hidden; }
@@ -178,11 +178,19 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="page">
   <header class="top">
     <a class="name" href="./">Open Data Atelier<span class="sig">Josephine Linders</span></a>
@@ -196,6 +204,8 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
       <button class="theme" id="themeBtn" type="button" aria-label="Wissel licht en donker">◐</button>
     </nav>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <section class="hero" aria-labelledby="h-hero">
     <div class="hero-text">
@@ -245,7 +255,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
 
   <section class="section" id="werkwijze" aria-labelledby="h-werk">
     <div class="manifest">
-      <h3>Anders kijken. Verbanden ontdekken. Betekenis zichtbaar maken.</h3>
+      <h2>Anders kijken. Verbanden ontdekken. Betekenis zichtbaar maken.</h2>
       <p>Elke registratie vertelt een eigen verhaal. In de verbindingen ertussen ontstaat iets nieuws. Het Open Data Atelier is de plek om die verbindingen te leggen. Zichtbaar wordt ook wat ontbreekt, wat afwijkt en wat onverwacht uitkomt. Juist daar begint vaak de volgende vraag.</p>
       <p class="slot">Soms is anders kijken genoeg om te zien wat er al die tijd al was.</p>
     </div>
@@ -781,6 +791,7 @@ footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap;
     <span>Geen cookies. Anonieme bezoekerstelling met GoatCounter.</span>
     <span><a href="colofon.html">Colofon en privacy</a></span>
   </footer>
+</main>
 </div>
 <script>
 (function () {

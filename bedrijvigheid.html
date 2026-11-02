@@ -22,11 +22,19 @@
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <title>Bedrijvigheid per buurt · Open Data Atelier</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="fonts/fonts.css">
@@ -726,7 +734,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:32px 48px}
-.wrap{max-width:1440px;margin:0 auto;display:grid;gap:20px}
+.wrap{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:20px}
+@media (max-width:360px){.pick select{min-width:0!important;width:100%}}
 button,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 header{display:grid;gap:10px}
@@ -806,6 +815,8 @@ footer a{color:var(--accent)}
     <div class="pick"><label for="gm">Gemeente</label><select id="gm"><option value="" disabled selected>Kies een gemeente</option></select></div>
     <p class="snel" id="snel"><span>Of begin met</span><button type="button" data-gm="0518">Den Haag</button><button type="button" data-gm="1783">Westland</button><button type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <div class="tabs" role="tablist" aria-label="Vraag" data-na-keuze hidden>
     <button class="tab" role="tab" data-v="meng">Hoe gemengd zijn wonen en werken?</button>
@@ -870,6 +881,7 @@ footer a{color:var(--accent)}
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder het antwoord het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 
 <script src="vendor/leaflet-1.9.4/leaflet.js"></script>

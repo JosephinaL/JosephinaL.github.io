@@ -180,6 +180,9 @@ details.tabelview .scroll { max-height: 420px; }
 table { border-collapse: collapse; width: 100%; font-size: .88rem; }
 th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
 th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
+th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td .rijknop { text-decoration: underline; text-underline-offset: 2px; }
 th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
 th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
 td.r, th.r { text-align: right; }
@@ -220,11 +223,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -243,6 +254,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
     </form>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
     <p>Hoeveel inwoners van je gemeente krijgen ondersteuning uit de Wet maatschappelijke ondersteuning (Wmo), wie zijn dat, wat kost het, hoe verdeelt het zich over de wijken en welke regels had de gemeente? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor.</p>
@@ -296,7 +309,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <div class="chart totaal" id="panTot"></div>
       <div class="typenkop"><h3>Waaruit bestaat het? Uitsplitsing naar type</h3><p class="small muted" id="typenNoot"></p></div>
       <div class="multiples" id="multiples"></div>
-      <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="trendTabelIn"></div></details>
+      <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="trendTabelIn" tabindex="0" role="region" aria-label="Tabel met cijfers; scroll met de pijltjestoetsen"></div></details>
 
       <!-- wie -->
       <div class="sectiekop">
@@ -351,7 +364,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
               <option value="ov">Overig</option>
             </select>
           </div>
-          <div id="map" role="region" aria-label="Kaart van de wijken"></div>
+          <div id="map" role="region" aria-label="Kaart van de wijken; dezelfde wijken staan in de tabel hieronder"></div>
           <div class="maplegend" id="mapLegend"></div>
         </div>
         <aside class="dossier" id="dossier" aria-live="polite"></aside>
@@ -359,7 +372,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <div class="chart" id="spreiding"></div>
       <div class="panel">
         <div class="tools">
-          <input id="search" type="search" placeholder="Zoek wijk…">
+          <input id="search" type="search" placeholder="Zoek wijk…" aria-label="Zoek wijk">
           <span class="muted small" id="rowCount"></span>
           <span style="flex:1"></span>
           <button class="btn" id="csvWijk" type="button">CSV wijken</button>
@@ -413,6 +426,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=wmo">Welke Wmo-indicatoren zijn er, en waar staan ze? Indicatoren belicht →</a></p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 <div id="tip" role="tooltip" hidden></div>
 
@@ -1317,6 +1331,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
         ly.on('click', () => kiesWijk(f.properties.wijkcode, false));
       }
     }).addTo(layer);
+    // de tabel eronder is de toetsenbordroute: dezelfde wijken, dezelfde keuze; de vlakken zelf zijn geen tabstops
+    gjLayer.eachLayer(l => { const el = l.getElement && l.getElement(); if (el) el.setAttribute('tabindex', '-1'); });
     const passen = !S.bounded; S.bounded = true;
     if (kl) {
       // bij een kleine spreiding één decimaal, anders worden de klassen "2%–2%"
@@ -1455,13 +1471,15 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     if (!rs.length) { $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Geen cijfers voor dit jaar.</p>'; $('#rowCount').textContent = ''; return; }
     const cel = (r, c) => c.k === 'naam' ? esc(r.naam) : c.k === 'oud' ? (r.oud == null ? '–' : nf.format(r.oud)) : c.k === '_a' ? (r._a == null ? '–' : nf.format(Math.round(r._a))) : fmt(r[c.k]);
     const kl = c => [c.r ? 'r' : '', c.uit ? 'uit' : ''].join(' ').trim();
-    $('#tblWrap').innerHTML = `<table><thead><tr>${COLS.map(c => `<th class="${kl(c)}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.t}</th>`).join('')}</tr></thead>
-      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selWijk ? 'sel' : ''}" data-code="${esc(r.code)}">${COLS.map(c => `<td class="${kl(c)}">${cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    $('#tblWrap').innerHTML = `<table><thead><tr>${COLS.map(c => `<th class="${kl(c)}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}><button type="button" class="kolomknop">${c.t}</button></th>`).join('')}</tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selWijk ? 'sel' : ''}" data-code="${esc(r.code)}">${COLS.map(c => `<td class="${kl(c)}">${c.k === 'naam' && !r.isGm ? `<button type="button" class="rijknop">${cel(r, c)}</button>` : cel(r, c)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
     $('#rowCount').textContent = `${rest.length} wijken · ${w.jaar}`;
     $('#tblWrap').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
       const k = th.dataset.k;
       if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === 'naam' ? 1 : -1; }
       renderTabel();
+      const knop = [...$('#tblWrap').querySelectorAll('th')].find(x => x.dataset.k === k);
+      if (knop) knop.querySelector('.kolomknop').focus(); // focus blijft op de kolom na het opnieuw opbouwen
     }));
     $('#tblWrap').querySelectorAll('tbody tr.klik').forEach(r => r.addEventListener('click', () => kiesWijk(r.dataset.code, true)));
   }

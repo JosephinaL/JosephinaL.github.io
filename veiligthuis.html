@@ -155,11 +155,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -178,6 +186,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
     </form>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
     <p>Hoe vaak vragen inwoners en professionals in je gemeente Veilig Thuis om advies, en hoe vaak doen ze een melding? Over welk geweld gaat het, wie meldt, en wat gebeurt er daarna? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen, met Nederland als enige referentie. Er is geen ranglijst van gemeenten.</p>
@@ -318,6 +328,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=hg">Welke indicatoren horen bij huiselijk geweld, en waar staan ze? Indicatoren belicht →</a></p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 
 <script>

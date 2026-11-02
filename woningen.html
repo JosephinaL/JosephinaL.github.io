@@ -199,11 +199,19 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -222,6 +230,8 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
       <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
     </form>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
     <p>Hoeveel woningen heeft je gemeente, wie bezit ze, en hoeveel staan er leeg? Kies een gemeente. Je ziet de voorraad op 1 januari, wat er elk jaar bij komt en af gaat, bij welke eigenaren de lege woningen staan, en per buurt hoe de voorraad is opgebouwd.</p>
@@ -297,7 +307,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
           <button class="tab" role="tab" aria-selected="false" data-view="wijk">Wijken</button>
         </div>
         <div class="tools">
-          <input id="search" type="search" placeholder="Zoek buurt of wijk…">
+          <input id="search" type="search" placeholder="Zoek buurt of wijk…" aria-label="Zoek buurt of wijk">
           <span class="muted small" id="rowCount"></span>
           <span style="flex:1"></span>
           <button class="btn" id="csvBtn" type="button">CSV buurten en wijken</button>
@@ -346,6 +356,7 @@ footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 <div id="tip" role="tooltip" hidden></div>
 

@@ -677,6 +677,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
 /* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
 :where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
 </style>
 <script>/* Leaflet 1.9.4 (c) Volodymyr Agafonkin, BSD-2-Clause */
 /* @preserve
@@ -877,6 +884,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         async src="https://gc.zgo.at/count.js"></script>
 </head>
 <body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="wrap">
   <header class="top">
     <div class="brand">
@@ -894,6 +902,8 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       <button class="btn" id="themeBtn" type="button" title="Licht of donker">◐</button>
     </form>
   </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
 
   <ol class="werk" aria-label="Zo werkt deze kaart">
     <li><b>1</b><span>BAG en CBS-buurten: elke regel landt op een pand of adres.</span></li>
@@ -1023,7 +1033,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
           <button class="tab" role="tab" aria-selected="false" data-view="buurt">Per buurt</button>
         </div>
         <div class="tools">
-          <input id="search" type="search" placeholder="Zoek naam, adres, ID, buurt…">
+          <input id="search" type="search" placeholder="Zoek naam, adres, ID, buurt…" aria-label="Zoek naam, adres, ID, buurt">
           <span class="muted small" id="rowCount"></span>
           <span style="flex:1"></span>
           <button class="btn" id="csvBtn" type="button">Verrijkte lijst downloaden (CSV)</button>
@@ -1078,6 +1088,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     <p><b>Contact en correcties.</b> Fout gezien in een koppeling, een signaal of een tekst? Meld het per e-mail via <a href="./#samenwerken">Samenwerken</a>, of openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens), of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Zet er geen regels uit je eigen lijst in. <a href="colofon.html">Colofon en privacy</a>.</p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
+</main>
 </div>
 
 <script>// Rekenkern "Eigen lijst op de kaart". Draait in browser en Node (globale fetch).
