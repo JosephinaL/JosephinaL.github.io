@@ -269,10 +269,6 @@ main > * { min-width: 0; }
             <li><b>Geen kosten</b>: de lasten van inburgering hebben geen eigen taakveld in de gemeentebegroting (Iv3) en zijn daarom niet zuiver per gemeente te tonen.</li>
           </ul>
         </div>
-        <div class="card">
-          <h2>Naast deze pagina</h2>
-          <ul class="small" id="verder"></ul>
-        </div>
       </div>
       <footer id="foot"></footer>
     </div>
@@ -417,7 +413,7 @@ main > * { min-width: 0; }
     renderAlles();
     laadInwoners(g);
   }
-  function renderAlles() { renderKern(); renderIn(); renderStatus(); renderRoute(); renderTabel(); renderVerder(); renderVoet(); }
+  function renderAlles() { renderKern(); renderIn(); renderStatus(); renderRoute(); renderTabel(); renderVoet(); }
 
   // ---------- inwoners (CBS) ----------
   async function laadInwoners(g) {
@@ -620,15 +616,6 @@ main > * { min-width: 0; }
     g.det.slice().sort((a, b) => a.c - b.c || a.d - b.d || a.r - b.r || a.l - b.l).forEach(x => rows.push([STAND, 'GM' + g.c, g.n, JAREN[x.c], DOEL[x.d], STATUSNAAM[x.r], REDEN[x.r], ROUTENAAM[x.l] || 'geen', x.n == null ? '1-4' : x.n]));
     csvDownload(`inburgering_${bestand(g.n)}.csv`, ['stand', 'gemeentecode', 'gemeente', 'jaargroep', 'doelgroep', 'status', 'uitstroomreden', 'leerroute', 'aantal'], rows);
   });
-
-  // ---------- verder ----------
-  function renderVerder() {
-    const c = S.g.c;
-    $('#verder').innerHTML = `
-      <li><a href="schulden.html#gm=${c}">Schulden per wijk</a>: huishoudens met problematische schulden, onder meer bij bijstand en huurtoeslag.</li>
-      <li><a href="woningen.html#gm=${c}">Woningvoorraad en leegstand</a>: de corporatievoorraad waarin statushouders meestal worden gehuisvest.</li>
-      <li><a href="huishoudens.html#gm=${c}">Huishoudens en vergrijzing</a>: samenstelling van de huishoudens per buurt.</li>`;
-  }
 
   // ---------- herken je je gemeente niet? ----------
   function renderHerken() {
