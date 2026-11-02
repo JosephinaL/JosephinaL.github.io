@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rijksgeld per gemeente · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Welk ministerie betaalt wat aan je gemeente: gemeentefonds, bijstandsbudget en overige rijksbetalingen per Nederlandse gemeente, naast de eigen Iv3.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --grijs: #b9c4c5;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; font-size: .9rem; max-width: 100%; }
+.info p { margin: 0; max-width: 90ch; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.jaren { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .ax { stroke: var(--line); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .val { fill: var(--fg); font: 600 11px var(--f-mono); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart-kop .laatst { font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .tick { display: inline-block; width: 0; height: 12px; border-left: 2px solid var(--fg); vertical-align: -1px; margin-right: 6px; }
+
+/* rijen met een balk en een streep voor Nederland */
+.rijen { display: grid; gap: 8px; }
+.rij { display: grid; grid-template-columns: minmax(120px, 13em) minmax(0, 1fr) 8.5em; gap: 4px 12px; align-items: center; font-size: .9rem; }
+.rij .naam { min-width: 0; }
+.rij .baan { position: relative; height: 16px; background: var(--sunk); border-radius: 3px; }
+.rij .baan i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.rij .baan b { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--fg); }
+.rij .w { text-align: right; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rij .w .muted { font-family: var(--f-body); }
+@media (max-width: 520px) { .rij { grid-template-columns: minmax(0, 1fr) 7.5em; } .rij .baan { grid-column: 1 / -1; grid-row: 2; } }
+
+/* gestapelde balk gemeente tegen Nederland */
+.stapel { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 6px 12px; align-items: center; font-size: .88rem; }
+.stapel .s { display: flex; height: 22px; border-radius: 3px; overflow: hidden; background: var(--sunk); }
+.stapel .s i { display: block; height: 100%; }
+.stapel .s i + i { border-left: 1px solid var(--surface); }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 14px 10px; }
+.scroll { overflow: auto; max-height: 520px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; white-space: nowrap; z-index: 1; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tr.grp td { font-weight: 600; background: var(--sunk); }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.hulp { font-size: .85rem; color: var(--muted); }
+
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+.ondertitel { font-size: 1rem; color: var(--muted); }
+.min-lijst { display: grid; gap: 6px; }
+.min-lijst details { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.min-lijst summary { cursor: pointer; padding: 8px 12px; display: grid; grid-template-columns: minmax(120px, 20em) minmax(0, 1fr) 7em; gap: 4px 12px; align-items: center; font-size: .92rem; }
+.min-lijst summary .baan { position: relative; height: 14px; background: var(--sunk); border-radius: 3px; }
+.min-lijst summary .baan i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.min-lijst summary .baan b { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--fg); }
+.min-lijst summary .w { text-align: right; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.min-lijst .reg { padding: 0 12px 10px; }
+.min-lijst table { font-size: .85rem; }
+@media (max-width: 560px) { .min-lijst summary { grid-template-columns: minmax(0, 1fr) 6.5em; } .min-lijst summary .baan { grid-column: 1 / -1; grid-row: 2; } }
+.indic { font-size: .72rem; font-family: var(--f-display); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 3px; padding: 0 5px; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Financiën · open data</span>
+      <h1 id="title">Rijksgeld per gemeente</h1>
+      <span class="ondertitel">Welk ministerie betaalt wat aan je gemeente</span>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Een gemeente leeft voor een groot deel van geld van het Rijk. De Iv3 laat zien wat de gemeente ontvangt, maar niet van welk ministerie en via welke regeling. Hier leg je de rijksbetalingen naast elkaar. Kies een gemeente. Je ziet de eigen gemeente, met Nederland als enige referentie. Er is geen ranglijst van gemeenten.</p>
+    <p class="muted small">De betalingen staan vast op de pagina (boekjaar 2025). De boekingen van de gemeente komen live van het CBS op het moment dat je een gemeente kiest.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="info"><p><b>Lees dit eerst.</b> Dit zijn betalingen van het Rijk aan de gemeente zelf. Geld dat via een gemeenschappelijke regeling, een veiligheidsregio of een GGD loopt, staat hier niet bij. Het bijstandsbudget staat apart, omdat het niet in de rijksbestanden per ontvanger staat.</p></div>
+      <div class="top3" id="top3"></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit zijn betalingen zoals het Rijk ze verantwoordt, op kasbasis. De jaarrekening van de gemeente rekent baten toe aan het jaar waar ze bij horen. Een voorschot kan dus in een ander jaar in de jaarrekening staan.</li>
+          <li><b>Een ander jaar.</b> Betalingen gaan over 2025, het bijstandsbudget over 2026. De definitieve bedragen van 2025 per gemeente waren niet meer openbaar te vinden op de vaste plek.</li>
+          <li><b>Registratie bij de bron.</b> Een betaling staat op een ontvanger met een naam en een KvK-nummer, en die zijn niet altijd juist of eenduidig. De pagina koppelt ze aan de gemeente met vaste regels. Betalingen die daarbij niet herkend worden, ontbreken hier.</li>
+          <li><b>Een fout in de bewerking.</b> Controleer het bedrag in de bron: <a href="https://www.rijksfinancien.nl/open-data/financi%C3%ABle%20instrumenten">Financiële instrumenten op rijksfinancien.nl</a>.</li>
+        </ol>
+        <p class="status small muted">Dit is een bewerking van open data door Josephine Linders, op eigen titel. Geen officiële cijfers van een gemeente of van het Rijk.</p>
+        <div class="meld">
+          <span>Fout gezien, of een cijfer dat niet klopt?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted"><a href="https://github.com/josephinal/josephinal.github.io/issues">Eerdere meldingen</a>. GitHub is openbaar en vraagt een gratis account; zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <div class="sectiekop"><h2>Per ministerie</h2><p class="muted small">Open een regel voor de regelingen. De balk is het bedrag per inwoner; de streep is Nederland. Het gemeentefonds staat er niet in de balk bij, omdat het veel groter is dan de rest.</p></div>
+      <div class="min-lijst" id="ministeries"></div>
+
+      <div class="sectiekop"><h2>Naast de boekingen van de gemeente</h2><p class="muted small">Wat de gemeente zelf als inkomsten van het Rijk boekt in de Iv3, jaarrekening 2025. Een verschil is geen fout; zie de toelichting.</p></div>
+      <div class="chart"><div class="scroll" style="max-height:none" id="iv3" tabindex="0" role="region" aria-label="Rijksbetalingen naast Iv3; scroll met de pijltjestoetsen"></div></div>
+
+      <details class="tabelview" id="tabel"><summary>Toon alle regelingen als tabel</summary>
+        <div class="tools"><button class="btn" id="csvBtn" type="button">Download als CSV</button><span class="small muted">Bedragen in euro's, in de bron afgerond op duizendtallen.</span></div>
+        <div class="scroll" id="tabelIn" tabindex="0" role="region" aria-label="Tabel met regelingen; scroll met de pijltjestoetsen"></div>
+      </details>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Gemeentefonds</b>: algemene uitkering, integratie-uitkeringen en decentralisatie-uitkeringen.</li>
+            <li><b>Bijstandsbudget</b>: de definitieve budgetten 2026 voor bijstand en loonkostensubsidies (BUIG). Een ander jaar dan de rest.</li>
+            <li><b>Overige betalingen</b>: alles wat ministeries aan de gemeente betalen buiten het gemeentefonds, zoals specifieke uitkeringen (SPUK's) en subsidies.</li>
+            <li><b>Koppeling</b>: het Rijk publiceert geen gemeentecode. Ontvangers zijn herkend op het KvK-nummer uit het gemeentefonds en op naam.</li>
+            <li><b>Inburgering</b>: de regels bij Sociale Zaken tellen in de bron landelijk op tot nul; de betaling staat bij Justitie en Veiligheid. De pagina laat de regels bij Sociale Zaken weg.</li>
+            <li><b>Per inwoner</b>: inwoners op 1 januari 2025 (CBS 70072ned).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Geen volledig beeld</b>: de overige betalingen zijn indicatief. Landelijk boeken gemeenten meer dan hier gekoppeld is: € 5,7 mld tegen € 5,3 mld.</li>
+            <li><b>Via samenwerking</b>: rijksgeld voor een gemeenschappelijke regeling of centrumgemeente staat bij die ontvanger, of bij één gemeente voor de hele regio.</li>
+            <li><b>Geen oordeel</b>: veel of weinig rijksgeld zegt niets over goed of slecht beleid. Taken, omvang en bijzondere regelingen verschillen.</li>
+            <li><b>Geen vergelijking</b>: Nederland is de enige referentie, en alleen per inwoner.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Ministerie van Financiën, <a href="https://www.rijksfinancien.nl/open-data/financi%C3%ABle%20instrumenten">Financiële instrumenten 2025</a> (betalingen per ontvanger, gepubliceerd bij de Slotwet). Ministerie van SZW, <a href="https://www.rijksoverheid.nl/documenten/2025/09/30/budgetten-specificaties-en-toelichting">definitieve budgetten bijstand en LKS 2026</a>. CBS, onbewerkte Iv3-data gemeenten 2025 (<a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED">45071NED</a>), live opgehaald; inwoners <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a>. Peildatum data op de pagina: 2 november 2026.</p>
+    <p><b>Licentie.</b> Rijksfinancien en rijksoverheid.nl: CC0. CBS: CC BY 4.0.</p>
+    <p><b>Methode.</b> Ontvangers zijn met vaste regels aan een gemeentecode gekoppeld (KvK-nummer uit het gemeentefonds, naam, handmatig vastgestelde uitzonderingen). De regels bij Sociale Zaken voor inburgering zijn weggelaten omdat ze landelijk op nul uitkomen. Iv3: baten op categorie Inkomensoverdrachten Rijk en Investeringsbijdragen Rijk, verdeeld over taakveld 0.7, taakveld 6.3 en de overige taakvelden, jaarrekening 2025.</p>
+    <p><b>Wat dit niet is.</b> Geen volledig overzicht van rijksgeld voor een gebied, geen jaarrekening en geen oordeel over een gemeente. Geen vergelijking tussen gemeenten.</p>
+    <p><b>Bekende beperkingen.</b> Het gemeentefonds sluit aan op de Iv3: 317 van 340 gemeenten binnen 1%. Het bijstandsbudget sluit in de verdeling aan op taakveld 6.3 (getoetst met de nader voorlopige verdeling 2025: mediane afwijking 0,9%), maar gaat hier over een ander jaar. De overige betalingen zijn indicatief: mediane afwijking per gemeente 16% ten opzichte van de Iv3. Ontvangers staan soms onder een onjuiste naam in de bron.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", of meld het per e-mail via <a href="./#samenwerken">Samenwerken</a> of openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens). <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '0.1';
+  const PRODUCT = 'Rijksgeld per gemeente';
+  const IV3 = 'https://dataderden.cbs.nl/ODataApi/OData/45071NED/';
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const DICT = ["Gemeentefonds|Algemene uitkering", "Gemeentefonds|Integratie-Uitkering Participatie R", "Asiel en Migratie|Bijdrage medeoverheden: Nationaal Programma Oekraïense Ontheemden", "Gemeentefonds|Integratie-uitkering Beschermd wonen R", "Gemeentefonds|Decentralisatie-uitkeringen", "Klimaat en Groene Groei|Tijdelijke regeling capaciteit decentrale overheden voor klimaat- en energiebeleid", "Onderwijs, Cultuur en Wetenschap|Gemeentelijk onderwijsachterstandenbeleid", "Justitie en Veiligheid|Inburgeringsvoorzieningen", "Volksgezondheid, Welzijn en Sport|BMO SPUK Gezondheidsbescherming", "Financiën|Toeslagen", "Volksgezondheid, Welzijn en Sport|BMO SPUK Duurzame en toegankelijke sportaccom", "Volksgezondheid, Welzijn en Sport|BMO Diversen", "Onderwijs, Cultuur en Wetenschap|Educatie", "Volksgezondheid, Welzijn en Sport|BMO SPUK Jeugdhulp", "Justitie en Veiligheid|Aanpak ondermijning", "Justitie en Veiligheid|Regionale Informatie en Expertise Centra", "Mobiliteitsfonds|Verkenningen en planuitwerkingen", "Asiel en Migratie|Bijdrage medeoverheden: Overig", "Onderwijs, Cultuur en Wetenschap|Regionaal Programma", "Onderwijs, Cultuur en Wetenschap|RMC's", "Justitie en Veiligheid|aanpak criminaliteitsfenomenen", "Volksgezondheid, Welzijn en Sport|BMO SPUK Gezondheidsbevordering", "Asiel en Migratie|Bijdrage medeoverheden: Samenwerkingsverbanden asielketen", "Onderwijs, Cultuur en Wetenschap|Bijdragen aan medeoverheden", "Volksgezondheid, Welzijn en Sport|BMO SPUK DOS", "Binnenlandse Zaken|Gemeenten", "Justitie en Veiligheid|Onderwijsroute", "Landbouw, Visserij, Voedselzekerheid en Natuur|Specifieke Uitkering Visserij Ontwikkel Plan", "Volkshuisvesting en Ruimtelijke Ordening|Nationaal Programma Lokale Warmtetransitie", "Volksgezondheid, Welzijn en Sport|BMO Heroine gemeenten", "Klimaat en Groene Groei|Regeling ter tegemoetkoming van gestegen energiekosten door opzegging contract SEFE Energy Ltd.", "Onderwijs, Cultuur en Wetenschap|Bekostiging Primair Onderwijs", "Onderwijs, Cultuur en Wetenschap|Bekostiging voortgezet onderwijs lumpsum", "Justitie en Veiligheid|Overig", "Economische Zaken|Cofinanciering EFRO incl. Interreg", "Justitie en Veiligheid|Brede Doeluitkering Rampenbestrijding", "Sociale Zaken en Werkgelegenheid|SPUK kwijtschelden schulden ko toeslagaffaire", "Klimaat en Groene Groei|Gebiedsinvesteringen Netten op Zee Klimaatfonds (RE)", "Volksgezondheid, Welzijn en Sport|BMO COVID-19", "Justitie en Veiligheid|Jeugdbescherming en jeugdsancties", "Volkshuisvesting en Ruimtelijke Ordening|Woningbouwimpuls", "Economische Zaken|Just Transition Fund", "Onderwijs, Cultuur en Wetenschap|Scholenprogramma Groningen", "Volkshuisvesting en Ruimtelijke Ordening|Verduurzaming Gron & N Dr Ontzorgingsprogramma", "Volksgezondheid, Welzijn en Sport|BMO Pandemische paraatheid", "Binnenlandse Zaken|Kwijtschelden publieke schulden", "Volkshuisvesting en Ruimtelijke Ordening|Verduurzaming Gr & N Dr isolatie en ventilatie", "Onderwijs, Cultuur en Wetenschap|Masterplan Campus Groningen", "Mobiliteitsfonds|Optimalisering gebruik", "Asiel en Migratie|Subsidies: Overig", "Mobiliteitsfonds|ZuidasDok", "Binnenlandse Zaken|Sociaal-emotionele ondersteuning door gemeenten", "Binnenlandse Zaken|Nationaal Programma Groningen", "Mobiliteitsfonds|Realisatie", "Sociale Zaken en Werkgelegenheid|Maatwerkreg. Duurz. Inzetbaarh.en Eerder Uittreden", "Mobiliteitsfonds|Vervanging", "Binnenlandse Zaken|Knelpunten gemeenten sociaal domein", "Infrastructuur en Waterstaat|Overige bijdragen", "Justitie en Veiligheid|Bijdrage ihkv de kwaliteit van de politiezorg", "Binnenlandse Zaken|Compensatie gemeenten en provincie", "Volkshuisvesting en Ruimtelijke Ordening|Diverse projecten ruimtelijke kwaliteit", "Onderwijs, Cultuur en Wetenschap|Maatschappelijke diensttijd", "Mobiliteitsfonds|Geïntegreerde contractvormen/PPS", "Economische Zaken|Regeling specifieke uitkering impulsaanpak winkelgebieden", "Klimaat en Groene Groei|Uitkering aankoop woningen onder hoogspanningsverb", "Infrastructuur en Waterstaat|Meerjarenprogramma Bodem", "Onderwijs, Cultuur en Wetenschap|Subsidieregeling basisvaardigheden", "Mobiliteitsfonds|Realisatieprogramma", "Infrastructuur en Waterstaat|NGF NL2120", "Sociale Zaken en Werkgelegenheid|Spuk grensinformatiepunten", "Mobiliteitsfonds|Mobiliteitspakketten", "Volkshuisvesting en Ruimtelijke Ordening|Regio Deals", "Volkshuisvesting en Ruimtelijke Ordening|Grootschalige woningbouwgebieden", "Infrastructuur en Waterstaat|Bedrijvenregeling", "Onderwijs, Cultuur en Wetenschap|Subsidieregeling Rijke schooldag", "Mobiliteitsfonds|Woningbouw op korte termijn door bovenplanse infrastructuur", "Infrastructuur en Waterstaat|Programma NSL en SLA", "Volksgezondheid, Welzijn en Sport|SUB Stagefonds", "Onderwijs, Cultuur en Wetenschap|Brugfunctionaris VO", "Volkshuisvesting en Ruimtelijke Ordening|Nationaal Groeifonds", "Landbouw, Visserij, Voedselzekerheid en Natuur|EIP Fieldlabs", "Volkshuisvesting en Ruimtelijke Ordening|Nationaal Programma Leefbaarheid en Veiligheid", "Mobiliteitsfonds|Overige", "Binnenlandse Zaken|Clustering en gebiedsfonds", "Economische Zaken|Investor Relation Program", "Onderwijs, Cultuur en Wetenschap|Aanvullende bekostiging PO", "Onderwijs, Cultuur en Wetenschap|Aanvullende regeling strategisch personeelsbeleid", "Volkshuisvesting en Ruimtelijke Ordening|Vestigingsklimaat", "Binnenlandse Zaken|Leefbaarheid en wijkontwikkeling", "Landbouw, Visserij, Voedselzekerheid en Natuur|Programma Jong Leren Eten 2022-2024", "Onderwijs, Cultuur en Wetenschap|Zij-Instroom", "Sociale Zaken en Werkgelegenheid|SLIM-scholen", "Onderwijs, Cultuur en Wetenschap|Overige subsidies", "Onderwijs, Cultuur en Wetenschap|Lerarenbeurs", "Mobiliteitsfonds|Realisatieprogramma personenvervoer", "Justitie en Veiligheid|College voor de Rechten van de Mens", "Volkshuisvesting en Ruimtelijke Ordening|Aardgasvrije wijken", "Buitenlandse Zaken|Publieksdiplomatie", "Infrastructuur en Waterstaat|KF - Laadinfra", "Volkshuisvesting en Ruimtelijke Ordening|Ruimtelijk instrumentarium (diversen)", "Mobiliteitsfonds|Verkenning en planuitwerking personenvervoer", "Infrastructuur en Waterstaat|Transitievangnet OV"];
+  const DATA = "0014=0:669800,1:32701,3:83085,4:76491,5:12668,6:4930,8:3480,9:901,a:4515,b:8939,c:4159,d:8316,g:1,i:1043,j:1057,p:289,t:833,10:40,16:135,17:775,19:29,1a:413,1b:1695,1f:2,1g:6,1h:3,1k:3,1n:3,1v:76,1y:8,1z:5,23:11,25:2,29:5,2b:16,2g:6;0034=0:513143,1:11103,2:35393,3:52936,4:37869,5:6465,6:13091,7:5544,8:3478,9:8941,a:1888,b:4559,c:2954,h:4747,i:1637,j:1458,k:1680,m:114,p:211,q:193,s:356,x:64,10:505,13:400,19:55,1l:50,1y:24,27:108,2t:1;0037=0:89822,1:19900,2:5483,4:4379,5:1215,6:1377,7:621,8:754,9:100,a:302,g:281,m:576,p:33,q:36,10:3,17:164,19:1,1a:127;0047=0:77106,1:10572,2:1720,4:3134,5:1054,6:1291,7:547,9:241,g:365,i:473,j:683,p:28,q:23,10:2,17:158,19:2,1a:95;0050=0:46402,1:562,2:955,4:1289,5:906,6:754,7:458,8:332,9:162,a:1417,o:117,p:22,q:20,10:9,19:3;0059=0:67784,1:5488,2:3144,4:985,5:973,6:893,7:561,8:601,9:82,a:646,p:29,q:48,10:2,19:1;0060=0:11733,1:253,4:358,5:345,6:64,7:1,8:91,9:12,a:141,p:4,q:3,w:2195,1u:18,2e:12,2l:6;0072=0:45831,1:2397,2:1813,4:853,5:693,6:526,7:315,9:173,h:29,p:16,q:14,10:2,14:762,19:2;0074=0:126190,1:9353,2:9889,4:1375,5:2354,6:1253,7:1028,8:944,9:233,a:293,g:747,p:51,q:44,10:3,14:3,19:4,1l:41;0080=0:370041,1:15826,2:38368,3:50978,4:34262,5:4760,6:3878,7:8136,8:2187,9:310,a:182,c:3295,d:106,e:4381,f:6320,g:1,h:800,i:977,j:945,k:274,m:212,p:252,q:532,s:908,t:946,x:376,10:19,13:510,14:127,19:6,29:4;0085=0:64289,1:2886,2:4008,4:1140,5:1015,6:573,7:508,8:497,9:6,a:116,g:280,p:25,q:22,10:2,14:350,19:1;0086=0:65453,1:3684,2:3632,4:1002,5:1076,6:504,7:586,8:525,9:86,a:87,h:1829,m:40,p:30,q:26,10:1,14:205,19:1;0088=0:4513,1:16,4:298,5:195,6:64,8:91,a:16,g:68,p:1,q:1,v:703,1u:7,2d:3;0090=0:151620,1:12862,2:8213,4:1870,5:1995,6:1819,7:1115,8:1094,9:388,a:3532,b:5700,i:845,j:933,m:880,p:55,q:79,10:139,19:2;0093=0:13442,1:245,2:1295,4:373,5:376,6:64,7:1,8:91,9:12,a:15,p:5,q:4,v:1985,w:1799,14:94,1u:134,2d:9,2e:8,2i:15;0096=0:5538,1:17,4:612,5:186,6:64,8:91,9:23,a:38,g:105,p:1,q:1;0098=0:65172,1:5327,2:4753,4:1327,5:1014,6:538,7:560,8:539,9:99,a:272,p:27,q:53,10:6,14:1,19:2;0106=0:183299,1:20494,2:14236,3:42668,4:9334,5:3150,6:1924,7:1411,8:1130,9:148,a:608,g:734,i:633,j:779,p:141,q:154,w:4500,10:4,19:3,22:160,26:120,2e:20,2k:8;0109=0:83687,1:4803,2:3914,4:1532,5:1357,6:1314,7:717,8:692,9:80,a:32,m:524,p:35,q:30,10:1,1i:129;0114=0:290642,1:27433,2:16975,3:16967,4:17310,5:3702,6:4638,7:2171,8:2388,9:294,a:2177,b:4210,c:1368,g:160,h:538,i:610,j:750,m:536,p:111,q:93,10:6,19:9,1r:600,25:3;0118=0:146148,1:21130,2:8171,4:2401,5:2071,6:2399,7:1118,8:1200,9:144,a:1420,b:50,i:426,j:670,m:1420,o:681,p:56,q:73,10:2,19:2;0119=0:88152,1:8480,2:8287,4:1459,5:2143,6:620,7:714,8:601,9:70,a:709,p:33,q:53,10:1,19:1;0141=0:206126,1:13200,2:12298,3:15815,4:7892,5:2605,6:4768,7:1497,8:1543,9:283,a:1138,k:450,p:71,q:63,10:11,19:5;0147=0:47435,1:3070,2:5293,4:610,5:824,6:139,7:500,9:28,g:229,p:23,q:21,u:648,10:1,19:1;0148=0:55597,1:3461,2:4979,4:943,5:1004,6:141,7:588,8:490,a:464,p:28,q:25;0150=0:256273,1:19497,2:17823,3:20973,4:8584,5:7687,6:3985,7:2121,8:1754,9:1444,a:1208,b:1439,g:973,o:329,p:173,q:99,t:706,u:131,19:33,1h:14;0153=0:441845,1:28976,2:10554,3:40740,4:28150,5:5951,6:8225,7:3355,8:3130,9:523,a:2353,b:290,c:3469,d:2141,e:846,f:6640,i:2151,j:1787,k:1555,p:193,q:183,t:833,10:64,19:31;0158=0:51481,1:2575,2:2991,4:834,5:890,6:381,7:474,9:16,h:407,m:80,p:24,q:26,u:264,10:1,19:2;0160=0:133572,1:10283,2:7470,4:2579,5:2150,6:1602,7:1230,8:1135,9:49,a:1413,g:1,p:62,q:54,10:2,14:3,19:1;0163=0:77180,1:4130,2:4423,4:1274,5:1225,6:256,7:731,8:643,9:207,a:712,p:36,q:31,u:396,10:2,19:1;0164=0:211127,1:14581,2:4701,4:3575,5:2947,6:2843,7:1991,8:1401,9:389,a:2044,b:50,g:568,p:78,q:71,s:664,u:1708,10:46,19:15,1i:79,1v:63;0166=0:128305,1:6246,2:7879,4:1882,5:1883,6:1102,7:1107,9:136,h:681,m:44,p:54,q:68,u:145,10:3,19:2,1d:1322;0168=0:48062,1:3376,2:2527,4:905,5:819,6:545,7:451,9:7,g:397,p:23,q:21,10:1,19:2;0171=0:117836,1:6343,2:6551,4:2026,5:1839,6:2175,7:979,9:241,m:1606,q:79,10:2,19:2;0173=0:73765,1:7453,2:3434,4:965,5:1158,6:721,7:637,8:581,a:486,p:31,q:27,u:1017,10:1,19:5;0175=0:42813,1:3128,2:3275,4:760,5:765,6:195,7:365,p:19,q:16;0177=0:77201,1:4630,2:5142,4:1299,5:1289,6:517,7:758,8:650,9:43,a:321,g:250,h:1494,q:33,u:5,10:30,25:1;0180=0:33648,1:1260,2:3727,4:729,6:338,7:353,8:303,a:208,p:17,q:70;0183=0:38211,1:2501,2:827,4:920,5:775,6:64,7:410,8:340,9:25,a:189,g:629,p:22,q:21,u:9,10:1,19:1;0184=0:40268,1:1890,2:3786,4:534,5:621,6:1254,7:431,g:90,p:22,q:19,r:7785;0189=0:47053,1:2412,2:5643,4:778,5:857,6:64,7:501,8:385,9:48,a:6,m:112,p:24,q:21,u:83,10:31,19:2;0193=0:332121,1:15433,2:13889,3:76884,4:26576,5:4828,6:2818,7:2686,8:2035,9:821,a:1443,b:3314,c:2189,g:243,h:2305,i:1537,j:1412,k:454,m:90,p:123,q:244,s:285,10:21,19:8,1l:41,1s:49,1y:24,25:10,2a:88;0197=0:60123,1:6946,2:5894,4:738,5:972,6:487,7:554,8:526,9:17,a:197,g:484,p:27,q:53;0200=0:408162,1:23438,2:15976,3:49559,4:20432,5:6425,6:5290,7:3368,8:2925,9:658,b:2822,c:3022,g:2,i:1535,j:1345,p:162,q:143,s:424,t:706,u:376,x:20,10:19,19:24,1c:2,1h:176,1l:50,1z:9,25:2;0202=0:482669,1:32762,2:19105,3:76816,4:30682,5:5925,6:8291,7:3665,8:3030,9:8000,a:4989,b:3593,c:2594,d:106,e:2123,g:1,i:1246,j:1293,k:134,m:508,p:156,q:254,t:782,x:784,10:21,19:12,1p:211,1t:1,1y:23,20:50,29:3;0203=0:120964,1:2993,2:5680,4:2168,5:1981,6:2225,7:1237,8:992,9:235,a:346,g:862,o:82,p:59,q:53,10:2,19:1;0209=0:50356,1:3042,2:5409,4:746,5:908,6:452,7:531,9:42,g:296,p:26,q:23,14:1;0213=0:42777,1:2400,2:2386,4:1799,5:813,6:473,7:428,g:350,h:1142,p:21,q:53,u:72,10:1,19:2;0214=0:49112,1:2138,2:2962,4:865,5:916,6:673,7:541,8:517,9:9,a:370,g:519,p:27,q:31,10:1,19:9;0216=0:64423,1:3904,4:1644,5:1025,6:816,7:600,9:66,p:29,q:25,s:375,10:1,19:5,23:11;0221=0:30040,1:1689,2:4371,4:455,5:477,6:325,7:261,8:231,9:57,a:135,g:105,p:12,q:27,10:1;0222=0:143231,1:9326,2:7857,3:31981,4:10701,5:1987,6:1707,7:1214,8:1053,9:91,a:418,b:2648,c:1247,g:623,i:990,j:1035,p:159,q:144,10:14,19:3,1i:41;0225=0:41034,1:2329,2:4515,4:738,5:681,6:507,7:385,8:344,9:8,a:363,g:226,p:19,q:21,10:1,19:1;0226=0:50103,1:2148,2:3412,4:791,5:893,6:539,7:501,9:23,p:24,q:31,10:1,19:1;0228=0:259199,1:9629,2:9145,3:27092,4:14333,5:4188,6:3709,7:2460,8:1919,9:364,a:1437,b:2413,c:1466,g:1,k:131,o:136,p:178,q:105,x:80,10:2,13:400,19:2,1c:124,1l:45,1y:23,1z:15,28:101,2m:5;0230=0:47326,1:3756,2:4197,4:678,5:822,6:562,7:474,8:444,9:43,a:89,b:1632,p:24,q:21,x:10;0232=0:70060,1:4537,2:6191,4:1112,5:1212,6:868,7:665,9:12,g:737,p:33,q:53,u:139,x:10,10:3,19:1;0233=0:61117,1:4115,2:3171,4:901,5:1066,6:465,7:562,8:437,9:45,a:2566,g:377,p:26,q:64,10:6,19:2;0243=0:108739,1:5672,2:2174,4:2237,5:1653,6:1880,7:991,9:642,g:403,i:626,j:843,m:160,p:47,q:123,10:40,19:2;0244=0:23732,1:828,2:1015,4:446,5:488,6:120,7:254,8:200,a:158,p:12,q:16;0246=0:39765,1:2464,2:3537,4:736,5:676,6:389,7:370,8:352,a:153,g:374,p:19,q:21,25:3;0252=0:31575,1:1440,2:2052,4:602,5:623,6:183,7:331,8:239,a:13,b:50,g:199,p:16,q:37,10:1;0262=0:70224,1:3081,2:5198,4:1336,5:1295,6:383,7:664,9:31,g:879,p:70,q:58,u:203,10:1,19:2;0263=0:48160,1:1709,2:6316,4:784,5:842,6:600,7:502,8:495,9:61,a:191,p:26,q:22,10:1;0267=0:85047,1:2431,2:4224,4:1841,5:1382,6:1010,7:895,8:757,9:71,a:210,g:432,h:2199,p:43,q:39,s:380,10:1,19:2;0268=0:488260,1:25842,2:14380,3:64405,4:29299,5:7650,6:6444,7:4399,8:3017,9:665,a:2850,b:2553,c:1860,d:14628,g:976,i:925,j:1021,k:1555,m:24,o:192,p:228,q:391,t:706,x:273,10:64,13:400,19:7,23:13;0269=0:49250,1:2266,2:2893,4:1809,5:814,6:572,7:474,8:503,9:13,a:248,g:332,p:25,q:21,s:359;0273=0:48239,1:2252,2:3234,4:1023,5:1776,6:437,7:490,8:466,9:49,a:92,g:435,p:24,q:26,10:6,14:4,19:1;0274=0:63808,1:2675,2:5919,4:853,5:1152,6:461,7:629,9:117,p:29,q:27,x:10;0275=0:101290,1:6966,2:10547,4:1358,5:1885,6:1431,7:853,8:844,9:462,a:613,m:512,p:43,q:58,10:2,19:2;0277=0:4137,1:90,2:2211,4:283,5:172,6:64,7:42,8:73,p:2,q:2;0279=0:19191,1:299,2:1436,4:416,5:415,6:215,7:196,8:176,a:26,p:10,q:16,u:31;0281=0:104877,1:9068,2:4559,4:4264,5:1441,6:2511,7:863,8:859,9:1473,a:172,b:1721,c:1119,g:333,i:744,j:969,p:43,q:36,10:3,19:3;0285=0:50168,1:2473,2:2440,4:776,5:891,6:120,7:506,8:415,9:18,a:486,p:25,q:22,u:122,10:1;0289=0:87620,1:4035,2:3271,4:981,5:1520,6:869,7:860,8:533,9:56,a:187,g:283,m:970,o:54,p:112,q:43,10:8,19:2;0293=0:33865,1:3291,2:980,4:524,5:568,6:614,7:312,8:279,9:16,a:85,p:15,q:32,19:3;0294=0:71712,1:6763,2:2904,4:1255,5:1101,6:1122,7:606,8:575,9:33,a:340,p:29,q:64,s:191,25:2;0296=0:87438,1:4544,2:3616,4:1048,5:1405,6:632,7:968,8:712,9:109,a:480,h:999,p:40,q:35,10:2,19:1;0297=0:60119,1:3217,2:5883,4:922,5:980,6:784,7:599,8:533,9:23,a:530,p:30,q:26,10:1,19:1,25:1;0299=0:102042,1:5312,2:6377,4:1262,5:1537,6:1331,7:895,8:920,9:378,a:1451,g:531,p:45,q:47,19:6,1v:283,25:3;0301=0:129689,1:11369,2:2510,4:1855,5:1722,6:1746,7:1079,8:881,9:123,a:437,g:246,k:457,m:1026,p:46,q:74,u:453,10:8,19:8,1i:42;0302=0:59619,1:4123,2:5333,4:970,5:1000,6:646,7:588,9:107,m:200,p:28,q:69,10:5,19:1;0303=0:91925,1:2189,2:3142,4:2346,5:1511,6:1703,7:857,8:682,9:175,a:135,m:208,p:41,q:38,10:1,19:5,1l:41;0307=0:363076,1:19051,2:9369,3:28882,4:18155,5:5457,6:5222,7:3228,8:2317,9:286,b:2398,c:1617,g:716,i:2073,j:1919,m:160,o:139,p:151,q:138,s:334,x:67,10:35,19:14,1y:23;0308=0:50336,1:945,2:3110,4:661,5:974,6:412,7:499,8:387,9:173,a:309,m:184,p:23,q:42,x:20,10:1,19:5;0310=0:78589,1:1211,2:4060,4:937,5:3086,6:476,7:863,9:207,p:40,q:74,10:3,19:8;0312=0:24792,1:628,2:1712,4:465,5:583,6:64,7:352,8:186,a:76,p:15,q:43;0313=0:38144,1:1147,2:1368,4:566,5:749,6:787,7:450,8:410,9:24,a:6,p:22,q:42,19:4;0317=0:16818,1:309,2:1666,4:492,5:414,6:76,7:205,8:123,m:64,p:9,q:16;0321=0:89148,1:956,2:4815,4:931,5:1646,6:349,7:1031,8:639,9:51,a:576,g:427,p:48,q:85,10:2,19:2;0327=0:53925,1:1722,2:4214,4:718,5:1309,6:285,7:639,8:394,9:22,a:176,g:300,m:132,o:82,p:29,q:27;0331=0:27734,1:862,2:493,4:574,5:582,6:409,7:287,9:27,p:15,q:13,10:1,19:1;0335=0:23732,1:546,2:3870,4:565,5:630,6:278,7:287,9:43,p:13,q:21,10:1,19:1;0339=0:11018,1:345,2:1539,4:749,5:265,6:100,7:119,8:85,a:47,p:6,q:5;0340=0:38834,1:1660,2:2417,4:565,5:706,6:650,7:409,8:354,9:68,a:72,h:385,p:21,q:17,x:10,10:1,19:1;0342=0:88200,1:3307,2:4723,4:1069,5:1650,6:1638,7:966,8:730,9:382,a:981,b:50,p:120,q:63,x:20,10:4,19:4,1l:50;0344=0:922828,1:20593,2:26920,3:105721,4:66548,5:12446,6:14987,7:7519,8:4963,9:4575,a:6508,b:3657,c:4656,d:5076,e:6408,f:6362,g:336,h:2466,i:2592,j:2504,m:196,o:449,p:405,q:395,s:632,t:1212,u:1347,x:587,10:42,13:400,14:2,19:25,1p:413,1t:531,1z:11,23:20,29:3,2n:5,2q:3;0345=0:157189,1:8322,2:4965,4:1859,5:2787,6:2287,7:1408,9:416,p:65,q:59,10:1,19:1;0351=0:25723,1:498,2:3698,4:625,5:501,6:216,7:290,8:210,9:25,p:13,q:12,u:53;0352=0:43856,1:1262,2:1780,4:582,5:836,6:473,7:479,9:46,p:23,q:20,10:5,19:2;0353=0:65913,1:3070,2:1393,4:731,5:1124,6:756,7:673,8:536,9:101,a:549,b:1692,o:100,p:32,q:58,19:2;0355=0:139811,1:6401,2:5908,4:2833,5:2184,6:1803,7:1331,8:966,9:378,a:574,b:1217,g:415,k:100,o:34,q:111,10:18;0356=0:143690,1:3452,2:5068,4:2283,5:2172,6:2483,7:1364,8:1157,9:182,a:1311,e:1568,g:253,p:63,q:73,10:8,19:6,29:2;0358=0:60825,1:991,2:339,4:885,5:1081,6:556,7:678,8:527,9:242,a:541,p:32,q:37,10:2,19:1;0361=0:270580,1:13442,2:9777,3:22667,4:18643,5:3847,6:3598,7:2192,8:1922,9:734,a:2942,b:138,c:3073,g:712,h:3044,i:901,j:1026,o:244,p:107,q:115,10:3,19:3,1z:16;0362=0:182224,1:2712,2:8870,4:1978,5:3178,6:1198,7:1932,8:1300,9:1254,a:153,b:1155,m:120,o:1154,p:86,q:81,10:11,19:7,1q:195,25:1;0363=0:2801987,1:81970,2:65801,3:130344,4:140985,5:15977,6:49134,7:19317,8:15106,9:30461,a:10552,b:15253,c:11456,d:11183,e:12664,f:6320,h:3634,i:4542,j:4017,l:18713,m:556,n:28700,o:2548,p:1478,q:792,t:2302,x:383,10:650,12:558,13:360,19:370,1c:350,1e:1253,1h:302,1i:344,1y:70,1z:10,25:52,29:10,2c:60;0373=0:52650,1:1444,2:4876,4:844,5:1273,6:396,7:614,8:434,9:161,a:1108,g:387,m:60,o:275,p:28,q:31,10:1,19:1;0375=0:98196,1:5486,2:1991,4:1024,5:1564,6:2424,7:945,9:1155,p:42,q:36,10:4,19:7;0376=0:18983,1:127,2:12137,4:493,5:486,6:91,7:255,8:149,9:27,p:11,q:11;0377=0:33744,1:1003,2:2705,4:548,5:831,6:64,7:497,m:48,p:22,q:20,10:1,19:1;0383=0:61529,1:1000,2:2011,4:708,5:1494,6:64,7:685,8:481,9:118,a:282,p:35,q:63,10:1,19:1;0384=0:61869,1:2003,2:1879,4:832,5:1240,6:938,7:683,8:409,9:1840,a:1210,h:629,k:413,p:29,q:28,10:19,19:3;0385=0:70273,1:1798,2:8738,4:867,5:1175,6:705,7:732,8:669,9:213,a:837,b:50,p:37,q:47;0388=0:47034,1:1742,2:2891,4:645,5:817,6:659,7:377,8:361,9:74,a:188,p:19,q:16,10:1,19:1;0392=0:390256,1:18267,2:16945,3:50403,4:24040,5:9193,6:5377,7:3413,8:2604,9:648,b:2860,c:2027,e:694,f:6362,g:631,i:1076,j:1224,k:500,p:156,q:143,10:23,14:4,19:16,1l:50,23:14;0394=0:292141,1:6701,2:20065,4:4847,5:5501,6:3558,7:3312,8:2424,9:331,a:818,b:1120,e:3407,o:73,p:676,q:210,10:77,19:22,1h:372,1j:7,1q:14,1y:23,1z:9;0396=0:85465,1:4716,2:4656,4:843,5:1409,6:2142,7:814,8:696,9:93,a:186,g:221,p:38,q:34,10:3,19:3;0397=0:47529,1:1417,2:4530,4:568,5:1038,6:64,7:564,8:327,a:102,m:40,p:26,q:23,10:1,19:1;0399=0:42005,1:1152,2:1464,4:493,5:1349,6:64,7:493,8:323,9:84,a:255,g:207,p:23,q:58,10:2,19:2;0400=0:147476,1:8049,2:2763,3:8824,4:6719,5:3156,6:2989,7:1135,8:1199,9:111,a:465,g:473,i:597,j:735,k:425,m:998,p:57,q:48,10:24,19:3;0402=0:213659,1:8336,2:14936,3:14325,4:10279,5:3727,6:2611,7:1917,8:1544,9:319,a:423,b:1752,c:1166,i:687,j:943,p:162,q:165,u:113,x:12,10:4,19:3,1l:41,1q:80;0405=0:184674,1:7068,2:672,3:12283,4:5260,5:3609,6:3539,7:1522,8:1328,9:1990,a:551,b:5407,h:148,i:662,j:861,k:500,o:937,p:72,q:64,10:6,19:6,23:12;0406=0:84546,1:2089,2:5362,4:876,5:1428,6:887,7:817,8:685,9:115,a:130,g:276,p:40,q:36,10:3,19:4;0415=0:22758,1:195,4:467,5:476,6:159,7:227,8:169,9:46,a:246,p:11,q:10,10:1,19:2;0417=0:18688,1:146,2:33,4:378,5:503,6:64,7:238,p:11,q:10;0420=0:96790,1:3072,2:3158,4:1275,5:1437,6:1476,7:919,8:854,9:40,a:239,p:45,q:52,10:1,19:1;0431=0:17697,1:47,2:4887,4:410,5:415,6:113,7:210,8:161,9:175,a:81,p:10,q:16;0432=0:25360,1:383,2:3684,4:609,5:475,6:209,7:246,8:203,9:27,a:492,g:136,p:12,q:10,10:1;0437=0:25810,1:229,2:6025,4:617,5:641,6:106,7:355,8:189,9:157,a:85,m:60,p:13,q:16,10:33,19:2,1q:48;0439=0:215191,1:7413,2:17276,3:6673,4:3739,5:6663,6:3324,7:1967,8:1719,9:2136,a:1083,b:2901,o:20,p:92,q:81,10:33,19:5,1s:3,1z:8;0441=0:101643,1:5445,2:5090,4:1286,5:1819,6:649,7:950,8:778,9:268,a:1381,g:584,h:318,p:46,q:58,10:2,19:4;0448=0:37559,1:2781,2:4750,4:783,5:886,6:327,7:272,8:244,a:208,g:503,p:13,q:12;0450=0:22097,1:961,2:1303,4:432,5:652,6:113,7:284,8:172,9:18,a:115,g:105,p:13,q:16;0451=0:62833,1:1407,2:2187,4:792,5:1075,6:874,7:660,8:483,9:430,a:536,b:50,p:30,q:31,10:2,19:2;0453=0:146515,1:6269,2:6605,4:2330,5:2462,6:2623,7:1407,8:1223,9:560,a:652,b:326,g:48,m:200,o:107,p:68,q:59,10:4,19:3;0473=0:37424,1:854,2:3574,4:622,5:849,6:406,7:374,8:319,9:41,p:16,q:15,10:5,19:1;0479=0:395906,1:10736,2:13561,3:13751,4:15903,5:5434,6:10132,8:2928,9:3310,a:1667,c:2078,e:1456,o:402,p:155,x:487,z:6362,10:23,13:440,19:49,1s:86,29:7;0482=0:42554,1:1623,2:2919,4:630,5:727,6:784,7:408,9:94,q:21,10:2;0484=0:237717,1:15564,2:13216,4:4375,5:4216,6:3037,7:2327,8:1877,9:1705,a:2385,p:109,q:169,s:510,u:637,10:4,14:3,19:8,1z:6;0489=0:92357,1:244,2:1661,4:2233,5:1522,6:1399,7:1012,8:712,9:1330,a:914,p:47,q:41,s:819,10:7,14:3,19:5;0498=0:39338,1:1441,2:1927,4:612,5:713,6:434,7:409,8:350,9:79,a:327,p:21,q:17;0502=0:165539,1:7008,2:5868,4:1616,5:2310,6:3588,7:1399,8:1245,9:3444,k:270,o:140,p:66,q:133,10:84,14:3,19:18,25:1;0503=0:266908,1:13542,2:6500,3:22067,4:10117,5:7232,6:4332,7:2260,8:1614,9:1277,a:1096,b:2521,k:1302,m:100,o:405,p:97,q:93,x:390,10:84,19:16,1i:122,1l:50,1z:6,23:24,29:2;0505=0:318166,1:22325,2:18125,3:47192,4:20569,5:5367,6:7740,7:2465,8:2318,9:836,a:909,b:3210,c:1804,i:1593,j:1468,k:1948,o:381,p:118,q:104,s:397,x:20,10:93,19:34,1c:496,1o:760,1w:409,1z:12,29:3;0512=0:96615,1:8333,2:4706,4:4732,5:1337,6:1697,7:778,8:733,9:229,a:703,c:687,p:37,q:36,s:206,10:2,19:2;0513=0:201021,1:10765,2:6748,3:19240,4:11007,5:4255,6:3077,7:1558,8:1296,9:992,a:1665,b:1946,c:1197,g:348,i:1263,j:1259,k:631,m:70,p:72,q:149,u:412,x:223,10:40,19:17;0518=0:1748593,1:46677,2:42717,3:88118,4:77667,5:18779,6:48569,7:11843,8:9992,9:6878,a:5805,b:824,c:7456,d:166,e:5945,f:6211,h:4885,i:3473,j:3107,k:1331,l:4654,m:244,p:796,q:481,t:1455,x:899,19:143,1m:880,1y:31,23:17,29:4;0523=0:37648,1:164,2:234,4:657,5:643,6:420,7:382,8:326,9:21,a:454,p:18,q:16,u:99;0531=0:58021,1:1314,2:6857,4:855,5:992,6:484,7:642,8:469,9:108,a:180,p:31,q:28,10:5,19:2;0532=0:50679,1:2363,2:1266,4:557,5:750,6:920,7:441,8:447,9:75,a:613,p:22,q:37,10:1,19:1;0534=0:43180,1:2007,2:2230,4:596,5:823,6:377,7:444,8:401,9:39,a:30,p:21,q:32;0537=0:130085,1:7525,2:4393,4:2280,5:2054,6:2484,7:1336,8:1221,9:331,a:1131,b:50,m:484,o:503,p:66,q:57,10:1,19:8;0542=0:64218,1:2557,2:4731,4:736,5:1026,6:887,7:593,8:544,9:697,a:454,b:50,p:30,q:25,10:10,19:3;0546=0:317550,1:22871,2:9578,3:38478,4:23571,5:6409,6:3609,7:2626,8:1889,9:662,a:1973,b:4264,c:2520,d:979,g:367,h:82,i:1224,j:1293,k:532,n:27,p:190,q:111,x:131,10:84,14:3,19:49,1i:87,2s:1;0547=0:53836,1:290,2:2189,4:629,5:1028,6:595,7:541,8:396,9:42,a:232,p:26,q:24,10:1,19:7;0553=0:46790,1:2019,2:2699,4:596,5:886,6:320,7:461,8:412,9:38,a:310,p:23,q:26,10:1;0556=0:80723,1:4895,2:2081,4:866,6:2488,7:766,8:680,9:925,a:270,p:34,q:30,10:17,19:5;0569=0:53019,1:184,2:1276,4:671,5:1071,6:486,7:579,8:498,9:35,a:483,p:29,q:31,u:270,x:10,10:1,19:2;0575=0:81957,1:2889,2:293,4:960,5:1686,6:547,7:913,8:733,9:179,a:1808,p:43,q:47,10:1,19:1;0579=0:42754,1:852,2:2248,4:602,5:883,6:64,7:524,8:266,9:11,a:162,g:137,p:23,q:22,10:1,19:3;0589=0:20525,1:572,2:1622,4:516,5:431,6:64,7:201,8:172,9:12,a:94,p:10,q:10,10:1,19:1;0590=0:66302,1:2080,2:1042,4:903,5:1146,6:1208,7:634,8:564,9:130,a:121,m:104,p:31,q:27,10:11,19:3;0597=0:108110,1:352,2:2618,4:1127,5:1680,6:2532,7:921,8:973,9:1813,a:2256,p:48,q:85,10:8,19:8;0599=0:2203782,1:57385,2:34354,3:126178,4:100407,5:24548,6:60221,7:13843,8:13341,9:46315,b:7410,c:12262,d:28431,e:18218,f:6089,h:3721,i:5056,j:3675,k:60,l:6620,m:80,o:577,p:720,q:570,x:350,y:6578,10:1370,11:4610,12:3940,14:2,15:3070,18:2713,19:359,1c:124,1j:370,1q:2,1w:2,1y:23,1z:9,21:171,29:31,2p:3,2r:2;0603=0:143211,1:2784,2:7428,4:1938,5:2093,6:2924,7:1267,8:967,9:441,a:1795,b:50,k:413,p:54,q:51,10:17,19:14,25:1;0606=0:210046,1:10785,2:2816,4:3464,5:4075,6:7955,7:1650,8:1658,9:1718,a:312,e:1405,o:210,p:80,q:70,x:93,10:115,19:35,29:2;0610=0:61462,1:2743,2:3526,4:814,5:976,6:1222,7:541,8:512,9:128,a:125,p:26,q:26,u:191,10:16,19:2;0613=0:44229,1:327,2:1898,4:638,5:845,6:488,7:528,8:368,9:656,a:394,p:25,q:22,19:2;0622=0:198791,1:10366,2:32890,3:15255,4:7814,5:5532,6:6270,7:1535,8:1578,9:1867,a:890,b:1805,k:1190,o:554,p:74,q:65,10:59,14:4,19:21,1q:1,29:2;0626=0:45539,1:176,2:1767,4:587,5:1545,6:376,7:507,8:325,9:153,a:115,p:24,q:64,10:3,19:13;0627=0:67177,1:2406,2:3145,4:720,5:1048,6:953,7:657,8:508,9:742,a:342,p:30,q:32,u:275,10:1,19:6;0629=0:45537,1:1291,4:1945,5:999,6:433,7:552,9:186,m:1434,p:25,q:23,10:2,19:31;0632=0:107912,1:6218,2:14305,4:1505,5:1798,6:747,7:1082,9:256,a:9,p:51,q:90,10:7,19:1;0637=0:304907,1:9462,2:7267,4:6105,5:3969,6:6410,7:2570,8:2074,9:3062,a:1198,b:6761,c:2099,k:898,p:121,q:109,x:205,10:138,19:79,1z:6;0638=0:19054,1:46,2:1153,4:414,5:397,6:101,7:199,8:130,a:83,o:139,p:9,q:8,10:3,19:2;0642=0:107704,1:4095,2:4946,4:1549,5:1626,6:2430,7:900,8:910,9:481,a:2405,m:122,p:45,q:84,10:69,19:18;0654=0:47515,1:1997,2:9226,4:3378,5:860,6:354,7:458,8:392,9:163,a:108,e:2645,p:23,q:20,10:6,19:1;0664=0:102447,1:6818,2:5503,4:4747,5:1492,6:1029,7:779,8:729,9:325,a:537,b:3337,c:1818,g:347,i:530,j:753,m:160,p:38,q:34,10:1,19:1,1x:220;0668=0:39991,1:1211,2:1716,4:752,5:724,6:273,7:428,8:360,9:13,a:70,p:19,q:70,10:1,19:1,1l:50;0677=0:62800,1:4306,4:1772,5:1108,6:640,7:549,8:565,9:264,a:81,g:231,p:28,q:23,10:3,19:1;0678=0:25882,1:526,2:2151,4:576,5:523,6:130,7:258,8:226,9:12,a:223,p:13,q:11;0687=0:128699,1:6206,4:2682,5:1877,6:1771,7:1026,9:471,i:376,j:634,k:465,m:68,p:47,q:43,10:3,19:3;0703=0:50571,1:1472,2:3606,4:827,5:892,6:1022,7:446,8:444,9:210,a:92,p:23,q:20,10:1,19:1,25:1;0715=0:138531,1:9872,2:7838,4:4347,5:2121,6:2456,7:1177,8:1137,9:206,a:606,i:330,j:599,p:54,q:47,s:619,10:6,19:1,25:1,2h:21;0716=0:59429,1:2467,2:4065,4:918,5:989,6:1167,7:538,8:517,9:176,a:600,g:170,p:27,q:23,10:1,19:1;0717=0:40711,1:1262,2:8396,4:852,5:1136,6:129,7:440,8:327,9:12,a:526,m:64,p:21,q:19;0718=0:132490,1:8604,2:4059,3:42633,4:14542,5:2679,6:1783,7:925,8:866,9:133,a:597,b:50,k:413,p:45,q:39,19:2;0736=0:82913,1:2138,2:4564,4:1132,5:1542,6:800,7:920,8:695,9:175,a:219,b:1383,q:52;0737=0:71840,1:4066,2:5169,4:1232,5:1175,6:1218,7:641,8:585,9:97,a:487,o:176,p:32,q:31,v:569,10:2,19:1,2d:2;0743=0:34254,1:1792,2:1660,4:734,5:640,6:283,7:348,g:290,p:16,q:15;0744=0:17259,1:39,2:1748,4:101,5:388,6:131,7:143,8:135,a:93,g:306,p:7,q:6,1x:18;0748=0:175068,1:12750,3:10973,4:5418,5:2462,6:3614,7:1487,9:265,g:621,k:500,p:81,q:138,10:16,19:13,1x:97;0753=0:58457,1:3922,2:2126,4:704,5:1044,6:508,7:627,8:464,9:110,a:452,g:339,p:104,q:27,x:20,10:1,19:1;0755=0:22135,1:1410,2:1887,4:390,5:423,6:128,7:224,9:50,g:171,p:11,q:10;0757=0:73373,1:9385,2:7516,4:1237,5:1134,6:1011,7:685,8:620,9:393,a:239,p:33,q:47,10:1,19:1;0758=0:431349,1:26124,2:13899,3:38743,4:26339,5:6735,6:5114,7:3795,8:2965,9:1111,a:2900,b:6040,c:3669,e:1495,g:1,h:3207,i:2129,j:1961,m:266,p:395,q:280,s:692,10:19,19:15,1i:204,1o:3,1y:24,1z:7,29:3;0762=0:72938,1:4532,2:4433,4:1167,5:1119,6:581,7:654,8:628,a:38,g:639,m:82,p:33,q:28,10:56;0765=0:35601,1:5420,2:6848,4:3175,5:514,6:675,7:249,8:300,a:42,g:139,p:13,q:16,10:2,17:112,19:8,1a:63;0766=0:52946,1:1770,2:1604,4:687,5:932,6:615,7:540,8:474,9:268,a:359,g:237,o:409,p:26,q:23;0770=0:37524,1:2957,2:3883,4:650,5:740,6:147,7:389,8:300,9:26,a:159,g:405,p:20,q:17,25:1;0772=0:631813,1:39543,2:25981,3:54949,4:34097,5:10764,6:10111,7:5138,8:4207,9:774,a:3598,b:4436,c:2953,d:8031,e:2528,f:6362,g:1,i:2120,j:2098,k:274,m:128,p:383,q:257,s:897,t:706,x:646,10:60,14:5,19:16,1c:207,1x:41,23:21,29:2,2f:32;0777=0:98047,1:6621,2:3239,4:1248,5:1496,6:1165,7:906,8:783,a:410,g:435,o:146,p:44,q:38,10:3,19:5;0779=0:46357,1:2236,2:2988,4:1002,5:807,6:660,7:448,8:424,9:13,a:202,g:221,p:22,q:19,10:2,19:1;0784=0:54401,1:2170,2:510,4:2113,5:959,6:1195,7:539,8:467,9:22,a:290,g:319,p:27,q:26,10:1,19:1;0785=0:47469,1:2942,2:1316,4:718,5:845,6:270,7:474,8:378,9:18,a:274,g:269,p:23,q:21;0794=0:238589,1:19180,2:7604,3:21475,4:12703,5:3024,6:5491,7:1884,8:1920,9:233,a:1720,b:1962,c:1275,k:1345,m:100,p:94,q:82,10:6,19:5;0796=0:375812,1:26488,2:21127,3:35879,4:23416,5:6487,6:5710,7:3300,8:2702,9:630,a:1513,b:5509,c:2845,g:1,i:1925,j:1830,k:1972,o:1642,p:152,q:137,x:40,10:10,19:9,1h:203,1y:24,1z:15,20:126;0797=0:91156,1:4043,2:7978,4:1001,5:1540,6:937,7:906,9:101,g:467,p:45,q:39,10:12,19:2;0798=0:27900,1:1545,2:1785,4:841,5:638,6:101,7:310,8:239,a:4,g:272,p:16,q:14,10:1,19:1;0809=0:44656,1:3206,2:3100,4:657,5:868,6:533,7:472,8:446,9:166,g:289,o:256,p:23,q:26,10:1,19:1;0820=0:41771,1:1768,2:1796,4:529,5:845,6:123,7:485,8:317,9:39,a:144,p:23,q:21;0823=0:34925,1:2757,2:420,4:803,5:712,6:256,7:395,8:315,9:50,a:317,g:417,m:80,p:19,q:16,x:20,10:19,19:1,1h:7;0824=0:61104,1:4643,2:7199,4:955,5:1137,6:481,7:645,8:519,a:421,g:480,m:112,p:31,q:28;0826=0:128192,1:7324,2:5050,4:1619,5:1980,6:2069,7:1174,8:1048,9:572,a:1540,g:585,k:413,m:264,o:146,p:56,q:57,x:12,10:3,19:6,1l:47;0828=0:223493,1:20998,2:520,3:21359,4:8225,5:3116,6:4297,7:1933,8:1771,9:7,a:709,b:50,g:834,o:147,p:93,q:80,x:10,10:5,19:2;0840=0:50122,1:6899,2:335,4:651,5:810,6:864,7:480,8:540,9:62,a:522,g:361,p:25,q:26,10:1,19:3;0845=0:52411,1:4705,2:1632,4:745,5:957,6:249,7:594,9:239,p:30,q:26,10:1;0847=0:39236,1:1858,2:1534,4:727,5:1533,6:280,7:397,8:380,a:423,g:420,p:19,q:17;0848=0:30195,1:796,2:1970,4:527,5:639,6:76,7:347,8:234,a:214,p:16,q:37,1l:41;0851=0:52314,1:3065,2:2195,4:688,5:923,6:554,7:484,h:49,p:25,q:48;0852=0:33801,1:682,2:5338,4:1118,5:653,6:111,7:355,8:257,9:24,a:117,m:100,p:17,q:15;0855=0:594099,1:32817,2:19333,3:71067,4:29605,5:7899,6:11023,7:4573,8:4202,9:1008,a:4148,b:6136,c:2614,d:136,e:3310,f:6362,g:2,h:1474,i:1438,j:1285,m:84,o:455,p:290,q:195,s:479,x:218,10:100,13:697,19:30,1l:50,1y:26,25:12,29:3;0858=0:70390,1:4038,2:1859,4:694,5:1182,6:413,7:627,9:143,g:330,p:31,q:27,19:1;0861=0:90952,1:4471,2:1187,4:948,5:1545,6:519,7:919,8:721,9:27,a:438,g:431,h:362,p:44,q:40,10:12,19:2,2f:7;0865=0:61229,1:5451,2:9387,4:755,5:1792,6:121,7:642,h:350,p:29,q:42,10:1,19:1;0866=0:29856,1:1319,2:610,4:469,5:652,6:64,7:358,8:218,a:45,g:205,p:17,q:15;0867=0:114585,1:6331,2:7341,4:2143,5:1827,6:1617,7:1000,8:1006,9:122,a:903,g:494,h:256,p:49,q:85,10:1,19:1;0873=0:43755,1:2572,2:2184,4:857,5:891,6:517,7:459,9:51,g:88,h:175,p:23,q:37,19:2;0879=0:41915,1:2278,2:1789,4:895,5:816,6:217,7:443,9:7,g:430,m:108,p:21,q:19,10:2;0880=0:34357,1:139,2:3177,4:621,5:635,6:493,7:339,9:349,p:16,q:14,10:2,19:3;0882=0:96020,1:10902,2:11331,4:974,5:1366,6:1195,7:729,9:266,g:283,p:38,q:32,10:1,19:5;0888=0:33515,1:1397,2:8926,4:591,5:648,6:252,7:326,8:296,9:7,a:417,p:15,q:14,10:1,1h:1;0889=0:30646,1:1871,2:2509,4:494,5:559,6:378,7:274,8:278,a:91,p:14,q:11;0893=0:28874,1:2667,2:447,4:646,5:607,7:277,8:269,a:8,g:373,q:11,x:20,10:1;0899=0:74077,1:10505,2:3926,4:902,5:1117,6:1020,7:565,8:662,9:67,a:753,g:202,k:483,p:28,q:24,10:1,19:1;0907=0:38528,1:5628,2:8747,4:818,5:673,6:212,7:346,8:309,a:78,p:17,q:26,x:10;0917=0:278365,1:30434,3:36242,4:19301,5:3466,6:5906,8:2172,9:300,a:834,c:3488,g:605,i:1820,j:1565,p:194,s:791,t:879,10:7,19:27,29:6;0928=0:131851,1:19565,2:9969,4:1412,5:1861,6:2260,7:904,8:1192,9:338,a:385,g:229,k:492,p:47,q:39,10:57,19:2,25:1;0935=0:325678,1:21163,2:10878,3:26266,4:16719,5:9732,6:4303,7:4277,9:624,e:2709,f:5867,k:1555,m:472,p:144,q:181,10:11,19:3,1h:55,1z:6;0938=0:37387,1:2150,2:1180,4:491,5:651,6:186,7:369,8:331,9:71,a:127,p:18,q:16,10:1,19:1;0944=0:14632,1:707,2:2714,4:414,5:360,6:64,7:174,8:106,9:28,a:6,g:115,p:7,q:7;0946=0:37195,1:2790,2:1593,4:4927,5:660,6:206,7:347,g:312,p:17,q:15,10:142,24:129;0957=0:161920,1:11980,2:7264,4:4838,5:2063,6:2996,7:1221,8:1234,9:335,a:220,c:1163,d:1845,k:387,o:322,p:58,q:52,x:343,10:2,19:1,1j:538,1l:29;0965=0:23940,1:2378,2:343,4:406,5:482,6:121,7:208,8:227,a:77,p:10,q:9;0971=0:54859,1:2796,2:971,4:713,5:920,6:297,7:493,8:523,9:227,a:350,p:100,q:21,1l:41;0981=0:26208,1:1750,2:894,4:440,5:541,6:239,7:200,8:228,a:16,m:312,p:26,q:9,19:1;0983=0:267140,1:15886,2:14429,3:55369,4:23640,5:4651,6:5044,7:2613,8:2260,9:250,a:1688,b:4748,c:1403,g:771,i:1507,j:1468,k:1405,p:294,q:88,s:747,10:4,19:3,1z:5,25:2;0984=0:104961,1:11142,2:6574,4:2173,5:1503,6:1102,7:893,8:848,9:63,g:687,k:465,p:44,q:38,10:1,19:1;0986=0:25292,1:1054,2:1152,4:489,5:508,6:115,7:248,8:219,a:55,p:12,q:11,x:7,10:1;0988=0:120178,1:8582,2:7960,4:2297,5:1778,6:1415,7:1032,8:992,9:4,a:644,p:49,q:43,u:135,10:1,19:1,25:1;0994=0:37540,1:1615,2:2709,4:549,5:730,6:310,7:332,8:321,9:61,a:110,q:14,10:1;0995=0:220177,1:7715,2:8176,4:3193,5:4662,6:6265,7:1681,8:1486,9:1299,a:1217,e:1551,o:718,p:81,q:71,10:143,19:16,1l:50,29:3;1507=0:86722,1:4312,2:2485,4:1411,5:1491,6:464,7:895,8:751,9:58,a:1515,g:872,h:7046,k:66,o:203,p:42,q:37,u:200;1509=0:88728,1:5715,2:8830,4:1156,5:1329,6:1160,7:776,8:815,9:69,a:108,g:619,h:406,o:602,p:40,q:68;1525=0:64022,1:3388,2:3053,4:729,5:1272,6:320,7:766,8:521,9:50,a:731,p:35,q:33;1581=0:91874,1:1774,2:3382,4:1284,5:1751,6:636,7:979,8:673,9:110,a:140,m:424,p:47,q:47,10:4;1586=0:61791,1:6781,2:5061,4:912,5:1062,6:239,7:585,8:497,9:384,a:157,g:330,o:236,p:29,q:48,10:1,19:1;1598=0:43604,1:787,2:2725,4:759,5:804,6:244,7:471,9:155,g:262,p:22,q:42,10:1;1621=0:109142,1:264,2:4808,4:1233,5:1861,6:697,7:1273,8:838,9:2221,a:1071,o:21,p:61,q:56,10:9,19:6,1l:41,1q:253;1640=0:71485,1:3448,2:30,4:1335,5:1280,6:362,7:700,8:642,9:3,a:496,g:277,m:768,p:35,q:31,u:71,10:1,19:1;1641=0:49749,1:2459,2:5471,4:1160,5:890,6:339,7:495,9:29,g:297,p:24,q:21;1652=0:64505,1:5022,2:4673,4:901,5:1050,6:665,7:626,8:587,9:31,a:190,p:31,q:31,x:24,25:3;1655=0:62574,1:6103,2:3750,4:904,5:1102,6:1208,7:634,8:607,9:22,a:182,g:398,p:31,q:27,10:2,19:5,25:1;1658=0:30182,1:1176,2:3330,4:675,5:627,6:126,7:336,8:224,a:230,g:360,p:16,q:14;1659=0:43762,1:2694,2:1895,4:667,5:807,6:269,7:469,g:359,p:23,q:20,x:10;1667=0:27171,1:3068,2:1597,4:542,5:525,6:148,7:275,8:229,a:330,g:307,p:13,q:12,10:1,19:1;1669=0:45444,1:3112,2:3419,4:774,5:843,6:484,7:426,8:396,9:74,a:156,g:525,p:21,q:18,10:11,19:1;1674=0:188580,1:16490,2:5570,4:3562,5:2753,6:3519,7:1555,8:1508,9:2147,a:397,d:2437,g:752,k:1540,o:1892,p:78,q:105,10:48,19:15,29:3;1676=0:75943,1:4860,2:111,4:1438,5:1621,6:602,7:678,8:625,9:8,a:315,h:70,p:33,q:29,10:1,19:1,1h:4;1680=0:55495,1:177,2:7649,4:3143,5:1032,6:190,7:519,8:401,9:66,a:351,p:25,q:37,10:1,17:152,19:1,1a:63;1681=0:58923,1:5315,2:5769,4:867,5:991,6:472,7:507,8:488,9:19,a:672,g:810,p:26,q:22,10:1,19:1;1690=0:49603,1:1114,2:2938,4:979,5:922,6:163,7:486,8:412,9:17,a:240,o:1362,p:24,q:31,10:2,19:2;1695=0:19037,1:558,2:2240,4:574,5:530,6:175,7:167,8:126,9:15,a:76,p:7,q:7;1696=0:40228,1:622,2:2549,4:592,5:958,6:283,7:485,8:374,a:163,p:23,q:21,x:55,10:1;1699=0:67182,1:3527,2:5958,4:3514,5:1223,6:361,7:639,8:500,a:302,g:641,m:86,p:30,q:31,10:1,17:176,1a:95,1z:8;1700=0:71361,1:7032,2:6086,4:994,5:1169,6:1016,7:664,8:687,9:59,a:1595,g:477,p:34,q:29,x:4,10:2,19:4;1701=0:44861,1:3328,2:3452,4:927,6:113,7:394,m:171,p:19,q:53;1705=0:86715,1:3993,2:5512,4:1014,5:1551,6:539,7:932,9:103,g:474,p:46,q:52,s:652;1706=0:44070,1:2336,2:2350,4:5416,5:774,6:447,7:424,8:398,9:49,a:480,g:191,m:2888,p:21,q:18,10:1,19:1;1708=0:109427,1:7391,2:9900,4:1937,5:1680,6:1121,7:882,8:835,9:49,a:573,p:44,q:63,u:140,10:208,19:13,1c:305;1709=0:77309,1:3145,2:4784,4:1926,5:1451,6:1211,7:753,8:685,9:168,a:204,g:659,o:557,p:37,q:69,10:1,19:1;1711=0:72518,1:3626,2:3243,4:1083,5:1203,6:702,7:657,8:679,9:46,a:338,g:267,m:840,p:51,q:42;1714=0:54000,1:2273,2:4199,4:1121,5:1446,6:517,7:463,8:451,9:13,a:66,h:45,p:39,q:20,10:3,19:2,1z:7;1719=0:52521,1:1508,2:3071,4:722,5:975,6:455,7:551,8:514,a:296,g:374,p:27,q:24;1721=0:57844,1:5184,2:3425,4:795,5:1002,6:397,7:632,8:563,9:147,a:248,g:530,p:31,q:28,10:1,14:806,19:1;1723=0:19103,1:553,2:105,4:507,5:448,6:64,7:212,8:166,a:216,g:305,p:10,q:9;1724=0:35511,1:2407,2:2195,4:668,5:737,6:188,7:365,8:312,9:22,a:85,g:405,p:57,q:16;1728=0:40298,1:5961,2:1889,4:1214,5:796,6:226,7:397,8:355,9:49,a:310,g:340,q:18;1729=0:30322,1:2006,2:1853,4:500,5:600,6:186,7:274,8:275,9:16,a:83,p:14,q:12;1730=0:66125,1:296,2:6030,4:3052,5:1307,6:64,7:682,8:458,9:28,a:214,m:56,p:32,q:30,17:180,1a:95;1731=0:74504,1:316,2:873,4:1238,5:1289,6:346,7:676,8:551,9:11,a:428,b:50,p:32,q:53;1734=0:91605,1:4326,2:4632,4:1233,5:1549,6:496,7:973,8:773,9:109,a:663,b:50,p:47,q:101,10:1,19:1;1735=0:72605,1:3199,2:7060,4:1295,5:1273,6:379,7:689,9:104,m:102,p:34,q:30;1740=0:49180,1:1481,2:3224,4:917,5:763,6:1110,7:503,8:485,9:13,a:223,g:319,p:25,q:22,10:1,19:1,1s:13;1742=0:80331,1:3285,2:5167,4:1475,5:1237,6:666,7:750,8:660,9:54,a:572,p:38,q:33,10:1,19:2;1771=0:81456,1:2199,2:3892,4:953,5:1390,6:1142,7:821,9:40,g:224,m:108,p:39,q:35,10:2,19:1;1773=0:37369,1:2262,2:4766,4:720,5:681,6:156,7:378,8:309,9:7,a:259,p:18,q:16,u:49,10:1,19:1;1774=0:49004,1:2328,2:4679,4:920,5:921,6:125,7:519,8:409,9:13,a:996,g:763,p:26,q:23,u:159;1783=0:227993,1:8309,2:7191,4:2967,5:3489,6:2858,7:2320,8:2019,9:565,a:1943,b:2990,e:1058,p:109,q:99,19:8;1842=0:31328,1:125,2:68,4:543,5:700,6:90,7:384,8:265,9:33,a:330,b:50,o:23,p:18,q:26,10:2,19:2;1859=0:96114,1:6563,2:4985,4:1930,5:1564,6:460,7:870,8:807,9:16,a:53,g:813,m:120,p:44,q:133,s:253;1876=0:70089,1:4793,2:4307,4:1239,5:1326,6:141,7:718,9:36,h:536,p:36,q:36,19:1;1883=0:243519,1:15232,2:8254,4:3312,5:3381,6:3093,7:1878,8:1957,9:263,a:1444,b:7743,k:1555,m:64,p:94,q:79,x:10,10:3,19:3;1884=0:53511,1:141,2:2532,4:700,5:986,6:452,7:574,8:484,9:55,a:386,p:27,q:25;1891=0:47071,1:5881,2:2298,4:616,5:685,6:488,7:383,8:412,9:40,a:38,g:310,p:19,q:26,10:1,14:240,19:1;1892=0:85290,1:2202,2:3087,4:1050,5:4773,6:934,7:937,9:300,g:179,p:44,q:41,u:173,10:3,19:2,1h:13,20:45;1894=0:93145,1:6858,2:2915,4:2024,5:1482,6:552,7:896,8:847,9:2,a:224,g:278,p:44,q:39,10:1,25:1;1895=0:111499,1:13908,2:5316,4:6165,5:1489,6:1644,7:797,8:895,9:769,a:253,m:132,p:40,q:37,10:1,17:193,19:1,1a:190,1f:353,1g:999,1k:914,1n:717,1z:6,25:1,2b:3,2g:2;1896=0:45578,1:1199,2:4282,4:992,5:828,6:572,7:453,9:57,p:24,q:32;1900=0:225150,1:17317,2:13578,4:3634,5:3753,6:1944,7:1769,8:1649,9:423,a:506,i:446,j:686,p:88,q:77,10:5,19:2,1l:50;1901=0:69188,1:1320,2:11515,4:2002,5:1220,6:640,7:732,8:566,9:128,a:255,m:260,p:35,q:31,u:61,10:1,19:4;1903=0:48131,1:1815,2:9175,4:624,5:920,6:64,7:510,9:112,h:361,m:268,p:25,q:22,10:1,19:1;1904=0:118826,1:3508,2:5661,4:1498,5:2327,6:1235,7:1286,9:751,p:63,q:68,10:2,19:2;1911=0:103930,1:3395,2:8552,4:1939,5:1722,6:1334,7:970,8:895,9:174,a:348,h:1432,o:73,p:48,q:42,r:6625,10:2,19:1,1s:130;1916=0:166983,1:3486,2:4676,4:1690,5:3338,6:2150,7:1565,8:1194,9:874,a:662,e:40,m:160,p:73,q:67,10:9,19:10;1924=0:104824,1:6092,2:20628,4:2585,5:2155,6:769,7:1069,8:967,9:86,a:1260,p:50,q:47,s:163,10:1,19:2,2o:5;1926=0:94803,1:300,2:3578,4:1023,5:1638,6:656,7:1146,8:730,9:2207,a:1141,q:49,10:13;1930=0:210413,1:10459,2:93,3:16787,4:8755,5:2855,6:4901,7:1784,8:1668,9:4562,a:773,b:3477,k:404,p:86,q:116,10:35,19:19,1j:39,1q:29,1z:6;1931=0:118351,1:3781,2:3114,4:1433,5:1841,6:1311,7:1133,8:1018,9:616,a:459,m:160,p:56,q:49,u:387,10:2,19:3,1s:9;1940=0:114099,1:3582,2:5504,4:1723,5:1962,6:967,7:1003,8:937,a:764,h:26,p:51,q:44,10:1,14:74,1z:8,2j:12;1942=0:113739,1:1776,2:15949,4:1276,5:2406,6:194,7:1213,8:767,9:257,a:1022,g:214,p:55,q:79,10:2,19:1;1945=0:74727,1:4099,2:8209,4:1104,5:2901,6:678,7:700,8:689,9:38,a:222,g:311,m:220,p:35,q:30,10:1,19:1;1948=0:167249,1:17342,2:12272,4:4190,5:3087,6:1847,7:1694,8:1484,9:393,a:2869,g:1,h:333,m:148,p:83,q:72,10:12,19:11,1l:41;1949=0:112566,1:6441,2:1475,4:2230,5:1662,6:1302,7:897,8:903,9:239,a:270,m:90,p:47,q:40,10:2,14:415,19:2,25:5;1950=0:68988,1:9731,2:466,4:6924,5:1012,6:973,7:509,8:566,9:77,a:769,h:4666,m:3972,p:26,q:53,v:6441,10:1,17:154,19:1,1a:127,1u:366,2d:32;1952=0:159384,1:12792,2:6232,4:5527,5:2176,6:2531,7:1212,8:1276,9:379,a:763,p:62,q:52,10:4,16:897,17:245,19:4,1a:190,1f:1,1g:8,1k:2,1n:2,2b:8,2g:5;1954=0:70534,1:5150,2:543,4:1106,5:1287,6:684,7:700,8:671,a:655,g:436,p:36,q:31,10:1,19:1,25:1;1955=0:81067,1:5074,2:5369,4:1141,5:1240,6:987,7:732,8:746,9:150,a:157,g:485,p:526,q:123,10:2,19:1,25:3;1959=0:111413,1:3752,2:4699,4:2152,5:1771,6:1165,7:1147,8:1111,9:315,a:523,g:381,p:57,q:90,10:1,19:4;1960=0:96046,1:3615,2:7349,4:2143,5:1641,6:1199,7:1060,8:912,9:6,a:454,g:803,p:53,q:193,10:1,19:23;1961=0:123369,1:3988,2:5647,4:2043,5:1855,6:2219,7:1194,8:1083,9:58,a:957,p:59,q:80,10:2,19:2;1963=0:163691,1:5610,2:7059,4:3060,5:2878,6:1536,7:1729,8:1499,9:462,a:287,g:511,q:77,10:4,1s:68;1966=0:119700,1:8895,2:2469,4:6086,5:2203,6:1042,7:939,8:932,9:174,a:599,p:48,q:41,10:2,16:418,17:219,19:2,1a:190,1f:880,1g:2,1k:2,1n:2,1z:6,2b:9,2g:4;1969=0:136192,1:9679,2:7915,4:4368,5:2344,6:541,7:1236,8:1066,9:24,a:488,o:1308,p:64,q:55,10:6,17:262,19:1,1a:190,1g:175,25:6;1970=0:119906,1:11626,2:6255,4:2014,5:2457,6:830,7:902,8:948,9:81,a:208,g:625,p:47,q:85,r:4425,10:1,19:1,1z:10;1978=0:83745,1:1255,2:5297,4:1320,5:1391,6:1000,7:877,8:748,9:6,a:459,p:119,q:58,10:1,19:1,1s:1,1z:11;1979=0:123103,1:10348,2:3907,4:8095,5:1802,6:2234,7:850,8:976,9:94,a:340,g:17,i:345,j:585,m:932,p:47,q:38,10:1,16:1551,17:211,19:5,1a:159,1f:5,1g:5,1k:7,1n:58,1z:5,2b:51,2g:17;1980=0:189869,1:6870,2:1013,4:2723,5:3646,6:2899,7:1823,8:1405,9:565,a:1085,g:660,m:170,p:84,q:116,10:4,19:4,1s:218;1982=0:190270,1:17426,2:16330,4:4628,5:3062,6:2017,7:1802,8:1613,a:399,b:3102,g:2,h:120,m:112,p:90,q:88,s:238,10:4,19:5;1991=0:128762,1:10981,2:2555,4:1596,5:1982,6:1497,7:1155,8:1060,a:697,b:50,g:803,p:59,q:50,10:1,19:1;1992=0:143840,1:465,2:8072,4:1645,5:2843,6:2523,7:1455,8:1254,9:588,a:214,p:72,q:63,10:7,19:11,1s:13";
+  const BUIG = "1992:22846 1734:12377 1735:9022 1740:5729 1742:9319 1771:13390 1773:4677 1774:4785 1783:28367 1842:3602 1859:12078 1876:7070 1883:49393 1884:6404 1891:9183 1892:12125 1894:10441 1895:24113 1896:4751 1900:39419 1901:7659 1903:4872 1904:14018 1911:12681 1916:34392 1924:13265 1926:10784 1930:47441 1931:14433 1940:15865 1942:16354 1945:13248 1948:20541 1949:18352 1950:9997 1952:38001 1954:9089 1955:9772 1959:12825 1960:10111 1961:17081 1963:20021 1966:20854 1969:19801 1970:20363 1978:8892 1979:26442 1980:25376 1982:26060 1991:17804 957:36616 965:2342 971:6623 981:5233 983:59667 984:18093 986:2772 988:19909 994:5049 995:43034 1507:9604 1509:12204 1525:7962 1581:12321 1586:6231 1598:3738 1621:13404 1640:7294 1641:5436 1652:8301 1655:10383 1658:2353 1659:4991 1667:2233 1669:5690 1674:42804 1676:8662 1680:6889 1681:8353 1690:4502 1695:2321 1696:4133 1699:9775 1700:10361 1701:4908 1705:10277 1706:4772 1708:17686 1709:11384 1711:9004 1714:5543 1719:5164 1721:6453 1723:1582 1724:3051 1728:3662 1729:2997 1730:9193 1731:9385 755:1935 757:11471 758:93260 762:9251 765:7684 766:7208 770:3349 772:147339 777:15921 779:6924 784:8155 785:5824 794:55638 796:76326 797:12770 798:2321 809:5206 820:6024 823:3339 824:7207 826:21522 828:39841 840:7387 845:5262 847:4388 848:3734 851:6881 852:3658 855:138234 858:9723 861:11824 865:7412 866:3506 867:17901 873:5885 879:4905 880:4816 882:17908 888:5275 889:4230 893:3031 899:13922 907:5177 917:74335 928:29889 935:79984 938:4129 944:2011 946:2731 512:18855 513:37399 518:459420 523:4717 531:7646 532:4922 534:5415 537:19893 542:11974 546:67873 547:7278 553:5470 556:18206 569:5278 575:11539 579:6654 589:1901 590:11055 597:20386 599:645400 603:31683 606:49836 610:11019 613:7285 622:52736 626:6398 627:8888 629:7548 632:13870 637:60290 638:1393 642:22926 654:4567 664:17663 668:3928 677:6955 678:2341 687:25144 703:5476 715:22421 716:6530 717:3503 718:29868 736:9362 737:11448 743:3794 744:1443 748:39433 753:8113 344:192800 345:27941 351:2293 352:5519 353:10462 355:24330 356:23874 358:6848 361:51371 362:27309 363:753651 373:6019 375:21255 376:2173 377:4278 383:6790 384:9257 385:6622 388:6432 392:74475 394:44350 396:16096 397:5138 399:5272 400:29785 402:39427 405:31257 406:13541 415:2563 417:2239 420:11361 431:1748 432:2532 437:3745 439:32722 441:11477 448:2900 450:3417 451:8252 453:31683 473:7221 479:75996 482:7529 484:34861 489:11941 498:3752 502:39825 503:66766 505:73296 213:6366 214:4754 216:9638 221:5269 222:28640 225:6153 226:8158 228:35513 230:5531 232:9131 233:7624 243:17352 244:2580 246:4036 252:5092 262:8249 263:4724 267:10437 268:135605 269:5835 273:4603 274:10803 275:18592 279:1715 281:22880 285:5188 289:17533 293:6490 294:11883 296:13780 297:6647 299:15143 301:27340 302:6637 303:12714 307:67788 308:7208 310:12542 312:3076 313:4290 317:1808 321:11266 327:6559 331:3161 335:2324 339:712 340:5523 342:13809 14:205117 34:106650 37:18447 47:16469 50:5767 59:12433 60:240 72:9263 74:25853 80:105069 85:10876 86:9866 88:167 90:34532 93:397 96:106 98:9834 106:41050 109:13388 114:60810 118:25531 119:15948 141:48930 147:6358 148:5487 150:54011 153:124751 158:6681 160:19878 163:9262 164:49109 166:18883 168:6651 171:18471 173:11670 175:5244 177:9683 180:3563 183:3280 184:3186 189:4732 193:72206 197:6726 200:72351 202:136375 203:12743 209:8067 277:128";
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tr = s => String(s == null ? '' : s).trim();
+  const fK = v => v == null ? '–' : '€ ' + nf.format(Math.round(v) * 1000);
+  const fMln = v => { if (v == null) return '–'; if (Math.abs(v) < 1000) return fK(v); const m = v / 1000; return '€ ' + (Math.abs(m) >= 100 ? nf.format(Math.round(m)) : new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1 }).format(m)) + ' mln'; };
+  const fPi = v => v == null ? '–' : '€ ' + nf.format(Math.round(v));
+
+  // ---------- data ----------
+  const REG = DICT.map(s => { const i = s.indexOf('|'); return { h: s.slice(0, i), r: s.slice(i + 1).replace(/^Bijdrage medeoverheden: /, '').replace(/ R$/, '') }; });
+  const P = {};
+  DATA.split(';').forEach(d => { const i = d.indexOf('='); const c = d.slice(0, i); P[c] = d.slice(i + 1).split(',').map(x => { const q = x.split(':'); return [parseInt(q[0], 36), +q[1]]; }); });
+  const B = {};
+  BUIG.split(' ').forEach(x => { const q = x.split(':'); B[q[0].padStart(4, '0')] = +q[1]; });
+  const somH = regels => { const m = new Map(); regels.forEach(([i, v]) => { const h = REG[i].h; m.set(h, (m.get(h) || 0) + v); }); return m; };
+  const NL = somH(Object.values(P).flat());
+  const nlTot = [...NL.values()].reduce((a, b) => a + b, 0), nlFonds = NL.get('Gemeentefonds'), nlBuig = Object.values(B).reduce((a, b) => a + b, 0);
+
+  // ---------- gemeenten ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- ophalen ----------
+  async function getJSON(u) {
+    let last;
+    for (let i = 0; i < 3; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  let S = null; const fouten = new Set();
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Het CBS gaf om ${t} geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#melding').hidden = false;
+  }
+  async function haalInw(c) {
+    try {
+      const f = encodeURIComponent(`(RegioS eq 'GM${c}' or RegioS eq 'NL01  ') and Perioden eq '2025JJ00'`);
+      const v = (await getJSON(CBS + '70072ned/TypedDataSet?$filter=' + f + '&$select=RegioS,TotaleBevolking_1')).value;
+      const o = {}; v.forEach(r => { o[tr(r.RegioS).startsWith('NL') ? 'nl' : 'gm'] = r.TotaleBevolking_1; }); return o;
+    } catch (e) { fouten.add('inwoners'); return {}; }
+  }
+  async function haalIv3(c) {
+    try {
+      const f = encodeURIComponent(`Gemeenten eq 'GM${c}   ' and Verslagsoort eq '2025X005' and (Categorie eq 'B4.3.1  ' or Categorie eq 'B4.5.1  ')`);
+      const v = (await getJSON(IV3 + 'TypedDataSet?$filter=' + f + '&$select=TaakveldBalanspost,k_2ePlaatsing_2')).value;
+      const o = { fonds: 0, bijst: 0, rest: 0, gevuld: false };
+      v.forEach(r => { const t = tr(r.TaakveldBalanspost), w = r.k_2ePlaatsing_2; if (!w || !/^\d/.test(t)) return; o.gevuld = true; if (t === '0.7') o.fonds += w; else if (t === '6.3') o.bijst += w; else o.rest += w; });
+      return o;
+    } catch (e) { fouten.add('Iv3'); return null; }
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#gmInput').value = g.n;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    try { if (location.hash !== '#gm=' + g.c) history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
+    $('#intro').hidden = true; $('#result').hidden = false;
+    const regels = (P[g.c] || []).slice().sort((a, b) => b[1] - a[1]);
+    const perH = somH(regels);
+    S = { g, regels, perH, fonds: perH.get('Gemeentefonds') || 0, totaal: [...perH.values()].reduce((a, b) => a + b, 0), buig: B[g.c], inw: {}, iv3: undefined, opgehaald: new Date() };
+    S.overig = S.totaal - S.fonds;
+    fouten.clear(); toonMelding(); render();
+    const [inw, iv3] = await Promise.all([haalInw(g.c), haalIv3(g.c)]);
+    if (!S || S.g !== g) return;
+    S.inw = inw; S.iv3 = iv3; toonMelding(); render();
+  }
+  function render() {
+    const { g, inw } = S; const pi = v => inw.gm ? 1000 * v / inw.gm : null;
+    $('#leadBig').textContent = `${g.n}: ${fMln(S.totaal)} van het Rijk in 2025`;
+    $('#leadSub').textContent = (inw.gm ? fPi(pi(S.totaal)) + ' per inwoner · ' : '') + 'zonder het bijstandsbudget';
+    const nlPi = v => inw.nl ? 1000 * v / inw.nl : null;
+    const kaart = (t, v, sub) => `<div class="unit"><span class="eyebrow">${t}</span><span class="u-val">${v}</span><span class="u-sub">${sub}</span></div>`;
+    $('#top3').innerHTML = kaart('Gemeentefonds · 2025', fMln(S.fonds), inw.gm ? `${fPi(pi(S.fonds))} per inwoner; Nederland ${fPi(nlPi(nlFonds))}` : 'algemene, integratie- en decentralisatie-uitkeringen')
+      + kaart('Bijstandsbudget · 2026', fMln(S.buig), inw.gm ? `${fPi(pi(S.buig))} per inwoner; Nederland ${fPi(nlPi(nlBuig))}` : 'ander jaar dan de rest')
+      + kaart('Overige betalingen · 2025 <span class="indic">indicatief</span>', fMln(S.overig), inw.gm ? `${fPi(pi(S.overig))} per inwoner; Nederland ${fPi(nlPi(nlTot - nlFonds))}` : 'specifieke uitkeringen en subsidies');
+    renderMin(pi, nlPi); renderIv3(); renderTabel(); renderVoet(); vulMeld();
+  }
+  function renderMin(pi, nlPi) {
+    const open = new Set([...document.querySelectorAll('#ministeries details[open]')].map(d => d.dataset.h));
+    const hs = [...S.perH.entries()].sort((a, b) => (b[0] === 'Gemeentefonds') - (a[0] === 'Gemeentefonds') || b[1] - a[1]);
+    const zonder = hs.filter(([h]) => h !== 'Gemeentefonds');
+    const max = Math.max(1e-9, ...zonder.map(([h, v]) => Math.max(pi(v) || 0, nlPi(NL.get(h)) || 0)));
+    $('#ministeries').innerHTML = hs.map(([h, v]) => {
+      const fonds = h === 'Gemeentefonds';
+      const pv = pi(v), pn = nlPi(NL.get(h));
+      const baan = fonds || pv == null ? '<span class="muted small">' + (fonds ? 'buiten de schaal' : '') + '</span>' : `<span class="baan"><i style="width:${Math.max(0, 100 * pv / max)}%"></i>${pn != null ? `<b style="left:${100 * pn / max}%"></b>` : ''}</span>`;
+      const rg = S.regels.filter(([i]) => REG[i].h === h);
+      return `<details data-h="${esc(h)}"${open.has(h) ? ' open' : ''}><summary><span>${esc(h)}</span>${baan}<span class="w">${fMln(v)}</span></summary><div class="reg"><table><tbody>${rg.map(([i, w]) => `<tr><td>${esc(REG[i].r)}</td><td class="r">${fK(w)}</td></tr>`).join('')}</tbody></table></div></details>`;
+    }).join('');
+  }
+  function renderIv3() {
+    const iv = S.iv3;
+    if (iv === undefined) { $('#iv3').innerHTML = '<p class="small muted">Iv3 ophalen…</p>'; return; }
+    if (iv === null) { $('#iv3').innerHTML = '<p class="small muted">De Iv3 is nu niet bereikbaar.</p>'; return; }
+    if (!iv.gevuld) { $('#iv3').innerHTML = '<p class="small muted">Geen jaarrekening 2025 van deze gemeente in de Iv3-data.</p>'; return; }
+    const rij = (n, a, b) => `<tr><td>${n}</td><td class="r">${fMln(a)}</td><td class="r">${fMln(b)}</td></tr>`;
+    $('#iv3').innerHTML = `<table><thead><tr><th>Stroom</th><th class="r">Rijk betaalde</th><th class="r">Gemeente boekte</th></tr></thead><tbody>
+      ${rij('Gemeentefonds (taakveld 0.7)', S.fonds, iv.fonds)}
+      ${rij('Bijstand (taakveld 6.3; Rijk: budget 2026)', S.buig, iv.bijst)}
+      ${rij('Overige taakvelden <span class="indic">indicatief</span>', S.overig, iv.rest)}
+    </tbody></table>`;
+  }
+  function renderTabel() {
+    $('#tabelIn').innerHTML = `<table><thead><tr><th>Ministerie of fonds</th><th>Regeling</th><th class="r">2025</th></tr></thead><tbody>${S.regels.map(([i, w]) => `<tr><td>${esc(REG[i].h)}</td><td>${esc(REG[i].r)}</td><td class="r">${fK(w)}</td></tr>`).join('')}</tbody></table>`;
+  }
+  $('#csvBtn').addEventListener('click', () => {
+    const regels = [['ministerie of fonds', 'regeling', 'bedrag 2025 (euro)']].concat(S.regels.map(([i, w]) => [REG[i].h, REG[i].r, w * 1000]));
+    const csv = '﻿' + regels.map(r => r.map(v => /[;"\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(';')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = `rijksgeld_2025_${S.g.n.replace(/[^\w-]+/g, '_').toLowerCase()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  function vulMeld() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+  }
+  function renderVoet() {
+    const t = S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    $('#foot').innerHTML = `Bronnen: Ministerie van Financiën, Financiële instrumenten 2025 (CC0); Ministerie van SZW, definitieve budgetten 2026 (CC0); CBS, Iv3 45071NED en 70072ned (CC BY 4.0). Iv3 opgehaald ${t}. Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+  $('#retryBtn').addEventListener('click', () => { if (S) kies(S.g); });
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  vulMeld();
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=(\d{4})/) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>
