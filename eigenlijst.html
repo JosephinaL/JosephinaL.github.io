@@ -2669,15 +2669,15 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
       td.appendChild(b);
     });
     if (laatst && document.activeElement === document.body) {
-      var d = w.querySelector(laatst); var k = d && d.querySelector('.kolomknop');
-      if (k) k.focus();
+      if (laatst === 'rij') { var r = w.querySelector('.rijknop'); if (r) r.focus(); }
+      else { var d = w.querySelector(laatst); var k = d && d.querySelector('.kolomknop'); if (k) k.focus(); }
     }
     laatst = null;
   }
   if (w) {
     w.addEventListener('focusin', function (e) {
       var th = e.target.closest && e.target.closest('th');
-      laatst = th ? (th.dataset.k ? 'th[data-k="' + th.dataset.k + '"]' : 'th[data-sort="' + th.dataset.sort + '"]') : null;
+      laatst = th ? (th.dataset.k ? 'th[data-k="' + th.dataset.k + '"]' : 'th[data-sort="' + th.dataset.sort + '"]') : (e.target.classList.contains('rijknop') ? 'rij' : null);
     });
     new MutationObserver(verrijk).observe(w, { childList: true });
     verrijk();
