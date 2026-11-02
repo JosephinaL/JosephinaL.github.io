@@ -297,6 +297,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <button class="tab" role="tab" aria-selected="false" data-view="buurt">Per buurt</button>
           <button class="tab" role="tab" aria-selected="false" data-view="bek">Bekendmakingen</button>
         </div>
+        <div class="sigtxt" id="oudNoot" hidden style="margin:10px 12px 0;border-left:3px solid var(--warn);padding:6px 10px;font-size:.88rem;background:color-mix(in srgb, var(--warn) 8%, transparent)"></div>
         <div class="tools">
           <input id="search" type="search" placeholder="Zoek adres, buurt of tekst…" aria-label="Zoek adres, buurt of tekst">
           <select id="faseFilter" aria-label="Filter"></select>
@@ -357,7 +358,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const PRODUCT = 'Bouwstroom';
   const BAG = 'https://api.pdok.nl/kadaster/bag/ogc/v2/collections/';
   const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
@@ -525,6 +526,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- staat ----------
   let S = null;
   let view = 'proj', sortKey = null, sortDir = 1, selId = null, filter = 'alle';
+  // Komt de bezoeker uit Kwaliteit van de BAG (#gm=0503&verwacht=2024&n=22&peil=2026-09-30), dan opent de lijst van dat signaal.
+  const oud = (() => {
+    const h = location.hash, m = h.match(/verwacht=(\d{4})/);
+    if (!m) return null;
+    return { tot: +m[1], gm: (h.match(/gm=?(\d{4})/i) || [])[1], n: (h.match(/[#&]n=(\d+)/) || [])[1], peil: (h.match(/peil=(\d{4}-\d{2}-\d{2})/) || [])[1] };
+  })();
+  if (oud) filter = 'oud';
+  let oudScroll = !!oud;
   let map = null, lagen = {}, lagenAan = new Set(['vergund', 'bouw', 'klaar', 'opgeleverd', 'bestaand', 'sloop', 'bek']), objLaag = new Map();
   const mv = (n, een, meer) => `${fmt(n)} ${n === 1 ? een : meer}`;
   const fouten = new Set();
@@ -546,8 +555,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#intro').hidden = true; $('#result').hidden = false;
     $('#gmInput').value = g.n;
     document.title = 'Bouwstroom ' + g.n;
-    try { localStorage.setItem('jl-gemeente', g.c); history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
-    S = { g, gebied: null, buurten: [], wijken: new Map(), bjaar: null, panden: new Map(), proj: [], bek: null, bekN: null, bekNaam: null, bagStamp: null, opgehaald: null, klaar: false };
+    try { localStorage.setItem('jl-gemeente', g.c); history.replaceState(null, '', '#gm=' + g.c + (oud ? `&verwacht=${oud.tot}` + (oud.gm === g.c && oud.n ? `&n=${oud.n}&peil=${oud.peil}` : '') : '')); } catch (e) {}
+    S = { g, gebied: null, buurten: [], wijken: new Map(), bjaar: null, panden: new Map(), proj: [], projAlle: [], bek: null, bekN: null, bekNaam: null, bagStamp: null, opgehaald: null, klaar: false };
     selId = null; fouten.clear(); toonMelding();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'gegevens ophalen…';
     ['#top4', '#stroom', '#zijstroom', '#chJaar', '#chBek', '#tblWrap', '#dossier', '#mapLegend', '#stroomNoot'].forEach(s => { $(s).innerHTML = ''; });
@@ -561,6 +570,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     S.opgehaald = new Date(); S.klaar = true;
     voortgang(4, 4, '');
     renderAlles();
+    if (oudScroll) { oudScroll = false; $('#oudNoot').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
   function renderAlles() { $('#nietWoon').textContent = S.nietWoon ? ` (in ${S.g.n} nu ${nf.format(S.nietWoon)} panden)` : ''; renderKern(); renderStroom(); renderJaar(); renderBekMat(); renderLagen(); renderKaart(); renderDossier(null); renderFilter(); renderTabel(); renderVoet(); }
 
@@ -664,7 +674,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     // alleen panden met minstens één woning: een kas, schuur of bedrijfshal hoort niet in de woningbouwstroom
     S.nietWoon = proj.filter(p => !p.woon).length;
     S.proj = proj.filter(p => p.woon > 0);
-    S.pmap = new Map(S.proj.map(p => [p.uid, p]));
+    S.projAlle = proj;
+    S.pmap = new Map(proj.map(p => [p.uid, p]));
   }
   function adresLijst(vbo) {
     if (!vbo.length) return '';
@@ -991,7 +1002,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   // ---------- tabellen ----------
   function renderFilter() {
-    const opts = view === 'proj' ? [['alle', 'Alle fasen'], ['sig', 'Alleen: verwacht jaar voorbij']].concat(FASEN.map(f => [f.k, f.t]))
+    const opts = view === 'proj' ? [['alle', 'Alle fasen'], ['sig', 'Alleen: verwacht jaar voorbij']].concat(oud ? [['oud', `Verwacht jaar ${oud.tot} of eerder, ook zonder woning`]] : []).concat(FASEN.map(f => [f.k, f.t]))
       : view === 'bek' ? [['alle', 'Alle soorten']].concat(SOORTEN.map(s => [s, s])).concat(STAPPEN.map(s => ['stap:' + s, 'Stap: ' + s]))
       : [['alle', 'Alle buurten'], ['sig', 'Met signaal']];
     if (!opts.some(o => o[0] === filter)) filter = 'alle';
@@ -1005,8 +1016,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }));
   $('#search').addEventListener('input', () => renderTabel());
   const chip = (k, extra = '') => `<span class="chip"><i class="d" style="background:var(${FASE[k].c})"></i>${esc(FASE[k].t)}${extra}</span>`;
+  const projBron = () => filter === 'oud' && view === 'proj' ? S.projAlle.filter(p => p.sig && p.bouwjaar <= oud.tot) : S.proj;
   function rijenProj() {
-    return S.proj.map(p => ({ uid: p.uid, adres: p.adres || '', buurt: p.buurt ? p.buurt.naam : '', wijk: p.buurt ? (S.wijken.get(p.buurt.wijk) || '') : '', fase: p.fase, faseT: FASE[p.fase].t, woon: p.woon, ander: p.ander, bouwjaar: p.bouwjaar, sig: p.sig, status: p.status || '', pand: p.id || '' }));
+    return projBron().map(p => ({ uid: p.uid, adres: p.adres || '', buurt: p.buurt ? p.buurt.naam : '', wijk: p.buurt ? (S.wijken.get(p.buurt.wijk) || '') : '', fase: p.fase, faseT: FASE[p.fase].t, woon: p.woon, ander: p.ander, bouwjaar: p.bouwjaar, sig: p.sig, status: p.status || '', pand: p.id || '', geenAdres: !p.nvbo && !p.vbo.length }));
   }
   function rijenBuurt() {
     const m = new Map();
@@ -1018,7 +1030,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
   function rijenBek() { return (S.bek || []).map(r => ({ uid: r.uid, datum: r.datum, soort: r.soort, stap: r.stap, n: r.n, tekst: (r.abs && r.abs.length > 20 ? r.abs : r.titel), titel: r.titel, buurt: r.buurt ? r.buurt.naam : '', id: r.id })); }
   const COLS = {
-    proj: [{ k: 'adres', t: 'Adres', f: r => r.adres ? esc(r.adres) : `<span class="muted">pand ${esc(r.pand.slice(-6))} · klik voor adres</span>` }, { k: 'buurt', t: 'Buurt' }, { k: 'faseT', t: 'Fase', f: r => chip(r.fase) + (r.sig ? ` <span class="chip sig">verwacht ${r.bouwjaar}</span>` : '') },
+    proj: [{ k: 'adres', t: 'Adres', f: r => r.adres ? esc(r.adres) : `<span class="muted">pand ${esc(r.pand.slice(-6))} · ${r.geenAdres ? 'nog geen adres in de BAG' : 'klik voor adres'}</span>` }, { k: 'buurt', t: 'Buurt' }, { k: 'faseT', t: 'Fase', f: r => chip(r.fase) + (r.sig ? ` <span class="chip sig">verwacht ${r.bouwjaar}</span>` : '') },
       { k: 'woon', t: 'Woningen', r: 1 }, { k: 'ander', t: 'Anders', r: 1 }, { k: 'bouwjaar', t: 'Bouwjaar', r: 1, f: r => r.bouwjaar || '–' }],
     buurt: [{ k: 'buurt', t: 'Buurt' }, { k: 'wijk', t: 'Wijk' }, { k: 'vergund', t: 'Vergund', r: 1 }, { k: 'bouw', t: 'In aanbouw', r: 1 }, { k: 'klaar', t: 'Klaar', r: 1 },
       { k: 'opgeleverd', t: 'Opgeleverd (ca.)', r: 1 }, { k: 'bestaand', t: 'Bestaand pand', r: 1 }, { k: 'sloop', t: 'Sloop', r: 1 }, { k: 'sigW', t: 'Verwacht jaar voorbij', r: 1 },
@@ -1029,7 +1041,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function gefilterd() {
     const zoek = $('#search').value.trim().toLowerCase();
     let rs = view === 'proj' ? rijenProj() : view === 'buurt' ? rijenBuurt() : rijenBek();
-    if (view === 'proj' && filter !== 'alle') rs = rs.filter(r => filter === 'sig' ? r.sig : r.fase === filter);
+    if (view === 'proj' && filter !== 'alle') rs = rs.filter(r => filter === 'oud' ? true : filter === 'sig' ? r.sig : r.fase === filter);
     if (view === 'buurt' && filter === 'sig') rs = rs.filter(r => r.sigW > 0);
     if (view === 'bek' && filter !== 'alle') rs = rs.filter(r => filter.startsWith('stap:') ? r.stap === filter.slice(5) : r.soort === filter);
     if (zoek) rs = rs.filter(r => Object.values(r).join(' ').toLowerCase().includes(zoek));
@@ -1037,10 +1049,20 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     else if (view === 'buurt') rs.sort((a, b) => (b.vergund + b.bouw + b.klaar) - (a.vergund + a.bouw + a.klaar));
     return rs;
   }
+  function renderOudNoot() {
+    const el = $('#oudNoot'), aan = filter === 'oud' && view === 'proj';
+    el.hidden = !aan;
+    if (!aan) return;
+    const l = projBron(), w = l.filter(p => p.woon > 0).length, zonder = l.length - w;
+    const t = oud.gm === S.g.c && oud.n && oud.peil ? ` Kwaliteit van de BAG telde er ${fmt(+oud.n)} op ${new Date(oud.peil + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}; deze lijst leest de BAG van vandaag, dus het aantal kan afwijken.` : '';
+    el.innerHTML = `<b>${mv(l.length, 'pand', 'panden')} op vergund of bouw gestart, met verwacht bouwjaar ${oud.tot} of eerder.</b> ${w === l.length ? 'Alle met woningen.' : `${mv(w, 'pand', 'panden')} met woningen, ${mv(zonder, 'pand', 'panden')} zonder. Die laatste staan alleen in deze lijst, niet op de kaart of in de cijfers van Bouwstroom.`}${t} <button class="btn linkish" type="button" id="oudUit">Toon alle panden</button>`;
+    $('#oudUit').addEventListener('click', () => { filter = 'alle'; renderFilter(); renderTabel(); });
+  }
   function renderTabel() {
     if (!S || !S.klaar) return;
     const cols = COLS[view];
     const rs = gefilterd();
+    renderOudNoot();
     const MAX = 1500;
     const toon = rs.slice(0, MAX);
     $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}>${c.t}</th>`).join('')}</tr></thead>
@@ -1073,8 +1095,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     if (!S || !S.klaar) return;
     const slug = S.g.n.replace(/[^\w-]+/g, '_').toLowerCase(), d = iso(new Date());
     if (view === 'proj') {
-      csvDownload(`bouwstroom_panden_${slug}_${d}.csv`, ['gemeentecode', 'gemeente', 'pand_id', 'adres', 'buurtcode', 'buurt', 'wijk', 'fase', 'bag_status', 'bouwjaar', 'woningen', 'andere_verblijfsobjecten', 'verwacht_jaar_voorbij_jaren', 'lon', 'lat'],
-        S.proj.map(p => ['GM' + S.g.c, S.g.n, p.id || '', p.adres, p.buurt ? p.buurt.code : '', p.buurt ? p.buurt.naam : '', p.buurt ? S.wijken.get(p.buurt.wijk) || '' : '', FASE[p.fase].t, p.status || '', p.bouwjaar || '', p.woon, p.ander, p.sig || '', p.xy ? p.xy[0].toFixed(6) : '', p.xy ? p.xy[1].toFixed(6) : '']));
+      csvDownload(`bouwstroom_panden_${filter === 'oud' ? `verwacht_${oud.tot}_of_eerder_` : ''}${slug}_${d}.csv`, ['gemeentecode', 'gemeente', 'pand_id', 'adres', 'buurtcode', 'buurt', 'wijk', 'fase', 'bag_status', 'bouwjaar', 'woningen', 'andere_verblijfsobjecten', 'verwacht_jaar_voorbij_jaren', 'lon', 'lat'],
+        projBron().map(p => ['GM' + S.g.c, S.g.n, p.id || '', p.adres, p.buurt ? p.buurt.code : '', p.buurt ? p.buurt.naam : '', p.buurt ? S.wijken.get(p.buurt.wijk) || '' : '', FASE[p.fase].t, p.status || '', p.bouwjaar || '', p.woon, p.ander, p.sig || '', p.xy ? p.xy[0].toFixed(6) : '', p.xy ? p.xy[1].toFixed(6) : '']));
     } else if (view === 'buurt') {
       csvDownload(`bouwstroom_buurten_${slug}_${d}.csv`, ['buurtcode', 'buurt', 'wijk', 'vergund', 'in_aanbouw', 'klaar_niet_ingemeten', 'opgeleverd_ca', 'nieuw_in_bestaand_pand', 'sloop', 'verwacht_jaar_voorbij', 'bekendmakingen', 'woningen_in_besluiten'],
         rijenBuurt().map(r => [r.uid, r.buurt, r.wijk, r.vergund, r.bouw, r.klaar, r.opgeleverd, r.bestaand, r.sloop, r.sigW, r.bek, r.bekN]));

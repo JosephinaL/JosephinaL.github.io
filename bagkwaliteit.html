@@ -262,7 +262,7 @@ const DATA = {"peil":"2026-09-30","leeftijd_peil":"2026-10-30","gm":{"0998":["Bu
       kol: [...KOP_ADRES, 'Nieuw object', 'Bestaand object', 'Status pand', 'Sinds', 'Maanden'], rij: r => [r[0], r[1], viewer(r[2]), r[3].split('|').map(viewer).join('<br>'), r[7], datum(r[5]), { r: r[6] }] },
     { groep: 'onderweg', k: 'pijp', titel: 'Vergunde of gestarte bouw met verwacht jaar 2024 of eerder',
       uitleg: 'Panden die als vergund of in aanbouw staan, terwijl het verwachte bouwjaar al twee jaar of langer voorbij is. De lijst per pand staat in Bouwstroom.',
-      telling: g => g.pijpOud, noemer: g => g.pijp, link: g => `bouwstroom.html#gm=${g.c}` },
+      telling: g => g.pijpOud, noemer: g => g.pijp, link: g => `bouwstroom.html#gm=${g.c}&verwacht=2024&n=${g.pijpOud}&peil=${DATA.peil}` },
     { groep: 'opval', k: 'opp1', titel: 'Oppervlakte 1 m²',
       uitleg: 'De kleinst mogelijke waarde. Vaak een werkafspraak voor "nog niet gemeten"; wie gemiddelde oppervlaktes berekent, rekent er dan mee.',
       kol: [...KOP_ADRES, 'Verblijfsobject', 'Status', 'm²', 'Gebruiksdoel'], rij: r => [r[0], r[1], viewer(r[2]), r[3], { r: fmt(r[4]) }, r[5]] },
@@ -328,7 +328,7 @@ const DATA = {"peil":"2026-09-30","leeftijd_peil":"2026-10-30","gm":{"0998":["Bu
             <span class="getal${n ? '' : ' nul'}">${fmt(n)}</span>
             <p>${esc(c.uitleg)}</p>
             <span class="ref">${noem ? `van ${fmt(noem)} panden in de pijplijn (${Math.round(100 * n / noem)}%)` : 'geen panden in de pijplijn'} · Nederland ${Math.round(100 * nl.n / nl.noem)}%</span>
-            <div class="acties"><a class="btn linkish" href="${c.link(g)}">Per pand in Bouwstroom →</a></div></div>`;
+            <div class="acties"><a class="btn linkish" href="${c.link(g)}">Bekijk deze panden in Bouwstroom →</a></div></div>`;
         }
         const l = L[c.k] || [], n = l.length, nl = NL[c.k];
         return `<div class="ctl" style="--kleur:${kleur}" id="ctl-${c.k}"><h3>${esc(c.titel)}</h3>
