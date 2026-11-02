@@ -283,6 +283,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div><span class="eyebrow">Per pand</span><h2 id="kaartKop">Op de kaart</h2></div>
       </div>
       <div class="maten" id="lagen" role="group" aria-label="Kies welke lagen de kaart toont"></div>
+      <div class="sigtxt" id="oudNoot" hidden style="margin:0 0 10px;border-left:3px solid var(--warn);padding:6px 10px;font-size:.88rem;background:color-mix(in srgb, var(--warn) 8%, transparent)"></div>
       <div class="split">
         <div class="mapwrap">
           <div id="map" role="region" aria-label="Kaart met panden en bekendmakingen"></div>
@@ -297,7 +298,6 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <button class="tab" role="tab" aria-selected="false" data-view="buurt">Per buurt</button>
           <button class="tab" role="tab" aria-selected="false" data-view="bek">Bekendmakingen</button>
         </div>
-        <div class="sigtxt" id="oudNoot" hidden style="margin:10px 12px 0;border-left:3px solid var(--warn);padding:6px 10px;font-size:.88rem;background:color-mix(in srgb, var(--warn) 8%, transparent)"></div>
         <div class="tools">
           <input id="search" type="search" placeholder="Zoek adres, buurt of tekst…" aria-label="Zoek adres, buurt of tekst">
           <select id="faseFilter" aria-label="Filter"></select>
@@ -358,7 +358,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.2';
+  const VERSIE = '1.3';
   const PRODUCT = 'Bouwstroom';
   const BAG = 'https://api.pdok.nl/kadaster/bag/ogc/v2/collections/';
   const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
@@ -527,7 +527,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   let S = null;
   let view = 'proj', sortKey = null, sortDir = 1, selId = null, filter = 'alle';
   // Komt de bezoeker uit Kwaliteit van de BAG (#gm=0503&verwacht=2024&n=22&peil=2026-09-30), dan opent de lijst van dat signaal.
-  const oud = (() => {
+  let oud = (() => {
     const h = location.hash, m = h.match(/verwacht=(\d{4})/);
     if (!m) return null;
     return { tot: +m[1], gm: (h.match(/gm=?(\d{4})/i) || [])[1], n: (h.match(/[#&]n=(\d+)/) || [])[1], peil: (h.match(/peil=(\d{4}-\d{2}-\d{2})/) || [])[1] };
@@ -859,10 +859,17 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
 
   // ---------- kaart ----------
+  // de kaart volgt het filter van het tabblad Panden
+  const oudAan = () => filter === 'oud' && !!oud;
+  const projOud = () => S.projAlle.filter(p => p.sig && p.bouwjaar <= oud.tot);
+  const kaartFilter = () => view === 'proj' ? filter : 'alle';
+  const kaartGefilterd = () => kaartFilter() !== 'alle';
+  const kaartProj = () => { const f = kaartFilter(); return f === 'alle' ? S.proj : f === 'oud' ? projOud() : f === 'sig' ? S.proj.filter(p => p.sig) : S.proj.filter(p => p.fase === f); };
+  function kaartVolgt(was) { if (was !== kaartFilter()) { renderLagen(); renderKaart(); } }
   function renderLagen() {
-    const tel = {}; FASEN.forEach(f => { tel[f.k] = S.proj.filter(p => p.fase === f.k).length; });
+    const tel = {}, kp = kaartProj(); FASEN.forEach(f => { tel[f.k] = kp.filter(p => p.fase === f.k).length; });
     tel.bek = S.bek ? S.bek.filter(r => r.xy).length : 0;
-    const items = FASEN.map(f => ({ k: f.k, t: f.t, c: f.c, n: tel[f.k] })).concat([{ k: 'bek', t: 'Bekendmakingen', c: BEK_KLEUR, n: tel.bek, rond: 1 }]);
+    const items = FASEN.map(f => ({ k: f.k, t: f.t, c: f.c, n: tel[f.k] })).filter(i => !kaartGefilterd() || i.n).concat(kaartGefilterd() ? [] : [{ k: 'bek', t: 'Bekendmakingen', c: BEK_KLEUR, n: tel.bek, rond: 1 }]);
     $('#lagen').innerHTML = '<span class="muted small">Kaart toont</span>' + items.map(i => `<label class="laag" ${lagenAan.has(i.k) ? '' : 'data-uit'}><input type="checkbox" data-k="${i.k}" ${lagenAan.has(i.k) ? 'checked' : ''}><i class="${i.rond ? 'rond' : ''}" style="background:var(${i.c})"></i>${esc(i.t)} <span class="muted">${fmt(i.n)}</span></label>`).join('');
     $('#lagen').querySelectorAll('input').forEach(cb => cb.addEventListener('change', () => {
       if (cb.checked) lagenAan.add(cb.dataset.k); else lagenAan.delete(cb.dataset.k);
@@ -900,7 +907,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     puntVlak = [];
     // volgorde: bestaand en opgeleverd onderop, de pijplijn erboven
     const volg = { bestaand: 0, sloop: 1, opgeleverd: 2, vergund: 3, bouw: 4, klaar: 5 };
-    S.proj.slice().sort((a, b) => volg[a.fase] - volg[b.fase] || (b.woon || 0) - (a.woon || 0)).forEach(p => {
+    if (kaartGefilterd()) kaartProj().forEach(p => lagenAan.add(p.fase));
+    kaartProj().slice().sort((a, b) => volg[a.fase] - volg[b.fase] || (b.woon || 0) - (a.woon || 0)).forEach(p => {
       const tipTxt = `<b>${esc(p.adres || (p.buurt ? p.buurt.naam : 'Pand'))}</b><br>${esc(FASE[p.fase].t)}${p.bouwjaar ? ` · bouwjaar ${p.bouwjaar}` : ''}<br>${fmt(p.woon)} woningen${p.ander ? ` · ${fmt(p.ander)} anders` : ''}${p.sig ? `<br><span style="color:var(--warn)">verwacht jaar voorbij</span>` : ''}`;
       const klein = p.fase === 'bestaand' || p.fase === 'sloop';
       const pt = p.xy ? L.circleMarker([p.xy[1], p.xy[0]], { radius: klein ? 3 + Math.min(5, Math.sqrt(p.woon || 1) * .6) : 4 + Math.min(12, Math.sqrt(p.woon || 1) * .9),
@@ -914,7 +922,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     if (!map._bsZoom) { map.on('zoomend', pasZoom); map._bsZoom = true; }
     pasZoom();
     lagen.bek = L.featureGroup();
-    (S.bek || []).forEach(r => {
+    (kaartGefilterd() ? [] : S.bek || []).forEach(r => {
       if (!r.xy) return;
       const ly = L.circleMarker([r.xy[1], r.xy[0]], { radius: 5 + Math.min(6, Math.sqrt(r.n || 1)), color: css(BEK_KLEUR), weight: 2, fillColor: lijn, fillOpacity: .9 });
       ly.bindTooltip(`<b>${esc(r.soort)} · ${esc(r.stap)}</b> · ${dmy(r.datum)}${r.n ? `<br>${fmt(r.n)} woningen genoemd` : ''}<br>${esc((r.abs || r.titel).slice(0, 140))}`, { sticky: true });
@@ -922,10 +930,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       ly.addTo(lagen.bek); objLaag.set(r.uid, ly);
     });
     zetLagen();
-    $('#mapLegend').innerHTML = `<span>Rondje = pand, groter naarmate er meer woningen in zitten; ingezoomd zie je het pand zelf. Open rondje = bekendmaking.</span><span><i style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2.5px solid var(--warn);vertical-align:-1px;margin-right:4px"></i>verwacht jaar voorbij</span>`;
+    $('#mapLegend').innerHTML = `${kaartGefilterd() ? `<span><b>De kaart toont alleen de ${mv(kaartProj().length, 'pand', 'panden')} uit dit filter.</b></span>` : ''}<span>Rondje = pand, groter naarmate er meer woningen in zitten; ingezoomd zie je het pand zelf. Open rondje = bekendmaking.</span><span><i style="display:inline-block;width:12px;height:12px;border-radius:50%;border:2.5px solid var(--warn);vertical-align:-1px;margin-right:4px"></i>verwacht jaar voorbij</span>`;
     setTimeout(() => {
       map.invalidateSize();
-      if (lagen.grens) map.fitBounds(lagen.grens.getBounds(), { padding: [12, 12] });
+      const kp = kaartGefilterd() ? kaartProj().filter(p => p.xy) : [];
+      if (kp.length) map.fitBounds(L.latLngBounds(kp.map(p => [p.xy[1], p.xy[0]])).pad(.15), { maxZoom: 16 });
+      else if (lagen.grens) map.fitBounds(lagen.grens.getBounds(), { padding: [12, 12] });
     }, 60);
   }
 
@@ -1008,15 +1018,15 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     if (!opts.some(o => o[0] === filter)) filter = 'alle';
     $('#faseFilter').innerHTML = opts.map(([k, t]) => `<option value="${esc(k)}" ${k === filter ? 'selected' : ''}>${esc(t)}</option>`).join('');
   }
-  $('#faseFilter').addEventListener('change', e => { filter = e.target.value; renderTabel(); });
+  $('#faseFilter').addEventListener('change', e => { const was = kaartFilter(); filter = e.target.value; renderTabel(); kaartVolgt(was); });
   document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => {
-    view = b.dataset.view; sortKey = null; filter = 'alle';
+    const was = kaartFilter(); view = b.dataset.view; sortKey = null; filter = 'alle';
     document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x.dataset.view === view));
-    renderFilter(); renderTabel();
+    renderFilter(); renderTabel(); kaartVolgt(was);
   }));
   $('#search').addEventListener('input', () => renderTabel());
   const chip = (k, extra = '') => `<span class="chip"><i class="d" style="background:var(${FASE[k].c})"></i>${esc(FASE[k].t)}${extra}</span>`;
-  const projBron = () => filter === 'oud' && view === 'proj' ? S.projAlle.filter(p => p.sig && p.bouwjaar <= oud.tot) : S.proj;
+  const projBron = () => filter === 'oud' && view === 'proj' ? projOud() : S.proj;
   function rijenProj() {
     return projBron().map(p => ({ uid: p.uid, adres: p.adres || '', buurt: p.buurt ? p.buurt.naam : '', wijk: p.buurt ? (S.wijken.get(p.buurt.wijk) || '') : '', fase: p.fase, faseT: FASE[p.fase].t, woon: p.woon, ander: p.ander, bouwjaar: p.bouwjaar, sig: p.sig, status: p.status || '', pand: p.id || '', geenAdres: !p.nvbo && !p.vbo.length }));
   }
@@ -1050,13 +1060,17 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return rs;
   }
   function renderOudNoot() {
-    const el = $('#oudNoot'), aan = filter === 'oud' && view === 'proj';
+    const el = $('#oudNoot'), aan = oudAan() && view === 'proj';
     el.hidden = !aan;
     if (!aan) return;
     const l = projBron(), w = l.filter(p => p.woon > 0).length, zonder = l.length - w;
     const t = oud.gm === S.g.c && oud.n && oud.peil ? ` Kwaliteit van de BAG telde er ${fmt(+oud.n)} op ${new Date(oud.peil + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}; deze lijst leest de BAG van vandaag, dus het aantal kan afwijken.` : '';
-    el.innerHTML = `<b>${mv(l.length, 'pand', 'panden')} op vergund of bouw gestart, met verwacht bouwjaar ${oud.tot} of eerder.</b> ${w === l.length ? 'Alle met woningen.' : `${mv(w, 'pand', 'panden')} met woningen, ${mv(zonder, 'pand', 'panden')} zonder. Die laatste staan alleen in deze lijst, niet op de kaart of in de cijfers van Bouwstroom.`}${t} <button class="btn linkish" type="button" id="oudUit">Toon alle panden</button>`;
-    $('#oudUit').addEventListener('click', () => { filter = 'alle'; renderFilter(); renderTabel(); });
+    el.innerHTML = `<b>${mv(l.length, 'pand', 'panden')} op vergund of bouw gestart, met verwacht bouwjaar ${oud.tot} of eerder.</b> ${w === l.length ? 'Alle met woningen.' : `${mv(w, 'pand', 'panden')} met woningen, ${mv(zonder, 'pand', 'panden')} zonder. Die laatste staan alleen in deze lijst, niet in de cijfers van Bouwstroom.`}${t}<div style="margin-top:8px"><button class="btn" type="button" id="oudUit">← Terug naar alle panden</button></div>`;
+    $('#oudUit').addEventListener('click', () => {
+      filter = 'alle'; oud = null;
+      try { history.replaceState(null, '', '#gm=' + S.g.c); } catch (e) {}
+      renderFilter(); renderTabel(); kaartVolgt('oud');
+    });
   }
   function renderTabel() {
     if (!S || !S.klaar) return;
