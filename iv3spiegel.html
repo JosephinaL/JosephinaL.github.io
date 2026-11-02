@@ -452,7 +452,7 @@ function viewHeen(){
   document.getElementById("caveat").textContent = "Blokgrootte is het bedrag aan uitgaven ("+curLabel()+" 2025). Overhead, de kosten van de eigen organisatie, staat apart en is niet over de andere onderdelen verdeeld.";
   const view=document.getElementById("view");
   view.innerHTML = `<div class="grid"><div class="box"><nav class="crumbs" id="crumbs" aria-label="Zoomniveau"></nav>
-    <svg id="tm" viewBox="0 0 640 420" role="img" aria-label="Uitgaven als vlakken"></svg><p class="hint" id="hint"></p></div>
+    <svg id="tm" viewBox="0 0 640 420" role="group" aria-label="Uitgaven als vlakken"></svg><p class="hint" id="hint"></p></div>
     <div class="box side" id="side"></div></div>`;
   drawTm(); drawSide(); drawCrumbs();
 }
