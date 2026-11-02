@@ -171,6 +171,11 @@ main > * { min-width: 0; }
 .min-lijst summary .baan i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
 .min-lijst summary .baan b { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--fg); }
 .min-lijst summary .w { text-align: right; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.min-lijst summary::-webkit-details-marker { display: none; }
+.min-lijst summary { list-style: none; }
+.min-lijst .minnaam { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.min-lijst .minnaam::before { content: "▸"; display: inline-block; width: 1.1em; text-decoration: none; }
+.min-lijst details[open] .minnaam::before { content: "▾"; }
 .min-lijst .reg { padding: 0 12px 10px; }
 .min-lijst table { font-size: .85rem; }
 @media (max-width: 560px) { .min-lijst summary { grid-template-columns: minmax(0, 1fr) 6.5em; } .min-lijst summary .baan { grid-column: 1 / -1; grid-row: 2; } }
@@ -242,7 +247,7 @@ main > * { min-width: 0; }
         <div class="chart"><div class="rijen" id="opvallend"></div></div>
       </div>
 
-      <div class="sectiekop"><h2>Per ministerie</h2><p class="muted small">Open een regel voor de regelingen. De balk is het bedrag per inwoner; de streep is Nederland. Het gemeentefonds staat er niet in de balk bij, omdat het veel groter is dan de rest.</p></div>
+      <div class="sectiekop"><h2>Per ministerie</h2><p class="muted small">Klik op een naam voor de regelingen. De balk is het bedrag per inwoner; de streep is Nederland. Het gemeentefonds staat er niet in de balk bij, omdat het veel groter is dan de rest.</p></div>
       <div class="min-lijst" id="ministeries"></div>
 
       <div class="sectiekop"><h2>Naast de boekingen van de gemeente</h2><p class="muted small">Wat de gemeente zelf als inkomsten van het Rijk boekt in de Iv3, jaarrekening 2025. Een verschil is geen fout; zie de toelichting.</p></div>
@@ -422,7 +427,7 @@ main > * { min-width: 0; }
       const pv = pi(v), pn = nlPi(NL.get(h));
       const baan = fonds || pv == null ? '<span class="muted small">' + (fonds ? 'buiten de schaal' : '') + '</span>' : `<span class="baan"><i style="width:${Math.max(0, 100 * pv / max)}%"></i>${pn != null ? `<b style="left:${100 * pn / max}%"></b>` : ''}</span>`;
       const rg = S.regels.filter(([i]) => REG[i].h === h);
-      return `<details data-h="${esc(h)}"${open.has(h) ? ' open' : ''}><summary><span>${esc(h)}</span>${baan}<span class="w">${fMln(v)}</span></summary><div class="reg"><table><tbody>${rg.map(([i, w]) => `<tr><td>${esc(REG[i].r)}</td><td class="r">${fK(w)}</td></tr>`).join('')}</tbody></table></div></details>`;
+      return `<details data-h="${esc(h)}"${open.has(h) ? ' open' : ''}><summary><span class="minnaam">${esc(h)}</span>${baan}<span class="w">${fMln(v)}</span></summary><div class="reg"><table><tbody>${rg.map(([i, w]) => `<tr><td>${esc(REG[i].r)}</td><td class="r">${fK(w)}</td></tr>`).join('')}</tbody></table></div></details>`;
     }).join('');
   }
   function renderIv3() {
