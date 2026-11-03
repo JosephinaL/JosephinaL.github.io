@@ -68,9 +68,10 @@ Drie principes:
 
 Label C-kantoren en Eigen lijst op de kaart nemen eigen gegevens van de gemeente op. Daarvoor geldt:
 
-- De lijst wordt in de browser gelezen en nergens bewaard. Er is geen eigen server; sluit je de pagina, dan is de lijst weg.
+- De lijst wordt in de browser gelezen en niet verstuurd. Er is geen eigen server. Eigen lijst op de kaart bewaart niets: sluit je de pagina, dan is de lijst weg. Label C-kantoren onthoudt de lijst per gemeente in je eigen browser, tot je hem leegmaakt.
+- Label C-kantoren neemt per pand een status op. Vrijgesteld en voldoet wijzigen de uitkomst; aangeschreven, in behandeling en niet beoordeeld zijn alleen een aantekening. Het percentage label C of beter blijft op open data, op vrijgestelde panden na: die vallen uit de plicht.
 - Eigen lijst op de kaart stuurt alleen de adressen als zoekvraag naar PDOK, om ze in de BAG te vinden. Dat staat op de pagina.
-- In Eigen lijst op de kaart staat een beveiligingsregel (Content-Security-Policy) die alleen verbindingen toestaat met `api.pdok.nl` en `data.rivm.nl`. Zo is na te gaan dat de lijst nergens anders heen kan.
+- In Eigen lijst op de kaart staat een beveiligingsregel (Content-Security-Policy) die de verbindingen beperkt tot `api.pdok.nl`, `data.rivm.nl` en de bezoekerstelling GoatCounter (alleen bezoek, geen lijstgegevens). Zo is na te gaan welke diensten de pagina kan bereiken.
 - Een controle vooraf stopt lijsten met persoonsgegevens (namen, BSN, contactgegevens, cliënten of bewoners) voordat er iets wordt opgezocht. De pagina is bedoeld voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed.
 
 ## Gebruik

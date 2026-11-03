@@ -2038,12 +2038,13 @@ footer { font-size: .8rem; color: var(--muted); }
 
   // ---------- CSV ----------
   $('#csvBtn').onclick = () => {
-    const head = ['pand_id', 'aantal_kantooradressen', 'adres', 'woonplaats', 'wijk', 'bouwjaar', 'kantoor_m2_min', 'kantoor_m2_max', 'pand_totaal_m2', 'status', 'label_dominant', 'label_hoogste', 'label_laagste', 'rijksmonument', 'monument_koppeling', 'grenst_aan_rijksmonument', 'eigen_uitzondering', 'eigen_status', 'eigen_toelichting', 'eigen_peildatum', 'redenering'];
+    const head = ['pand_id', 'aantal_kantooradressen', 'adres', 'woonplaats', 'wijk', 'bouwjaar', 'kantoor_m2_min', 'kantoor_m2_max', 'pand_totaal_m2', 'status', 'label_dominant', 'label_hoogste', 'label_laagste', 'rijksmonument', 'monument_koppeling', 'grenst_aan_rijksmonument', 'eigen_uitzondering', 'eigen_status', 'eigen_toelichting', 'eigen_peildatum', 'redenering', 'bron'];
     const q = v => { const s = String(v ?? ''); return /[";\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-    const lines = [head.join(';')].concat(state.res.panden.map(p => [p.id, p.kvbo.length, p.adres, p.wp, p.wijk, p.bouwjaar, p.offMin, p.offMax, p.totaal, ST[p.status], p.label?.dominant_label, p.label?.hoogste_label, p.label?.laagste_label, p.monument?.nr, p.monument?.how ? LabelC.KOPPELING[p.monument.how] : '', (p.grenst || []).map(g => g.nr).join(', '), p.eigen ? (p.eigen.redenen.join('; ') || 'ja') : '', p.eg ? ES[p.eg.status] : '', p.eg ? p.eg.redenen.join('; ') : '', p.eg ? p.eg.peil : '', p.redenering.join(' ')].map(q).join(';')));
+    const bron = `Josephine Linders, Open Data Atelier, josephinelinders.nl/labelc.html#${state.res.gm.code}, versie ${VERSIE}`;
+    const lines = [head.join(';')].concat(state.res.panden.map(p => [p.id, p.kvbo.length, p.adres, p.wp, p.wijk, p.bouwjaar, p.offMin, p.offMax, p.totaal, ST[p.status], p.label?.dominant_label, p.label?.hoogste_label, p.label?.laagste_label, p.monument?.nr, p.monument?.how ? LabelC.KOPPELING[p.monument.how] : '', (p.grenst || []).map(g => g.nr).join(', '), p.eigen ? (p.eigen.redenen.join('; ') || 'ja') : '', p.eg ? ES[p.eg.status] : '', p.eg ? p.eg.redenen.join('; ') : '', p.eg ? p.eg.peil : '', p.redenering.join(' '), bron].map(q).join(';')));
     const blob = new Blob(['﻿' + lines.join('\n')], { type: 'text/csv;charset=utf-8' });
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-    a.download = `label-c-kantoren-${state.res.gm.naam.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.csv`;
+    a.download = `open-data-atelier-label-c-kantoren-${state.res.gm.naam.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.csv`;
     document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   };
 
