@@ -10,6 +10,12 @@
 <link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
 <script src="vendor/leaflet-1.9.4/leaflet.js"></script>
 <style>
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
 :root {
   --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
   --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
@@ -263,6 +269,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       </div>
       <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
 
+      <div class="focusbar" id="focusbar" hidden>
+        <label class="eyebrow" for="focusSel">Kijk naar</label>
+        <select id="focusSel"></select>
+        <span class="muted small" id="focusTxt"></span>
+        <button class="btn linkish" type="button" id="focusTerug" hidden>← Hele gemeente</button>
+      </div>
+      <p class="small muted focusinfo" id="focusInfo" role="status" hidden></p>
+
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
       <div class="top3" id="top3"></div>
       <details class="herken" id="herken">
@@ -283,6 +297,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       </details>
 
       <!-- gebruik -->
+      <p class="small muted reeksnoot" id="reeksNoot" hidden></p>
       <div class="sectiekop">
         <div><span class="eyebrow">Door de jaren</span><h2>Gebruik van jeugdzorg</h2></div>
         <div class="seg" id="trendSeg" role="group" aria-label="Toon percentage of aantal">
@@ -366,6 +381,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="card">
           <h2>Let op bij het lezen</h2>
           <ul class="small">
+            <li><b>Een wijk kiezen</b>: kerncijfers, kaart en dossier volgen je keuze, met de link mee. Gebruik door de jaren, kosten en regels bestaan alleen voor de hele gemeente.</li>
             <li><b>Reeksbreuk</b>: tussen 2020 en 2021 is de CBS-reeks herzien. De lijnen lopen daar niet door.</li>
             <li><b>Kleine aantallen</b>: het CBS rondt af op 5 en laat kleine aantallen weg (–). Woont er in een wijk of buurt minder dan 150 jongeren tot 23 jaar, dan toont deze pagina geen percentage. Een paar jongeren meer of minder verschuift het percentage dan al flink.</li>
             <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Het CBS stelt ze later nog bij.</li>
@@ -403,7 +419,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.3';
+  const VERSIE = '1.4';
   const PRODUCT = 'Jeugdzorg per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOG = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title,Modified';
@@ -528,7 +544,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     document.title = 'Jeugdzorg ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
     S = { g, trend: null, kosten: null, w: null, wJaar: null, opgehaald: null, rJaar: null, regels: null, regelsFout: false, regelsOp: null };
-    selWijk = null; kostJaar = null; fouten.clear(); toonMelding();
+    selWijk = null; kostJaar = null; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo(''); renderNoot();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
     $('#top3').innerHTML = ''; $('#multiples').innerHTML = ''; $('#kostenChart').innerHTML = ''; $('#kostenVorm').innerHTML = '';
     $('#tblWrap').innerHTML = ''; $('#dossier').innerHTML = ''; $('#jaren').innerHTML = '';
@@ -545,7 +561,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
     renderJaren(jaren);
     const heel = jaren.filter(j => j < new Date().getFullYear()); // het lopende jaar heeft alleen halfjaarcijfers
-    await kiesJaar(jaren.includes(gevraagd) ? gevraagd : (heel[0] || jaren[0]), true);
+    const hk = location.hash.match(/[#&]wijk=(WK\w+)/);
+    const wens = hk && hk[1].startsWith('WK' + g.c) ? hk[1] : null;
+    const km = (location.hash.match(/kaart=(\w+)/) || [])[1];
+    const kb = km && document.querySelector(`#kaartSeg button[data-k="${km}"]`);
+    if (kb) { kaartMaat = km; document.querySelectorAll('#kaartSeg button').forEach(x => x.setAttribute('aria-pressed', x === kb)); }
+    await kiesJaar(jaren.includes(gevraagd) ? gevraagd : (heel[0] || jaren[0]), true, wens);
     voortgang(4, 4, '');
   }
 
@@ -733,6 +754,19 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- kern ----------
   function renderKern() {
     const g = S.g;
+    const fo = focusObj();
+    if (fo) {
+      const u = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+      const gm = S.w.gm, hf = hh(fo), hg = gm ? hh(gm) : null;
+      const deel = fo.n != null && gm && gm.n ? 100 * fo.n / gm.n : null;
+      $('#leadBig').textContent = fo.n != null ? `${fo.naam}: ${fmt(fo.n)} jongeren met jeugdzorg in ${S.w.perLabel}` : fo.naam;
+      $('#leadSub').textContent = [`wijk in ${g.n}`, pctTonen(fo) && fo.pct != null ? `${fP(fo.pct)} van de jongeren tot 23 jaar` : '', 'zorg in natura'].filter(Boolean).join(' · ');
+      $('#top3').innerHTML =
+        u('Van de jongeren tot 23', pctTekst(fo), fo.pct == null ? 'Het CBS heeft de percentages per wijk voor dit jaar nog niet gepubliceerd.' : gm ? `Hele gemeente: ${pctTekst(gm)}.` : '') +
+        u('Eenouder', hf.toon ? fP(hf.pEen) : 'klein', `van de jongeren met jeugdzorg.${hg && hg.toon ? ` Hele gemeente: ${fP(hg.pEen)}.` : ''}`) +
+        u('Deel van de gemeente', deel == null ? '–' : fP(deel), `van de jongeren met jeugdzorg in ${esc(g.n)}.`);
+      return;
+    }
     const tz = S.trend && S.trend.d.T001203 || {};
     const jt = Object.keys(tz).map(Number).filter(j => tz[j].n != null).sort();
     const laatst = jt[jt.length - 1], eerst = jt[0];
@@ -906,9 +940,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       b.classList.toggle('primary', on);
     });
   }
-  async function kiesJaar(j, eerste) {
+  async function kiesJaar(j, eerste, wens) {
+    const vorig = wens !== undefined ? wens : selWijk;
+    const vorigNaam = (focusObj() || {}).naam;
     const g = S.g; S.wJaar = j; S.rJaar = j; selWijk = null; markeerJaar(j); renderRegels();
-    try { history.replaceState(null, '', '#gm=' + g.c + '&jaar=' + j); } catch (e) {}
+    zetHash();
     $('#wijkKop').textContent = `Jeugdzorg per wijk · ${j}`;
     $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Wijken ophalen…</p>';
     fouten.delete('wijken'); fouten.delete('wijkgrenzen');
@@ -938,7 +974,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     document.querySelector('.tab[data-view="buurt"]').disabled = !(w && w.buurten.length);
     if (view === 'buurt' && !(w && w.buurten.length)) zetView('wijk');
     S.bounded = false;
-    renderKaart(); renderDossier(null); renderTabel(); renderVoet();
+    toonInfo('');
+    if (vorig) {
+      if (w && w.wijken.some(x => x.code === vorig)) selWijk = vorig;
+      else toonInfo(`${vorigNaam || 'Deze wijk'} komt in de wijkindeling van ${j} niet voor. De pagina toont daarom de hele gemeente.`);
+    }
+    zetHash();
+    renderKaart(); renderDossier(focusObj()); renderTabel(); renderVoet();
+    renderFocus(); renderKern(); renderNoot();
   }
 
   async function laadWijk(c, j) {
@@ -1105,7 +1148,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   const kaartWaarde = o => kaartMaat === 'een' ? (hh(o).toon ? hh(o).pEen : null) : (pctTonen(o) ? o.pct : null);
   const kaartKleurt = w => kaartMaat === 'een' ? w.wijken.some(o => kaartWaarde(o) != null) : w.heeftPct;
   document.querySelectorAll('#kaartSeg button').forEach(b => b.addEventListener('click', () => {
-    kaartMaat = b.dataset.k;
+    kaartMaat = b.dataset.k; zetHash();
     document.querySelectorAll('#kaartSeg button').forEach(x => x.setAttribute('aria-pressed', x === b));
     if (S && S.w) renderKaart();
   }));
@@ -1181,7 +1224,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     } else {
       $('#mapLegend').innerHTML = '<span><i class="sw" style="background:var(--accent);border-radius:50%"></i>Grootte van de stip: aantal jongeren met jeugdzorg</span>' + (kaartMaat === 'een' ? '<span>Geen wijk heeft genoeg jongeren met jeugdzorg voor een aandeel eenouder.</span>' : '');
     }
-    setTimeout(() => { map.invalidateSize(); if (passen) map.fitBounds(grens, { padding: [16, 16] }); }, 60);
+    setTimeout(() => { map.invalidateSize(); if (passen) { const ls = selWijk ? gj.getLayers().filter(l => l.feature.properties.wijkcode === selWijk) : []; map.fitBounds(ls.length ? L.featureGroup(ls).getBounds() : grens, ls.length ? { maxZoom: 15, padding: [24, 24] } : { padding: [16, 16] }); } }, 60);
   }
 
   // ---------- dossier ----------
@@ -1246,12 +1289,40 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     s += `<div class="signaal"><b>Opvallend${isGm ? ' ten opzichte van Nederland' : ''}:</b> ${sg.length ? esc(sg.join(' · ')) : 'geen afwijking boven de drempels.'}</div>`;
     return s;
   }
+  function focusObj() { return selWijk && S && S.w ? S.w.wijken.find(x => x.code === selWijk) || null : null; }
+  function zetHash() {
+    if (!S) return;
+    const h = '#gm=' + S.g.c + (S.wJaar ? '&jaar=' + S.wJaar : '') + (selWijk ? '&wijk=' + selWijk : '') + (kaartMaat !== 'pct' ? '&kaart=' + kaartMaat : '');
+    try { if (location.hash !== h) history.replaceState(null, '', h); } catch (e) {}
+  }
+  function toonInfo(t) { $('#focusInfo').textContent = t; $('#focusInfo').hidden = !t; }
+  function renderNoot() {
+    const fo = focusObj();
+    $('#reeksNoot').hidden = !fo;
+    $('#reeksNoot').textContent = fo ? `Gebruik door de jaren, kosten en regels bestaan alleen voor de hele gemeente. Deze blokken tonen ${S.g.n}, niet ${fo.naam}.` : '';
+  }
+  function renderFocus() {
+    const bar = $('#focusbar'), lijst = S && S.w ? S.w.wijken : [];
+    if (!S || !lijst.length) { bar.hidden = true; return; }
+    bar.hidden = false;
+    const fo = focusObj();
+    const opties = lijst.slice().sort((x, y) => x.naam.localeCompare(y.naam, 'nl'));
+    $('#focusSel').innerHTML = `<option value="">Hele gemeente: ${esc(S.g.n)}</option>` + opties.map(o => `<option value="${esc(o.code)}">${esc(o.naam)}</option>`).join('');
+    $('#focusSel').value = fo ? fo.code : '';
+    $('#focusTerug').hidden = !fo;
+    $('#focusTxt').textContent = fo
+      ? `De pagina volgt deze wijk in ${S.w.perLabel}. Wat alleen voor de hele gemeente bestaat, zegt dat.`
+      : 'Kies een wijk hier, op de kaart of in de tabel. De kerncijfers, de kaart en het dossier volgen dan die keuze.';
+  }
+  $('#focusSel').addEventListener('change', e => kiesWijk(e.target.value || null, true));
+  $('#focusTerug').addEventListener('click', () => kiesWijk(null, true));
   function kiesWijk(code, vanTabel) {
-    selWijk = code;
-    const o = code ? S.w.wijken.find(x => x.code === code) : null;
-    renderDossier(o);
-    renderKaart();
+    selWijk = code || null;
+    const o = focusObj();
+    toonInfo(''); zetHash();
+    renderDossier(o); renderKaart(); renderFocus(); renderKern(); renderNoot();
     if (vanTabel && gjLayer && code) gjLayer.eachLayer(l => { if (l.feature && l.feature.properties.wijkcode === code) map.fitBounds(l.getBounds(), { maxZoom: 15, padding: [24, 24] }); });
+    if (vanTabel && gjLayer && !code && gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] });
     document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', !!code && tr.dataset.code === code));
   }
 
