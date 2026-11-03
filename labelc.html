@@ -794,6 +794,8 @@ ol.werk b { font: 600 .72rem/1 var(--f-mono); color: var(--accent-fg); backgroun
 .annrij .chip { padding: 3px 9px; }
 .annrij .chip[aria-pressed="false"] { opacity: 1; background: var(--surface); }
 .annrij .chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.eigen-uitleg summary { cursor: pointer; color: var(--accent); }
+.eigen-uitleg ul { margin-top: 6px; }
 .eigen-knoppen { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 #eigenKaart:target { outline: 2px solid var(--st-eigen); outline-offset: 2px; }
 .intro p { margin: 0; }
@@ -946,13 +948,17 @@ footer { font-size: .8rem; color: var(--muted); }
       <div class="cols">
         <div class="card" id="eigenKaart">
           <h2>Eigen gegevens</h2>
-          <p class="small">Voeg per pand toe wat alleen de gemeente en haar uitvoeringspartners weten. Eén regel per pand: <b>pand-ID of verblijfsobject-ID</b>, dan <b>status</b>, <b>toelichting</b> en <b>peildatum</b>, gescheiden door een tab of puntkomma. Alleen de ID is verplicht. Bestaande panden worden verrijkt; panden toevoegen kan niet.</p>
-          <ul class="plain small">
-            <li><b>Wijzigt de uitkomst:</b> <i>vrijgesteld</i> haalt het pand uit de plicht, bijvoorbeeld een gemeentelijk monument. <i>voldoet</i> markeert het als voldoet volgens de gemeente; het percentage hierboven blijft op open data.</li>
-            <li><b>Alleen een aantekening:</b> <i>aangeschreven</i>, <i>in behandeling</i> en <i>niet beoordeeld</i>. Het pand houdt zijn status en je ziet waar al werk loopt.</li>
-            <li>Staat er geen bekende status, dan telt de regel als uitzondering en is de tekst de reden, zoals in eerdere lijsten.</li>
-          </ul>
-          <p class="small">Geen namen of andere persoonsgegevens in de toelichting. De lijst blijft in deze browser, maar staat wel in je CSV en in screenshots.</p>
+          <p class="small">Voeg per pand toe wat alleen de gemeente en haar uitvoeringspartners weten. Eén regel per pand: pand-ID of verblijfsobject-ID, status, toelichting, peildatum. Alleen de ID is verplicht. De lijst blijft in deze browser. Zet er geen namen of andere persoonsgegevens in.</p>
+          <details class="small eigen-uitleg">
+            <summary>Hoe werkt dit?</summary>
+            <ul class="plain">
+              <li><b>Wijzigt de uitkomst:</b> <i>vrijgesteld</i> haalt het pand uit de plicht, bijvoorbeeld een gemeentelijk monument. <i>voldoet</i> markeert het als voldoet volgens de gemeente; het percentage hierboven blijft op open data.</li>
+              <li><b>Alleen een aantekening:</b> <i>aangeschreven</i>, <i>in behandeling</i> en <i>niet beoordeeld</i>. Het pand houdt zijn status en je ziet waar al werk loopt.</li>
+              <li>Staat er geen bekende status, dan telt de regel als uitzondering en is de tekst de reden, zoals in eerdere lijsten.</li>
+              <li>Scheid de velden met een tab of puntkomma. Bestaande panden worden verrijkt; panden toevoegen kan niet.</li>
+              <li>Wat je invoert, staat wel in je CSV en in screenshots.</li>
+            </ul>
+          </details>
           <textarea id="eigen" spellcheck="false" aria-label="Eigen gegevens per pand" placeholder="0503100000001234;vrijgesteld;gemeentelijk monument&#10;0503100000005678;aangeschreven;eerste brief;2026-10-01"></textarea>
           <div class="eigen-knoppen">
             <button class="btn" id="eigenBtn" type="button">Toepassen</button>
@@ -1497,7 +1503,7 @@ footer { font-size: .8rem; color: var(--muted); }
     else if (p.status === 'voldoet_eigen') { p.egEffect = 'voldoet'; p.redenering.push(`Voldoet volgens de gemeente${tekst}.${peil}${via}${herkomst}`); }
     else if (e.status === 'vrijgesteld' || e.status === 'voldoet') { p.egEffect = 'geen'; p.redenering.push(`Op de eigen lijst als ${EIGEN_STATUS[e.status].toLowerCase()}${tekst}. Dit wijzigt de status niet.${peil}${via}${herkomst}`); }
     else if (p.status === 'buiten' || p.status === 'monument') { p.egEffect = 'geen'; p.redenering.push(`Op de eigen lijst als ${EIGEN_STATUS[e.status].toLowerCase()}${tekst}, maar dit pand valt al buiten de plicht of is rijksmonument.${peil}${via}${herkomst}`); }
-    else { p.egEffect = 'aant'; p.redenering.push(`Aantekening van de gemeente: ${EIGEN_STATUS[e.status].toLowerCase()}${tekst}. De status blijft ${STATUS[p.status].toLowerCase()}.${peil}${via}${herkomst}`); }
+    else { p.egEffect = 'aant'; p.redenering.push(`Aantekening van de gemeente: ${EIGEN_STATUS[e.status].toLowerCase()}${tekst}. De status blijft: ${STATUS[p.status]}.${peil}${via}${herkomst}`); }
     return p;
   }
   function deelIn(p, e) {
