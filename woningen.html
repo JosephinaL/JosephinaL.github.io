@@ -383,7 +383,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.3';
+  const VERSIE = '1.4';
   const PRODUCT = 'Woningvoorraad en leegstand';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_VOOR = '86286NED';   // voorraad; eigendom, type eigenaar, status van bewoning, regio
@@ -905,6 +905,18 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     if (!tot) return '<span class="muted">–</span>';
     return `<div class="stack" role="img" aria-label="Woningen naar eigendom">${d.map(x => `<i style="width:${100 * x.v / tot}%;background:${x.c}" data-tip="${esc(x.t)}: ${x.v}%"></i>`).join('')}</div>`;
   }
+  // zelfde wijk in de andere instrumenten
+  function zelfdeWijk(o) {
+    const oud = document.getElementById('zelfdeWijk'); if (oud) oud.remove();
+    if (!o) return;
+    const isB = /^BU/.test(o.code), wk = isB ? o.wijk : o.code;
+    if (!wk) return;
+    const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['huishoudens', 'Huishoudens']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const p = document.createElement('p');
+    p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
+    p.innerHTML = `<span class="muted">${isB ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> ${links}`;
+    $('#dossier').appendChild(p);
+  }
   function renderDossier(o) {
     const b = S.b;
     if (!b) { $('#dossier').innerHTML = '<span class="eyebrow">Buurt</span><p class="muted" style="margin:0">Geen buurtcijfers beschikbaar.</p>'; return; }
@@ -946,6 +958,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       ${o ? '' : '<p class="small muted" style="margin:0">Klik een buurt op de kaart of in de tabel.</p>'}`;
     bindTips($('#dossier'));
     $('#dossier').querySelectorAll('[data-naar]').forEach(k => k.addEventListener('click', () => kiesBuurt(k.dataset.naar === 'gm' ? null : k.dataset.naar, true)));
+    zelfdeWijk(o);
   }
   function huidig() {
     if (!S || !S.b || !selCode) return null;

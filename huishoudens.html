@@ -356,7 +356,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const PRODUCT = 'Huishoudens en vergrijzing';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_REEKS = '70072ned';
@@ -789,6 +789,18 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return `<div class="stack" role="img" aria-label="Huishoudens naar samenstelling">${d.filter(x => x.v).map(x => `<i style="width:${100 * x.v / tot}%;background:${x.c}" data-tip="${esc(x.t)}: ${x.v}%"></i>`).join('')}</div>`;
   }
   function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, esc(i.dataset.tip))); i.addEventListener('pointerleave', verbergTip); }); }
+  // zelfde wijk in de andere instrumenten
+  function zelfdeWijk(o) {
+    const oud = document.getElementById('zelfdeWijk'); if (oud) oud.remove();
+    if (!o) return;
+    const isB = /^BU/.test(o.code), wk = isB ? o.wijk : o.code;
+    if (!wk) return;
+    const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const p = document.createElement('p');
+    p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
+    p.innerHTML = `<span class="muted">${isB ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> ${links}`;
+    $('#dossier').appendChild(p);
+  }
   function renderDossier(o) {
     const b = S.b;
     if (!b) { $('#dossier').innerHTML = '<span class="eyebrow">Buurt</span><p class="muted" style="margin:0">Geen buurtcijfers beschikbaar.</p>'; return; }
@@ -813,6 +825,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       ${o ? `<button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>` : '<p class="small muted" style="margin:0">Klik een buurt op de kaart of in de tabel.</p>'}`;
     bindTips($('#dossier'));
     const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesBuurt(null));
+    zelfdeWijk(o);
   }
   // ---------- één keuze, alle blokken luisteren ----------
   function focusObj() {

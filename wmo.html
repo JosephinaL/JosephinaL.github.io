@@ -433,7 +433,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.4';
+  const VERSIE = '1.5';
   const PRODUCT = 'Wmo per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
@@ -1386,6 +1386,18 @@ main > * { min-width: 0; }
   }
 
   // ---------- dossier ----------
+  // zelfde wijk in de andere instrumenten
+  function zelfdeWijk(o) {
+    const oud = document.getElementById('zelfdeWijk'); if (oud) oud.remove();
+    if (!o) return;
+    const isB = /^BU/.test(o.code), wk = isB ? o.wijk : o.code;
+    if (!wk) return;
+    const links = [['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const p = document.createElement('p');
+    p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
+    p.innerHTML = `<span class="muted">${isB ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> ${links}`;
+    $('#dossier').appendChild(p);
+  }
   function renderDossier(o) {
     const w = S.w;
     if (!w || (!w.gm && !w.wijken.length)) { $('#dossier').innerHTML = '<span class="eyebrow">Wijk</span><p class="muted" style="margin:0">Geen wijkcijfers beschikbaar voor dit jaar.</p>'; return; }
@@ -1418,6 +1430,7 @@ main > * { min-width: 0; }
       <p class="small muted" style="margin:0">Achter een type het aandeel van de cliënten. Een cliënt met meer typen telt bij elk type mee. – = weggelaten vanwege kleine aantallen.</p>
       ${o ? `<button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>` : '<p class="small muted" style="margin:0">Klik een wijk op de kaart, in de spreiding of in de tabel.</p>'}`;
     const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesWijk(null));
+    zelfdeWijk(o);
   }
   // één keuze, alle blokken luisteren: wat per wijk bestaat beweegt mee, de rest zegt waarom niet
   function kiesWijk(code, vanElders) {

@@ -419,7 +419,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.4';
+  const VERSIE = '1.5';
   const PRODUCT = 'Jeugdzorg per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOG = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title,Modified';
@@ -1248,6 +1248,18 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function bindStapelTips(root) {
     root.querySelectorAll('.stack i').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, esc(i.dataset.tip))); i.addEventListener('pointerleave', verbergTip); });
   }
+  // zelfde wijk in de andere instrumenten
+  function zelfdeWijk(o) {
+    const oud = document.getElementById('zelfdeWijk'); if (oud) oud.remove();
+    if (!o) return;
+    const isB = /^BU/.test(o.code), wk = isB ? o.wijk : o.code;
+    if (!wk) return;
+    const links = [['wmo', 'Wmo'], ['schulden', 'Schulden'], ['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const p = document.createElement('p');
+    p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
+    p.innerHTML = `<span class="muted">${isB ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> ${links}`;
+    $('#dossier').appendChild(p);
+  }
   function renderDossier(o) {
     const w = S.w;
     if (!w || (!w.gm && !w.wijken.length)) { $('#dossier').innerHTML = '<span class="eyebrow">Wijk</span><p class="muted" style="margin:0">Geen wijkcijfers beschikbaar voor dit jaar.</p>'; return; }
@@ -1272,6 +1284,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       ${o ? `<button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>` : '<p class="small muted" style="margin:0">Klik een wijk op de kaart of in de tabel.</p>'}`;
     bindStapelTips($('#dossier'));
     const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesWijk(null));
+    zelfdeWijk(o);
   }
   function dossierHuishouden(x, isGm) {
     const w = S.w, h = hh(x), hn = hh(w.nl), hg = hh(w.gm);
