@@ -489,7 +489,10 @@ tr.sel td { background: var(--sunk); }
       const heen = (perS.get(sel) || []).find(f => f.w === g.i), terug = (perS.get(g.i) || []).find(f => f.w === sel);
       const zelf = sel === g.i;
       d.innerHTML = `<h3>${esc(naam(sel))}</h3>` + (zelf
-        ? reeksHtml(`Woont en studeert in ${g.n}`, heen, '')
+        ? reeksHtml(`Woont en studeert in ${g.n}`, heen, '') + (() => {
+          const e = eigen(g.i, jaar), w = woonT(g.i, jaar, 0), s = studeert(g.i, jaar), pc = (a, b) => nf.format(Math.round(100 * a / b));
+          return e && w && s ? `<p class="small">In ${J[jaar]} is dit ${pc(e, w)}% van de ${fmt(w)} studenten die hier wonen en ${pc(e, s)}% van de ${fmt(s)} die hier studeren.</p>` : '';
+        })()
         : (isStudie(sel) ? reeksHtml(`Wonen in ${g.n}, studeren in ${naam(sel)}`, heen, '') : '') + (sel === ONB || !isStudie(g.i) ? '' : reeksHtml(`Wonen in ${naam(sel)}, studeren in ${g.n}`, terug, 'b'))) +
         (sel !== ONB && !zelf ? `<button class="btn linkish" type="button" id="naarSel">Open ${esc(naam(sel))}</button>` : '') +
         `<button class="btn linkish" type="button" id="sluitSel">Terug naar het overzicht</button>`;
