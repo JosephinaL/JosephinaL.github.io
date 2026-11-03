@@ -87,6 +87,8 @@ nav a:hover { color: var(--accent); }
 .manifest h2 { font-size: 1.25rem; color: var(--accent); }
 .manifest p { color: var(--ink); }
 .manifest p.slot { font-style: italic; color: var(--muted); }
+.makers { display: grid; gap: 10px; max-width: 72ch; }
+.makers p { color: var(--muted); }
 .product { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); overflow: hidden; }
 @media (max-width: 820px) { .product { grid-template-columns: minmax(0, 1fr); } }
 .product-body { padding: 28px; display: grid; gap: 16px; align-content: start; }
@@ -277,13 +279,18 @@ main > * { min-width: 0; }
         <p>Gevoelige gegevens blijven waar ze horen. Lokale kennis wordt toegevoegd in de eigen omgeving van de gemeente, niet verstuurd.</p>
       </div>
     </div>
+    <div class="makers">
+      <h3>Gemaakt met AI</h3>
+      <p>Het Open Data Atelier ontstaat in samenwerking met Claude, het AI-model van Anthropic. Josephine Linders bepaalt de vragen, de keuzes en de grenzen. Claude zoekt bronnen uit, bouwt de pagina's, rekent en test mee. Er gaat niets online zonder haar akkoord.</p>
+      <p>De instrumenten zelf gebruiken geen AI: ze werken met vaste, beschreven rekenregels. Wat je invoert, gaat niet naar een AI-dienst. Zie je een fout, meld die dan.</p>
+    </div>
   </section>
 
   <section class="section" id="producten" aria-labelledby="h-prod">
     <div class="section-head">
       <span class="eyebrow">Instrumenten · Gemeentebeeld</span>
       <h2 id="h-prod">Van open data naar een bruikbaar instrument, voor elke gemeente</h2>
-      <p class="lead">Geen rapport en geen dashboard. Een rapport vertelt wat een ander heeft gezien; een dashboard laat je kijken naar wat een ander voor je koos. Met een instrument kies je zelf waar je kijkt: een gemeente, een wijk, een jaar, een pand. Het rekent ter plekke en laat zien waar het antwoord vandaan komt.</p>
+      <p class="lead">Een rapport legt vast wat er is gezien. Een dashboard volgt vaste cijfers door de tijd. Een instrument is gemaakt om een vraag uit te zoeken: je kiest zelf waar je kijkt, een gemeente, een wijk, een jaar, een pand. Het rekent ter plekke en laat zien waar het antwoord vandaan komt.</p>
     </div>
     <div class="shelves">
       <div class="shelf">
