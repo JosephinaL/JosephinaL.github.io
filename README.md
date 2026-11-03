@@ -20,6 +20,7 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
 | **Onderwijs** | | | |
 | Basisonderwijs per buurt | [onderwijs.html](https://josephinelinders.nl/onderwijs.html) | Waar krimpen en groeien basisscholen tot 2035? | DUO, BAG/PDOK, CBS |
+| Studentenlijnen | [studenten.html](https://josephinelinders.nl/studenten.html) | Waar wonen de studenten van een stad, en waar studeren de jongeren uit een gemeente? | DUO (studenten per woon- en studeergemeente), CBS, PDOK |
 | **Bevolking en wonen** | | | |
 | Huishoudens en vergrijzing | [huishoudens.html](https://josephinelinders.nl/huishoudens.html) | Hoe zijn de huishoudens samengesteld, hoe snel vergrijst de gemeente sinds 1995, en in welke buurten? | CBS (Regionale kerncijfers, Kerncijfers wijken en buurten), PDOK |
 | Woningvoorraad en leegstand | [woningen.html](https://josephinelinders.nl/woningen.html) | Hoeveel woningen zijn er, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg? | CBS (Woningvoorraad, Levensloop van woningen, Kerncijfers wijken en buurten), PDOK |
@@ -51,7 +52,7 @@ Wmo, Jeugdzorg, Schulden, Huishoudens en Woningvoorraad delen de wijk als ingang
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, bevolking en wonen (CBS), inburgering (DUO), vergunningen (gemeenteblad).
+2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, bevolking en wonen (CBS), inburgering en studenten (DUO), vergunningen (gemeenteblad).
 3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving. Eigen lijst op de kaart is daar het gereedschap voor.
 4. **Antwoord:** navolgbaar per object.
 
@@ -64,7 +65,7 @@ Drie principes:
 ## Techniek
 
 - Elk instrument is één zelfstandig HTML-bestand, zonder buildstap.
-- De data komt live uit openbare API's (PDOK, RIVM, RCE, CBS, Officiële bekendmakingen) of staat inline, zoals bij DUO (onderwijs en inburgering), waar de API geen verzoeken van andere sites toestaat, en bij Schuldenproblematiek in beeld, dat alleen als download bij een CBS-dashboard bestaat.
+- De data komt live uit openbare API's (PDOK, RIVM, RCE, CBS, Officiële bekendmakingen) of staat inline, zoals bij DUO (onderwijs, inburgering en studenten), waar de API geen verzoeken van andere sites toestaat, en bij Schuldenproblematiek in beeld, dat alleen als download bij een CBS-dashboard bestaat.
 - Bron en peildatum staan op elke pagina.
 - Gehost via GitHub Pages.
 
