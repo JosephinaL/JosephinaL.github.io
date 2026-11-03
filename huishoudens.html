@@ -10,6 +10,12 @@
 <link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
 <script src="vendor/leaflet-1.9.4/leaflet.js"></script>
 <style>
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
 :root {
   --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
   --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
@@ -232,6 +238,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       </div>
       <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
 
+      <div class="focusbar" id="focusbar" hidden>
+        <label class="eyebrow" for="focusSel">Kijk naar</label>
+        <select id="focusSel"></select>
+        <span class="muted small" id="focusTxt"></span>
+        <button class="btn linkish" type="button" id="focusTerug" hidden>← Hele gemeente</button>
+      </div>
+      <p class="small muted focusinfo" id="focusInfo" role="status" hidden></p>
+
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
       <div class="top4" id="top4"></div>
       <details class="herken" id="herken">
@@ -259,6 +273,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <button type="button" data-m="n" aria-pressed="false">Aantal</button>
         </div>
       </div>
+      <p class="small muted reeksnoot" id="reeksNoot" hidden></p>
       <div class="trio">
         <div class="chart" id="chHh"></div>
         <div class="chart" id="chOud"></div>
@@ -308,6 +323,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="card">
           <h2>Let op bij het lezen</h2>
           <ul class="small">
+            <li><b>Een wijk of buurt kiezen</b>: kerncijfers, kaart en dossier volgen je keuze, met de link mee. De reeks sinds 1995 en de 80-plussers bestaan alleen voor de hele gemeente. Aantallen per wijk of buurt zijn berekend uit afgeronde percentages, dus "ca.".</li>
             <li><b>Afgerond</b>: de buurtpercentages zijn door het CBS afgerond op hele procenten. Een aantal ouderen per buurt is daarom bij benadering.</li>
             <li><b>Kleine buurten</b>: het CBS laat cijfers weg bij weinig inwoners of huishoudens. Zo'n buurt is grijs met een stippelrand.</li>
             <li><b>Grenzen</b>: de buurtindeling verschilt per jaar. Vergelijk een buurt daarom niet zonder meer tussen jaren.</li>
@@ -340,7 +356,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Huishoudens en vergrijzing';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_REEKS = '70072ned';
@@ -431,7 +447,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     document.title = 'Huishoudens en vergrijzing ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
     S = { g, reeks: null, nl: null, jaren: [], jaar: null, b: null, opgehaald: null };
-    selCode = null; fouten.clear(); toonMelding();
+    selCode = null; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo(''); renderNoot();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen…';
     ['#top4', '#chHh', '#chOud', '#chOpbouw', '#trendTabel', '#tblWrap', '#dossier', '#jaren', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
     voortgang(0, 3, 'Reeks ophalen bij het CBS…');
@@ -442,7 +458,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     S.jaren = jaren;
     renderJaren();
     const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
-    if (jaren.length) await kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[0]);
+    const hk = location.hash.match(/[#&](?:wijk|buurt)=((?:WK|BU)\w+)/);
+    const wens = hk && hk[1].startsWith((hk[1].startsWith('WK') ? 'WK' : 'BU') + g.c) ? hk[1] : null;
+    const km = (location.hash.match(/kaart=(\w+)/) || [])[1];
+    if (km && MATEN.some(x => x.k === km)) maat = km;
+    if (jaren.length) await kiesJaar(jaren.includes(gevraagd) ? gevraagd : jaren[0], wens);
     else { fouten.add('buurtcijfers (PDOK)'); toonMelding(); renderVoet(); }
     voortgang(3, 3, '');
   }
@@ -477,6 +497,22 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderKern() {
     const g = S.g, rs = S.reeks;
     const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    const fo = focusObj(), gmB = S.b && S.b.gm;
+    if (fo) {
+      const isB = /^BU/.test(fo.code), ca = (v, pct) => v == null || pct == null ? null : Math.round(v * pct / 100);
+      const nv = (v, f) => v == null ? 'geen cijfer' : f(v);
+      const gmz = k => gmB && gmB[k] != null ? ` Hele gemeente: ${fP0(gmB[k])}.` : '';
+      $('#leadBig').textContent = fo.hh != null ? `${fo.naam}: ${fmt(fo.hh)} huishoudens op 1 januari ${S.b.jaar}` : fo.naam;
+      $('#leadSub').textContent = [`${isB ? 'buurt' : 'wijk'} in ${g.n}`, fo.gr != null ? `gemiddeld ${nf1.format(fo.gr)} personen per huishouden` : '', fo.inw != null ? `${fmt(fo.inw)} inwoners` : ''].filter(Boolean).join(' · ');
+      const nEen = ca(fo.hh, fo.een), nMet = ca(fo.hh, fo.met);
+      const deel = gmB && gmB.inw && fo.inw != null ? 100 * fo.inw / gmB.inw : null;
+      $('#top4').innerHTML =
+        unit('Alleenwonend', nv(fo.een, fP0), `${nEen != null ? `Ca. ${fmt(nEen)} van de ${fmt(fo.hh)} huishoudens.` : ''}${gmz('een')}`) +
+        unit('Met kinderen', nv(fo.met, fP0), `${nMet != null ? `Ca. ${fmt(nMet)} huishoudens.` : ''}${gmz('met')}`) +
+        unit('65 jaar of ouder', nv(fo.p65, fP0), `${fo.n65 != null ? `Ca. ${fmt(fo.n65)} inwoners.` : ''}${gmz('p65')}`) +
+        unit('Deel van de gemeente', nv(deel, fP), `van de inwoners van ${esc(g.n)}.`);
+      return;
+    }
     if (!rs) { $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'de reeks kon niet worden opgehaald'; $('#top4').innerHTML = ''; return; }
     const hL = laatsteMet(rs, 'hh'), hE = eersteMet(rs, 'hh'), iL = laatsteMet(rs, 'a65'), iE = eersteMet(rs, 'a65');
     const nlL = S.nl && iL ? S.nl.find(r => r.j === iL.j) : null;
@@ -625,10 +661,13 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     o.n65 = o.inw != null && o.p65 != null ? Math.round(o.inw * o.p65 / 100) : null;
     return o;
   }
-  async function kiesJaar(j) {
-    const g = S.g; S.jaar = j; selCode = null;
+  async function kiesJaar(j, wens) {
+    const g = S.g; S.jaar = j;
+    const vorig = wens !== undefined ? wens : selCode;
+    const vorigNaam = (focusObj() || {}).naam;
+    selCode = null;
     $('#jaren').querySelectorAll('button').forEach(b => { const on = +b.dataset.j === j; b.setAttribute('aria-pressed', on); b.classList.toggle('primary', on); });
-    try { history.replaceState(null, '', '#gm=' + g.c + '&jaar=' + j); } catch (e) {}
+    zetHash();
     $('#buurtKop').textContent = `Per buurt · 1 januari ${j}`;
     $('#tblWrap').innerHTML = '<p class="small muted" style="padding:0 12px">Buurten ophalen…</p>';
     fouten.delete('buurtcijfers (PDOK)');
@@ -659,7 +698,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     }
     toonMelding();
     S.bounded = false;
-    renderMaten(); renderKaart(); renderDossier(null); renderTabel(); renderVoet();
+    toonInfo('');
+    if (vorig && S.b) {
+      if (S.b.buurten.some(x => x.code === vorig) || S.b.wijken.some(x => x.code === vorig)) selCode = vorig;
+      else toonInfo(`${vorigNaam || (/^BU/.test(vorig) ? 'Deze buurt' : 'Deze wijk')} komt in de indeling van ${j} niet voor. De pagina toont daarom de hele gemeente.`);
+    }
+    zetHash();
+    renderMaten(); renderKaart(); renderDossier(focusObj()); renderTabel(); renderVoet();
+    renderFocus(); renderKern(); renderNoot();
   }
 
   // ---------- kaart ----------
@@ -672,7 +718,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   ];
   function renderMaten() {
     $('#maten').innerHTML = '<span class="muted small">Kaart toont</span>' + MATEN.map(m => `<button class="btn linkish ${m.k === maat ? 'primary' : ''}" type="button" data-k="${m.k}" aria-pressed="${m.k === maat}">${m.t}</button>`).join('');
-    $('#maten').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { maat = b.dataset.k; renderMaten(); renderKaart(); }));
+    $('#maten').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { maat = b.dataset.k; zetHash(); renderMaten(); renderKaart(); }));
   }
   const beide = o => S.b.gm && o.p65 != null && o.een != null && S.b.gm.p65 != null && S.b.gm.een != null && o.p65 > S.b.gm.p65 && o.een > S.b.gm.een;
   function klassen(k) {
@@ -707,7 +753,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     layer = L.featureGroup().addTo(map);
     gjLayer = L.geoJSON(b.geo, {
       style: f => {
-        const o = byCode.get(f.properties.buurtcode); const sel = o && o.code === selCode;
+        const o = byCode.get(f.properties.buurtcode); const sel = o && (o.code === selCode || o.wijk === selCode);
         let fill, leeg = false;
         if (maat === 'beide') { const ok = o && o.p65 != null && o.een != null; leeg = !ok; fill = ok ? (beide(o) ? css('--accent') : css('--seq-1')) : css('--sunk'); }
         else { fill = o ? kleurVoor(o[maat], kl) : null; if (!fill) { fill = css('--sunk'); leeg = true; } }
@@ -732,7 +778,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       $('#mapLegend').innerHTML = h;
     } else $('#mapLegend').innerHTML = '<span>Geen cijfers voor deze maat.</span>';
     const passen = !S.bounded; S.bounded = true;
-    setTimeout(() => { map.invalidateSize(); if (passen && gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); }, 60);
+    setTimeout(() => { map.invalidateSize(); if (passen && gjLayer && gjLayer.getLayers().length) { if (selCode) zoomSel(); else map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); } }, 60);
   }
 
   // ---------- dossier ----------
@@ -768,17 +814,54 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     bindTips($('#dossier'));
     const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesBuurt(null));
   }
+  // ---------- één keuze, alle blokken luisteren ----------
+  function focusObj() {
+    if (!selCode || !S || !S.b) return null;
+    return S.b.buurten.find(x => x.code === selCode) || S.b.wijken.find(x => x.code === selCode) || null;
+  }
+  function zetHash() {
+    if (!S) return;
+    const h = '#gm=' + S.g.c + (S.jaar ? '&jaar=' + S.jaar : '') + (selCode ? (/^BU/.test(selCode) ? '&buurt=' : '&wijk=') + selCode : '') + (maat !== 'p65' ? '&kaart=' + maat : '');
+    try { if (location.hash !== h) history.replaceState(null, '', h); } catch (e) {}
+  }
+  function toonInfo(t) { $('#focusInfo').textContent = t; $('#focusInfo').hidden = !t; }
+  function renderNoot() {
+    const fo = focusObj();
+    $('#reeksNoot').hidden = !fo;
+    $('#reeksNoot').textContent = fo ? `De reeks door de jaren en het aantal 80-plussers bestaan alleen voor de hele gemeente. Deze drie grafieken tonen ${S.g.n}, niet ${fo.naam}.` : '';
+  }
+  function renderFocus() {
+    const bar = $('#focusbar');
+    if (!S || !S.b || !S.b.wijken.length) { bar.hidden = true; return; }
+    bar.hidden = false;
+    const fo = focusObj(), isB = fo && /^BU/.test(fo.code);
+    const opties = S.b.wijken.slice().sort((x, y) => x.naam.localeCompare(y.naam, 'nl'));
+    $('#focusSel').innerHTML = `<option value="">Hele gemeente: ${esc(S.g.n)}</option>` + (isB ? `<option value="${esc(fo.code)}">Buurt: ${esc(fo.naam)}</option>` : '') + opties.map(o => `<option value="${esc(o.code)}">${esc(o.naam)}</option>`).join('');
+    $('#focusSel').value = fo ? fo.code : '';
+    $('#focusTerug').hidden = !fo;
+    $('#focusTxt').textContent = fo
+      ? `De pagina volgt deze ${isB ? 'buurt' : 'wijk'} op 1 januari ${S.b.jaar}. Wat alleen voor de hele gemeente bestaat, zegt dat.`
+      : 'Kies een wijk hier, of een buurt of wijk op de kaart of in de tabel. De kerncijfers, de kaart en het dossier volgen dan die keuze.';
+  }
+  function zoomSel() {
+    if (!gjLayer) return;
+    const ls = gjLayer.getLayers().filter(l => /^WK/.test(selCode) ? l.feature.properties.wijkcode === selCode : l.feature.properties.buurtcode === selCode);
+    if (ls.length) map.fitBounds(L.featureGroup(ls).getBounds(), { maxZoom: 15, padding: [24, 24] });
+  }
   function kiesBuurt(code, vanTabel) {
-    selCode = code;
-    const o = code ? (S.b.buurten.find(x => x.code === code) || S.b.wijken.find(x => x.code === code)) : null;
-    renderDossier(o);
-    if (gjLayer) gjLayer.setStyle(gjLayer.options.style);
-    if (vanTabel && gjLayer && code) {
-      const ls = gjLayer.getLayers().filter(l => /^WK/.test(code) ? l.feature.properties.wijkcode === code : l.feature.properties.buurtcode === code);
-      if (ls.length) map.fitBounds(L.featureGroup(ls).getBounds(), { maxZoom: 15, padding: [24, 24] });
+    selCode = code || null;
+    toonInfo(''); zetHash();
+    const o = focusObj();
+    renderDossier(o); renderFocus(); renderKern(); renderNoot();
+    if (gjLayer) {
+      gjLayer.setStyle(gjLayer.options.style);
+      gjLayer.eachLayer(l => { const p = l.feature.properties; if (selCode && (p.buurtcode === selCode || p.wijkcode === selCode)) l.bringToFront(); });
+      if (vanTabel) { if (code) zoomSel(); else if (gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); }
     }
     document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', !!code && tr.dataset.code === code));
   }
+  $('#focusSel').addEventListener('change', e => kiesBuurt(e.target.value || null, true));
+  $('#focusTerug').addEventListener('click', () => kiesBuurt(null, true));
 
   // ---------- tabellen ----------
   const COLS = [

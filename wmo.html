@@ -581,7 +581,7 @@ main > * { min-width: 0; }
     voortgang(3, 4, 'Wijken ophalen…');
     const jaren = Object.keys(WIJK).map(Number).sort((a, b) => b - a).slice(0, AANTAL_JAREN);
     const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
-    const gevraagdeWijk = (location.hash.match(/wijk=(WK\d+)/) || [])[1] || null;
+    const gevraagdeWijk = (location.hash.match(/wijk=(WK\w+)/) || [])[1] || null;
     const gevraagdeKaart = (location.hash.match(/kaart=(\w+)/) || [])[1];
     if (gevraagdeKaart && (gevraagdeKaart === 'oud' || isType(gevraagdeKaart))) {
       kaartMaat = gevraagdeKaart;
