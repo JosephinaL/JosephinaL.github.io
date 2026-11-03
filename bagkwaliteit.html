@@ -206,7 +206,7 @@ main > * { min-width: 0; }
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> BAG (Kadaster) via PDOK: het landelijke <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-bestand</a> (GeoPackage), stand 1 november 2026, en de documentdatum van nieuwe verblijfsobjecten uit de BAG OGC API, stand 3 november 2026. Geteld en in deze pagina opgenomen; maandelijks ververst, pas gepubliceerd na controle.</p>
+    <p><b>Bron en peildatum.</b> BAG (Kadaster) via PDOK: het landelijke <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-bestand</a> (GeoPackage), stand <span data-stand="peil"></span>, en de documentdatum van nieuwe verblijfsobjecten uit de BAG OGC API, stand <span data-stand="leeftijd_peil"></span>. Geteld en in deze pagina opgenomen; maandelijks ververst, pas gepubliceerd na controle.</p>
     <p><b>Licentie.</b> BAG: CC0. Deze pagina is een afgeleid bestand, geen authentieke BAG.</p>
     <p><b>Methode.</b> Acht controles op de hele BAG in drie groepen: tegenspraak, lang onderweg en opvallende waarden. Per signaal het aantal, per 10.000 verblijfsobjecten naast Nederland, en een lijst met link naar de BAG-viewer. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen vaststelling van fouten: een signaal is een aanleiding om na te gaan. Opvallende waarden kunnen werkafspraken zijn. Geen ranglijst en geen oordeel over een gemeente; wie veel bouwt of splitst heeft vanzelf meer lopend werk.</p>
@@ -234,6 +234,7 @@ const DATA = {"peil":"2026-11-01","leeftijd_peil":"2026-11-03","gm":{"0998":["Bu
   const fmt = v => v == null ? '–' : nf.format(v);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const datum = s => new Date(s + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  document.querySelectorAll('[data-stand]').forEach(e => { e.textContent = datum(DATA[e.dataset.stand]); });
   const viewer = id => `<a href="https://bagviewer.kadaster.nl/?objectId=${id}" target="_blank" rel="noopener">${id}</a>`;
 
   // ---------- gemeenten ----------
