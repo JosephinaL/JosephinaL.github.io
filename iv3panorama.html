@@ -28,7 +28,7 @@ main > * { min-width: 0; }
 :root{
   --bg:#f3f5f6; --surface:#ffffff; --fg:#141b21; --muted:#56626c; --line:#d5dbdf; --soft:#e8ecee;
   --accent:#0f5c66; --accent-ink:#ffffff; --mark:#141b21;
-  --k0:#8a96a0; --k1:#2a78d6; --k2:#eb6834; --k3:#1baf7a; --k4:#eda100; --k5:#e87ba4; --k6:#1d5f74; --k7:#6250d6; --k8:#d23f3f; --k9:#b3b9c3;
+  --k0:#8a96a0; --k1:#2a78d6; --k2:#eb6834; --k3:#1baf7a; --k4:#eda100; --k5:#e87ba4; --k6:#1d5f74; --k7:#6250d6; --k8:#d23f3f; --k9:#b3b9c3; --p1:#0b3f47; --p2:#0f5c66; --p3:#2b7a84; --p4:#4f97a0; --p5:#79b3ba; --p6:#a3cdd2; --p7:#c9e2e4;
   --stroke:#ffffff;
   --f-display:"Archivo", "Arial Narrow", system-ui, sans-serif;
   --f-body:"Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -36,12 +36,12 @@ main > * { min-width: 0; }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0f1417; --surface:#161d21; --fg:#e6ebee; --muted:#9aa7b0; --line:#2b353b; --soft:#1f282d;
   --accent:#5fb7c2; --accent-ink:#0f1417; --mark:#ffffff;
-  --k0:#76838d; --k1:#3987e5; --k2:#d95926; --k3:#199e70; --k4:#c98500; --k5:#d55181; --k6:#3a9ab3; --k7:#9085e9; --k8:#e66767; --k9:#4a525e;
+  --k0:#76838d; --k1:#3987e5; --k2:#d95926; --k3:#199e70; --k4:#c98500; --k5:#d55181; --k6:#3a9ab3; --k7:#9085e9; --k8:#e66767; --k9:#4a525e; --p1:#a8dde3; --p2:#7fc6ce; --p3:#5baeb8; --p4:#3f939e; --p5:#2e7883; --p6:#215e68; --p7:#184852;
   --stroke:#0f1417; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0f1417; --surface:#161d21; --fg:#e6ebee; --muted:#9aa7b0; --line:#2b353b; --soft:#1f282d;
   --accent:#5fb7c2; --accent-ink:#0f1417; --mark:#ffffff;
-  --k0:#76838d; --k1:#3987e5; --k2:#d95926; --k3:#199e70; --k4:#c98500; --k5:#d55181; --k6:#3a9ab3; --k7:#9085e9; --k8:#e66767; --k9:#4a525e;
+  --k0:#76838d; --k1:#3987e5; --k2:#d95926; --k3:#199e70; --k4:#c98500; --k5:#d55181; --k6:#3a9ab3; --k7:#9085e9; --k8:#e66767; --k9:#4a525e; --p1:#a8dde3; --p2:#7fc6ce; --p3:#5baeb8; --p4:#3f939e; --p5:#2e7883; --p6:#215e68; --p7:#184852;
   --stroke:#0f1417; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.55;
@@ -75,6 +75,7 @@ button.crumb:hover{background:var(--soft)}
 .find{max-width:100%}
 .find select{padding:6px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);width:20em;flex:0 1 auto;min-width:0}
 .bar .tag{flex:1 1 auto;min-width:0;overflow:hidden;white-space:nowrap;padding-left:5px;font-size:10px;line-height:11px;color:var(--muted)}
+.bar.ramp i{box-shadow:inset -1px 0 0 var(--surface)}
 .bar.div{position:relative}
 .bar.div::before{content:"";position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--muted)}
 .bar.div i{position:absolute;top:0}
@@ -254,7 +255,7 @@ function delen(){
   if(rest.length) d.push({n:`Overig (${rest.length} taakvelden)`,c:"k0",get:g=>rest.reduce((a,i)=>a+Math.max(0,g.tv[i]),0)});
   return d;
 }
-/* Soort uitgave binnen een taakveld: hooguit acht delen, kleur per soort gelijk aan de spiegel, de kleinste vallen in Overig. */
+/* Soort uitgave binnen een taakveld: hooguit acht delen in tinten petrol, van donker (landelijk grootste) naar licht, de kleinste vallen in Overig. */
 function soorten(code,tv){ const a=Array(LGK.length).fill(0), f=(TVS[code]||{})[tv]; if(f) for(let i=0;i<f.length;i+=2) a[f[i]]=f[i+1]; return a; }
 function delenTv(tv){
   const i=TVI[tv], per=Object.fromEntries(G.map(g=>[g.code,soorten(g.code,tv)]));
@@ -262,7 +263,7 @@ function delenTv(tv){
   per.NL=nat;
   const ov=LGK.indexOf("ov"), ix=LGK.map((_,x)=>x).filter(x=>nat[x]>0&&x!==ov).sort((a,b)=>nat[b]-nat[a]);
   const eigen=ix.slice(0,7), rest=ix.slice(7).concat(nat[ov]>0?[ov]:[]);
-  const d=eigen.map(x=>({n:LG[LGK[x]][0],c:LG[LGK[x]][1],key:LGK[x],get:g=>per[g.code||"NL"][x]}));
+  const d=eigen.map((x,t)=>({n:LG[LGK[x]][0],c:"p"+(t+1),key:LGK[x],get:g=>per[g.code||"NL"][x]}));
   if(rest.length) d.push({n:rest.length===1?LG[LGK[rest[0]]][0]:"Overig",c:LG.ov[1],key:"ov",get:g=>rest.reduce((a,x)=>a+Math.max(0,per[g.code||"NL"][x]),0)});
   if(G.some(g=>!TVS[g.code]&&g.tv[i])) d.push({n:"Niet uitgesplitst (begroting)",c:"muted",get:g=>g.code&&!TVS[g.code]?g.tv[i]:0});
   return d;
@@ -362,7 +363,7 @@ function row(g,ord,isNL){
   const href = isNL ? null : SPIEGEL+"#gm="+g.code.slice(2)+(scopeDeel()?"&"+scopeDeel():"");
   const el = href ? "a" : "div";
   return `<${el} class="r${isNL?" nl":""}${hit===g.code?" hit":""}" ${href?`href="${href}" target="_blank" rel="noopener" id="r-${g.code}"`:""} data-c="${g.code}">
-    <span class="n">${g.name}</span><span class="bar">${segs}${tag}${clipped?'<span class="clip"></span>':""}</span><span class="v">${val}</span></${el}>`;
+    <span class="n">${g.name}</span><span class="bar${lv===2?" ramp":""}">${segs}${tag}${clipped?'<span class="clip"></span>':""}</span><span class="v">${val}</span></${el}>`;
 }
 function kruimels(){
   const c=document.getElementById("pad"); const lv=level();
@@ -384,7 +385,7 @@ function render(){
   zoom.value = scopeDeel(); kruimels(); bouwLegend();
   document.getElementById("lead").textContent = lv===0 ? LEAD0 : lv===1
     ? `Alle 342 gemeenten onder elkaar, alleen voor ${HN[scope.h].toLowerCase()}. Elke regel laat zien hoe een gemeente dit deel van haar uitgaven over de taakvelden verdeelt. Klik op een kleur om die vooraan in elke balk te zetten, of kies een taakveld om verder in te zoomen. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`
-    : `Alle 342 gemeenten onder elkaar, alleen voor het taakveld ${TVN[TVI[scope.tv]].toLowerCase()}. De lengte van de balk is de uitgave in euro per inwoner, de kleuren laten zien waaraan het geld opging. Klik op een kleur om die vooraan te zetten. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`;
+    : `Alle 342 gemeenten onder elkaar, alleen voor het taakveld ${TVN[TVI[scope.tv]].toLowerCase()}. De lengte van de balk is de uitgave in euro per inwoner, de tinten laten zien waaraan het geld opging. Klik op een tint om die vooraan te zetten. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`;
   document.getElementById("caveat").textContent = lv===0 ? CAVEAT0 : CAVEAT0.replace(/ Een zwart streepje.*$/,"")+" Hoe dieper je kijkt, hoe zwaarder die boekingsverschillen wegen: een groot verschil op een taakveld is een vraag, geen conclusie."+(lv===2?" Vooral eigen personeel is gevoelig: de ene gemeente boekt het op de taak, de andere op overhead. Een regel zonder balk heeft negatieve lasten of niets op dit taakveld geboekt; dat staat erbij. Duiven en Rozendaal hebben alleen een begroting, zonder soort uitgave.":"")+" Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal.";
   const onderdeel = lv===0 ? "alle uitgaven" : lv===1 ? HN[scope.h].toLowerCase() : TVN[TVI[scope.tv]].toLowerCase();
   if(em==="plan"){
