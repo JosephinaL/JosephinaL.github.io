@@ -64,6 +64,7 @@ h1{font-family:var(--f-display);font-stretch:85%;font-weight:800;font-size:clamp
 .legend{display:flex;flex-wrap:wrap;gap:6px}
 .lg{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:4px 11px 4px 8px;font-size:13.5px;cursor:pointer}
 .lg:hover{border-color:var(--accent)}
+.lg.uit{opacity:.6}
 .lg[aria-pressed="true"]{border-color:var(--fg);background:var(--surface);font-weight:600}
 .sw{width:12px;height:12px;border-radius:3px;flex:none}
 .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px;font-size:14px;min-height:30px;min-width:0}
@@ -142,7 +143,7 @@ footer a{color:var(--accent)}
     <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
     <p class="eyebrow">Open data · Iv3 2025 · CBS</p>
     <h1>Iv3-panorama</h1>
-    <p class="lead" id="lead">Alle 342 gemeenten onder elkaar. Elke regel laat zien hoe een gemeente haar uitgaven over negen hoofdgroepen verdeelt. Waar een kleur breder of smaller is dan bij de rest, wijkt een gemeente af. De gemeenten staan op alfabet, zodat je je eigen gemeente snel vindt. Klik op een kleur om die vooraan in elke balk te zetten, of sorteer van hoog naar laag om te zien wie eruit springt. Klik op een regel om de Iv3-spiegel van die gemeente te openen.</p>
+    <p class="lead" id="lead">Alle 342 gemeenten onder elkaar. Elke regel laat zien hoe een gemeente haar uitgaven over negen hoofdgroepen verdeelt. Waar een kleur breder of smaller is dan bij de rest, wijkt een gemeente af. De gemeenten staan op alfabet, zodat je je eigen gemeente snel vindt. Klik op een kleur om alleen dat onderdeel over te houden, of sorteer van hoog naar laag om te zien wie eruit springt. Klik op een regel om de Iv3-spiegel van die gemeente te openen.</p>
   </header>
 <main>
 <span id="inhoud" tabindex="-1"></span>
@@ -238,7 +239,7 @@ const inH = k => k.split(".")[0];
 /* landelijke omvang per taakveld: bepaalt de vaste kleur, ongeacht de gekozen gemeente */
 const TVTOT = TVK.map((_,i)=>G.reduce((a,g)=>a+Math.max(0,g.tv[i]),0));
 
-let mode="pct", sort="abc", grp=6, hit=null;
+let mode="pct", sort="abc", grp=6, hit=null, solo=false;  // solo: alleen het gekozen onderdeel blijft over
 let scope={h:null,tv:null};   // niets = hoofdgroepen, h = een hoofdgroep, tv = een taakveld
 const level = () => scope.tv ? 2 : scope.h!==null ? 1 : 0;
 const effMode = () => mode;
@@ -275,9 +276,10 @@ function maat(D){
   const som = {h:HN.map((_,i)=>G.reduce((a,g)=>a+g.h[i],0)),tv:TVK.map((_,i)=>G.reduce((a,g)=>a+g.tv[i],0))};
   som.code=null;
   const N = reken(som,"Alle gemeenten",G.reduce((a,g)=>a+g.inw,0),"J","NL");
-  const s = L.map(g=>g.piTot).sort((a,b)=>a-b), top = s[Math.floor(s.length*0.98)]||1;
+  const em=effMode(), s = L.map(g=>solo?(em==="pct"?g.share[grp]:g.pi[grp]):g.piTot).sort((a,b)=>a-b), top = Math.max(s[Math.floor(s.length*0.98)],1);
   const stap = Math.pow(10,Math.floor(Math.log10(top)))/2;
-  return {L,N,CAP:Math.ceil(top/stap)*stap};
+  const CAP = Math.ceil(top/stap)*stap;
+  return {L,N,CAP:solo&&em==="pct"?Math.min(CAP,100):CAP};
 }
 /* Verschil met het plan: jaarrekening min begroting van het gekozen onderdeel. Alleen gemeenten met beide. Rekent als de spiegel, dus zonder negatieve lasten weg te laten. */
 function planMaat(){
@@ -308,7 +310,8 @@ document.getElementById("s-abc").onclick=()=>{sort="abc";render();};
 function naarRegel(){ const el=hit&&document.getElementById("r-"+hit); if(el) el.scrollIntoView({block:"center",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); }
 const gmDeel = () => hit ? "gm="+hit.slice(2) : "";
 const scopeDeel = () => scope.tv ? "tv="+scope.tv : scope.h!==null ? "h="+scope.h : "";
-const hashNu = () => [gmDeel(),scopeDeel(),vDeel()].filter(Boolean).join("&");
+const sDeel = () => solo&&mode!=="plan" ? "s="+(D[grp]&&D[grp].key||grp) : "";
+const hashNu = () => [gmDeel(),scopeDeel(),vDeel(),sDeel()].filter(Boolean).join("&");
 document.getElementById("q").addEventListener("change",e=>{ const g=G.find(x=>x.name.toLowerCase()===e.target.value.trim().toLowerCase()); hit=g?g.code:null;
   try{ history.replaceState(null,"","#"+hashNu()); }catch(err){}
   render(); naarRegel(); });
@@ -331,7 +334,8 @@ function leesHash(){
   else scope={h:null,tv:null};
   if(scopeDeel()!==vorig){ grp = level()===0 ? 6 : 0; if(level()===2&&mode==="pct") mode="eur"; }
   if(grp>=delen().length) grp=0;
-  const sw=h.match(/(?:^|&)s=(\w+)/); if(sw&&level()===2){ const x=delen().findIndex(d=>d.key===sw[1]); if(x>=0) grp=x; }
+  solo=false;
+  const sw=h.match(/(?:^|&)s=([\w.]+)/); if(sw){ const x=delen().findIndex((d,i)=>d.key===sw[1]||String(i)===sw[1]); if(x>=0){ grp=x; solo=true; } }
   const g=G.find(x=>x.code===hit); document.getElementById("q").value=g?g.name:"";
 }
 window.addEventListener("hashchange",()=>{ leesHash(); render(); naarRegel(); });
@@ -349,20 +353,23 @@ function planRow(g,isNL){
 }
 function row(g,ord,isNL){
   const em=effMode(), lv=level();
-  const scale = em==="pct" ? 100 : M.CAP;
+  const scale = em==="pct" ? (solo?M.CAP:100) : M.CAP;
   const vals = em==="pct" ? g.share : g.pi;
+  if(solo) ord=[grp];
   let used=0, segs="";
   for(const i of ord){ let w=100*vals[i]/scale; if(used+w>100) w=Math.max(0,100-used); used+=w;
     if(w>0) segs+=`<i style="width:${w}%;background:var(--${D[i].c})"></i>`; }
-  const clipped = em==="eur" && g.piTot>M.CAP;
-  const r = g.tvv, val = lv===2&&em==="eur" ? piS(r*1000/g.inw) : em==="pct" ? nf1.format(g.share[ord[0]])+"%" : "€ "+nf0.format(g.piTot);
+  const clipped = solo ? vals[grp]>scale : em==="eur" && g.piTot>M.CAP;
+  const r = g.tvv, val = solo&&em==="eur" ? "€ "+nf0.format(g.pi[grp]) : lv===2&&em==="eur" ? piS(r*1000/g.inw) : em==="pct" ? nf1.format(g.share[ord[0]])+"%" : "€ "+nf0.format(g.piTot);
   let tag="";
   if(lv===2&&!isNL){ const w=[]; if(r<0) w.push("negatief"); else if(!r) w.push("niets geboekt"); if(g.src==="B") w.push("begroting");
     if(w.length) tag=`<span class="tag">${w.join(", ")}</span>`; }
-  const href = isNL ? null : SPIEGEL+"#gm="+g.code.slice(2)+(scopeDeel()?"&"+scopeDeel():"");
+  const onbekend = solo&&lv===2&&!isNL&&g.src==="B"&&D[grp].key;  // alleen begroting: soort uitgave is onbekend, geen € 0
+  const toon = onbekend ? "–" : val;
+const href = isNL ? null : SPIEGEL+"#gm="+g.code.slice(2)+(scopeDeel()?"&"+scopeDeel():"");
   const el = href ? "a" : "div";
   return `<${el} class="r${isNL?" nl":""}${hit===g.code?" hit":""}" ${href?`href="${href}" target="_blank" rel="noopener" id="r-${g.code}"`:""} data-c="${g.code}">
-    <span class="n">${g.name}</span><span class="bar${lv>0?" ramp":""}">${segs}${tag}${clipped?'<span class="clip"></span>':""}</span><span class="v">${val}</span></${el}>`;
+    <span class="n">${g.name}</span><span class="bar${lv>0?" ramp":""}">${segs}${tag}${clipped?'<span class="clip"></span>':""}</span><span class="v">${toon}</span></${el}>`;
 }
 function kruimels(){
   const c=document.getElementById("pad"); const lv=level();
@@ -373,18 +380,21 @@ function kruimels(){
 function bouwLegend(){
   legend.hidden = false; legend.innerHTML="";
   if(effMode()==="plan"){ legend.innerHTML=`<span class="lk"><span class="sw" style="background:var(--k2)"></span>Meer uitgegeven dan gepland</span><span class="lk"><span class="sw" style="background:var(--k1)"></span>Minder uitgegeven dan gepland</span>`; return; }
-  (level()===0?BASE:D.map((_,i)=>i)).forEach(i=>{ const b=document.createElement("button"); b.className="lg"; b.dataset.i=i; b.setAttribute("aria-pressed",String(i===grp));
+  const zet=(i,aan)=>{ if(aan) grp=i; solo=aan; try{ history.replaceState(null,"","#"+hashNu()); }catch(e){} render(); };
+  const alles=document.createElement("button"); alles.className="lg"; alles.textContent="Alle onderdelen"; alles.setAttribute("aria-pressed",String(!solo));
+  alles.addEventListener("click",()=>zet(grp,false)); legend.appendChild(alles);
+  (level()===0?BASE:D.map((_,i)=>i)).forEach(i=>{ const b=document.createElement("button"); b.className="lg"+(solo&&i!==grp?" uit":""); b.dataset.i=i; b.setAttribute("aria-pressed",String(solo&&i===grp));
     b.innerHTML=`<span class="sw" style="background:var(--${D[i].c})"></span>${D[i].n}`;
-    b.addEventListener("click",()=>{ grp=i; render(); }); legend.appendChild(b); });
+    b.addEventListener("click",()=>zet(i,!(solo&&i===grp))); legend.appendChild(b); });
 }
 function render(){
-  D=delen(); const em0=effMode(); M = em0==="plan" ? planMaat() : maat(D);
+  D=delen(); if(grp>=D.length) grp=0; const em0=effMode(); M = em0==="plan" ? planMaat() : maat(D);
   const lv=level(), em=em0;
   press(["m-pct","m-eur","m-plan"],"m-"+em); press(["s-abc","s-grp","s-inw"],"s-"+sort);
   zoom.value = scopeDeel(); kruimels(); bouwLegend();
   document.getElementById("lead").textContent = lv===0 ? LEAD0 : lv===1
-    ? `Alle 342 gemeenten onder elkaar, alleen voor ${HN[scope.h].toLowerCase()}. Elke regel laat zien hoe een gemeente dit deel van haar uitgaven over de taakvelden verdeelt. Klik op een tint om die vooraan in elke balk te zetten, of kies een taakveld om verder in te zoomen. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`
-    : `Alle 342 gemeenten onder elkaar, alleen voor het taakveld ${TVN[TVI[scope.tv]].toLowerCase()}. De lengte van de balk is de uitgave in euro per inwoner, de tinten laten zien waaraan het geld opging. Klik op een tint om die vooraan te zetten. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`;
+    ? `Alle 342 gemeenten onder elkaar, alleen voor ${HN[scope.h].toLowerCase()}. Elke regel laat zien hoe een gemeente dit deel van haar uitgaven over de taakvelden verdeelt. Klik op een tint om alleen dat onderdeel over te houden, of kies een taakveld om verder in te zoomen. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`
+    : `Alle 342 gemeenten onder elkaar, alleen voor het taakveld ${TVN[TVI[scope.tv]].toLowerCase()}. De lengte van de balk is de uitgave in euro per inwoner, de tinten laten zien waaraan het geld opging. Klik op een tint om alleen die soort over te houden. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`;
   document.getElementById("caveat").textContent = lv===0 ? CAVEAT0 : CAVEAT0.replace(/ Een zwart streepje.*$/,"")+" Hoe dieper je kijkt, hoe zwaarder die boekingsverschillen wegen: een groot verschil op een taakveld is een vraag, geen conclusie."+(lv===2?" Vooral eigen personeel is gevoelig: de ene gemeente boekt het op de taak, de andere op overhead. Een regel zonder balk heeft negatieve lasten of niets op dit taakveld geboekt; dat staat erbij. Duiven en Rozendaal hebben alleen een begroting, zonder soort uitgave.":"")+" Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal.";
   const onderdeel = lv===0 ? "alle uitgaven" : lv===1 ? HN[scope.h].toLowerCase() : TVN[TVI[scope.tv]].toLowerCase();
   if(em==="plan"){
@@ -413,12 +423,13 @@ function render(){
   const eigen = hit ? M.L.find(g=>g.code===hit) : null;
   if(sort==="grp"){ const hi=list[0], lo=list[list.length-1];
     st.innerHTML=`Gesorteerd op <b>${naam}</b>, van hoog naar laag. Hoogste: <b>${hi.name}</b> (${f(waarde(hi))}). Laagste: <b>${lo.name}</b> (${f(waarde(lo))}). De middelste gemeente zit op ${f(med)}${em==="pct"?(lv===0?" van haar uitgaven":" van dit deel"):" per inwoner"}.`; }
+  else if(solo) st.innerHTML=`Alleen <b>${D[grp].n}</b>. ${eigen?`<b>${eigen.name}</b>: ${f(waarde(eigen))}. `:""}De middelste gemeente zit op ${f(med)}${em==="pct"?(lv===0?" van haar uitgaven":lv===1?" van dit deel":" van dit taakveld"):" per inwoner"}. De schaal past zich aan.`;
   else if(lv===2){ const m2=[...M.L].map(tvPi).sort((a,b)=>a-b)[Math.floor(G.length/2)];
-    st.innerHTML=`Taakveld ${scope.tv}. ${eigen?`<b>${eigen.name}</b>: ${piS(tvPi(eigen))} per inwoner. `:""}De middelste gemeente zit op ${piS(m2)} per inwoner. <b>${D[grp].n}</b> staat vooraan in elke balk.`; }
-  else st.innerHTML = (sort==="inw" ? "Gesorteerd op inwonertal, van groot naar klein. " : "Gesorteerd op naam. ")+`<b>${D[grp].n}</b> staat vooraan in elke balk; het getal rechts is het ${em==="pct"?"aandeel daarvan":"totaal per inwoner"}.`;
-  const C=M.CAP, ticks = em==="pct" ? [0,25,50,75,100].map(t=>[t,t+"%"]) : [0,C/4,C/2,3*C/4,C].map(t=>[100*t/C,"€ "+nf0.format(t)]);
+    st.innerHTML=`Taakveld ${scope.tv}. ${eigen?`<b>${eigen.name}</b>: ${piS(tvPi(eigen))} per inwoner. `:""}De middelste gemeente zit op ${piS(m2)} per inwoner.`; }
+  else st.innerHTML = (sort==="inw" ? "Gesorteerd op inwonertal, van groot naar klein. " : "Gesorteerd op naam. ")+(em==="pct"?`Het getal rechts is het aandeel van <b>${D[grp].n.toLowerCase()}</b>.`:"Het getal rechts is het totaal per inwoner.");
+  const C=M.CAP, nfT=C<20?nf1:nf0, ticks = em==="pct" ? (solo?[0,C/4,C/2,3*C/4,C].map(t=>[100*t/C,nfT.format(t)+"%"]):[0,25,50,75,100].map(t=>[t,t+"%"])) : [0,C/4,C/2,3*C/4,C].map(t=>[100*t/C,"€ "+nf0.format(t)]);
   document.getElementById("weave").innerHTML =
-    `<div class="axis"><span></span><span class="ticks">${ticks.map(([p,l])=>`<span style="left:${p}%">${l}</span>`).join("")}</span><span class="u" style="text-align:right">${em==="pct"?"aandeel":"totaal p.i."}</span></div>`+
+    `<div class="axis"><span></span><span class="ticks">${ticks.map(([p,l])=>`<span style="left:${p}%">${l}</span>`).join("")}</span><span class="u" style="text-align:right">${em==="pct"?"aandeel":solo?"per inwoner":"totaal p.i."}</span></div>`+
     row(M.N,ord,true)+list.map((g,ix)=>{ const L=key(g.name)[0].toUpperCase(); const prev=ix?key(list[ix-1].name)[0].toUpperCase():"";
       return (sort==="abc"&&L!==prev?`<div class="letter" id="l-${L}">${L}</div>`:"")+row(g,ord,false); }).join("");
 }
