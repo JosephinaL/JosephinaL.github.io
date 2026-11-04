@@ -100,6 +100,8 @@ h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute
 .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px;font-size:14px;min-height:30px}
 .crumb{background:none;border:0;padding:4px 7px;border-radius:5px;color:var(--accent);cursor:pointer}
 .crumb:hover{background:var(--soft)}
+a.prow{color:inherit;text-decoration:none;cursor:pointer}
+a.prow:hover{background:var(--soft)}
 .naarpan{margin-left:auto;padding:4px 7px;font-size:14px;color:var(--accent);white-space:nowrap}
 .crumb[aria-current="page"]{color:var(--fg);font-weight:600;cursor:default;background:none}
 .sep{color:var(--muted)}
@@ -578,8 +580,8 @@ function viewPlan(){
     <div class="plegend"><span><i class="lg-p"></i>Plan (begroting)</span><span><i class="lg-r"></i>Werkelijk (jaarrekening)</span>
     <span><b class="d more">+ meer</b>&nbsp;/&nbsp;<b class="d less">− minder</b> uitgegeven dan gepland</span></div>
     <div class="plan">${rows.map(x=>{ const df=x.r-x.p, rel=x.p>0?100*df/x.p:null, cls=Math.abs(df)<Math.max(50,0.02*Math.abs(x.p))?"same":df>0?"more":"less";
-      const tag=x.drill?"button":"div";
-      return `<${tag} class="prow" ${x.drill?`data-id="${x.id}" aria-label="${x.name}: bekijk taakvelden"`:""}><span class="t" title="${x.name}">${x.name}</span>
+      const tag=x.drill?"button":"a";
+      return `<${tag} class="prow" ${x.drill?`data-id="${x.id}" aria-label="${x.name}: bekijk taakvelden"`:`href="iv3panorama.html#gm=${gm.slice(2)}&tv=${x.id}&v=plan" target="_blank" rel="noopener" title="Vergelijk ${x.name} met alle gemeenten"`}><span class="t" title="${x.name}">${x.name}</span>
       <span class="track"><span class="p" style="width:${100*pos(x.p)/mx}%"></span><span class="r" style="width:${100*pos(x.r)/mx}%"></span></span>
       <span class="d ${cls}">${df>=0?"+":"−"}${eur(Math.abs(df))}${rel!=null&&Math.abs(rel)<1000?` <small>(${df>=0?"+":"−"}${pct(Math.abs(rel))})</small>`:""}</span></${tag}>`; }).join("")}</div></div>`;
   const pc=document.getElementById("pcrumbs");
@@ -588,13 +590,15 @@ function viewPlan(){
     const b=document.createElement("button"); b.className="crumb"; b.textContent=l;
     if(i===chain.length-1) b.setAttribute("aria-current","page"); else b.addEventListener("click",()=>{ planPath=[]; viewPlan(); });
     pc.appendChild(b); });
+  const a=document.createElement("a"); a.className="naarpan"; a.target="_blank"; a.rel="noopener"; a.textContent="Bekijk alle gemeenten →"; a.href="iv3panorama.html#gm="+gm.slice(2)+(planPath[0]?"&h="+planPath[0]:"")+"&v=plan"; pc.appendChild(a);
   view.querySelectorAll("button.prow").forEach(b=>b.addEventListener("click",()=>{ planPath=[b.dataset.id]; viewPlan(); }));
 }
 
 { const k = startGemeente(), lnk = location.hash; if (k) kies(k);
   /* vanuit het Iv3-panorama: open op hetzelfde onderdeel (#gm=0503&h=1 of &tv=1.2) */
   if (k) { const tv=(lnk.match(/[#&]tv=([\d.]+)/)||[])[1], h=(lnk.match(/[#&]h=(\d)(?:&|$)/)||[])[1], rij=tv&&cur().t[tv], hb=tv?hoofd(tv):h;
-    if (hb&&HN[hb]) { if (rij&&rij[0]>0) { if (G[k].J&&rij[2]) tmPath=[hb,tv]; else { tmPath=[hb]; tmSel=tv; } } else tmPath=[hb]; renderTab(); } }
+    if (hb&&HN[hb]) { if (rij&&rij[0]>0) { if (G[k].J&&rij[2]) tmPath=[hb,tv]; else { tmPath=[hb]; tmSel=tv; } } else tmPath=[hb]; renderTab(); }
+    if (/[#&]v=plan(&|$)/.test(lnk)) { tab="plan"; tmPath=[]; tmSel=null; planPath=hb&&HN[hb]?[hb]:[]; renderTab(); } }
 }
 </script>
 
