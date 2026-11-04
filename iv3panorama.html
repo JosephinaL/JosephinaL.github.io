@@ -200,7 +200,7 @@ footer a{color:var(--accent)}
     <h2 id="vh">Verantwoording</h2>
     <p><b>Bron en peildatum.</b> CBS, Gemeenten 2025, onbewerkte Iv3-data (<a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED">45071NED</a>), opgehaald op 21 oktober 2026 en in deze pagina opgenomen; inwoners op 1 januari 2025 (CBS, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a>). Jaarrekening 2025; bij Duiven en Rozendaal, die die nog niet hadden aangeleverd, de begroting.</p>
     <p><b>Licentie.</b> CBS: CC BY 4.0.</p>
-    <p><b>Methode.</b> Lasten per hoofdtaakveld, als aandeel van de totale lasten of in euro per inwoner, zonder mutaties in reserves en het resultaat. De gemeenten staan op alfabet; sorteren op een hoofdgroep of op inwonertal kan. Binnen een hoofdgroep toont de balk de taakvelden, als aandeel van die hoofdgroep of in euro per inwoner, met eigen kleuren voor de acht grootste taakvelden landelijk en de rest als Overig. Bij één taakveld toont de balk de soort uitgave (economische categorie), in euro per inwoner of als aandeel van het taakveld, met hooguit acht delen. Dezelfde cijfers als in de Iv3-spiegel. Verschil met plan: lasten in de jaarrekening 2025 min lasten in de begroting 2025, in euro per inwoner, voor gemeenten die beide bij het CBS hebben.</p>
+    <p><b>Methode.</b> Lasten per hoofdtaakveld, als aandeel van de totale lasten of in euro per inwoner, zonder mutaties in reserves en het resultaat. De gemeenten staan op alfabet; sorteren op een hoofdgroep of op inwonertal kan. Binnen een hoofdgroep toont de balk de taakvelden, als aandeel van die hoofdgroep of in euro per inwoner, in tinten voor de zeven grootste taakvelden landelijk en de rest als Overig. Bij één taakveld toont de balk de soort uitgave (economische categorie), in euro per inwoner of als aandeel van het taakveld, met hooguit acht delen. Dezelfde cijfers als in de Iv3-spiegel. Verschil met plan: lasten in de jaarrekening 2025 min lasten in de begroting 2025, in euro per inwoner, voor gemeenten die beide bij het CBS hebben.</p>
     <p><b>Wat dit niet is.</b> Geen ranglijst en geen oordeel. Anders dan de Iv3-spiegel zet deze pagina gemeenten naast elkaar, zodat afwijkingen in de verdeling zichtbaar worden. Een andere verdeling is een vraag, niet meteen een andere keuze.</p>
     <p><b>Bekende beperkingen.</b> Gemeenten boeken soms anders (overhead op 0.4 of op de taak zelf; werk via een samenwerkingsverband als bijdrage). Hoe dieper je kijkt, hoe zwaarder die verschillen wegen. Binnen een taakveld kan een soort uitgave negatief zijn; die telt niet mee in de stapeling, zodat een balk dan iets langer is dan het bedrag rechts. Op een taakveld kunnen de lasten negatief zijn; die regel toont geen balk maar het woord negatief, en in de stapeling binnen een hoofdgroep tellen negatieve taakvelden niet mee. Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal. Alleen 2025.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van het CBS.</p>
@@ -227,7 +227,6 @@ const LGK = Object.keys(LG);
 const HN = ["Bestuur en eigen organisatie","Veiligheid","Verkeer, vervoer en water","Economie","Onderwijs","Sport, cultuur en recreatie","Zorg, werk en inkomen","Gezondheid en milieu","Wonen en ruimte"];
 const HC = ["k0","k8","k1","k4","k7","k5","k6","k3","k2"];
 const BASE = [6,0,2,7,5,1,4,8,3];  // vaste volgorde: grootste posten eerst, rustig kleurverloop
-const KLEUR = ["k1","k2","k3","k4","k5","k6","k7","k8"];  // taakvelden binnen een hoofdgroep: vaste volgorde, de rest valt in Overig
 const nf0 = new Intl.NumberFormat("nl-NL",{maximumFractionDigits:0});
 const nf1 = new Intl.NumberFormat("nl-NL",{minimumFractionDigits:1,maximumFractionDigits:1});
 const dS = x => (x<0?"−":"+")+"€ "+nf0.format(Math.abs(Math.round(x)));
@@ -250,9 +249,9 @@ function delen(){
   if(level()===0) return HN.map((n,i)=>({n,c:HC[i],get:g=>g.h[i]}));
   if(level()===2) return delenTv(scope.tv);
   const ix=TVK.map((k,i)=>i).filter(i=>inH(TVK[i])===String(scope.h)&&TVTOT[i]>0).sort((a,b)=>TVTOT[b]-TVTOT[a]);
-  const eigen = ix.length>8 ? ix.slice(0,8) : ix, rest = ix.slice(eigen.length);
-  const d = eigen.map((i,x)=>({n:TVN[i],c:KLEUR[x],get:g=>g.tv[i],key:TVK[i]}));
-  if(rest.length) d.push({n:`Overig (${rest.length} taakvelden)`,c:"k0",get:g=>rest.reduce((a,i)=>a+Math.max(0,g.tv[i]),0)});
+  const eigen = ix.slice(0,7), rest = ix.slice(eigen.length);  // tinten petrol van donker naar licht, de rest valt in Overig
+  const d = eigen.map((i,x)=>({n:TVN[i],c:"p"+(x+1),get:g=>g.tv[i],key:TVK[i]}));
+  if(rest.length) d.push({n:rest.length===1?TVN[rest[0]]:`Overig (${rest.length} taakvelden)`,c:"k0",get:g=>rest.reduce((a,i)=>a+Math.max(0,g.tv[i]),0)});
   return d;
 }
 /* Soort uitgave binnen een taakveld: hooguit acht delen in tinten petrol, van donker (landelijk grootste) naar licht, de kleinste vallen in Overig. */
@@ -363,7 +362,7 @@ function row(g,ord,isNL){
   const href = isNL ? null : SPIEGEL+"#gm="+g.code.slice(2)+(scopeDeel()?"&"+scopeDeel():"");
   const el = href ? "a" : "div";
   return `<${el} class="r${isNL?" nl":""}${hit===g.code?" hit":""}" ${href?`href="${href}" target="_blank" rel="noopener" id="r-${g.code}"`:""} data-c="${g.code}">
-    <span class="n">${g.name}</span><span class="bar${lv===2?" ramp":""}">${segs}${tag}${clipped?'<span class="clip"></span>':""}</span><span class="v">${val}</span></${el}>`;
+    <span class="n">${g.name}</span><span class="bar${lv>0?" ramp":""}">${segs}${tag}${clipped?'<span class="clip"></span>':""}</span><span class="v">${val}</span></${el}>`;
 }
 function kruimels(){
   const c=document.getElementById("pad"); const lv=level();
@@ -384,7 +383,7 @@ function render(){
   press(["m-pct","m-eur","m-plan"],"m-"+em); press(["s-abc","s-grp","s-inw"],"s-"+sort);
   zoom.value = scopeDeel(); kruimels(); bouwLegend();
   document.getElementById("lead").textContent = lv===0 ? LEAD0 : lv===1
-    ? `Alle 342 gemeenten onder elkaar, alleen voor ${HN[scope.h].toLowerCase()}. Elke regel laat zien hoe een gemeente dit deel van haar uitgaven over de taakvelden verdeelt. Klik op een kleur om die vooraan in elke balk te zetten, of kies een taakveld om verder in te zoomen. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`
+    ? `Alle 342 gemeenten onder elkaar, alleen voor ${HN[scope.h].toLowerCase()}. Elke regel laat zien hoe een gemeente dit deel van haar uitgaven over de taakvelden verdeelt. Klik op een tint om die vooraan in elke balk te zetten, of kies een taakveld om verder in te zoomen. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`
     : `Alle 342 gemeenten onder elkaar, alleen voor het taakveld ${TVN[TVI[scope.tv]].toLowerCase()}. De lengte van de balk is de uitgave in euro per inwoner, de tinten laten zien waaraan het geld opging. Klik op een tint om die vooraan te zetten. Klik op een regel om de Iv3-spiegel van die gemeente op dit niveau te openen.`;
   document.getElementById("caveat").textContent = lv===0 ? CAVEAT0 : CAVEAT0.replace(/ Een zwart streepje.*$/,"")+" Hoe dieper je kijkt, hoe zwaarder die boekingsverschillen wegen: een groot verschil op een taakveld is een vraag, geen conclusie."+(lv===2?" Vooral eigen personeel is gevoelig: de ene gemeente boekt het op de taak, de andere op overhead. Een regel zonder balk heeft negatieve lasten of niets op dit taakveld geboekt; dat staat erbij. Duiven en Rozendaal hebben alleen een begroting, zonder soort uitgave.":"")+" Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal.";
   const onderdeel = lv===0 ? "alle uitgaven" : lv===1 ? HN[scope.h].toLowerCase() : TVN[TVI[scope.tv]].toLowerCase();
