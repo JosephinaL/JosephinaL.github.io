@@ -512,7 +512,7 @@ function panLink(){
   const a=document.getElementById("panlink"); if(!a) return;
   const tv=tmPath.length===1&&tmSel?tmSel:tmPath[1];
   const d = tv ? "&tv="+tv : tmPath[0] ? "&h="+tmPath[0] : "";
-  a.href="iv3panorama.html#gm="+gm.slice(2)+d;
+  a.href="iv3panorama.html#gm="+gm.slice(2)+d+(tmPath.length===2&&tmSel?"&s="+tmSel:"");
 }
 function drawCrumbs(){
   const c=document.getElementById("crumbs"); c.innerHTML="";
