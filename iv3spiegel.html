@@ -100,6 +100,7 @@ h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute
 .crumbs{display:flex;flex-wrap:wrap;align-items:center;gap:2px;font-size:14px;min-height:30px}
 .crumb{background:none;border:0;padding:4px 7px;border-radius:5px;color:var(--accent);cursor:pointer}
 .crumb:hover{background:var(--soft)}
+.naarpan{margin-left:auto;padding:4px 7px;font-size:14px;color:var(--accent);white-space:nowrap}
 .crumb[aria-current="page"]{color:var(--fg);font-weight:600;cursor:default;background:none}
 .sep{color:var(--muted)}
 .grid{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:18px;align-items:start}
@@ -504,6 +505,13 @@ function drawTm(){
     svg.appendChild(g); }
   document.getElementById("hint").textContent = nodes.some(n=>n.drill) ? "Klik op een blok om in te zoomen. Ga met de muis over een blok voor het bedrag." : "Dit is het diepste niveau. Ga terug via het pad boven de vlakken.";
 }
+/* naar hetzelfde onderdeel in het Iv3-panorama: alle gemeenten naast elkaar */
+function panLink(){
+  const a=document.getElementById("panlink"); if(!a) return;
+  const tv=tmPath.length===1&&tmSel?tmSel:tmPath[1];
+  const d = tv ? "&tv="+tv : tmPath[0] ? "&h="+tmPath[0] : "";
+  a.href="iv3panorama.html#gm="+gm.slice(2)+d;
+}
 function drawCrumbs(){
   const c=document.getElementById("crumbs"); c.innerHTML="";
   const chain=[["",nm(gm)+" totaal"]]; if(tmPath[0]) chain.push([tmPath[0],HN[tmPath[0]]]); if(tmPath[1]) chain.push([tmPath[1],tvName(tmPath[1])]);
@@ -511,8 +519,10 @@ function drawCrumbs(){
     const b=document.createElement("button"); b.className="crumb"; b.textContent=l;
     if(i===chain.length-1) b.setAttribute("aria-current","page"); else b.addEventListener("click",()=>{ tmPath=tmPath.slice(0,i); tmSel=null; drawTm(); drawCrumbs(); drawSide(); });
     c.appendChild(b); });
+  const a=document.createElement("a"); a.id="panlink"; a.className="naarpan"; a.target="_blank"; a.rel="noopener"; a.textContent="Bekijk alle gemeenten →"; c.appendChild(a); panLink();
 }
 function drawSide(){
+  panLink();
   const r=cur(), T=totals(r), side=document.getElementById("side"), nodes=tmNodes().sort((a,b)=>b.v-a.v);
   let title, sub, uit, amount;
   if(tmSel){ const n=nodes.find(x=>x.id===tmSel); title=n.name; amount=n.v; uit=n.tv?TU[n.tv]:""; sub=tmPath.length===2?`Deel van ${tvName(tmPath[1])}`:(n.tv?`Taakveld ${n.tv}`:""); }
@@ -581,7 +591,11 @@ function viewPlan(){
   view.querySelectorAll("button.prow").forEach(b=>b.addEventListener("click",()=>{ planPath=[b.dataset.id]; viewPlan(); }));
 }
 
-{ const k = startGemeente(); if (k) kies(k); }
+{ const k = startGemeente(), lnk = location.hash; if (k) kies(k);
+  /* vanuit het Iv3-panorama: open op hetzelfde onderdeel (#gm=0503&h=1 of &tv=1.2) */
+  if (k) { const tv=(lnk.match(/[#&]tv=([\d.]+)/)||[])[1], h=(lnk.match(/[#&]h=(\d)(?:&|$)/)||[])[1], rij=tv&&cur().t[tv], hb=tv?hoofd(tv):h;
+    if (hb&&HN[hb]) { if (rij&&rij[0]>0) { if (G[k].J&&rij[2]) tmPath=[hb,tv]; else { tmPath=[hb]; tmSel=tv; } } else tmPath=[hb]; renderTab(); } }
+}
 </script>
 
 <!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
