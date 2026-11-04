@@ -113,7 +113,7 @@ footer{font-size:13px;color:var(--muted);display:grid;gap:6px;max-width:90ch}
 footer p{margin:0}
 footer a{color:var(--accent)}
 :root{--namew:150px}
-@media (max-width:620px){:root{--namew:92px}.r .v{display:none}.axis,.r{grid-template-columns:var(--namew) minmax(0,1fr)}.axis span.u{display:none}.controls{position:static}}
+@media (max-width:620px){.legend{flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px}.lg{flex:none}:root{--namew:92px}.r .v{display:none}.axis,.r{grid-template-columns:var(--namew) minmax(0,1fr)}.axis span.u{display:none}.controls{position:static}}
 
 /* Terug naar het productoverzicht op de homepage */
 .terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
@@ -201,7 +201,7 @@ footer a{color:var(--accent)}
     <h2 id="vh">Verantwoording</h2>
     <p><b>Bron en peildatum.</b> CBS, Gemeenten 2025, onbewerkte Iv3-data (<a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED">45071NED</a>), opgehaald op 21 oktober 2026 en in deze pagina opgenomen; inwoners op 1 januari 2025 (CBS, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a>). Jaarrekening 2025; bij Duiven en Rozendaal, die die nog niet hadden aangeleverd, de begroting.</p>
     <p><b>Licentie.</b> CBS: CC BY 4.0.</p>
-    <p><b>Methode.</b> Lasten per hoofdtaakveld, als aandeel van de totale lasten of in euro per inwoner, zonder mutaties in reserves en het resultaat. De gemeenten staan op alfabet; sorteren op een hoofdgroep of op inwonertal kan. Binnen een hoofdgroep toont de balk de taakvelden, als aandeel van die hoofdgroep of in euro per inwoner, in tinten voor de zeven grootste taakvelden landelijk en de rest als Overig. Bij één taakveld toont de balk de soort uitgave (economische categorie), in euro per inwoner of als aandeel van het taakveld, met hooguit acht delen. Dezelfde cijfers als in de Iv3-spiegel. Verschil met plan: lasten in de jaarrekening 2025 min lasten in de begroting 2025, in euro per inwoner, voor gemeenten die beide bij het CBS hebben.</p>
+    <p><b>Methode.</b> Lasten per hoofdtaakveld, als aandeel van de totale lasten of in euro per inwoner, zonder mutaties in reserves en het resultaat. De gemeenten staan op alfabet; sorteren op een hoofdgroep of op inwonertal kan. Binnen een hoofdgroep toont de balk de taakvelden, als aandeel van die hoofdgroep of in euro per inwoner, in tinten voor de zeven grootste taakvelden landelijk en de rest als Overig; bij Zorg, werk en inkomen in zeven eigen groepen van taakvelden (geen Iv3-indeling), elk taakveld blijft apart te kiezen. Bij één taakveld toont de balk de soort uitgave (economische categorie), in euro per inwoner of als aandeel van het taakveld, met hooguit acht delen. Dezelfde cijfers als in de Iv3-spiegel. Verschil met plan: lasten in de jaarrekening 2025 min lasten in de begroting 2025, in euro per inwoner, voor gemeenten die beide bij het CBS hebben.</p>
     <p><b>Wat dit niet is.</b> Geen ranglijst en geen oordeel. Anders dan de Iv3-spiegel zet deze pagina gemeenten naast elkaar, zodat afwijkingen in de verdeling zichtbaar worden. Een andere verdeling is een vraag, niet meteen een andere keuze.</p>
     <p><b>Bekende beperkingen.</b> Gemeenten boeken soms anders (overhead op 0.4 of op de taak zelf; werk via een samenwerkingsverband als bijdrage). Hoe dieper je kijkt, hoe zwaarder die verschillen wegen. Binnen een taakveld kan een soort uitgave negatief zijn; die telt niet mee in de stapeling, zodat een balk dan iets langer is dan het bedrag rechts. Op een taakveld kunnen de lasten negatief zijn; die regel toont geen balk maar het woord negatief, en in de stapeling binnen een hoofdgroep tellen negatieve taakvelden niet mee. Een zwart streepje aan het eind van een balk betekent dat die verder doorloopt dan de schaal. Alleen 2025.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van het CBS.</p>
@@ -246,9 +246,17 @@ const effMode = () => mode;
 const vDeel = () => mode==="plan" ? "v=plan" : "";
 
 /* Wat een balk bevat op dit niveau: onderdelen met naam, kleur en een manier om het bedrag te lezen. */
+/* Zorg, werk en inkomen heeft 26 taakvelden: in de balk samengenomen tot zeven groepen, zodat geen groot blok Overig ontstaat. Elk taakveld blijft apart te kiezen. */
+const GROEP = {6:[["Inkomensregelingen",["6.3"]],["Samenkracht en burgerparticipatie",["6.1"]],
+  ["Jeugdhulp en jeugdbescherming",["6.751","6.752","6.753","6.761","6.762","6.763","6.792","6.821","6.822"]],
+  ["Wmo: hulpmiddelen en ondersteuning thuis",["6.60","6.711","6.712","6.713","6.714","6.791"]],
+  ["Werk: Wsw en arbeidsparticipatie",["6.4","6.5"]],["Beschermd wonen en opvang",["6.811","6.812"]],
+  ["Toegang en coördinatie",["6.21","6.22","6.23","6.91","6.92"]]]};
 function delen(){
   if(level()===0) return HN.map((n,i)=>({n,c:HC[i],get:g=>g.h[i]}));
   if(level()===2) return delenTv(scope.tv);
+  if(GROEP[scope.h]){ const som=(l,a)=>l.reduce((t,k)=>t+Math.max(0,a[TVI[k]]),0);
+    return GROEP[scope.h].map(([n,l])=>({n,l,t:som(l,TVTOT)})).sort((a,b)=>b.t-a.t).map((d,x)=>({n:d.n,c:"p"+(x+1),get:g=>som(d.l,g.tv)})); }
   const ix=TVK.map((k,i)=>i).filter(i=>inH(TVK[i])===String(scope.h)&&TVTOT[i]>0).sort((a,b)=>TVTOT[b]-TVTOT[a]);
   const eigen = ix.slice(0,7), rest = ix.slice(eigen.length);  // tinten petrol van donker naar licht, de rest valt in Overig
   const d = eigen.map((i,x)=>({n:TVN[i],c:"p"+(x+1),get:g=>g.tv[i],key:TVK[i]}));
