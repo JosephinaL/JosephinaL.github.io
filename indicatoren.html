@@ -12,7 +12,7 @@
   --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
   --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --strook: #34494c; --warn: #d2462c;
   --open: #0f5c66; --keten: #9a5b00; --intern: #6a4c93;
-  --open-vis: #1a8a3f; --keten-vis: #f2d01c; --intern-vis: #f0a018;
+  --open-vis: #0f5c66; --keten-vis: #4f9ca6; --intern-vis: #d5dbdc; --intern-rand: #5a6b6e;
   --open-bg: #e3f1f2; --keten-bg: #f6ecdc; --intern-bg: #eee8f5;
   --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
   --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -24,14 +24,14 @@
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --strook: #3a5256; --warn: #ef6a4f;
   --open: #5fb7c2; --keten: #e0a24a; --intern: #b49ad8;
-  --open-vis: #57a83a; --keten-vis: #f2d01c; --intern-vis: #f0a018;
+  --open-vis: #8fd3dc; --keten-vis: #4f9ca6; --intern-vis: #2b383b; --intern-rand: #93a6a9;
   --open-bg: #183236; --keten-bg: #33281a; --intern-bg: #2a2336;
   color-scheme: dark; } }
 :root[data-theme="dark"] {
   --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
   --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --strook: #3a5256; --warn: #ef6a4f;
   --open: #5fb7c2; --keten: #e0a24a; --intern: #b49ad8;
-  --open-vis: #57a83a; --keten-vis: #f2d01c; --intern-vis: #f0a018;
+  --open-vis: #8fd3dc; --keten-vis: #4f9ca6; --intern-vis: #2b383b; --intern-rand: #93a6a9;
   --open-bg: #183236; --keten-bg: #33281a; --intern-bg: #2a2336;
   color-scheme: dark; }
 
@@ -104,7 +104,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .blokjes i { display: block; width: 18px; height: 18px; border-radius: 3px; }
 .blokjes i.open, .legenda i.open { background: var(--open-vis); }
 .blokjes i.keten, .legenda i.keten { background: var(--keten-vis); }
-.blokjes i.intern, .legenda i.intern { background: var(--intern-vis); }
+.blokjes i.intern, .legenda i.intern { background: var(--intern-vis); box-shadow: inset 0 0 0 1.5px var(--intern-rand); }
 .legenda { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: .84rem; color: var(--fg); }
 .legenda span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
@@ -154,7 +154,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .teller .s { font-size: .8rem; color: var(--muted); }
 .teller[data-b="open"] { border-top-color: var(--open-vis); }
 .teller[data-b="keten"] { border-top-color: var(--keten-vis); }
-.teller[data-b="intern"] { border-top-color: var(--intern-vis); }
+.teller[data-b="intern"] { border-top-color: var(--intern-rand); }
 .teller[aria-pressed="true"] { outline: 2px solid var(--fg); outline-offset: -2px; }
 .filterregel { font-size: .85rem; color: var(--muted); margin: 0; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
 
@@ -166,7 +166,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .kaart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; border-left: 4px solid var(--line); }
 .kaart[data-b="open"] { border-left-color: var(--open-vis); }
 .kaart[data-b="keten"] { border-left-color: var(--keten-vis); }
-.kaart[data-b="intern"] { border-left-color: var(--intern-vis); }
+.kaart[data-b="intern"] { border-left-color: var(--intern-rand); }
 .kaart .kop { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
 .badge { font-size: .74rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
 .badge.open { background: var(--open-bg); color: var(--open); }
