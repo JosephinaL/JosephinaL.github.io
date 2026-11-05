@@ -818,7 +818,7 @@ main > * { min-width: 0; }
 
   function kaartHtml(c) {
     const rij = (dt, dd) => dd ? `<dt>${dt}</dt><dd>${dd}</dd>` : '';
-    const inst = c.inst ? `<a class="btn klein" href="${esc(instLink(c.inst[0]))}">Bekijk in ${esc(c.inst[1])}${S.gm ? ' · ' + esc(byCode.get(S.gm).n) : ''} →</a>` : '';
+    const inst = c.inst ? `<a class="btn primary klein" href="${esc(instLink(c.inst[0]))}">Bekijk in ${esc(c.inst[1])}${S.gm ? ' · ' + esc(byCode.get(S.gm).n) : ''} →</a>` : '';
     return `<article class="kaart" data-b="${c.b}">
       <div class="kop"><span class="badge ${c.b}">${BRON[c.b]}</span><h3>${esc(c.naam)}</h3></div>
       <p class="def">${esc(c.def)}</p>
