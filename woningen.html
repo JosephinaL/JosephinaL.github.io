@@ -301,6 +301,15 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       </div>
       <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="trendTabel"></div></details>
 
+      <!-- woz-waarde -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Waarde</span><h2>WOZ-waarde sinds <span id="wozVan">2019</span></h2></div>
+      </div>
+      <div class="duo">
+        <div class="chart" id="chWoz"></div>
+        <div class="chart"><div class="scroll" id="wozTabel"></div></div>
+      </div>
+
       <!-- erbij en eraf -->
       <div class="sectiekop">
         <div><span class="eyebrow">Erbij en eraf</span><h2 id="mutKop">Wat er elk jaar bij komt en af gaat</h2></div>
@@ -345,6 +354,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>Erbij</b>: nieuwbouw; transformatie (een kantoor, winkel of ander gebouw dat woningen wordt); splitsing (extra woningen in een bestaand pand). <b>Eraf</b>: sloop; samenvoeging (woningen in een bestaand pand opgeheven); functiewijziging (woning wordt iets anders). <b>Overig</b>: correcties en nagekomen meldingen.</li>
             <li><b>Peildatum</b>: bewoning en eigendom op 1 januari. Erbij en eraf per kalenderjaar; het lopende jaar telt tot de laatste maand die het CBS heeft.</li>
             <li><b>Per buurt</b>: het CBS geeft een aandeel pas vanaf 20 woningen in de buurt. De WOZ-waarde hoort bij de waardepeildatum een jaar eerder. Corporatiewoningen gaat om eigendom, niet om de hoogte van de huur.</li>
+            <li><b>WOZ-waarde door de jaren</b>: gemiddelde per gemeente, alle woningen en naar eigenaar, zoals het CBS die publiceert. Woningen onder € 10.000 en boven € 5 miljoen tellen niet mee. De waarde is getaxeerd op een peildatum een jaar vóór het getoonde jaar. Na een gemeentelijke herindeling zijn de jaren niet goed vergelijkbaar.</li>
             <li><b>Kaartkleuren</b>: vijf klassen met elk ongeveer evenveel buurten van de gekozen gemeente. Zo zie je verschillen binnen de gemeente.</li>
           </ul>
         </div>
@@ -367,7 +377,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> CBS: Voorraad woningen naar eigendom en bewoning (86286NED, stand 1 januari, 2021 tot nu) en Levensloop van woningen en niet-woningen (86098NED, per maand vanaf 2015); buurtcijfers en grenzen uit de Kerncijfers wijken en buurten via PDOK. Alles live opgehaald bij de gemeentekeuze. Het tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Bron en peildatum.</b> CBS: Voorraad woningen naar eigendom en bewoning (86286NED, stand 1 januari, 2021 tot nu) Levensloop van woningen en niet-woningen (86098NED, per maand vanaf 2015) en Gemiddelde WOZ-waarde van woningen (85036NED, per jaar vanaf 2019); buurtcijfers en grenzen uit de Kerncijfers wijken en buurten via PDOK. Alles live opgehaald bij de gemeentekeuze. Het tijdstip van ophalen staat onder de cijfers.</p>
     <p><b>Licentie.</b> CBS: CC BY 4.0. Wijk- en buurtgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
     <p><b>Methode.</b> Aandelen leeg en ander gebruik rekent deze pagina zelf uit de CBS-aantallen; particuliere verhuur is de som van verhuur door personen, BV's en overige rechtspersonen. Aantallen per buurt zijn percentage maal woningen, dus bij benadering. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen telling van werkelijk leegstaande woningen ter plaatse en geen langdurige leegstand. Geen woningbehoefte en geen planning. Geen ranglijst en geen oordeel over een gemeente of eigenaar; Nederland staat er alleen als referentiepunt.</p>
@@ -385,11 +395,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.4';
+  const VERSIE = '1.5';
   const PRODUCT = 'Woningvoorraad en leegstand';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_VOOR = '86286NED';   // voorraad; eigendom, type eigenaar, status van bewoning, regio
   const T_MUT = '86098NED';    // levensloop van woningen en niet-woningen
+  const T_WOZ = '85036NED';    // gemiddelde WOZ-waarde van woningen; eigendom, regio
   const G_WONING = 'A045364';
   const ST = { tot: 'T001742', bew: 'A059380', ander: 'A059382', leeg: 'A059383' };
   const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
@@ -424,7 +435,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.dataset.theme = dark ? 'light' : 'dark';
     try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
-    if (S) { renderReeks(); renderMut(); if (S.b) renderKaart(); }
+    if (S) { renderReeks(); renderWoz(); renderMut(); if (S.b) renderKaart(); }
   });
   const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
@@ -482,15 +493,15 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#gmInput').value = g.n;
     document.title = 'Woningvoorraad en leegstand ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    S = { g, voor: null, nl: null, mut: null, ytd: null, jaren: [], jaar: null, b: null, opgehaald: null };
+    S = { g, voor: null, nl: null, mut: null, ytd: null, woz: null, wozNl: null, jaren: [], jaar: null, b: null, opgehaald: null };
     selCode = null; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo(''); renderNoot();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen…';
-    ['#top4', '#chLeeg', '#chEig', '#chLeegEig', '#trendTabel', '#chMut', '#mutTabel', '#tblWrap', '#dossier', '#jaren', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
+    ['#top4', '#chLeeg', '#chEig', '#chLeegEig', '#trendTabel', '#chWoz', '#wozTabel', '#chMut', '#mutTabel', '#tblWrap', '#dossier', '#jaren', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
     voortgang(0, 3, 'Voorraad en mutaties ophalen bij het CBS…');
-    const [, , jaren] = await Promise.all([laadVoorraad(), laadMut(), zoekJaren(g.c)]);
+    const [, , , jaren] = await Promise.all([laadVoorraad(), laadMut(), laadWoz(), zoekJaren(g.c)]);
     if (S.g !== g) return;
     S.opgehaald = new Date();
-    renderKern(); renderReeks(); renderMut();
+    renderKern(); renderReeks(); renderWoz(); renderMut();
     voortgang(2, 3, 'Buurten ophalen bij PDOK…');
     S.jaren = jaren;
     renderJaren();
@@ -535,6 +546,46 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
   const lp = (x, k = 'leeg') => x && x[k] && x.tot ? pct(x[k].tot, x.tot.tot) : null;
   const nlJaar = j => S.nl ? S.nl.find(r => r.j === j) : null;
+
+  // ---------- WOZ-waarde door de jaren (85036NED) ----------
+  const WOZ_EIG = { T001132: 'alle', '1014800': 'koop', A047047: 'corp', A047048: 'ovr' };
+  function parseWoz(rows) {
+    const per = new Map();
+    rows.forEach(r => {
+      const k = WOZ_EIG[tr(r.Eigendom)], j = +tr(r.Perioden).slice(0, 4), v = num(r.GemiddeldeWOZWaardeVanWoningen_1);
+      if (!k || !j || v == null) return;
+      if (!per.has(j)) per.set(j, { j });
+      per.get(j)[k] = v;
+    });
+    const out = [...per.values()].sort((a, b) => a.j - b.j);
+    return out.length ? out : null;
+  }
+  async function laadWoz() {
+    try {
+      const [a, b] = await Promise.all([
+        getJSON(CBS + T_WOZ + `/TypedDataSet?$filter=startswith(RegioS,'GM${S.g.c}')`),
+        getJSON(CBS + T_WOZ + `/TypedDataSet?$filter=startswith(RegioS,'NL01')`).catch(() => null)
+      ]);
+      S.woz = parseWoz(a.value); S.wozNl = b ? parseWoz(b.value) : null;
+    } catch (e) { S.woz = null; fouten.add('WOZ-waarde (CBS)'); toonMelding(); }
+  }
+  function renderWoz() {
+    const rs = S.woz, el = $('#chWoz'), tb = $('#wozTabel');
+    if (!rs) { el.innerHTML = '<p class="small muted" style="margin:0">Geen WOZ-cijfers voor deze gemeente.</p>'; tb.innerHTML = ''; return; }
+    const nl = new Map((S.wozNl || []).map(r => [r.j, r]));
+    $('#wozVan').textContent = rs[0].j;
+    const ser = [
+      { naam: 'Koopwoningen', kort: 'Koop', kleur: 'var(--hh-1)', w: r => r.koop },
+      { naam: 'Alle woningen', kort: 'Alle', kleur: 'var(--dn-1)', w: r => r.alle },
+      { naam: 'Overige verhuurders', kort: 'Overig', kleur: 'var(--hh-2)', w: r => r.ovr },
+      { naam: 'Corporaties', kort: 'Corp.', kleur: 'var(--hh-3)', w: r => r.corp }
+    ];
+    if (S.wozNl) ser.push({ naam: 'Alle woningen in Nederland', kort: 'NL', kleur: 'var(--muted)', dash: true, w: r => { const n = nl.get(r.j); return n ? n.alle : null; } });
+    lijnen(el, 'Gemiddelde WOZ-waarde', 'per woning, naar eigenaar', rs, ser, 'eur', '');
+    const eur = v => v == null ? '–' : nf.format(v * 1000);
+    tb.innerHTML = `<span class="noemer">gemiddeld per woning, in euro</span><table><thead><tr><th>Jaar</th><th class="r">Alle</th><th class="r">Koop</th><th class="r">Corporatie</th><th class="r">Overig</th><th class="r">Nederland</th></tr></thead><tbody>` +
+      rs.slice().reverse().map(r => { const n = nl.get(r.j); return `<tr><td class="mono">${r.j}</td><td class="r">${eur(r.alle)}</td><td class="r">${eur(r.koop)}</td><td class="r">${eur(r.corp)}</td><td class="r">${eur(r.ovr)}</td><td class="r">${eur(n && n.alle)}</td></tr>`; }).join('') + '</tbody></table>';
+  }
 
   // ---------- erbij en eraf (86098NED) ----------
   const MVELD = 'Perioden,BeginstandVoorraad_1,VergundeNieuwbouw_2,NieuwbouwTotaal_6,WijzigingGebruiksfunctiePositief_9,WijzigingGebruiksfunctieNegatief_10,ToevoegingenTotaal_13,Sloop_15,Onttrekkingen_16,VoorraadMutatieAndersPositief_17,VoorraadMutatieAndersNegatief_18,NagekomenInformatiePositief_19,NagekomenInformatieNegatief_20,SaldoVoorraad_21,EindstandVoorraad_22';
@@ -626,7 +677,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     renderReeks();
   }));
   function nice(v) { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
-  const fAs = (t, isPct) => isPct ? (t % 1 ? nf1.format(t) : nf.format(t)) + '%' : (Math.abs(t) >= 10000 ? nf.format(t / 1000) + 'k' : nf.format(t));
+  const fAs = (t, isPct) => isPct === 'eur' ? (t ? '€ ' + nf.format(t) + 'k' : '€ 0') : isPct ? (t % 1 ? nf1.format(t) : nf.format(t)) + '%' : (Math.abs(t) >= 10000 ? nf.format(t / 1000) + 'k' : nf.format(t));
   function lijnen(el, titel, noemer, rs, series, isPct, noot) {
     const W = 420, H = 210, L = 48, R = 112, Tp = 12, B = 24;
     const pts = series.map(s => rs.map(r => ({ j: r.j, v: s.w(r), vl: VOORLOPIG_LEEG.includes(r.j) && s.vl })).filter(p => p.v != null));
@@ -637,7 +688,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const x = j => L + (W - L - R) * (j - j0) / Math.max(1, j1 - j0);
     const y = v => Tp + (H - Tp - B) * (1 - v / hi);
     const stap = nice(hi / 4);
-    const fv = v => isPct ? fP(v) : fmt(v);
+    const fv = v => isPct === 'eur' ? '€ ' + nf.format(v * 1000) : isPct ? fP(v) : fmt(v);
     let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(titel)}, ${j0} tot en met ${j1}">`;
     for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${fAs(t, isPct)}</text>`;
     const tick = j1 - j0 > 12 ? 5 : 1;
@@ -662,7 +713,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) * W / r.width;
       let bj = jaren[0], bd = 1e9; jaren.forEach(j => { const d = Math.abs(x(j) - px); if (d < bd) { bd = d; bj = j; } });
       hl.setAttribute('x1', x(bj)); hl.setAttribute('x2', x(bj)); hl.setAttribute('visibility', 'visible');
-      toonTip(e, `<b>1 januari ${bj}</b>${VOORLOPIG_LEEG.includes(bj) && series.some(se => se.vl) ? ' <span class="muted">(leegstand voorlopig)</span>' : ''}` + series.map((se, i) => { const q = pts[i].find(p => p.j === bj); return `<br><i class="sw" style="background:${se.kleur}"></i>${esc(se.naam)}: <span class="num">${q ? fv(q.v) : '–'}</span>`; }).join(''));
+      toonTip(e, `<b>${isPct === 'eur' ? bj : '1 januari ' + bj}</b>${VOORLOPIG_LEEG.includes(bj) && series.some(se => se.vl) ? ' <span class="muted">(leegstand voorlopig)</span>' : ''}` + series.map((se, i) => { const q = pts[i].find(p => p.j === bj); return `<br><i class="sw" style="background:${se.kleur}"></i>${esc(se.naam)}: <span class="num">${q ? fv(q.v) : '–'}</span>`; }).join(''));
     };
     svg.addEventListener('pointermove', zet); svg.addEventListener('pointerdown', zet);
     svg.addEventListener('pointerleave', () => { hl.setAttribute('visibility', 'hidden'); verbergTip(); });
@@ -1085,7 +1136,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const vs = S.voor, ms = S.mut;
     const j = S.b ? S.b.jaar : (S.jaren[0] || '');
-    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Bewoning en eigendom: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_VOOR}/table">Voorraad woningen; eigendom, type eigenaar, status van bewoning</a> (${T_VOOR}${vs ? `, ${vs[0].j}–${vs[vs.length - 1].j}` : ''}, peildatum 1 januari). Erbij en eraf: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_MUT}/table">Levensloop van woningen en niet-woningen</a> (${T_MUT}${ms ? `, ${ms[0].j}–${S.ytd ? S.ytd.j + ' t/m ' + MAAND[S.ytd.tm - 1] : ms[ms.length - 1].j}` : ''}, uit de BAG). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Woningvoorraad en leegstand · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Bewoning en eigendom: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_VOOR}/table">Voorraad woningen; eigendom, type eigenaar, status van bewoning</a> (${T_VOOR}${vs ? `, ${vs[0].j}–${vs[vs.length - 1].j}` : ''}, peildatum 1 januari). WOZ-waarde: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_WOZ}/table">Gemiddelde WOZ-waarde van woningen</a> (${T_WOZ}${S.woz ? `, ${S.woz[0].j}–${S.woz[S.woz.length - 1].j}` : ''}). Erbij en eraf: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_MUT}/table">Levensloop van woningen en niet-woningen</a> (${T_MUT}${ms ? `, ${ms[0].j}–${S.ytd ? S.ytd.j + ' t/m ' + MAAND[S.ytd.tm - 1] : ms[ms.length - 1].j}` : ''}, uit de BAG). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Woningvoorraad en leegstand · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -1093,8 +1144,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const g = S.g; const was = [...fouten]; fouten.clear(); toonMelding();
     if (was.some(x => /voorraad/.test(x))) await laadVoorraad();
     if (was.some(x => /nieuwbouw/.test(x))) await laadMut();
+    if (was.some(x => /WOZ/.test(x))) await laadWoz();
     if (S.g !== g) return;
-    S.opgehaald = new Date(); renderKern(); renderReeks(); renderMut();
+    S.opgehaald = new Date(); renderKern(); renderReeks(); renderWoz(); renderMut();
     if (was.some(x => /PDOK/.test(x))) {
       if (!S.jaren.length) { S.jaren = await zoekJaren(g.c); renderJaren(); }
       if (S.jaren.length) await kiesJaar(S.jaar || S.jaren[0]); else fouten.add('buurtcijfers (PDOK)');
