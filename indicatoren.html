@@ -279,8 +279,8 @@ main > * { min-width: 0; }
       <ul>
         <li><b>Geen volledige lijst.</b> Per domein staan de indicatoren die het meest bijdragen aan een beleidsvraag, niet alles wat te meten is.</li>
         <li><b>Tabelnummers wijzigen.</b> Het CBS publiceert sommige reeksen elk jaar in een nieuwe tabel. Bij een kaart staat het nummer van de laatste stand; de reeks loopt vaak via voorgangers terug.</li>
-        <li><b>Het GGM verschilt per domein.</b> Voor de Wmo dekt het de interne indicatoren; bij huiselijk geweld ontbreken attributen. Waar iets ontbreekt, staat dat op de kaart.</li>
-        <li><b>Nog in opbouw.</b> Twee thema's in het sociaal domein zijn uitgewerkt. De andere domeinen volgen.</li>
+        <li><b>Het GGM verschilt per domein.</b> Voor de Wmo dekt het de interne indicatoren; bij huiselijk geweld ontbreken attributen en voor urgente woningzoekenden is er geen entiteit. Waar iets ontbreekt, staat dat op de kaart.</li>
+        <li><b>Nog in opbouw.</b> Drie thema's zijn uitgewerkt: twee in het sociaal domein en Wonen. De andere domeinen volgen.</li>
       </ul>
     </div>
     <div class="card meldpunt">
@@ -298,11 +298,11 @@ main > * { min-width: 0; }
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De pagina haalt zelf geen cijfers op.</p>
+    <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, de Wet versterking regie volkshuisvesting, de Huisvestingswet 2014, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De pagina haalt zelf geen cijfers op.</p>
     <p><b>Licentie.</b> CBS en RIVM: CC BY 4.0. GGM (Gemeente Delft): EUPL-1.2; alleen namen van entiteiten en attributen overgenomen. De teksten op de kaarten vallen onder de gebruiksregel hieronder.</p>
     <p><b>Methode.</b> Per thema de indicatoren in de volgorde van de beleidsketen. Elke kaart geeft definitie, wat de indicator wel en niet zegt, laagste niveau, bron (open, ketenpartner of intern), herkomst, norm en vergelijkbaarheid. Zie "Zo is deze pagina opgebouwd".</p>
     <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen cijfers en geen oordeel over een gemeente. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
-    <p><b>Bekende beperkingen.</b> Twee thema's zijn uitgewerkt (Wmo, huiselijk geweld en kindermishandeling). Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
+    <p><b>Bekende beperkingen.</b> Drie thema's zijn uitgewerkt (Wmo, huiselijk geweld en kindermishandeling, Wonen). De uitwerking van de Wet versterking regie volkshuisvesting was op 5 november 2026 nog niet definitief. Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Geen officiële publicatie van een gemeente, de VNG of een bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bronnen. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Mis je een indicator of klopt er iets niet? Gebruik de knoppen bij "Mis je een indicator" hierboven, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -314,7 +314,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.3';
+  const VERSIE = '0.4';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -591,6 +591,144 @@ main > * { min-width: 0; }
           ggm: '<code>sociaalteamdossier.status</code>, <code>.datumeinde</code>; <code>doelstelling</code> met <code>doelstellingsoort</code>. Een veiligheidsoordeel bij afsluiting heeft geen eigen attribuut in GGM v2.5.1: dat moet bij de uitvraag worden afgesproken.',
           herkomst: 'Handreiking (Regioplan, resultaten lokale hulpverlening).' }
       ]
+    },
+    wonen: {
+      tv: '8', kort: 'Wonen', naam: 'Wonen',
+      taakvelden: '8.1 ruimtelijke ordening · 8.2 grondexploitatie · 8.3 wonen en bouwen',
+      scope: 'Van woningvoorraad via plannen en vergunningen tot wat wonen kost. Sinds 1 juli 2026 geldt de Wet versterking regie volkshuisvesting; de kaarten noemen wat daaruit volgt. De BBV-indicator demografische druk staat hier niet: die zegt iets over de bevolking, niet over wonen.',
+      lees: 'Vergund is niet opgeleverd, en corporatiebezit is niet hetzelfde als sociale huur. De percentages voor betaalbare nieuwbouw gelden per regio, niet per gemeente.',
+      atelier: 'woningen.html', atelierNaam: 'Woningvoorraad en leegstand', tvkort: '8.1 · 8.2 · 8.3',
+      tegel: 'Wonen', oms: 'Van voorraad en tekort via plannen en vergunningen tot wat wonen kost.',
+      kaarten: [
+        { k: 'context', b: 'open', naam: 'Woningvoorraad naar eigendom',
+          def: 'Aantal woningen naar koop, corporatie, particuliere verhuurder en overige eigenaren.',
+          zegt: 'Hoe de voorraad is samengesteld. Het corporatieaandeel is de open benadering van de vraag of de gemeente onder het landelijk gemiddelde sociale huur zit.',
+          niet: 'Hoeveel sociale huurwoningen er zijn. De tabel gaat over de eigenaar, niet over de huurprijs.',
+          niveau: 'Gemeente. Jaarlijks, peildatum 1 januari, vanaf 2021.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `${cbs('86286NED')}; verhuurders naar omvang in ${cbs('86287NED')}.`,
+          herkomst: 'Voorstel atelier (uitgangspunt voor de andere kaarten).',
+          inst: ['woningen.html', 'Woningvoorraad en leegstand'] },
+        { k: 'context', b: 'open', naam: 'Gemiddelde WOZ-waarde',
+          def: 'Gemiddelde WOZ-waarde van woningen, in duizend euro, ook naar koop en huur.',
+          zegt: 'Het prijsniveau van de voorraad en de grondslag van de OZB.',
+          niet: 'Wat een woning nu kost. De waarde hoort bij een peildatum een jaar eerder, en de samenstelling van de voorraad telt mee.',
+          niveau: 'Gemeente; wijk en buurt in de Kerncijfers wijken en buurten. Jaarlijks, vanaf 2019.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, met de kanttekening over de samenstelling.',
+          bron: () => `${cbs('85036NED')}; werkelijke verkoopprijzen in ${cbs('83625NED')}.`,
+          herkomst: 'BBV-verplicht.' },
+        { k: 'context', b: 'open', naam: 'Leegstand',
+          def: 'Woningen zonder inschrijving in de BRP, zonder WOZ-gebruiker en zonder bedrijf in het Handelsregister.',
+          zegt: 'Hoeveel van de voorraad administratief leegstaat.',
+          niet: 'Of een woning echt ongebruikt is. Het is een registratiemaat: kort leeg tussen twee bewoners telt mee.',
+          niveau: 'Gemeente. Jaarlijks, peildatum 1 januari, vanaf 2021.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja; 1 januari 2025 is voorlopig.',
+          bron: () => `${cbs('86286NED')}.`,
+          herkomst: 'Landelijke monitor (Landelijke Monitor Leegstand).',
+          inst: ['woningen.html', 'Woningvoorraad en leegstand'] },
+        { k: 'context', b: 'keten', naam: 'Woningtekort en woningbehoefte',
+          def: 'Vraag naar woningen minus het aanbod van langdurig lege woningen, als percentage van de voorraad.',
+          zegt: 'Hoe gespannen de woningmarkt is. Dit bepaalt mede de bouwopgave.',
+          niet: 'Hoeveel woningen de eigen gemeente tekort komt. Het is een raming voor een woningmarkt, die over gemeentegrenzen loopt.',
+          niveau: 'Woningmarktregio (31) in het landelijke rapport. Jaarlijks.',
+          norm: '2% tekort geldt als normale spanning op de markt.', vgl: 'Ja, tussen regio\'s.',
+          bron: () => 'ABF Research, Primos-prognose, in opdracht van het ministerie van VRO; provincies gebruiken eigen prognoses. Primos per gemeente: primos.abfresearch.nl, niet nagegaan welke cijfers daar open staan.',
+          herkomst: 'Landelijke monitor (Primos). Het ministerie moet verslagen over woningbehoefte en woningtekort publiceren.' },
+        { k: 'inspanning', b: 'open', naam: 'Lasten en baten wonen en bouwen per inwoner',
+          def: 'Lasten en baten op de taakvelden 8.1, 8.2 en 8.3, per inwoner.',
+          zegt: 'Wat de gemeente zelf uitgeeft aan plannen, grond en woonbeleid, door de jaren heen.',
+          niet: 'Wat er aan wonen wordt geïnvesteerd. Bouwers en corporaties staan er niet in, en 8.2 schommelt mee met de verkoop van grond.',
+          niveau: 'Gemeente. Begroting en jaarrekening, jaarlijks.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (boekingspraktijk, grondposities).',
+          bron: () => 'CBS, onbewerkte Iv3-data gemeenten (<a href="https://dataderden.cbs.nl" target="_blank" rel="noopener">dataderden.cbs.nl</a>).',
+          herkomst: 'Voorstel atelier.',
+          inst: ['iv3spiegel.html', 'Iv3-spiegel'] },
+        { k: 'inspanning', b: 'intern', naam: 'Plancapaciteit: harde en zachte plannen',
+          def: 'Aantal woningen in plannen, naar stand van het plan en verwachte oplevering.',
+          zegt: 'Of er genoeg plannen liggen voor de opgave, en hoe zeker ze zijn. Dit is de basis van het volkshuisvestingsprogramma.',
+          niet: 'Wat er echt gebouwd wordt. Plannen vallen uit of schuiven op.',
+          niveau: 'Plan, gemeente. Landelijk gerapporteerd per provincie en woondealregio. Twee keer per jaar aangeleverd.',
+          norm: 'Woondeal van de regio; de eigen opgave in het volkshuisvestingsprogramma, voorzien uiterlijk 1 juli 2027.', vgl: 'Beperkt (aanlevering verschilt per provincie).',
+          bron: () => 'Eigen planregistratie, aangeleverd aan de provincie; Landelijke Monitor Voortgang Woningbouw (ABF Research).',
+          ggm: '<code>plan.intentie</code>, <code>.bestemminggoedgekeurd</code>, <code>.onherroepelijk</code>, <code>.startbouw</code>, <code>.eersteoplevering</code>, <code>.laatsteoplevering</code>; <code>gebouw.aantal</code>, <code>.bestaat_uit_plan_id</code>; <code>omgevingsvergunning.betrekking_op_plan_id</code>. Hard en zacht heeft geen eigen attribuut: leg vast welke combinatie welke status is.',
+          herkomst: 'Wettelijke plicht (Omgevingswet, art. 3.6 lid 3: gemeentelijk volkshuisvestingsprogramma); landelijke monitor.' },
+        { k: 'inspanning', b: 'keten', naam: 'Afspraken met corporaties',
+          def: 'Aantal sociale huurwoningen dat corporaties in de prestatieafspraken toezeggen te bouwen, te slopen of te verkopen.',
+          zegt: 'Wat er vastligt voor de sociale huur, vóór er een vergunning is.',
+          niet: 'Of het gebouwd wordt. Een toezegging hangt af van locaties die de gemeente beschikbaar stelt.',
+          niveau: 'Gemeente, per corporatie. Jaarlijks.',
+          norm: 'Eigen afspraak.', vgl: 'Nee (vorm per gemeente verschillend).',
+          bron: () => 'Woningcorporaties, prestatieafspraken met gemeente en huurdersorganisatie; geen landelijke open tabel gevonden.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'open', naam: 'Nieuw gebouwde woningen per 1.000 woningen',
+          def: 'Aantal woningen dat in het jaar door nieuwbouw aan de voorraad is toegevoegd, per 1.000 woningen.',
+          zegt: 'Hoe snel de voorraad groeit door nieuwbouw.',
+          niet: 'De hele groei. Transformatie en splitsing horen er niet bij, en sloop is niet afgetrokken.',
+          niveau: 'Gemeente. Per maand, kwartaal en jaar, vanaf 2015.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `${cbs('86098NED')}; BBV-cijfer op waarstaatjegemeente.nl, uit de BAG.`,
+          herkomst: 'BBV-verplicht.',
+          inst: ['woningen.html', 'Woningvoorraad en leegstand'] },
+        { k: 'bereik', b: 'open', naam: 'Pijplijn: vergund en in aanbouw',
+          def: 'Woningen met een verleende vergunning of een melding bouw gestart die nog niet zijn opgeleverd, ook langer dan twee en vijf jaar.',
+          zegt: 'Wat er de komende tijd opgeleverd kan worden, en wat vastzit.',
+          niet: 'Waarom iets vastzit. De statussen in de BAG worden per gemeente verschillend bijgehouden.',
+          niveau: 'Gemeente. Per maand en kwartaal, vanaf 2015. Doorlooptijd van vergunning tot oplevering alleen per provincie (86260NED).',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (registratie van bouw gestart).',
+          bron: () => `${cbs('82211NED')}; ${cbs('86260NED')}.`,
+          herkomst: 'Landelijke monitor (bron van de Landelijke Monitor Voortgang Woningbouw).',
+          inst: ['bouwstroom.html', 'Bouwstroom'] },
+        { k: 'bereik', b: 'open', naam: 'Vergunde woningen: huur of koop',
+          def: 'Vergunde nieuwe woningen naar huur of koop en naar opdrachtgever: overheid of corporatie, bouwers voor de markt, anderen.',
+          zegt: 'Voor wie er gebouwd gaat worden. Het dichtst bij betaalbaarheid dat open per gemeente bestaat.',
+          niet: 'De prijs. Huur is niet sociale huur, en koop zegt niets over het prijssegment.',
+          niveau: 'Gemeente. Per kwartaal, vanaf 2012.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (alleen wat bij het CBS is gemeld, bouwsom vanaf € 50.000).',
+          bron: () => `${cbs('83671NED')}.`,
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'intern', naam: 'Betaalbare woningen in de nieuwbouw',
+          def: 'Aandeel nieuwe woningen in sociale huur, middenhuur en betaalbare koop.',
+          zegt: 'Of de plannen bijdragen aan de betaalbaarheidsafspraak van de regio.',
+          niet: 'Of het zo blijft. Dat hangt af van de borging in omgevingsplan en contracten.',
+          niveau: 'Plan, gemeente, regio. Open alleen tot COROP-gebied en met andere grenzen.',
+          norm: 'Twee derde betaalbaar en 30% sociale huur, per regio. De uitwerking in het Besluit kwaliteit leefomgeving en de Omgevingsregeling is voorzien per 1 januari 2027.', vgl: 'Nog niet (grenzen en uitwerking nog niet definitief).',
+          bron: () => `Eigen planregistratie. Ter vergelijking ${cbs('86084NED')}: nieuwbouw naar huur tot de liberalisatiegrens en koop tot de NHG-grens.`,
+          ggm: '<code>huurwoningen.huurprijs</code>; <code>koopwoningen.koopprijs</code>; <code>studentenwoningen.huurprijs</code>; <code>gebouw.aantal</code>. De woningbouwcategorie heeft geen eigen attribuut: leid haar af uit de prijs.',
+          herkomst: 'Wettelijke plicht (Wet versterking regie volkshuisvesting).' },
+        { k: 'bereik', b: 'intern', naam: 'Woningen voor urgent woningzoekenden',
+          def: 'Aantal toegewezen woningen aan urgent woningzoekenden, per urgentiecategorie.',
+          zegt: 'Of de gemeente de groepen huisvest die de wet aanwijst, zoals mensen die uit opvang of beschermd wonen komen.',
+          niet: 'Hoe lang iemand heeft gewacht of hoe groot de vraag is.',
+          niveau: 'Gemeente, regio. Jaarlijks.',
+          norm: 'Wettelijke urgentieregeling in de huisvestingsverordening, voorzien uiterlijk 1 januari 2028.', vgl: 'Nog niet (regeling nog niet overal ingevoerd).',
+          bron: () => 'Eigen registratie of die van de regionale woonruimteverdeling; jaarlijks overzicht aan gedeputeerde staten en de minister.',
+          ggm: 'Geen entiteit voor urgentie of woonruimteverdeling gevonden in GGM v2.5.1. Dat is een bevinding voor de uitvraag.',
+          herkomst: 'Wettelijke plicht (Huisvestingswet 2014, art. 12).' },
+        { k: 'uitkomst', b: 'open', naam: 'Woonquote',
+          def: 'Deel van het besteedbaar inkomen dat een huishouden aan wonen kwijt is: huur of hypotheek plus bijkomende lasten.',
+          zegt: 'Hoe zwaar wonen drukt, voor eigenaren en huurders, en per inkomensgroep.',
+          niet: 'Of mensen passend wonen. Studenten en huishoudens die een adres delen tellen niet mee.',
+          niveau: 'Gemeente. Jaarlijks, 2015–2024; het laatste jaar is voorlopig.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `${cbs('85950NED')}: gemiddelde en mediaan, ook woonlasten in euro.`,
+          herkomst: 'Landelijke monitor (woonquote ook in de Lokale Monitor Wonen).' },
+        { k: 'uitkomst', b: 'open', naam: 'Gemeentelijke woonlasten',
+          def: 'Wat een huishouden aan de gemeente betaalt: OZB, rioolheffing en afvalstoffenheffing, voor een- en meerpersoonshuishoudens.',
+          zegt: 'Het deel van de woonlasten waar de raad zelf over gaat.',
+          niet: 'Wat de gemeente daarmee doet. Een lage heffing kan samengaan met minder voorzieningen.',
+          niveau: 'Gemeente. Jaarlijks.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => 'COELO, Atlas van de lokale lasten; BBV-cijfer op waarstaatjegemeente.nl.',
+          herkomst: 'BBV-verplicht.' },
+        { k: 'uitkomst', b: 'keten', naam: 'Vrijkomende woningen en slaagkans',
+          def: 'Aandeel sociale huurwoningen dat per jaar vrijkomt (mutatiegraad), en zoektijd en slaagkans van woningzoekenden.',
+          zegt: 'Wat een woningzoekende merkt van de spanning op de markt.',
+          niet: 'De echte vraag. Wie ingeschreven staat, zoekt niet altijd actief.',
+          niveau: 'Gemeente, regio. Jaarlijks. Mutatiegraad per gemeente; zoektijd en slaagkans per woonruimteverdeelsysteem.',
+          norm: 'Geen.', vgl: 'Beperkt (definities per verdeelsysteem verschillend).',
+          bron: () => 'Lokale Monitor Wonen op waarstaatjegemeente.nl (mutatiegraad); corporaties en de regionale woonruimteverdeling (zoektijd, slaagkans).',
+          herkomst: 'Landelijke monitor (mutatiegraad); voorstel atelier (zoektijd, slaagkans).' }
+      ]
     }
   };
 
@@ -787,7 +925,7 @@ main > * { min-width: 0; }
   }
 
   function renderVoet() {
-    $('#foot').innerHTML = `<p>Bronnen van de indicatoren: CBS (StatLine, CC-BY 4.0), RIVM (Gezondheid per wijk en buurt, CC-BY 4.0), waarstaatjegemeente.nl (VNG), Iv3-informatievoorschrift gemeenten 2025, Wmo 2015, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling, Regioplan (handreiking lokale procesindicatoren, 2022). Gegevensobjecten: <a href="https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel" target="_blank" rel="noopener">Gemeentelijk Gegevensmodel</a> v2.5.1 (EUPL-1.2, Gemeente Delft); alleen entiteit- en attribuutnamen overgenomen. Tabelnummers gecontroleerd op 30 oktober 2026.</p>
+    $('#foot').innerHTML = `<p>Bronnen van de indicatoren: CBS (StatLine, CC-BY 4.0), RIVM (Gezondheid per wijk en buurt, CC-BY 4.0), waarstaatjegemeente.nl (VNG), Iv3-informatievoorschrift gemeenten 2025, Wmo 2015, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling, Regioplan (handreiking lokale procesindicatoren, 2022), Wet versterking regie volkshuisvesting (Stb. 2026, 156), Huisvestingswet 2014, Landelijke Monitor Voortgang Woningbouw en Primos-prognose 2026 (ABF Research), Lokale Monitor Wonen, COELO. Gegevensobjecten: <a href="https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel" target="_blank" rel="noopener">Gemeentelijk Gegevensmodel</a> v2.5.1 (EUPL-1.2, Gemeente Delft); alleen entiteit- en attribuutnamen overgenomen. Tabelnummers gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026.</p>
       <p>Josephine Linders · ${PRODUCT} · versie ${VERSIE}</p>`;
   }
 
