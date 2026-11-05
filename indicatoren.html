@@ -176,6 +176,11 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .indtegel .strip.keten { background: var(--keten-vis); }
 .indtegel .strip.intern { background: var(--intern-vis); box-shadow: inset 0 0 0 1px var(--intern-rand); }
 .indtegel .badge { justify-self: start; }
+.indtegel .btn-start { border: 0; font: inherit; font-weight: 700; cursor: pointer; }
+.indtegel .inzicht { display: grid; gap: 8px; align-content: start; }
+.indtegel .inzicht p { margin: 0; font-size: .9rem; color: var(--fg); }
+.indtegel .inzicht b { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.indtegel .inzicht .niet { box-shadow: inset 3px 0 0 var(--warn); padding-left: 10px; }
 .indtegel.open-nu { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
 .kaartpaneel { grid-column: 1 / -1; min-width: 0; }
 .kaartpaneel .kaart { box-shadow: 0 0 0 2px var(--accent); outline: none; }
@@ -794,9 +799,9 @@ main > * { min-width: 0; }
     const tegel = ([key, d]) => {
       const t = telling(d);
       return `<article class="tile">
-        <div class="vis">${blokjes(d)}</div>
+        <div class="vis">${blokjes(d)}<span class="legenda"><span><i class="open"></i>${t.open} open</span><span><i class="keten"></i>${t.keten} keten</span><span><i class="intern"></i>${t.intern} intern</span></span></div>
         <h4>${esc(d.tegel)}</h4>
-        <span class="meta">${d.kaarten.length} indicatoren · ${t.open} open</span>
+        <span class="meta">${d.kaarten.length} indicatoren</span>
         <p>${esc(d.oms)}</p>
         <div class="tile-links"><a class="btn-start" data-nav href="#domein=${key}${gmDeel}">Open de indicatoren <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-${key}">Meer weten</button></div>
       </article>`;
@@ -859,20 +864,20 @@ main > * { min-width: 0; }
       <span class="strip ${c.b}" aria-hidden="true"></span>
       <h4>${esc(c.naam)}</h4>
       <span class="badge ${c.b}">${BRON[c.b]}</span>
-      <p>${esc(c.def)}</p>
-      <div class="tile-links">${c.inst ? `<a class="btn-start" href="${esc(instLink(c.inst[0]))}" aria-label="Open ${esc(c.inst[1])}">Open instrument <span aria-hidden="true">→</span></a>` : ''}<button class="more" type="button" aria-expanded="false">Meer weten</button></div>
+      <div class="inzicht"><p><b>Zegt</b>${esc(c.zegt)}</p><p class="niet"><b>Zegt niet</b>${esc(c.niet)}</p></div>
+      <div class="tile-links"><button class="btn-start" type="button" data-open aria-expanded="false">Open de indicator <span aria-hidden="true">→</span></button></div>
     </article>`;
   }
   function sluitPaneel() {
     const p = $('#kaarten .kaartpaneel'); if (!p) return;
     p.remove();
-    document.querySelectorAll('#kaarten .indtegel.open-nu').forEach(t => { t.classList.remove('open-nu'); t.querySelector('.more').setAttribute('aria-expanded', 'false'); });
+    document.querySelectorAll('#kaarten .indtegel.open-nu').forEach(t => { t.classList.remove('open-nu'); t.querySelector('[data-open]').setAttribute('aria-expanded', 'false'); });
   }
   $('#kaarten').addEventListener('click', e => {
     if (e.target.closest('[data-sluit]')) {
-      const t = $('#kaarten .indtegel.open-nu'); sluitPaneel(); if (t) t.querySelector('.more').focus(); return;
+      const t = $('#kaarten .indtegel.open-nu'); sluitPaneel(); if (t) t.querySelector('[data-open]').focus(); return;
     }
-    const knop = e.target.closest('.more'); if (!knop) return;
+    const knop = e.target.closest('[data-open]'); if (!knop) return;
     const tegel = knop.closest('.indtegel'), was = tegel.classList.contains('open-nu');
     sluitPaneel(); if (was) return;
     const c = D[S.d].kaarten[+tegel.dataset.i];
