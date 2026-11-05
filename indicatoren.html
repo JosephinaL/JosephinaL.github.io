@@ -84,7 +84,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 @media (min-width: 1100px) {
   .shelves { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; margin-top: -32px; }
   .shelf { grid-column: span 1; grid-row: span 2; grid-template-columns: subgrid; grid-template-rows: subgrid; row-gap: 0; }
-  .shelf:has(.tile + .tile), .shelf:has(.tile.breed) { grid-column: span 2; }
+  .shelf:has(.tile + .tile) { grid-column: span 2; }
   .shelf:has(.tile + .tile + .tile) { grid-column: span 3; }
   .shelf:has(.tile + .tile + .tile + .tile) { grid-column: span 4; }
   .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
@@ -99,13 +99,13 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .tile > p { margin: 0; color: var(--muted); font-size: .95rem; }
 .tile .cijfers { display: block; margin-top: 6px; font-size: .88rem; }
 .tile .vis { display: grid; gap: 6px; align-content: center; min-height: 28px; }
-.blokjes { display: flex; flex-wrap: wrap; gap: 3px 8px; }
-.blokjes .stap { display: inline-flex; gap: 3px; }
-.blokjes i { display: block; width: 18px; height: 18px; border-radius: 3px; }
+.blokjes { display: flex; gap: 6px; height: 12px; }
+.blokjes .stap { display: flex; gap: 2px; min-width: 0; }
+.blokjes i { display: block; flex: 1 1 0; min-width: 0; height: 12px; border-radius: 2px; }
 .blokjes i.open, .legenda i.open { background: var(--open-vis); }
 .blokjes i.keten, .legenda i.keten { background: var(--keten-vis); }
-.blokjes i.intern, .legenda i.intern { background: var(--intern-vis); box-shadow: inset 0 0 0 1.5px var(--intern-rand); }
-.legenda { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: .84rem; color: var(--fg); }
+.blokjes i.intern, .legenda i.intern { background: var(--intern-vis); box-shadow: inset 0 0 0 1px var(--intern-rand); }
+.legenda { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: .84rem; color: var(--fg); margin: 0; }
 .legenda span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
 .legenda i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
 .tile.breed { background: transparent; border-style: dashed; grid-template-rows: auto 1fr; }
@@ -246,6 +246,7 @@ main > * { min-width: 0; }
     <h2 class="groot">Welke indicatoren horen bij een beleidsdomein, en waar staan ze?</h2>
     <p class="lead">Geen cijfers, wel de weg ernaartoe. Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden.</p>
     <p class="gmregel" id="gmRegel"></p>
+    <p class="legenda"><span><i class="open"></i>staat in open data</span><span><i class="keten"></i>ligt bij een ketenpartner</span><span><i class="intern"></i>intern opvragen</span></p>
   </section>
 
   <section id="overzicht" aria-label="Thema's per domein">
@@ -360,6 +361,7 @@ main > * { min-width: 0; }
     ['8', 'Volkshuisvesting, leefomgeving en stedelijke vernieuwing', 'Ruimtelijke ordening, wonen en bouwen, grondexploitatie.']
   ];
 
+  const PLANK = { '8': ['Volkshuisvesting', 'Ruimtelijke ordening, wonen en bouwen.'] }; // korte kop op de plank; de volledige naam staat bij het thema
   const D = {
     wmo: {
       tv: '6', kort: 'Wmo', naam: 'Maatschappelijke ondersteuning (Wmo)',
@@ -769,26 +771,25 @@ main > * { min-width: 0; }
   function themasVan(nr) { return Object.entries(D).filter(([, d]) => d.tv === nr); }
   function renderOverzicht() {
     const gmDeel = S.gm ? '&gm=' + S.gm : '';
-    const legenda = t => `<span class="legenda"><span><i class="open"></i>${t.open} open data</span><span><i class="keten"></i>${t.keten} vanuit de keten</span><span><i class="intern"></i>${t.intern} intern opvragen</span></span>`;
     const blokjes = d => `<span class="blokjes" role="img" aria-label="${d.kaarten.length} indicatoren in de volgorde van de keten">${KETEN.map(([k]) => {
-        const cs = d.kaarten.filter(c => c.k === k); return cs.length ? `<span class="stap">${cs.map(c => `<i class="${c.b}"></i>`).join('')}</span>` : ''; }).join('')}</span>`;
+        const cs = d.kaarten.filter(c => c.k === k); return cs.length ? `<span class="stap" style="flex:${cs.length} 1 0">${cs.map(c => `<i class="${c.b}"></i>`).join('')}</span>` : ''; }).join('')}</span>`;
     const tegel = ([key, d]) => {
       const t = telling(d);
       return `<article class="tile">
-        <div class="vis">${blokjes(d)}${legenda(t)}</div>
+        <div class="vis">${blokjes(d)}</div>
         <h4>${esc(d.tegel)}</h4>
-        <span class="meta">${d.kaarten.length} indicatoren · ${KETEN.filter(([k]) => d.kaarten.some(c => c.k === k)).length} stappen in de keten</span>
-        <p>${esc(d.oms)}<span class="cijfers">Cijfers per gemeente: <a href="${esc(instLink(d.atelier))}">${esc(d.atelierNaam)}</a></span></p>
+        <span class="meta">${d.kaarten.length} indicatoren · ${t.open} open</span>
+        <p>${esc(d.oms)}</p>
         <div class="tile-links"><a class="btn-start" data-nav href="#domein=${key}${gmDeel}">Open de indicatoren <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-${key}">Meer weten</button></div>
       </article>`;
     };
     const uitgewerkt = TV.filter(([nr]) => themasVan(nr).length);
     const rest = TV.filter(([nr]) => !themasVan(nr).length);
     $('#shelves').innerHTML = uitgewerkt.map(([nr, naam, oms]) => `<div class="shelf">
-        <div class="shelf-head"><h3>${nr} · ${esc(naam)}</h3><span>${esc(oms)}</span></div>
+        <div class="shelf-head"><h3>${nr} · ${esc(PLANK[nr] ? PLANK[nr][0] : naam)}</h3><span>${esc(PLANK[nr] ? PLANK[nr][1] : oms)}</span></div>
         <div class="rail">${themasVan(nr).map(tegel).join('')}</div></div>`).join('')
       + (rest.length ? `<div class="shelf">
-        <div class="shelf-head"><h3>Binnenkort</h3><span>De andere Iv3-hoofdtaakvelden, nog niet uitgewerkt</span></div>
+        <div class="shelf-head"><h3>Binnenkort</h3><span>Nog niet uitgewerkt.</span></div>
         <div class="rail"><div class="tile breed"><ul class="binnenkort">${rest.map(([nr, naam]) => `<li><b>${nr}</b> ${esc(naam)}</li>`).join('')}</ul></div></div></div>` : '');
 
     $('#infos').innerHTML = Object.entries(D).map(([key, d]) => {
