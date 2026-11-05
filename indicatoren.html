@@ -162,7 +162,18 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .ketenstap { display: grid; gap: 10px; }
 .ketenstap > h2 { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .ketenstap > h2 .muted { font-family: var(--f-body); font-stretch: 100%; font-size: .85rem; font-weight: 400; }
-.kaarten { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 12px; }
+.kaarten { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+@media (min-width: 640px) { .kaarten { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .kaarten { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.indtegel .strip { display: block; height: 12px; border-radius: 3px; background: var(--open-vis); }
+.indtegel .strip.keten { background: var(--keten-vis); }
+.indtegel .strip.intern { background: var(--intern-vis); box-shadow: inset 0 0 0 1px var(--intern-rand); }
+.indtegel .badge { justify-self: start; }
+.indtegel.open-nu { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.kaartpaneel { grid-column: 1 / -1; min-width: 0; }
+.kaartpaneel .kaart { box-shadow: 0 0 0 2px var(--accent); outline: none; }
+.kaartpaneel .sluit { justify-self: end; }
+@media (min-width: 900px) { .kaartpaneel .kaart { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px 20px; } .kaartpaneel .kop, .kaartpaneel .def, .kaartpaneel .acties { grid-column: 1 / -1; } .kaartpaneel .zz { align-self: start; grid-template-columns: minmax(0, 1fr); } }
 .kaart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; min-width: 0; border-left: 4px solid var(--line); }
 .kaart[data-b="open"] { border-left-color: var(--open-vis); }
 .kaart[data-b="keten"] { border-left-color: var(--keten-vis); }
@@ -833,9 +844,38 @@ main > * { min-width: 0; }
         ${rij('Gegevensobject', c.ggm || '')}
         ${rij('Herkomst', esc(c.herkomst))}
       </dl>
-      ${inst ? `<div class="acties">${inst}</div>` : ''}
+      <div class="acties">${inst}<button type="button" class="btn klein" data-sluit>Sluiten</button></div>
     </article>`;
   }
+  function tegelHtml(c, i) {
+    return `<article class="tile indtegel" data-i="${i}">
+      <span class="strip ${c.b}" aria-hidden="true"></span>
+      <h4>${esc(c.naam)}</h4>
+      <span class="badge ${c.b}">${BRON[c.b]}</span>
+      <p>${esc(c.def)}</p>
+      <div class="tile-links">${c.inst ? `<a class="btn-start" href="${esc(instLink(c.inst[0]))}" aria-label="Open ${esc(c.inst[1])}">Open instrument <span aria-hidden="true">→</span></a>` : ''}<button class="more" type="button" aria-expanded="false">Meer weten</button></div>
+    </article>`;
+  }
+  function sluitPaneel() {
+    const p = $('#kaarten .kaartpaneel'); if (!p) return;
+    p.remove();
+    document.querySelectorAll('#kaarten .indtegel.open-nu').forEach(t => { t.classList.remove('open-nu'); t.querySelector('.more').setAttribute('aria-expanded', 'false'); });
+  }
+  $('#kaarten').addEventListener('click', e => {
+    if (e.target.closest('[data-sluit]')) {
+      const t = $('#kaarten .indtegel.open-nu'); sluitPaneel(); if (t) t.querySelector('.more').focus(); return;
+    }
+    const knop = e.target.closest('.more'); if (!knop) return;
+    const tegel = knop.closest('.indtegel'), was = tegel.classList.contains('open-nu');
+    sluitPaneel(); if (was) return;
+    const c = D[S.d].kaarten[+tegel.dataset.i];
+    let laatste = tegel, n = tegel.nextElementSibling;
+    while (n && n.offsetTop === tegel.offsetTop) { laatste = n; n = n.nextElementSibling; }
+    const p = document.createElement('div'); p.className = 'kaartpaneel'; p.innerHTML = kaartHtml(c);
+    laatste.after(p);
+    tegel.classList.add('open-nu'); knop.setAttribute('aria-expanded', 'true');
+    const a = p.querySelector('.kaart'); a.tabIndex = -1; a.focus({ preventScroll: true }); p.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  });
 
   function render() {
     $('#gmInput').value = S.gm ? byCode.get(S.gm).n : '';
@@ -870,9 +910,9 @@ main > * { min-width: 0; }
     const ta = $('#toonAlles'); if (ta) ta.addEventListener('click', () => { S.b = null; render(); });
 
     $('#kaarten').innerHTML = KETEN.map(([k, kop, uitleg]) => {
-      const cs = d.kaarten.filter(c => c.k === k && (!S.b || c.b === S.b));
+      const cs = d.kaarten.map((c, i) => [c, i]).filter(([c]) => c.k === k && (!S.b || c.b === S.b));
       if (!cs.length) return '';
-      return `<section class="ketenstap"><h2>${kop} <span class="muted">${uitleg}</span></h2><div class="kaarten">${cs.map(kaartHtml).join('')}</div></section>`;
+      return `<section class="ketenstap"><h2>${kop} <span class="muted">${uitleg}</span></h2><div class="kaarten">${cs.map(([c, i]) => tegelHtml(c, i)).join('')}</div></section>`;
     }).join('');
 
     renderUitvraag(d);
