@@ -28,6 +28,7 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 | **Sociaal domein · ondersteuning en meedoen** | | | |
 | Wmo per wijk | [wmo.html](https://josephinelinders.nl/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
 | Schulden per wijk | [schulden.html](https://josephinelinders.nl/schulden.html) | Hoeveel huishoudens hebben problematische schulden, bij welke schuldeisers, wie zijn het en in welke wijken? | CBS (Schuldenproblematiek in beeld), PDOK |
+| Bijstand per wijk | [bijstand.html](https://josephinelinders.nl/bijstand.html) | Hoeveel inwoners leven van bijstand, per maand, per leefvorm en per wijk, en hoe staan rijksbudget en uitkeringslasten naast elkaar? | CBS (Personen met een uitkering, Bijstandsuitkeringen, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
 | Inburgering per gemeente | [inburgering.html](https://josephinelinders.nl/inburgering.html) | Wie werd inburgeringsplichtig onder de Wet inburgering 2021, hoe ver is elke jaargroep en in welke leerroute? | DUO (WI 2021 Instroom, Uitstroom en Leerroute), CBS (Regionale kerncijfers) |
 | **Sociaal domein · jeugd en veilig thuis** | | | |
 | Jeugdzorg per wijk | [jeugdzorg.html](https://josephinelinders.nl/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, hoe begint en eindigt de hulp, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
@@ -52,7 +53,7 @@ Wmo, Jeugdzorg, Schulden, Huishoudens en Woningvoorraad delen de wijk als ingang
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, bevolking en wonen (CBS), inburgering en studenten (DUO), vergunningen (gemeenteblad).
+2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, bijstand, bevolking en wonen (CBS), inburgering en studenten (DUO), vergunningen (gemeenteblad).
 3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving. Eigen lijst op de kaart is daar het gereedschap voor.
 4. **Antwoord:** navolgbaar per object.
 
