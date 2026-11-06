@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Jeugdzorg per wijk · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Jeugdzorggebruik, kosten, verwijzers, huishoudsamenstelling en de jeugdregels van de gemeente per Nederlandse gemeente en wijk, live uit open data van het CBS en lokaleregelgeving.overheid.nl.">
+<meta name="description" content="Jeugdzorggebruik, verloop van de hulp, kosten, verwijzers, huishoudsamenstelling en de jeugdregels van de gemeente per Nederlandse gemeente en wijk, live uit open data van het CBS en lokaleregelgeving.overheid.nl.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
 <script src="vendor/leaflet-1.9.4/leaflet.js"></script>
@@ -152,6 +152,8 @@ tbody tr.klik { cursor: pointer; }
 tbody tr.klik:hover { background: var(--sunk); }
 tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
 tbody tr.gm td { font-weight: 600; }
+.eindrij { display: grid; grid-template-columns: minmax(90px, 160px) minmax(0, 1fr); gap: 10px; align-items: center; font-size: .9rem; }
+.verloopsprong { margin: 0 0 10px; padding: 8px 12px; background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--vw-4); border-radius: var(--r); }
 .stack { display: flex; gap: 2px; height: 14px; min-width: 160px; border-radius: 3px; overflow: hidden; }
 .stack i { display: block; height: 100%; }
 .hhbar { position: relative; padding: 4px 0; }
@@ -256,7 +258,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
-    <p>Hoeveel jongeren in je gemeente krijgen jeugdzorg, wat kost dat, wie verwijst ze en welke regels had de gemeente? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen en de verdeling over de wijken. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor. Alleen Nederland als geheel staat erbij als referentiepunt.</p>
+    <p>Hoeveel jongeren in je gemeente krijgen jeugdzorg, hoe begint en eindigt de hulp, wat kost dat, wie verwijst ze en welke regels had de gemeente? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen en de verdeling over de wijken. Er is geen vergelijking met andere gemeenten: de pagina houdt de gemeente een spiegel voor. Alleen Nederland als geheel staat erbij als referentiepunt.</p>
     <p class="muted small">De cijfers komen live van het CBS en de regels van lokaleregelgeving.overheid.nl, op het moment dat je een gemeente kiest.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
     <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=jeugd">Welke indicatoren horen bij jeugd, en waar staan ze? Indicatoren belicht →</a></p>
@@ -285,7 +287,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <ol>
           <li><b>Een ander begrip.</b> Dit zijn jongeren tot 23 jaar met jeugdhulp, jeugdbescherming of jeugdreclassering, zoals aanbieders die aan het CBS doorgeven. Het zijn personen, geen trajecten of beschikkingen. De kosten komen uit een CBS-uitvraag bij gemeenten, niet uit de eigen begroting of jaarrekening.</li>
           <li><b>Een andere peildatum of indeling.</b> Jaarcijfers; het laatste jaar is voorlopig en een lopend jaar staat er als "(deel)". Tussen 2020 en 2021 heeft het CBS de reeks herzien. Wijken in de indeling van het gekozen jaar.</li>
-          <li><b>Registratie bij de bron.</b> Een jongere telt bij de gemeente volgens het woonplaatsbeginsel, niet waar hij verblijft. Aanbieders leveren aan; ontbreekt een aanlevering, dan ontbreken jongeren. Niet elke gemeente levert haar kosten aan.</li>
+          <li><b>Registratie bij de bron.</b> Een jongere telt bij de gemeente volgens het woonplaatsbeginsel, niet waar hij verblijft. Aanbieders leveren aan; ontbreekt een aanlevering, dan ontbreken jongeren of trajecten. Een grote sprong van jaar op jaar kan daardoor komen. Niet elke gemeente levert haar kosten aan.</li>
           <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85099NED/table" target="_blank" rel="noopener">de CBS-tabel zelf</a>, dan zit de fout hier. Meld het hieronder.</li>
         </ol>
         <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
@@ -308,6 +310,22 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       </div>
       <div class="multiples" id="multiples"></div>
       <details class="tabelview" id="trendTabel"><summary>Toon als tabel</summary><div class="scroll" id="trendTabelIn"></div></details>
+
+      <!-- verloop -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2>Hoe de hulp begint en eindigt</h2></div>
+        <div class="seg" id="verloopSeg" role="group" aria-label="Kies de vorm van jeugdhulp">
+          <button type="button" data-v="alle" aria-pressed="true">Alle</button>
+          <button type="button" data-v="wijk" aria-pressed="false">Wijkteam</button>
+          <button type="button" data-v="niet" aria-pressed="false">Ander zonder verblijf</button>
+          <button type="button" data-v="verblijf" aria-pressed="false">Met verblijf</button>
+        </div>
+      </div>
+      <p class="small muted reeksnoot">Jeugdhulptrajecten in natura. Een jongere kan meer trajecten hebben. <span class="legend" style="display:inline-flex"><span><i class="sw" style="background:var(--accent)"></i>deze gemeente</span><span>- - - Nederland</span></span></p>
+      <p class="small verloopsprong" id="verloopNoot" role="status" hidden></p>
+      <div class="multiples" id="verloopPan"></div>
+      <div class="chart" id="verloopEind"></div>
+      <details class="tabelview" id="verloopTabel"><summary>Toon als tabel</summary><div class="scroll" id="verloopTabelIn"></div><div style="padding:8px 14px"><button class="btn" id="csvVerloop" type="button">CSV verloop, alle vormen</button></div></details>
 
       <!-- kosten -->
       <div class="sectiekop">
@@ -369,10 +387,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <ul class="small">
             <li><b>Jeugdzorg</b>: jeugdhulp, jeugdbescherming en jeugdreclassering onder de Jeugdwet. Het gaat om jongeren die er op enig moment in het jaar gebruik van maakten.</li>
             <li><b>In natura</b>: zorg die de gemeente bij een aanbieder inkoopt. Hulp met een persoonsgebonden budget (pgb) telt in de gebruikscijfers en wijkcijfers niet mee, in de kosten wel.</li>
-            <li><b>Percentages</b>: jeugdzorg en jeugdhulp als deel van alle jongeren tot 23 jaar, jeugdbescherming als deel van jongeren tot 18 jaar, jeugdreclassering als deel van jongeren van 12 tot 23 jaar. Zo rekent het CBS.</li>
+            <li><b>Percentages</b>: jeugdzorg en jeugdhulp als deel van alle jongeren tot 23 jaar, jeugdbescherming als deel van jongeren tot 18 jaar, jeugdreclassering als deel van jongeren van 12 tot 23 jaar. Zo rekent het CBS. Het BBV telt jeugdhulp als deel van jongeren tot 18 jaar; dat percentage in de begroting of jaarstukken komt dus anders uit.</li>
             <li><b>Woonplaats</b>: een jongere telt mee in de gemeente en wijk waar hij woont, niet waar de hulp wordt gegeven.</li>
             <li><b>Kosten</b>: gerealiseerde en begrote kosten zoals de gemeente die aan het CBS opgeeft. Per inwoner is gedeeld door alle inwoners. Per jongere is gedeeld door het aantal jongeren met jeugdzorg (inclusief pgb).</li>
-            <li><b>Verwijzers</b>: wie een jeugdhulptraject startte. Een jongere kan meer trajecten hebben. Jeugdbescherming en jeugdreclassering hebben geen verwijzer en tellen hier niet mee.</li>
+            <li><b>Verwijzers</b>: wie een jeugdhulptraject startte. Een jongere kan meer trajecten hebben. Jeugdbescherming en jeugdreclassering hebben geen verwijzer en tellen hier niet mee. Sinds 2021 vallen alle trajecten van het wijk- of buurtteam onder "geen verwijzer", omdat die hulp vrij toegankelijk is. "Geen verwijzer" betekent dus niet: geen toegang.</li>
+            <li><b>Hoe de hulp begint</b>: "opnieuw in de hulp" is een begonnen traject van een jongere die in de vijf jaar ervoor jeugdhulp had (herhaald beroep bij het CBS). "Gestart in een crisis" is het oordeel van de professional, zonder vaste maat. Beide als deel van de begonnen trajecten.</li>
+            <li><b>Hoe de hulp eindigt</b>: "volgens plan" als deel van de afgesloten trajecten met een bekende reden, zoals het CBS rekent. De balk toont alle afgesloten trajecten, met het deel "reden onbekend". De reden is een code van de aanbieder.</li>
+            <li><b>Duur</b>: het deel van de afgesloten trajecten dat een jaar of langer duurde, uit de duurklassen van het CBS. De pagina toont bewust geen gemiddelde duur: dat veld in tabel 85097NED wijkt voor 2021–2024 af van de CBS-rapportages (2024: 322 tegenover 414 dagen) en is daardoor niet te vergelijken met 2025.</li>
+            <li><b>Kleine aantallen bij het verloop</b>: een percentage alleen bij minstens 50 trajecten. Een sprong van 30% of meer in begonnen trajecten krijgt een waarschuwing, bij minstens 200 trajecten in het jaar ervoor.</li>
             <li><b>Huishouden bij de hulpvraag</b>: in welk huishouden de jongere woonde toen de jeugdzorg begon. Eenouder, bij een paar, of ander huishouden (zoals pleegzorg, zelfstandig of in een instelling). Het CBS koppelt dit per jongere. Het aandeel eenouder is gedeeld door de som van de drie groepen.</li>
             <li><b>Referentie</b>: de doorgetrokken streep is Nederland, de gestippelde de eigen gemeente. "Opvallend" noemt een wijk als het aandeel eenouder 5 procentpunt of meer van Nederland afwijkt, het aandeel huishoudens met kinderen 8 procentpunt of meer van de gemeente, of de inkomensmaat een kwart of meer hoger of lager ligt dan in de gemeente.</li>
             <li><b>Regels</b>: alle regelingen van de gemeente in lokaleregelgeving.overheid.nl die de Jeugdwet noemen, of in de titel over jeugdhulp, jeugdzorg, jeugdbescherming, pleegzorg of pgb gaan. Regelingen alleen over de Wmo, organisatieregelingen (toezicht, mandaat, adviesraad) en jeugdgezondheidszorg, kinderopvang en leerlingenvervoer tellen niet mee. De indeling (verordening, beleidsregels, nadere regels, bedragen) volgt de titel. Een regeling gold in een jaar als een versie dat jaar of eerder inging en niet vóór 1 januari eindigde. Lokaleregelgeving.overheid.nl vult de einddatum niet altijd in; daarom geldt een regeling ook als vervangen zodra een nieuwere met dezelfde naam (zonder jaartal), of een nieuwe jeugdverordening, ingaat.</li>
@@ -382,10 +404,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="card">
           <h2>Let op bij het lezen</h2>
           <ul class="small">
-            <li><b>Een wijk kiezen</b>: kerncijfers, kaart en dossier volgen je keuze, met de link mee. Gebruik door de jaren, kosten en regels bestaan alleen voor de hele gemeente.</li>
+            <li><b>Een wijk kiezen</b>: kerncijfers, kaart en dossier volgen je keuze, met de link mee. Gebruik door de jaren, het verloop van de hulp, kosten en regels bestaan alleen voor de hele gemeente.</li>
             <li><b>Reeksbreuk</b>: tussen 2020 en 2021 is de CBS-reeks herzien. De lijnen lopen daar niet door.</li>
             <li><b>Kleine aantallen</b>: het CBS rondt af op 5 en laat kleine aantallen weg (–). Woont er in een wijk of buurt minder dan 150 jongeren tot 23 jaar, dan toont deze pagina geen percentage. Een paar jongeren meer of minder verschuift het percentage dan al flink.</li>
-            <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Het CBS stelt ze later nog bij.</li>
+            <li><b>Voorlopig</b>: de cijfers van het laatste jaar zijn voorlopig. Het CBS stelt ze later nog bij; definitief liggen ze meestal enkele procenten hoger. Trajecten zonder einddatum tellen pas later mee bij de afgesloten trajecten.</li>
+            <li><b>Wijkteams</b>: gemeenten bepalen zelf wat zij als jeugdhulp van het wijkteam registreren. De aantallen zijn moeilijk te vergelijken tussen gemeenten en kunnen grillig bewegen. Dat geldt ook voor het verschil tussen wijkteam en andere hulp.</li>
+            <li><b>Wat hier niet staat</b>: wachttijden, en wat de hulp opleverde volgens jongere of ouder. Daarvoor is geen open bron per gemeente. <a href="indicatoren.html#domein=jeugd">Indicatoren belicht</a> laat zien waar die gegevens wel liggen.</li>
             <li><b>Lopend jaar</b>: in het najaar publiceert het CBS de wijkcijfers over het eerste halfjaar van het lopende jaar. Dat jaar staat bij de jaarknoppen als "(deel)" en is niet te vergelijken met hele jaren. De pagina opent op het laatste hele jaar.</li>
             <li><b>Kosten ontbreken soms</b>: niet elke gemeente levert haar kosten aan het CBS. Gemeenten verdelen de kosten ook niet allemaal op dezelfde manier over de vormen.</li>
             <li><b>Geen jeugd-ggz apart</b>: jeugdhulp is één begrip. Psychische hulp, opvoedhulp en hulp bij een beperking zijn niet te onderscheiden.</li>
@@ -403,10 +427,10 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> CBS, Beleidsinformatie Jeugd (84134NED tot 2020, 85099NED vanaf 2021, wijktabellen per jaar), kosten 83454NED, context per wijk uit de Kerncijfers wijken en buurten; regels van de gemeente uit de CVDR (overheid.nl); wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze. Jaarcijfers vanaf 2015, het laatste jaar voorlopig. Het tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Bron en peildatum.</b> CBS, Beleidsinformatie Jeugd (84134NED tot 2020, 85099NED vanaf 2021, wijktabellen per jaar), verloop van trajecten 85097NED (vanaf 2021), kosten 83454NED, context per wijk uit de Kerncijfers wijken en buurten; regels van de gemeente uit de CVDR (overheid.nl); wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze. Jaarcijfers vanaf 2015, het laatste jaar voorlopig. Het tijdstip van ophalen staat onder de cijfers.</p>
     <p><b>Licentie.</b> CBS: CC BY 4.0. CVDR (KOOP): CC0. Wijkgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
-    <p><b>Methode.</b> Aantallen en percentages zoals het CBS ze publiceert, afgerond op vijftallen. Kosten per jongere en het aandeel per huishoudtype rekent deze pagina zelf; percentages per wijk alleen bij minstens 150 jongeren. Nederland is het enige referentiepunt. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
-    <p><b>Wat dit niet is.</b> Geen maat voor de kwaliteit of de uitkomst van jeugdhulp, en geen ranglijst van gemeenten of wijken. Een wijk met veel eenoudergezinnen of armoede zegt iets over de wijk, niet over de gezinnen in de jeugdzorg. Een regel die tegelijk met een verandering inging, is geen bewezen oorzaak.</p>
+    <p><b>Methode.</b> Aantallen en percentages zoals het CBS ze publiceert, afgerond op vijftallen. Kosten per jongere, het aandeel per huishoudtype en de aandelen bij het verloop van de hulp rekent deze pagina zelf; percentages per wijk alleen bij minstens 150 jongeren. Nederland is het enige referentiepunt. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen maat voor de kwaliteit of de uitkomst van jeugdhulp: "volgens plan" is een code van de aanbieder, geen oordeel over het resultaat. Ook geen ranglijst van gemeenten of wijken. Een wijk met veel eenoudergezinnen of armoede zegt iets over de wijk, niet over de gezinnen in de jeugdzorg. Een regel die tegelijk met een verandering inging, is geen bewezen oorzaak.</p>
     <p><b>Bekende beperkingen.</b> Reeksbreuk 2020/2021. Geen jeugd-ggz apart. Kosten ontbreken bij gemeenten die niet aanleveren. Inkomenscijfers per wijk komen later dan de jeugdcijfers; de pagina toont dan het meest recente jaar.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
@@ -421,17 +445,19 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.5';
+  const VERSIE = '1.6';
   const PRODUCT = 'Jeugdzorg per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOG = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title,Modified';
-  const T = { trendOud: '84134NED', trendNieuw: '85099NED', kosten: '83454NED' };
+  const T = { trendOud: '84134NED', trendNieuw: '85099NED', kosten: '83454NED', verloop: '85097NED' };
   // terugval als de catalogus niet antwoordt; wordt bij het laden aangevuld met nieuwere tabellen
   const WIJK = { 2025: '86204NED', 2024: '85990NED', 2023: '85685NED', 2022: '85335NED', 2021: '85075NED' };
   const KWB = { 2025: '86165NED', 2024: '85984NED', 2023: '85618NED', 2022: '85318NED', 2021: '85039NED' };
   const BREUK = 2021; // eerste jaar van de herziene reeks
   const MIN_JONG = 150; // ondergrens (jongeren tot 23 jaar) voor een percentage per wijk of buurt
   const MIN_HH = 50; // ondergrens (jongeren met jeugdzorg) voor een aandeel per huishoudtype
+  const MIN_TRAJ = 50; // ondergrens (trajecten) voor een percentage bij het verloop van de hulp
+  const SPRONG = 30; // procent verandering in begonnen trajecten die een waarschuwing krijgt
 
   const $ = s => document.querySelector(s);
   const nf = new Intl.NumberFormat('nl-NL');
@@ -459,7 +485,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.dataset.theme = dark ? 'light' : 'dark';
     try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
-    if (S) { renderTrend(); renderKosten(); if (S.w) { renderKaart(); renderTabel(); } }
+    if (S) { renderTrend(); renderVerloop(); renderKosten(); if (S.w) { renderKaart(); renderTabel(); } }
   });
   const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
 
@@ -521,6 +547,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- staat ----------
   let S = null;
   let modus = 'pct';
+  let verloopVorm = 'alle';
   let kostJaar = null;
   let view = 'wijk', sortKey = null, sortDir = 1, selWijk = null;
   let kaartMaat = 'pct';
@@ -545,19 +572,19 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#gmInput').value = g.n;
     document.title = 'Jeugdzorg ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    S = { g, trend: null, kosten: null, w: null, wJaar: null, opgehaald: null, rJaar: null, regels: null, regelsFout: false, regelsOp: null };
+    S = { g, trend: null, kosten: null, verloop: null, w: null, wJaar: null, opgehaald: null, rJaar: null, regels: null, regelsFout: false, regelsOp: null };
     selWijk = null; kostJaar = null; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo(''); renderNoot();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
-    $('#top3').innerHTML = ''; $('#multiples').innerHTML = ''; $('#kostenChart').innerHTML = ''; $('#kostenVorm').innerHTML = '';
+    $('#top3').innerHTML = ''; $('#multiples').innerHTML = ''; $('#verloopPan').innerHTML = ''; $('#verloopEind').innerHTML = ''; $('#verloopNoot').hidden = true; $('#kostenChart').innerHTML = ''; $('#kostenVorm').innerHTML = '';
     $('#tblWrap').innerHTML = ''; $('#dossier').innerHTML = ''; $('#jaren').innerHTML = '';
     voortgang(0, 4, 'Tabellen zoeken bij het CBS…');
     laadRegelsS(); // loopt los van de rest
     await ontdek();
     if (S.g !== g) return;
     voortgang(1, 4, 'Gebruik en kosten ophalen…');
-    await Promise.all([laadTrend(), laadKosten()]);
+    await Promise.all([laadTrend(), laadKosten(), laadVerloop()]);
     if (S.g !== g) return;
-    renderKern(); renderTrend(); renderKosten(); renderRegels();
+    renderKern(); renderTrend(); renderVerloop(); renderKosten(); renderRegels();
     voortgang(3, 4, 'Wijken ophalen…');
     const jaren = Object.keys(WIJK).map(Number).sort((a, b) => b - a);
     const gevraagd = +((location.hash.match(/jaar=(\d{4})/) || [])[1]);
@@ -586,6 +613,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       const jaren = [...new Set(a.concat(b).map(r => +r.Perioden.slice(0, 4)))].sort();
       S.trend = { d, jaren };
     } catch (e) { S.trend = null; fouten.add('gebruik door de jaren'); toonMelding(); }
+  }
+  async function laadVerloop() {
+    try {
+      const r = await odata(T.verloop, `TypedDataSet?$filter=VerwijzerJeugdzorg eq 'T001376' and (startswith(RegioS,'GM${S.g.c}') or startswith(RegioS,'NL01')) and substringof('JJ',Perioden)`);
+      const gm = {}, nl = {};
+      r.forEach(x => { (tr(x.RegioS) === 'NL01' ? nl : gm)[+x.Perioden.slice(0, 4)] = x; });
+      S.verloop = { gm, nl, jaren: Object.keys(gm).map(Number).sort() };
+    } catch (e) { S.verloop = null; fouten.add('verloop van de hulp'); toonMelding(); }
   }
   async function laadKosten() {
     try {
@@ -870,6 +905,105 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
   function nice(v) { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
 
+  // ---------- verloop van de hulp ----------
+  // 85097NED herhaalt dezelfde velden per vorm; het volgnummer schuift mee
+  const VVORM = { alle: { off: 0, t: 'alle jeugdhulp' }, wijk: { off: 44, t: 'hulp van het wijk- of buurtteam' }, niet: { off: 66, t: 'andere hulp zonder verblijf' }, verblijf: { off: 88, t: 'hulp met verblijf' } };
+  const VVELD = { beg: 'TotaalBegonnenTrajecten_2', herh: 'HerhaaldBeroep_4', crisis: 'GestartMetCrisis_5', eind: 'TotaalBeeindigdeTrajecten_7', k1: 'k_0Tot3Maanden_8', k2: 'k_3Tot6Maanden_9', k3: 'k_6MaandenTot1Jaar_10', k4: 'k_1Tot2Jaar_11', k5: 'k_2Tot3Jaar_12', k6: 'k_3Tot4Jaar_13', k7: 'k_4JaarOfLanger_14', plan: 'BeeindigdVolgensPlan_16', voort: 'TotaalVoortijdigAfgesloten_17', over: 'InOvereenstemming_18', client: 'EenzijdigDoorDeClient_19', aanb: 'EenzijdigDoorDeAanbieder_20', ext: 'WegensExterneOmstandigheden_21', onb: 'Onbekend_22' };
+  function vRij(x, vorm) {
+    if (!x) return null;
+    const off = VVORM[vorm].off, o = {};
+    Object.entries(VVELD).forEach(([k, v]) => { const i = v.lastIndexOf('_'); const w = x[v.slice(0, i + 1) + (+v.slice(i + 1) + off)]; o[k] = w == null ? null : w; });
+    return o;
+  }
+  const deel = (t, n) => t == null || n == null || n < MIN_TRAJ ? null : 100 * t / n;
+  function vMaat(o, k) {
+    if (!o) return null;
+    if (k === 'herh') return deel(o.herh, o.beg);
+    if (k === 'crisis') return deel(o.crisis, o.beg);
+    if (k === 'plan') return deel(o.plan, (o.plan || 0) + (o.voort || 0));
+    const lang = ['k4', 'k5', 'k6', 'k7'].reduce((a, c) => a + (o[c] || 0), 0);
+    const al = ['k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'k7'].reduce((a, c) => a + (o[c] || 0), 0);
+    return lang ? deel(lang, al) : null;
+  }
+  const VPAN = [
+    { k: 'herh', t: 'Opnieuw in de hulp', noemer: 'van de begonnen trajecten · jeugdhulp in de vijf jaar ervoor' },
+    { k: 'crisis', t: 'Gestart in een crisis', noemer: 'van de begonnen trajecten · oordeel van de professional' },
+    { k: 'lang', t: 'Langer dan een jaar', noemer: 'van de afgesloten trajecten met bekende duur' },
+    { k: 'plan', t: 'Volgens plan beëindigd', noemer: 'van de afgesloten trajecten met bekende reden' }
+  ];
+  const VEIND = [
+    { k: 'plan', t: 'Volgens plan', c: 'var(--vw-3)', n: o => o.plan },
+    { k: 'over', t: 'Voortijdig, in overeenstemming', c: 'var(--vw-1)', n: o => o.over },
+    { k: 'een', t: 'Voortijdig, eenzijdig door cliënt of aanbieder', c: 'var(--vw-2)', n: o => (o.client || 0) + (o.aanb || 0) },
+    { k: 'ext', t: 'Voortijdig, externe omstandigheden', c: 'var(--vw-4)', n: o => o.ext },
+    { k: 'onb', t: 'Reden onbekend', c: 'var(--muted)', n: o => o.onb }
+  ];
+  document.querySelectorAll('#verloopSeg button').forEach(b => b.addEventListener('click', () => {
+    verloopVorm = b.dataset.v;
+    document.querySelectorAll('#verloopSeg button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    renderVerloop();
+  }));
+  function vLijn(el, p, jaren, vals, nl) {
+    const W = 360, H = 150, L = 40, R = 14, Tp = 12, B = 24;
+    const alle = vals.concat(nl).filter(v => v != null);
+    const lastI = (() => { for (let i = vals.length - 1; i >= 0; i--) if (vals[i] != null) return i; return -1; })();
+    const kop = lastI >= 0 ? fP(vals[lastI]) + ` <span class="muted">in ${jaren[lastI]}</span>` : '–';
+    if (!alle.length) { el.innerHTML = `<div class="chart-kop"><h3>${esc(p.t)}</h3><span class="laatst">–</span></div><p class="small muted" style="margin:0">Te weinig trajecten voor een percentage.</p>`; return; }
+    const hi = Math.max(...alle) * 1.18 || 1;
+    const x = j => L + (W - L - R) * (j - jaren[0]) / Math.max(1, jaren[jaren.length - 1] - jaren[0]);
+    const y = v => Tp + (H - Tp - B) * (1 - v / hi);
+    const stap = nice(hi / 3);
+    const pad = (rr, attr) => { const pts = jaren.map((j, i) => rr[i] != null ? [x(j), y(rr[i])] : null).filter(Boolean); return pts.length > 1 ? `<path d="${pts.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' ')}" fill="none" stroke-linejoin="round" stroke-linecap="round" ${attr}/>` : ''; };
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(p.t)} per jaar, gemeente en Nederland">`;
+    for (let t = 0; t <= hi; t += stap) s += `<line class="ax" x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${L - 6}" y="${y(t) + 4}" text-anchor="end">${nf1.format(t).replace(/,0$/, '')}</text>`;
+    jaren.forEach(j => { s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle">${j}</text>`; });
+    s += pad(nl, 'stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 3"') + pad(vals, 'stroke="var(--accent)" stroke-width="2"');
+    vals.forEach((v, i) => { if (v != null && (i === lastI || vals.filter(q => q != null).length === 1)) s += `<circle cx="${x(jaren[i])}" cy="${y(v)}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`; });
+    s += `<line class="hl" x1="0" x2="0" y1="${Tp}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/><rect class="hit" x="${L - 10}" y="0" width="${W - L - R + 20}" height="${H}" fill="transparent"/></svg>`;
+    el.innerHTML = `<div class="chart-kop"><h3>${esc(p.t)}</h3><span class="laatst">${kop}</span></div><span class="noemer">${esc(p.noemer)}</span>${s}`;
+    const svg = el.querySelector('svg'), hl = svg.querySelector('.hl');
+    const zet = e => {
+      const r = svg.getBoundingClientRect(), px = (e.clientX - r.left) * W / r.width;
+      let bi = 0, bd = 1e9; jaren.forEach((j, i) => { const dd = Math.abs(x(j) - px); if (dd < bd) { bd = dd; bi = i; } });
+      hl.setAttribute('x1', x(jaren[bi])); hl.setAttribute('x2', x(jaren[bi])); hl.setAttribute('visibility', 'visible');
+      toonTip(e, `<b>${esc(p.t)} · ${jaren[bi]}</b><br>${esc(S.g.n)} <span class="num">${fP(vals[bi])}</span><br>Nederland <span class="num">${fP(nl[bi])}</span>${bi === jaren.length - 1 ? '<br><span class="muted">voorlopig</span>' : ''}`);
+    };
+    const weg = () => { hl.setAttribute('visibility', 'hidden'); verbergTip(); };
+    svg.addEventListener('pointermove', zet); svg.addEventListener('pointerdown', zet); svg.addEventListener('pointerleave', weg);
+  }
+  function vStapel(naam, o) {
+    if (!o || o.eind == null || o.eind < MIN_TRAJ) return `<div class="eindrij"><span>${esc(naam)}</span><span class="muted small">te weinig trajecten</span></div>`;
+    const d = VEIND.map(v => ({ ...v, w: v.n(o) || 0 })).filter(v => v.w);
+    const tot = d.reduce((a, v) => a + v.w, 0);
+    return `<div class="eindrij"><span>${esc(naam)}</span><div class="stack" role="img" aria-label="${esc(naam)}: ${d.map(v => `${esc(v.t)} ${fP(100 * v.w / tot)}`).join(', ')}">${d.map(v => `<i style="width:${100 * v.w / tot}%;background:${v.c}" data-tip="${esc(v.t)}: ${fP(100 * v.w / tot)} (${fmt(v.w)})"></i>`).join('')}</div></div>`;
+  }
+  function renderVerloop() {
+    const box = $('#verloopPan'), eind = $('#verloopEind'), noot = $('#verloopNoot');
+    if (!S.verloop || !S.verloop.jaren.length) { box.innerHTML = '<p class="muted small">Geen cijfers over het verloop opgehaald.</p>'; eind.innerHTML = ''; noot.hidden = true; $('#verloopTabelIn').innerHTML = ''; return; }
+    const { gm, nl, jaren } = S.verloop, v = verloopVorm;
+    box.innerHTML = VPAN.map((p, i) => `<div class="chart" id="vpan${i}"></div>`).join('');
+    VPAN.forEach((p, i) => vLijn($('#vpan' + i), p, jaren, jaren.map(j => vMaat(vRij(gm[j], v), p.k)), jaren.map(j => vMaat(vRij(nl[j], v), p.k))));
+    const lj = jaren[jaren.length - 1], og = vRij(gm[lj], v), on = vRij(nl[lj], v);
+    const pOnb = o => o && o.onb != null && o.eind >= MIN_TRAJ ? 100 * o.onb / o.eind : null;
+    eind.innerHTML = `<h3>Hoe trajecten eindigden in ${lj}</h3>${vStapel(S.g.n, og)}${vStapel('Nederland', on)}
+      <div class="legend">${VEIND.map(x => `<span><i class="sw" style="background:${x.c}"></i>${esc(x.t)}</span>`).join('')}</div>
+      <p class="small muted" style="margin:0">Reden onbekend: ${fP(pOnb(og))} in ${esc(S.g.n)}, ${fP(pOnb(on))} in Nederland. De lijn Volgens plan laat deze trajecten buiten beschouwing, zoals het CBS doet.</p>`;
+    bindStapelTips(eind);
+    // sprong in het aantal begonnen trajecten
+    const vg = vRij(gm[lj - 1], v), vn = vRij(nl[lj - 1], v);
+    const pv = vg && og && vg.beg >= 200 && og.beg != null ? 100 * (og.beg / vg.beg - 1) : null;
+    const pn = vn && on && vn.beg && on.beg != null ? 100 * (on.beg / vn.beg - 1) : null;
+    if (pv != null && Math.abs(pv) >= SPRONG) {
+      noot.textContent = `Let op: in ${lj} begonnen ${fmt(og.beg)} trajecten, ${nf.format(Math.round(Math.abs(pv)))}% ${pv < 0 ? 'minder' : 'meer'} dan de ${fmt(vg.beg)} in ${lj - 1}${pn != null ? ` (Nederland: ${nf.format(Math.round(Math.abs(pn)))}% ${pn < 0 ? 'minder' : 'meer'})` : ''}. Zo'n sprong kan echt zijn, maar ook komen door de aanlevering van aanbieders. ${lj} is nog niet definitief. Vergelijk het met de eigen registratie voordat je er conclusies aan verbindt.`;
+      noot.hidden = false;
+    } else noot.hidden = true;
+    // tabel
+    const kol = [['beg', 'Begonnen'], ['herh', 'Opnieuw'], ['crisis', 'Crisis'], ['eind', 'Afgesloten'], ['plan', 'Volgens plan'], ['voort', 'Voortijdig'], ['onb', 'Onbekend']];
+    const rijV = (lab, o, kl) => `<tr class="${kl}"><td class="mono">${lab}</td>${kol.map(([k]) => `<td class="r">${fmt(o ? o[k] : null)}</td>`).join('')}<td class="r">${fP(vMaat(o, 'lang'))}</td></tr>`;
+    $('#verloopTabelIn').innerHTML = `<table><thead><tr><th>Jaar</th>${kol.map(k => `<th class="r">${k[1]}</th>`).join('')}<th class="r">Langer dan een jaar</th></tr></thead><tbody>` +
+      jaren.map(j => rijV(`${j}${j === lj ? ' <span class="muted">voorlopig</span>' : ''}`, vRij(gm[j], v), '')).join('') + rijV(`Nederland ${lj}`, on, 'gm') + '</tbody></table>';
+  }
+
   // ---------- kosten ----------
   const KVORM = [
     ['A047012', 'Jeugdhulp zonder verblijf, door wijk- of jeugdteam'],
@@ -885,7 +1019,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const el = $('#kostenChart'), vel = $('#kostenVorm');
     const k = S.kosten;
     if (!k || !k.jaren.length) {
-      el.innerHTML = `<h3>Kosten per inwoner</h3><p class="small muted" style="margin:0">${k ? 'Deze gemeente heeft geen kosten voor jeugdzorg aan het CBS opgegeven. De lasten staan wel in de begroting en jaarrekening, onder de Iv3-taakvelden 6.72 en 6.82.' : 'De kosten konden niet worden opgehaald.'}</p>`;
+      el.innerHTML = `<h3>Kosten per inwoner</h3><p class="small muted" style="margin:0">${k ? 'Deze gemeente heeft geen kosten voor jeugdzorg aan het CBS opgegeven. De lasten staan wel in de begroting en jaarrekening, onder de Iv3-taakvelden 6.75, 6.76, 6.792 en 6.82.' : 'De kosten konden niet worden opgehaald.'}</p>`;
       vel.innerHTML = ''; return;
     }
     const jaren = k.jaren; if (!kostJaar || !jaren.includes(kostJaar)) kostJaar = jaren[jaren.length - 1];
@@ -1449,6 +1583,18 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     csvDownload(`jeugdzorg_wijken_${w.jaar}_${S.g.n.replace(/[^\w-]+/g, '_').toLowerCase()}.csv`, kop, rows);
   });
 
+  $('#csvVerloop').addEventListener('click', () => {
+    if (!S || !S.verloop) return;
+    const { gm, nl, jaren } = S.verloop, velden = ['beg', 'herh', 'crisis', 'eind', 'k1', 'k2', 'k3', 'k4', 'k5', 'k6', 'k7', 'plan', 'voort', 'over', 'client', 'aanb', 'ext', 'onb'];
+    const kop = ['jaar', 'status', 'regio', 'vorm', 'begonnen', 'herhaald_beroep', 'gestart_met_crisis', 'afgesloten', 'duur_0_3_mnd', 'duur_3_6_mnd', 'duur_6_12_mnd', 'duur_1_2_jr', 'duur_2_3_jr', 'duur_3_4_jr', 'duur_4_jr_of_langer', 'volgens_plan', 'voortijdig', 'in_overeenstemming', 'eenzijdig_client', 'eenzijdig_aanbieder', 'externe_omstandigheden', 'reden_onbekend', 'pct_herhaald', 'pct_crisis', 'pct_langer_dan_een_jaar', 'pct_volgens_plan'];
+    const r1 = v => v == null ? '' : komma(Math.round(v * 10) / 10), rows = [];
+    jaren.forEach((j, i) => Object.keys(VVORM).forEach(v => [[S.g.n, gm[j]], ['Nederland', nl[j]]].forEach(([n, x]) => {
+      const o = vRij(x, v); if (!o) return;
+      rows.push([j, i === jaren.length - 1 ? 'voorlopig' : '', n, VVORM[v].t, ...velden.map(k => o[k]), ...['herh', 'crisis', 'lang', 'plan'].map(k => r1(vMaat(o, k)))]);
+    })));
+    csvDownload(`jeugdhulp_verloop_${S.g.n.replace(/[^\w-]+/g, '_').toLowerCase()}.csv`, kop, rows);
+  });
+
   // ---------- voet ----------
   // ---------- herken je je gemeente niet? ----------
   function renderHerken() {
@@ -1466,7 +1612,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
     const w = S.w || {};
-    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}${w.ctx ? `, context (huishoudens en inkomen) uit Kerncijfers wijken en buurten ${w.ctx.jaar} ${link(w.ctx.tabel)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS, Beleidsinformatie Jeugd (CC-BY 4.0): jongeren met jeugdzorg ${link(T.trendOud)} (2015–2020) en ${link(T.trendNieuw)} (vanaf 2021), verloop van trajecten ${link(T.verloop)}, kosten ${link(T.kosten)}, jeugdzorg per wijk ${w.tabel ? link(w.tabel) : '–'}${w.kwb ? `, percentages per wijk en buurt uit Kerncijfers wijken en buurten ${link(w.kwb)}` : ''}${w.ctx ? `, context (huishoudens en inkomen) uit Kerncijfers wijken en buurten ${w.ctx.jaar} ${link(w.ctx.tabel)}` : ''}. Wijkgrenzen: CBS Wijken en buurten ${w.jaar || ''} via <a href="https://www.pdok.nl">PDOK</a>. Regels: Centrale Voorziening Decentrale Regelgeving (KOOP, CC0) via <a href="https://lokaleregelgeving.overheid.nl">lokaleregelgeving.overheid.nl</a>${S.regels && S.regels.naam ? `, uitgever "${esc(S.regels.naam)}"` : ''}${S.regelsOp ? ', opgehaald ' + S.regelsOp.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''}. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Jeugdzorg per wijk · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
@@ -1474,8 +1620,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const g = S.g; const was = [...fouten]; fouten.clear(); toonMelding();
     if (was.includes('gebruik door de jaren')) await laadTrend();
     if (was.includes('kosten')) await laadKosten();
+    if (was.includes('verloop van de hulp')) await laadVerloop();
     if (S.g !== g) return;
-    renderKern(); renderTrend(); renderKosten();
+    renderKern(); renderTrend(); renderVerloop(); renderKosten();
     if (was.includes('regels (lokaleregelgeving.overheid.nl)')) await laadRegelsS();
     if (was.includes('wijken')) await kiesJaar(S.wJaar);
     toonMelding();

@@ -338,7 +338,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.5';
+  const VERSIE = '0.6';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -491,7 +491,8 @@ main > * { min-width: 0; }
           niveau: 'Gemeente. Halfjaar en jaar, 2017–2025.',
           norm: 'Nederland.', vgl: 'Beperkt: de codering verschilt per aanbieder.',
           bron: () => `${cbs('86061NED')}.`,
-          herkomst: 'Landelijke monitor.' },
+          herkomst: 'Landelijke monitor.',
+          inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
         { k: 'uitkomst', b: 'open', naam: 'Doorstroom naar de Wlz',
           def: 'Aandeel Wmo-cliënten van het ene jaar dat het jaar erna zorg uit de Wet langdurige zorg krijgt, en hoeveel beide tegelijk hadden.',
           zegt: 'Hoe zwaar de Wmo-groep is, en hoe vaak de gemeente het voorportaal van de langdurige zorg is.',
@@ -719,15 +720,17 @@ main > * { min-width: 0; }
           niveau: 'Gemeente. Halfjaar en jaar.',
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt (crisis); herhaald beroep ja.',
           bron: () => `${cbs('85097NED')}.`,
-          herkomst: 'Centrale Monitor van het Jeugdstelsel.' },
+          herkomst: 'Centrale Monitor van het Jeugdstelsel.',
+          inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
         { k: 'bereik', b: 'open', naam: 'Duur van afgesloten trajecten',
-          def: 'Gemiddelde duur en verdeling over duurklassen, van minder dan drie maanden tot vier jaar of langer.',
+          def: 'Verdeling over duurklassen, van minder dan drie maanden tot vier jaar of langer, bijvoorbeeld het deel dat langer dan een jaar duurde.',
           zegt: 'Hoe lang hulp loopt, en of dat verschuift.',
-          niet: 'Of korter beter is. Telt alleen afgesloten trajecten; enkele lange pleegzorgtrajecten trekken het gemiddelde omhoog.',
+          niet: 'Of korter beter is. Telt alleen afgesloten trajecten. Gebruik de klassen: de gemiddelde duur in deze tabel wijkt voor 2021–2024 af van de CBS-rapportages, en enkele lange pleegzorgtrajecten trekken een gemiddelde omhoog.',
           niveau: 'Gemeente. Halfjaar en jaar.',
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
           bron: () => `${cbs('85097NED')}.`,
-          herkomst: 'Centrale Monitor van het Jeugdstelsel.' },
+          herkomst: 'Centrale Monitor van het Jeugdstelsel.',
+          inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
         { k: 'bereik', b: 'intern', naam: 'Doorlooptijd van aanvraag tot beschikking',
           def: 'Dagen tussen melding of aanvraag, eerste afspraak, vastgesteld plan en beschikking.',
           zegt: 'Of de toegang op tijd beslist.',
