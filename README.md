@@ -38,7 +38,7 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 
 ### Dezelfde wijk in vijf instrumenten
 
-Wmo, Jeugdzorg, Schulden, Huishoudens en Woningvoorraad delen de wijk als ingang. Kies je een wijk, dan volgen kop, kerncijfers, kaart en dossier die keuze, en staat de keuze in de link (`#gm=…&wijk=…`). Onder het dossier open je dezelfde wijk in de andere vier. Elke pagina toont haar eigen laatste jaar; wat alleen voor de hele gemeente bestaat, zegt dat.
+Wmo, Jeugdzorg, Schulden, Bijstand, Huishoudens en Woningvoorraad delen de wijk als ingang. Kies je een wijk, dan volgen kop, kerncijfers, kaart en dossier die keuze, en staat de keuze in de link (`#gm=…&wijk=…`). Onder het dossier open je dezelfde wijk in de andere vijf. Bij Bijstand volgen alleen kaart, dossier en tabel: de cijfers per maand, de leefvorm en het geld bestaan alleen voor de hele gemeente. Elke pagina toont haar eigen laatste jaar; wat alleen voor de hele gemeente bestaat, zegt dat.
 
 ## Indicatoren belicht
 

@@ -388,7 +388,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const PRODUCT = 'Bijstand per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
@@ -922,11 +922,22 @@ main > * { min-width: 0; }
     const reeks = S.wJaren.map(j => { const r = S.wAll[j]; const z = r && (selWijk ? r.wijken.find(x => x.code === selWijk) : r.gm); return { j, z }; });
     $('#dossier').innerHTML = `<span class="eyebrow">${selWijk ? 'Wijk' : 'Hele gemeente'} · december ${w.jaar}</span><h3>${esc(o.naam)}</h3>
       <div class="focus"><span class="fl">Personen met bijstand</span><span class="fv">${fmt(o.n)}</span><span class="fc">${f1(o.p)} per 1.000 inwoners van 15 tot 65 (${fmt(o.inw)})</span></div>
-      ${selWijk && w.gm ? `<p class="small muted" style="margin:0">Gemeente: ${f1(w.gm.p)} per 1.000.</p>` : ''}
+      ${selWijk && w.gm ? `<p class="small muted" style="margin:0">Gemeente: ${f1(w.gm.p)} per 1.000. De cijfers per maand, de leefvorm en het geld bestaan alleen voor de hele gemeente.</p>` : ''}
       <dl>${reeks.map(r => `<dt${r.j === w.jaar ? ' class="uit"' : ''}>${r.j}</dt><dd${r.j === w.jaar ? ' class="uit"' : ''}>${r.z ? fmt(r.z.n) + ' · ' + f1(r.z.p) + ' per 1.000' : '–'}</dd>`).join('')}</dl>
       <p class="small muted" style="margin:0">${selWijk ? 'Klik de wijk nog eens of kies een andere. Een wijk met een andere indeling in een ander jaar staat daar als –.' : 'Klik een wijk op de kaart of in de tabel.'}</p>
       ${selWijk ? '<button class="btn linkish" type="button" id="dosTerug">← Hele gemeente</button>' : ''}`;
     const bt = $('#dosTerug'); if (bt) bt.addEventListener('click', () => kiesWijk(selWijk));
+    zelfdeWijk(selWijk);
+  }
+  // dezelfde wijk in de andere wijkpagina's; elke pagina opent op haar eigen laatste jaar
+  function zelfdeWijk(wk) {
+    const oud = document.getElementById('zelfdeWijk'); if (oud) oud.remove();
+    if (!wk) return;
+    const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const p = document.createElement('p');
+    p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
+    p.innerHTML = `<span class="muted">Dezelfde wijk in:</span> ${links}`;
+    $('#dossier').appendChild(p);
   }
 
   // ---------- tabel ----------
