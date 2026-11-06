@@ -172,6 +172,11 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
   .kaarten { grid-column: 1 / -1; grid-template-columns: subgrid; }
   #kaarten > .kaartpaneel { margin-top: 16px; }
 }
+.uitkomst { margin: 0; padding: 8px 10px; background: var(--sunk, rgba(0,0,0,.04)); border-radius: var(--r); font-size: .85rem; display: grid; gap: 2px; }
+.uitkomst b { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+.uitkomst .uw { font-family: var(--f-mono, monospace); font-size: 1.15rem; font-weight: 600; color: var(--accent); }
+.uitkomst .un { color: var(--muted); }
+.uitkomst.stil { background: none; padding: 0; color: var(--muted); }
 .indtegel .strip { display: block; height: 12px; border-radius: 3px; background: var(--open-vis); }
 .indtegel .strip.keten { background: var(--keten-vis); }
 .indtegel .strip.intern { background: var(--intern-vis); box-shadow: inset 0 0 0 1px var(--intern-rand); }
@@ -253,7 +258,7 @@ main > * { min-width: 0; }
     </div>
     <form class="picker" id="pickForm">
       <div class="field">
-        <label for="gmInput">Gemeente voor de links (mag leeg)</label>
+        <label for="gmInput">Gemeente (mag leeg)</label>
         <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
         <datalist id="gmList"></datalist>
       </div>
@@ -267,7 +272,7 @@ main > * { min-width: 0; }
   <section class="intro">
     <span class="eyebrow">Thema's per Iv3-domein</span>
     <h2 class="groot">Welke indicatoren horen bij een beleidsdomein, en waar staan ze?</h2>
-    <p class="lead">Geen cijfers, wel de weg ernaartoe. Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden.</p>
+    <p class="lead">Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden. Bij Jeugd zie je met een gekozen gemeente ook de uitkomst, als die open beschikbaar is.</p>
     <p class="gmregel" id="gmRegel"></p>
     <p class="legenda"><span><i class="open"></i>staat in open data</span><span><i class="keten"></i>ligt bij een ketenpartner</span><span><i class="intern"></i>intern opvragen</span></p>
   </section>
@@ -325,7 +330,7 @@ main > * { min-width: 0; }
     <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, de Wet versterking regie volkshuisvesting, de Huisvestingswet 2014, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De pagina haalt zelf geen cijfers op. Voor Jeugd ook de Centrale Monitor van het Jeugdstelsel (CBS), de Jeugdmonitor, het Informatieprotocol Beleidsinformatie Jeugd en de open data van DUO over verzuim, voortijdig schoolverlaten en jongeren in een kwetsbare positie; stand 6 november 2026.</p>
     <p><b>Licentie.</b> CBS, Jeugdmonitor en RIVM: CC BY 4.0. Van DUO zijn geen cijfers overgenomen, alleen verwijzingen. GGM (Gemeente Delft): EUPL-1.2; alleen namen van entiteiten en attributen overgenomen. De teksten op de kaarten vallen onder de gebruiksregel hieronder.</p>
     <p><b>Methode.</b> Per thema de indicatoren in de volgorde van de beleidsketen. Elke kaart geeft definitie, wat de indicator wel en niet zegt, laagste niveau, bron (open, ketenpartner of intern), herkomst, norm en vergelijkbaarheid. Zie "Zo is deze pagina opgebouwd".</p>
-    <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen cijfers en geen oordeel over een gemeente. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
+    <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen oordeel over een gemeente en geen ranglijst: bij Jeugd staat op een open indicator één regel uit de bron, verder cijferwerk hoort bij de instrumenten. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
     <p><b>Bekende beperkingen.</b> Vier thema's zijn uitgewerkt (Wmo, huiselijk geweld en kindermishandeling, Jeugd, Wonen). De uitwerking van de Wet versterking regie volkshuisvesting was op 5 november 2026 nog niet definitief. Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Geen officiële publicatie van een gemeente, de VNG of een bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bronnen. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
@@ -338,7 +343,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.6';
+  const VERSIE = '0.7';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -628,7 +633,7 @@ main > * { min-width: 0; }
       atelier: 'jeugdzorg.html', atelierNaam: 'Jeugdzorg per wijk', tvkort: '6.2 · 6.7 · 6.8 · 4.3',
       tegel: 'Jeugd', oms: 'Van jeugdhulp en jeugdbescherming tot de overstap naar volwassenheid, met JIKP.',
       kaarten: [
-        { k: 'context', b: 'open', naam: 'Kinderen in een bijstandsgezin',
+        { k: 'context', b: 'open', uit: { b: 'jm', w: r => r.KinderenInBijstandsgezinnen_5, f: 'pct', l: 'van de kinderen tot 18 jaar' }, naam: 'Kinderen in een bijstandsgezin',
           def: 'Aandeel kinderen tot 18 jaar dat in een gezin met bijstand woont, op 31 december.',
           zegt: 'Hoeveel kinderen opgroeien met weinig bestaanszekerheid.',
           niet: 'Hoeveel kinderen in armoede leven: gezinnen met een laag inkomen uit werk tellen niet mee. Of deze kinderen hulp nodig hebben.',
@@ -636,7 +641,7 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
           bron: () => `${jm('20399NED')} (maatschappelijke indicatoren), ${jm('20396NED')} (0 tot 25 jaar). Het BBV noemt dit “kinderen in uitkeringsgezin”.`,
           herkomst: 'BBV-verplicht; landelijke monitor (Jeugdmonitor).' },
-        { k: 'context', b: 'open', naam: 'Jongeren verdacht van een misdrijf',
+        { k: 'context', b: 'open', uit: { b: 'jm', w: r => r.GeregistreerdeVerdachten_8, f: 'n', l: 'verdachten per 10.000, tot 23 jaar' }, naam: 'Jongeren verdacht van een misdrijf',
           def: 'Geregistreerde verdachten tot 23 jaar, in aantal en per 10.000 inwoners, naar woongemeente en soort delict.',
           zegt: 'Hoe vaak jongeren uit de gemeente met de politie in aanraking komen.',
           niet: 'Hoeveel jongeren een misdrijf plegen, of schuldig zijn. Een verdachte is niet veroordeeld. De BBV-indicator “jongeren met een delict voor de rechter” is een andere, smallere telling.',
@@ -644,7 +649,7 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, bij kleine aantallen beperkt.',
           bron: () => `${jm('20369NED')}, ${jm('20370NED')}. Cijfers bij de BBV-indicator staan op <a href="https://www.waarstaatjegemeente.nl" target="_blank" rel="noopener">waarstaatjegemeente.nl</a>.`,
           herkomst: 'BBV-verplicht (in gewijzigde vorm); Centrale Monitor van het Jeugdstelsel.' },
-        { k: 'context', b: 'open', naam: 'Jongeren op de arbeidsmarkt',
+        { k: 'context', b: 'open', uit: { b: 'jm', w: r => r.WerkzameJongeren_7, f: 'pct', l: 'van de jongeren van 15 tot 27 jaar werkt' }, naam: 'Jongeren op de arbeidsmarkt',
           def: 'Jongeren van 15 tot 27 jaar naar werk, onderwijs, uitkering en inschrijving als werkzoekende bij het UWV.',
           zegt: 'Hoe de start op de arbeidsmarkt in de gemeente verloopt.',
           niet: 'Hoeveel jongeren hulp zoeken: wie zich niet inschrijft, is geen werkzoekende. Het BBV telt werkloze jongeren van 16 tot en met 22 jaar.',
@@ -652,7 +657,7 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
           bron: () => `${cbs('86223NED')}; ook in ${jm('20275NED')}.`,
           herkomst: 'BBV-verplicht (in gewijzigde vorm); Centrale Monitor van het Jeugdstelsel.' },
-        { k: 'context', b: 'open', naam: 'Schoolverzuim',
+        { k: 'context', b: 'open', uitTekst: 'Per gemeente in het Excel-bestand van DUO. De link staat bij de bron als je de indicator opent.', naam: 'Schoolverzuim',
           def: 'Leerlingen met absoluut verzuim (leerplichtig, niet ingeschreven), relatief verzuim (16 uur of meer ongeoorloofd in vier lesweken) en langdurig relatief verzuim.',
           zegt: 'Hoeveel jongeren buiten het onderwijs dreigen te vallen, vaak voordat er jeugdhulp is.',
           niet: 'Of het verzuim is opgelost: dat staat in aparte kolommen. Het aantal hangt af van hoe scholen melden.',
@@ -660,7 +665,7 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt (meldgedrag per school en gemeente).',
           bron: () => '<a href="https://duo.nl/open_onderwijsdata/onderwijs-algemeen/verzuim/verzuim-gemeente.jsp" target="_blank" rel="noopener">DUO, Verzuim per gemeente</a> (Excel). De aantallen komen uit de opgave van gemeenten.',
           herkomst: 'BBV-verplicht (absoluut en relatief verzuim).' },
-        { k: 'context', b: 'open', naam: 'Jongeren zonder werk en onderwijs',
+        { k: 'context', b: 'open', uitTekst: 'Per gemeente in het dashboard van DUO. De link staat bij de bron als je de indicator opent.', naam: 'Jongeren zonder werk en onderwijs',
           def: 'Jongeren van 16 tot en met 27 jaar die geen onderwijs volgen en geen of een beperkt inkomen hebben (neet).',
           zegt: 'Hoe groot de groep is die buiten school en werk staat, ook na de JIKP-leeftijd.',
           niet: 'Of ze ondersteuning willen of nodig hebben. Het cijfer hangt af van de gekozen inkomensgrens: stel die zelf in en noem hem erbij.',
@@ -668,7 +673,7 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, bij dezelfde inkomensgrens.',
           bron: () => `${duoDash} (tabblad Jongeren zonder werk en onderwijs); zelf samen te stellen uit ${cbs('86223NED')}.`,
           herkomst: 'Landelijke monitor (Centrale Monitor van het Jeugdstelsel, DUO).' },
-        { k: 'inspanning', b: 'open', naam: 'Kosten jeugdzorg per inwoner',
+        { k: 'inspanning', b: 'open', uit: { b: 'kost', w: r => r.GerealiseerdeKostenPer1000Inwoners_4, f: 'eur', l: 'per inwoner' }, naam: 'Kosten jeugdzorg per inwoner',
           def: 'Gerealiseerde en begrote kosten van jeugdzorg per inwoner, per vorm.',
           zegt: 'Wat de gemeente uitgeeft, door de jaren heen.',
           niet: 'Wat een traject kost. Niet elke gemeente levert kosten aan, en regionale inkoop en boekingspraktijk verschillen.',
@@ -677,7 +682,7 @@ main > * { min-width: 0; }
           bron: () => `${cbs('83454NED')}; Iv3 taakvelden 6.75, 6.76, 6.792 en 6.82.`,
           herkomst: 'Voorstel atelier; Centrale Monitor van het Jeugdstelsel.',
           inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
-        { k: 'bereik', b: 'open', naam: 'Jongeren met jeugdhulp',
+        { k: 'bereik', b: 'open', uit: { b: 'ind', w: r => r.JongerenMetJeugdhulpInNatura_1, f: 'pct', l: 'van de jongeren tot 18 jaar', vl: 1 }, naam: 'Jongeren met jeugdhulp',
           def: 'Aandeel jongeren met jeugdhulp, met en zonder verblijf.',
           zegt: 'Hoeveel jongeren hulp krijgen die de gemeente betaalt.',
           niet: 'Of dat te veel of te weinig is. Pgb telt niet mee, en jeugd-ggz, opvoedhulp en hulp bij een beperking zijn niet te onderscheiden.',
@@ -686,7 +691,7 @@ main > * { min-width: 0; }
           bron: () => `${cbs('85098NED')} (tot 18 jaar, zoals het BBV), ${cbs('85099NED')} (tot 23 jaar, zoals Jeugdzorg per wijk) en de wijktabellen per jaar.`,
           herkomst: 'BBV-verplicht; Centrale Monitor van het Jeugdstelsel.',
           inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
-        { k: 'bereik', b: 'open', naam: 'Jongeren met jeugdbescherming',
+        { k: 'bereik', b: 'open', uit: { b: 'ind', w: r => r.JongerenMetJeugdbescherming_3, f: 'pct', l: 'van de jongeren tot 18 jaar', vl: 1 }, naam: 'Jongeren met jeugdbescherming',
           def: 'Aandeel jongeren tot 18 jaar met een maatregel van de rechter.',
           zegt: 'Hoe vaak de rechter ingrijpt omdat een kind niet veilig opgroeit.',
           niet: 'Of hulp eerder is geprobeerd, of dat de maatregel werkte.',
@@ -695,7 +700,7 @@ main > * { min-width: 0; }
           bron: () => `${cbs('85098NED')}; begonnen trajecten, duur en reden van einde in ${cbs('82975NED')}.`,
           herkomst: 'Verplicht in het BBV (indicator 30).',
           inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
-        { k: 'bereik', b: 'open', naam: 'Jongeren met jeugdreclassering',
+        { k: 'bereik', b: 'open', uit: { b: 'ind', w: r => r.JongerenMetJeugdreclassering_5, f: 'pct', l: 'van de jongeren van 12 tot 23 jaar', vl: 1 }, naam: 'Jongeren met jeugdreclassering',
           def: 'Aandeel jongeren van 12 tot 23 jaar met jeugdreclassering.',
           zegt: 'Hoeveel jongeren begeleiding krijgen na contact met politie of justitie.',
           niet: 'Of ze opnieuw de fout in gaan.',
@@ -704,7 +709,7 @@ main > * { min-width: 0; }
           bron: () => `${cbs('85098NED')}; verdieping per jeugdregio in ${cbs('82977NED')}.`,
           herkomst: 'BBV-verplicht.',
           inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
-        { k: 'bereik', b: 'open', naam: 'Wie verwijst en wie de hulp geeft',
+        { k: 'bereik', b: 'open', uit: { b: 'trajV', w: r => deelU(r.toegang, r.TotaalJeugdhulptrajectenInNatura_1), f: 'pct', l: 'van de trajecten via de gemeentelijke toegang', vl: 1 }, naam: 'Wie verwijst en wie de hulp geeft',
           def: 'Jeugdhulptrajecten naar verwijzer (gemeentelijke toegang, huisarts, jeugdarts, medisch specialist, gecertificeerde instelling, rechter) en het deel dat het wijk- of buurtteam uitvoert.',
           zegt: 'Hoeveel grip de gemeentelijke toegang heeft op de instroom.',
           niet: 'Of een verwijzing nodig was. Sinds 2021 vallen trajecten van wijkteams onder “geen verwijzer”, dus dat betekent niet: geen toegang.',
@@ -713,7 +718,7 @@ main > * { min-width: 0; }
           bron: () => `${cbs('85097NED')}, ${cbs('85094NED')}.`,
           herkomst: 'Centrale Monitor van het Jeugdstelsel.',
           inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
-        { k: 'bereik', b: 'open', naam: 'Hoe de hulp start: nieuw, opnieuw of in crisis',
+        { k: 'bereik', b: 'open', uit: { b: 'traj', w: r => deelU(r.HerhaaldBeroep_4, r.TotaalBegonnenTrajecten_2), f: 'pct', l: 'van de begonnen trajecten is opnieuw in de hulp', vl: 1 }, naam: 'Hoe de hulp start: nieuw, opnieuw of in crisis',
           def: 'Begonnen jeugdhulptrajecten, naar herhaald beroep (jeugdhulp in de vijf jaar ervoor) en gestart met een crisis.',
           zegt: 'Of de instroom nieuw is, en hoe vaak hulp pas begint als het misgaat.',
           niet: 'Dat herhaald beroep mislukking is: terugkomen kan de afspraak zijn. Crisis is het oordeel van de professional, zonder vaste maat.',
@@ -722,7 +727,7 @@ main > * { min-width: 0; }
           bron: () => `${cbs('85097NED')}.`,
           herkomst: 'Centrale Monitor van het Jeugdstelsel.',
           inst: ['jeugdzorg.html', 'Jeugdzorg per wijk'] },
-        { k: 'bereik', b: 'open', naam: 'Duur van afgesloten trajecten',
+        { k: 'bereik', b: 'open', uit: { b: 'traj', w: r => { const a = ['k_1Tot2Jaar_11', 'k_2Tot3Jaar_12', 'k_3Tot4Jaar_13', 'k_4JaarOfLanger_14'].reduce((x, k) => x + (r[k] || 0), 0); const t = ['k_0Tot3Maanden_8', 'k_3Tot6Maanden_9', 'k_6MaandenTot1Jaar_10'].reduce((x, k) => x + (r[k] || 0), a); return a ? deelU(a, t) : null; }, f: 'pct', l: 'duurde langer dan een jaar', vl: 1 }, naam: 'Duur van afgesloten trajecten',
           def: 'Verdeling over duurklassen, van minder dan drie maanden tot vier jaar of langer, bijvoorbeeld het deel dat langer dan een jaar duurde.',
           zegt: 'Hoe lang hulp loopt, en of dat verschuift.',
           niet: 'Of korter beter is. Telt alleen afgesloten trajecten. Gebruik de klassen: de gemiddelde duur in deze tabel wijkt voor 2021–2024 af van de CBS-rapportages, en enkele lange pleegzorgtrajecten trekken een gemiddelde omhoog.',
@@ -758,7 +763,7 @@ main > * { min-width: 0; }
           bron: () => 'Startset JIKP via Mijn DUO (persoonsgegevens, alleen voor de eigen gemeente) en de eigen registratie van het Doorstroompunt.',
           ggm: '<code>leerling.kwetsbarejongere</code>; <code>startkwalificatie.datumbehaald</code>; <code>inschrijving</code>; <code>uitschrijving.diplomabehaald</code>; <code>verzuimmelding</code>. Bereik of begeleiding: geen eigen attribuut gevonden in GGM v2.5.1.',
           herkomst: 'Voorstel atelier.' },
-        { k: 'uitkomst', b: 'open', naam: 'Reden van beëindiging',
+        { k: 'uitkomst', b: 'open', uit: { b: 'traj', w: r => deelU(r.BeeindigdVolgensPlan_16, (r.BeeindigdVolgensPlan_16 || 0) + (r.TotaalVoortijdigAfgesloten_17 || 0)), f: 'pct', l: 'volgens plan, bij bekende reden', vl: 1 }, naam: 'Reden van beëindiging',
           def: 'Afgesloten trajecten: volgens plan, voortijdig (in overeenstemming, eenzijdig door cliënt of aanbieder, externe omstandigheden) of reden onbekend.',
           zegt: 'Het dichtst bij een uitkomst dat open staat.',
           niet: 'Of de jongere geholpen is: de reden is een code van de aanbieder. Reken het deel onbekend mee: dat is groot en verschilt per gemeente.',
@@ -774,7 +779,7 @@ main > * { min-width: 0; }
           norm: 'Eigen gemeente door de jaren.', vgl: 'Nog onbekend.',
           bron: () => 'Jeugdhulpaanbieder. Een open tabel per gemeente is niet gevonden (6 november 2026).',
           herkomst: 'Wettelijke plicht (Regeling Jeugdwet, bijlage 2).' },
-        { k: 'uitkomst', b: 'open', naam: 'Voortijdig schoolverlaten',
+        { k: 'uitkomst', b: 'open', uit: { b: 'vsv', w: r => r.VoortijdigSchoolverlaters_2 < 30 ? null : deelU(r.VoortijdigSchoolverlaters_2, r.Leerlingen_1), f: 'pct', l: 'van de leerlingen', sj: 1 }, naam: 'Voortijdig schoolverlaten',
           def: 'Aandeel leerlingen onder de 23 jaar dat het onderwijs verlaat zonder startkwalificatie.',
           zegt: 'Hoeveel jongeren zonder diploma stoppen.',
           niet: 'Wat ze daarna doen. Praktijkonderwijs en voortgezet speciaal onderwijs tellen niet mee: de meest kwetsbare groep zit hier dus niet in.',
@@ -782,7 +787,7 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, bij kleine aantallen beperkt.',
           bron: () => `${cbs('84780NED')}; ${duoDash}.`,
           herkomst: 'BBV-verplicht.' },
-        { k: 'uitkomst', b: 'open', naam: 'Jongeren in een kwetsbare positie (JIKP)',
+        { k: 'uitkomst', b: 'open', uitTekst: 'Per gemeente in het dashboard van DUO, tabblad Vergelijken, maximaal vijf tegelijk.', naam: 'Jongeren in een kwetsbare positie (JIKP)',
           def: 'Jongeren onder de 23 jaar die instromen in een entreeopleiding, of vanuit vso, praktijkonderwijs, vmbo-basis of entree doorstromen naar mbo 2 of het onderwijs verlaten; daarna gevolgd in onderwijs, werk, dagbesteding of Wlz, uitkering en “niet in beeld”.',
           zegt: 'Of een overstap die vaak misgaat, goed afloopt: tot vijf jaar later, met onderwijs, werk en zorg in één beeld.',
           niet: 'Of het werk duurzaam is of de jongere begeleid werd. “Niet in beeld” is geen uitval maar een gat in de registers. Ook jongeren met een startkwalificatie kunnen eronder vallen.',
@@ -1016,6 +1021,58 @@ main > * { min-width: 0; }
 
   function telling(d) { const t = { open: 0, keten: 0, intern: 0 }; d.kaarten.forEach(c => t[c.b]++); return t; }
 
+  // ---------- uitkomst per gemeente (proef thema Jeugd) ----------
+  const CBSAPI = 'https://opendata.cbs.nl/ODataApi/OData/', JMAPI = 'https://dataderden.cbs.nl/ODataApi/OData/';
+  const MIN_U = 50; // ondergrens voor een zelf berekend aandeel
+  const deelU = (t, n) => t == null || n == null || n < MIN_U ? null : 100 * t / n;
+  const UBRON = {
+    jm: { api: JMAPI, t: '20399NED', geo: 'RegioS', per: 'JJ' },
+    ind: { api: CBSAPI, t: '85098NED', geo: 'RegioS', per: 'JJ' },
+    traj: { api: CBSAPI, t: '85097NED', geo: 'RegioS', per: 'JJ', extra: "VerwijzerJeugdzorg eq 'T001376'" },
+    trajV: { api: CBSAPI, t: '85097NED', geo: 'RegioS', per: 'JJ', extra: "(VerwijzerJeugdzorg eq 'T001376' or VerwijzerJeugdzorg eq 'A044132')", samen: 1 },
+    kost: { api: CBSAPI, t: '83454NED', geo: 'Regio', per: 'JJ', extra: "VormenVanJeugdzorg eq 'A045561'" },
+    vsv: { api: CBSAPI, t: '84780NED', geo: 'Regiokenmerken', per: 'SJ', extra: "Geslacht eq 'T001038'" }
+  };
+  const UCACHE = {};
+  function uLaad(b, gm) {
+    const k = b + gm; if (UCACHE[k]) return UCACHE[k];
+    const u = UBRON[b];
+    const f = `(startswith(${u.geo},'GM${gm}') or startswith(${u.geo},'NL01')) and substringof('${u.per}',Perioden)${u.extra ? ' and ' + u.extra : ''}`;
+    const ac = new AbortController(), to = setTimeout(() => ac.abort(), 20000);
+    return (UCACHE[k] = fetch(`${u.api}${u.t}/TypedDataSet?$format=json&$filter=${encodeURIComponent(f)}`, { signal: ac.signal })
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(j => {
+        const gmR = {}, nl = {};
+        j.value.forEach(x => {
+          const doel = String(x[u.geo]).trim() === 'NL01' ? nl : gmR, y = +x.Perioden.slice(0, 4);
+          if (u.samen) { const v = String(x.VerwijzerJeugdzorg).trim(); if (v === 'A044132') { (doel[y] = doel[y] || {}).toegang = x.TotaalJeugdhulptrajectenInNatura_1; } else doel[y] = Object.assign(doel[y] || {}, x); }
+          else doel[y] = x;
+        });
+        return { gm: gmR, nl };
+      })
+      .catch(e => { delete UCACHE[k]; throw e; })
+      .finally(() => clearTimeout(to)));
+  }
+  const uFmt = (v, f) => v == null ? '–' : f === 'eur' ? '€ ' + Math.round(v).toLocaleString('nl-NL') : f === 'pct' ? v.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%' : Math.round(v).toLocaleString('nl-NL');
+  function uHtml(c) {
+    if (!S.gm) return '';
+    if (c.uitTekst) return `<p class="uitkomst stil">${esc(c.uitTekst)}</p>`;
+    return c.uit ? '<p class="uitkomst" data-uit><span class="muted">Uitkomst ophalen…</span></p>' : '';
+  }
+  async function uVul(root, c) {
+    const el = root.querySelector('[data-uit]'); if (!el || !c.uit) return;
+    const gm = S.gm, naam = byCode.get(gm).n;
+    try {
+      const d = await uLaad(c.uit.b, gm);
+      if (S.gm !== gm || !el.isConnected) return;
+      const jaren = Object.keys(d.gm).map(Number).filter(j => c.uit.w(d.gm[j]) != null).sort((a, b) => a - b);
+      if (!jaren.length) { el.className = 'uitkomst stil'; el.textContent = `Geen cijfer voor ${naam}: te klein aantal of niet aangeleverd.`; return; }
+      const j = jaren[jaren.length - 1], v = c.uit.w(d.gm[j]), n = d.nl[j] ? c.uit.w(d.nl[j]) : null;
+      const lab = c.uit.sj ? `${j}/${String(j + 1).slice(2)}` : j;
+      const nu = Math.max(...Object.keys(d.gm).map(Number));
+      el.innerHTML = `<b>${esc(naam)} ${lab}${c.uit.vl && j === nu ? ' (voorlopig)' : ''}</b><span class="uw">${uFmt(v, c.uit.f)}</span> <span>${esc(c.uit.l)}</span>${n != null ? `<span class="un">Nederland ${uFmt(n, c.uit.f)}</span>` : ''}`;
+    } catch (e) { el.remove(); } // stille terugval: de kaart blijft zonder cijfer
+  }
   function kaartHtml(c) {
     const rij = (dt, dd) => dd ? `<dt>${dt}</dt><dd>${dd}</dd>` : '';
     const inst = c.inst ? `<a class="btn primary klein" href="${esc(instLink(c.inst[0]))}">Bekijk in ${esc(c.inst[1])}${S.gm ? ' · ' + esc(byCode.get(S.gm).n) : ''} →</a>` : '';
@@ -1023,6 +1080,7 @@ main > * { min-width: 0; }
       <div class="kop"><span class="badge ${c.b}">${BRON[c.b]}</span><h3>${esc(c.naam)}</h3></div>
       <p class="def">${esc(c.def)}</p>
       <div class="zz"><div><b>Wat het zegt</b>${esc(c.zegt)}</div><div class="niet"><b>Wat het níet zegt</b>${esc(c.niet)}</div></div>
+      ${uHtml(c)}
       <dl class="meta">
         ${rij('Niveau', esc(c.niveau))}
         ${rij('Norm', esc(c.norm))}
@@ -1040,6 +1098,7 @@ main > * { min-width: 0; }
       <h4>${esc(c.naam)}</h4>
       <span class="badge ${c.b}">${BRON[c.b]}</span>
       <div class="inzicht"><p><b>Zegt</b>${esc(c.zegt)}</p><p class="niet"><b>Zegt niet</b>${esc(c.niet)}</p></div>
+      ${uHtml(c)}
       <div class="tile-links"><button class="btn-start" type="button" data-open aria-expanded="false">Open de indicator <span aria-hidden="true">→</span></button></div>
     </article>`;
   }
@@ -1058,7 +1117,7 @@ main > * { min-width: 0; }
     const c = D[S.d].kaarten[+tegel.dataset.i];
     let laatste = tegel, n = tegel.nextElementSibling;
     while (n && n.offsetTop === tegel.offsetTop) { laatste = n; n = n.nextElementSibling; }
-    const p = document.createElement('div'); p.className = 'kaartpaneel'; p.innerHTML = kaartHtml(c);
+    const p = document.createElement('div'); p.className = 'kaartpaneel'; p.innerHTML = kaartHtml(c); uVul(p, c);
     const stap = tegel.closest('.ketenstap');
     if (getComputedStyle(stap).getPropertyValue('--n').trim() !== '4' && innerWidth >= 1100) {
       let st = stap, m = stap.nextElementSibling;
@@ -1072,8 +1131,8 @@ main > * { min-width: 0; }
   function render() {
     $('#gmInput').value = S.gm ? byCode.get(S.gm).n : '';
     $('#gmRegel').textContent = S.gm
-      ? `Links naar instrumenten openen op ${byCode.get(S.gm).n}. De indicatoren zelf zijn voor elke gemeente gelijk.`
-      : 'Kies je hierboven een gemeente, dan openen de links naar de instrumenten meteen op die gemeente. De indicatoren zelf zijn voor elke gemeente gelijk.';
+      ? `De indicatoren zijn voor elke gemeente gelijk. Bij Jeugd staat de uitkomst voor ${byCode.get(S.gm).n} erbij, en links openen op die gemeente.`
+      : 'Kies je hierboven een gemeente, dan openen de links op die gemeente en zie je bij Jeugd de uitkomst. De indicatoren zelf zijn voor elke gemeente gelijk.';
     const d = S.d ? D[S.d] : null;
     $('#overzicht').hidden = !!d; $('#detail').hidden = !d; $('#kruimel').hidden = !d;
     renderMeld(d);
@@ -1107,6 +1166,7 @@ main > * { min-width: 0; }
       return `<section class="ketenstap" style="--n:${Math.min(cs.length, 4)}"><h2>${kop} <span class="muted">${uitleg}</span></h2><div class="kaarten">${cs.map(([c, i]) => tegelHtml(c, i)).join('')}</div></section>`;
     }).join('');
 
+    document.querySelectorAll('#kaarten .indtegel').forEach(t => uVul(t, d.kaarten[+t.dataset.i]));
     renderUitvraag(d);
     schrijfHash();
   }
