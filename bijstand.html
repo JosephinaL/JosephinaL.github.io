@@ -311,7 +311,7 @@ main > * { min-width: 0; }
       </div>
       <details class="tabelview"><summary>De cijfers per maand als tabel</summary><div class="scroll" id="maandTabel" tabindex="0" role="region" aria-label="Tabel per maand"></div></details>
 
-      <div class="sectiekop"><h2>Leefvorm</h2><p class="small muted">Bijstandsuitkeringen aan mensen tot de AOW-leeftijd. Een paar heeft één uitkering samen; dit zijn dus uitkeringen, geen personen.</p></div>
+      <div class="sectiekop"><h2>Leefvorm</h2><p class="small muted">Bijstandsuitkeringen aan mensen tot de AOW-leeftijd. Een paar heeft één uitkering samen; dit zijn uitkeringen, geen personen. Tel je een paar als twee personen, dan kom je iets lager uit dan het aantal personen: bij een paar bepaalt de oudste partner of de uitkering onder "tot de AOW-leeftijd" valt.</p></div>
       <div class="twee">
         <div class="chart" id="chLeef"></div>
         <div class="chart" id="chLeefTrend"></div>
@@ -356,7 +356,7 @@ main > * { min-width: 0; }
             <li><b>Geen tekort of overschot</b>: het verschil tussen budget en lasten is een indicatie. In de lasten zit ook de bijzondere bijstand en minimaregelingen in geld, die niet uit het rijksbudget worden betaald; daardoor is het verschil eerder te laag dan te hoog. Subsidies op het taakveld zijn niet alleen loonkostensubsidie. Een nagekomen budget of een vangnetuitkering valt soms in een later jaar.</li>
             <li><b>Bijzondere jaren</b>: in 2020 en 2021 zat de Tozo voor zelfstandigen in budget én lasten; beide liggen dan hoger. In 2022 en 2023 betaalden veel gemeenten de energietoeslag uit hetzelfde taakveld, terwijl het geld uit het gemeentefonds kwam. Dan vallen de lasten hoger uit dan het budget, zonder dat de bijstand zelf tekortschoot.</li>
             <li><b>Via een regeling</b>: voert een gemeenschappelijke regeling de bijstand uit, dan betaalt die de uitkeringen. De gemeente maakt een bijdrage over waarin ook uitvoering en re-integratie zitten. In de cijfers van de gemeente is dat niet te scheiden; daarom geen vergelijking.</li>
-            <li><b>Personen en uitkeringen</b>: het bestand telt personen, de leefvorm telt uitkeringen. Een paar is twee personen en één uitkering.</li>
+            <li><b>Personen en uitkeringen</b>: het bestand telt personen, de leefvorm telt uitkeringen. Een paar is twee personen en één uitkering. Ook met paren dubbel geteld blijft de leefvorm iets onder het aantal personen. Bij de personen telt ieders eigen leeftijd. Bij de uitkeringen telt de oudste partner: is die 67 of ouder, dan valt de uitkering onder "vanaf de AOW-leeftijd", terwijl de jongere partner wél bij de personen tot de AOW-leeftijd telt. Daarnaast rondt het CBS elk getal af op tientallen.</li>
             <li><b>Per wijk</b>: zonder mensen in een instelling en dak- en thuislozen. Kleine aantallen laat het CBS weg (–); per 1.000 staat er alleen bij 250 of meer inwoners van 15 tot 65. De optelling van de wijken is daardoor lager dan het gemeentetotaal.</li>
             <li><b>Wijkindeling</b>: elk jaar in de indeling van dat jaar. Een wijk die anders is ingedeeld, is niet door de jaren te volgen; de tabel zet het vorige jaar alleen naast een wijk met dezelfde code.</li>
             <li><b>Geen oordeel</b>: meer bijstand kan meer armoede betekenen, een andere bevolking of een andere arbeidsmarkt, of een gemeente die mensen goed bereikt. De cijfers laten het verschil zien, niet de oorzaak.</li>
@@ -388,7 +388,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Bijstand per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
