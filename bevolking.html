@@ -258,7 +258,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
         <ol>
           <li><b>Een ander begrip.</b> Het CBS telt naar woonplaats: een kind telt mee in de gemeente waar de moeder woont, een overledene in de gemeente waar hij of zij ingeschreven stond. De aktes van de burgerlijke stand worden opgemaakt waar het kind geboren wordt of de persoon overlijdt, vaak de gemeente met een ziekenhuis. Wie de aktes telt, komt daarom op andere aantallen. Vertrek naar het buitenland omvat ook administratieve afvoeringen uit de BRP.</li>
-          <li><b>Een andere peildatum of indeling.</b> Jaarcijfers zijn definitief tot en met 2025; de maanden van dit jaar zijn voorlopig. Een gemeente staat in haar indeling van dat jaar: na een fusie of grenswijziging springt de reeks, en een fusiegemeente begint in haar fusiejaar. Wijken en buurten in de indeling van 2025.</li>
+          <li><b>Een andere peildatum of indeling.</b> De kop telt de laatste twaalf maanden waarvoor het CBS cijfers heeft; die zijn voorlopig. Jaarcijfers en grafieken zijn definitief tot en met 2025. Een gemeente staat in haar indeling van dat jaar: na een fusie of grenswijziging springt de reeks, en een fusiegemeente begint in haar fusiejaar. Wijken en buurten in de indeling van 2025.</li>
           <li><b>Registratie bij de bron.</b> De cijfers komen uit de BRP. Correcties, zoals het afvoeren van mensen van wie de gemeente niet weet waar ze wonen, tellen mee in het jaar waarin ze zijn verwerkt.</li>
           <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van de CBS-tabel zelf (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37259ned/table" target="_blank" rel="noopener">37259ned</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37230ned/table" target="_blank" rel="noopener">37230ned</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37201/table" target="_blank" rel="noopener">37201</a>), dan zit de fout hier. Meld het hieronder.</li>
         </ol>
@@ -352,6 +352,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="card">
           <h2>Zo is gerekend</h2>
           <ul class="small">
+            <li><b>Kop: laatste twaalf maanden</b>: de twaalf meest recente maanden uit 37230ned opgeteld, voorlopig, met het laatste definitieve jaar eronder. Twaalf maanden bevatten elk seizoen één keer, zodat de vergelijking met een heel jaar klopt; een deeljaar zou dat niet doen (sterfte piekt in de winter). Voor 2025 is de som van de maanden gelijk aan het jaartotaal. Inwoners zoals het CBS ze aan het eind van de laatste maand telt.</li>
             <li><b>Groei</b>: geboren min overleden (geboorteoverschot), plus het saldo met andere gemeenten (gevestigd uit min vertrokken naar), plus het saldo met het buitenland (immigratie min emigratie, inclusief administratieve correcties). De totale groei is die van het CBS; een klein verschil met de som komt door overige correcties.</li>
             <li><b>Per 1.000 inwoners</b>: op het gemiddelde van de bevolking op 1 januari en op 31 december van dat jaar.</li>
             <li><b>Dit jaar tot nu toe</b>: de maanden die het CBS al heeft, opgeteld, tegenover dezelfde maanden vorig jaar. Voorlopige cijfers.</li>
@@ -378,7 +379,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> CBS: Bevolkingsontwikkeling per regio per jaar (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37259ned/table">37259ned</a>, tot en met 2025) en per maand (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37230ned/table">37230ned</a>, lopend jaar voorlopig); Geboorte, vruchtbaarheid naar regio (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37201/table">37201</a>); Bevolking naar leeftijd en regio (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a>); Overledenen naar leeftijd in Nederland (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37168/table">37168</a>); Kerncijfers wijken en buurten 2025 (86165NED); wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze; het tijdstip staat onder de cijfers.</p>
+    <p><b>Bron en peildatum.</b> CBS: Bevolkingsontwikkeling per regio per jaar (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37259ned/table">37259ned</a>, tot en met 2025) en per maand (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37230ned/table">37230ned</a>, lopend jaar voorlopig); Geboorte, vruchtbaarheid naar regio (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37201/table">37201</a>); Bevolking naar leeftijd en regio (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a>); Overledenen naar leeftijd in Nederland (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37168/table">37168</a>); Kerncijfers wijken en buurten 2025 (86165NED); wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze; het tijdstip staat onder de cijfers. De kop toont de laatste twaalf maanden (voorlopig); grafieken, sterfte en wijken het laatste definitieve jaar.</p>
     <p><b>Licentie.</b> CBS: CC BY 4.0. Wijkgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
     <p><b>Methode.</b> De groei is opgedeeld in geboorteoverschot, saldo met andere gemeenten en saldo met het buitenland. De verwachte sterfte is indirect gestandaardiseerd: de sterftekansen van Nederland per leeftijdsjaar toegepast op de leeftijdsopbouw van de gemeente. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen prognose. Geen oordeel over gezondheid, zorg of beleid, en geen ranglijst van gemeenten. Geen telling van de aktes van de burgerlijke stand: de cijfers volgen de woonplaats. Geen sterftemaat per wijk.</p>
@@ -395,7 +396,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Bevolkingsontwikkeling per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const PDOK = 'https://api.pdok.nl/cbs/wijken-en-buurten-2025/ogc/v1/collections/';
@@ -514,15 +515,32 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- maanden (37230ned) ----------
   async function laadMaanden() {
     const nu = new Date().getFullYear();
-    const sel = 'Perioden,LevendGeborenKinderen_2,Overledenen_3,TotaleVestiging_4,VestigingVanuitEenAndereGemeente_5,Immigratie_6,TotaalVertrekInclAdmCorrecties_7,VertrekNaarAndereGemeente_8,EmigratieInclusiefAdmCorrecties_9,Bevolkingsgroei_11';
+    const sel = 'Perioden,BevolkingAanHetBeginVanDePeriode_1,LevendGeborenKinderen_2,Overledenen_3,VestigingVanuitEenAndereGemeente_5,Immigratie_6,VertrekNaarAndereGemeente_8,EmigratieInclusiefAdmCorrecties_9,Bevolkingsgroei_11,BevolkingAanHetEindeVanDePeriode_15';
+    const rij = r => ({
+      j: +r.Perioden.slice(0, 4), m: +r.Perioden.slice(6, 8), b0: r.BevolkingAanHetBeginVanDePeriode_1, b1: r.BevolkingAanHetEindeVanDePeriode_15,
+      geb: r.LevendGeborenKinderen_2, ovl: r.Overledenen_3, inGm: r.VestigingVanuitEenAndereGemeente_5, imm: r.Immigratie_6,
+      uitGm: r.VertrekNaarAndereGemeente_8, emi: r.EmigratieInclusiefAdmCorrecties_9, groei: r.Bevolkingsgroei_11
+    });
+    const flt = r => `startswith(RegioS,'${r}') and Perioden ge '${nu - 2}MM01'`;
+    const maand = v => v.filter(r => /MM\d\d$/.test(r.Perioden) && r.LevendGeborenKinderen_2 != null).map(rij).sort((a, b) => a.j - b.j || a.m - b.m);
     try {
-      const v = await odata('37230ned', `startswith(RegioS,'GM${S.g.c}') and Perioden ge '${nu - 2}MM01'`, sel);
-      S.maanden = v.filter(r => /MM\d\d$/.test(r.Perioden) && r.LevendGeborenKinderen_2 != null).map(r => ({
-        j: +r.Perioden.slice(0, 4), m: +r.Perioden.slice(6, 8),
-        geb: r.LevendGeborenKinderen_2, ovl: r.Overledenen_3, inGm: r.VestigingVanuitEenAndereGemeente_5, imm: r.Immigratie_6,
-        uitGm: r.VertrekNaarAndereGemeente_8, emi: r.EmigratieInclusiefAdmCorrecties_9, groei: r.Bevolkingsgroei_11
-      }));
-    } catch (e) { S.maanden = null; fouten.add('maandcijfers (CBS)'); }
+      const [a, b] = await Promise.all([odata('37230ned', flt('GM' + S.g.c), sel), odata('37230ned', flt('NL01'), sel).catch(() => [])]);
+      S.maanden = maand(a); S.nlMaanden = maand(b);
+    } catch (e) { S.maanden = null; S.nlMaanden = null; fouten.add('maandcijfers (CBS)'); }
+  }
+  // de laatste twaalf aaneengesloten maanden, opgeteld
+  function twaalf(ms) {
+    if (!ms || ms.length < 12) return null;
+    const r = ms.slice(-12);
+    for (let i = 1; i < 12; i++) { const a = r[i - 1], b = r[i]; if (b.j * 12 + b.m !== a.j * 12 + a.m + 1) return null; }
+    const som = k => r.reduce((s, x) => s + (x[k] || 0), 0);
+    const o = { van: r[0], tot: r[11], b0: r[0].b0, b31: r[11].b1, geb: som('geb'), ovl: som('ovl'), inGm: som('inGm'), uitGm: som('uitGm'), imm: som('imm'), emi: som('emi'), groei: som('groei') };
+    o.gov = o.geb - o.ovl; o.bin = o.inGm - o.uitGm; o.bui = o.imm - o.emi; o.rest = o.groei - o.gov - o.bin - o.bui;
+    o.gem = o.b0 != null && o.b31 != null ? (o.b0 + o.b31) / 2 : o.b0;
+    o.kalender = o.van.m === 1 && o.tot.m === 12;
+    o.label = o.kalender ? `heel ${o.tot.j}` : `${MAAND[o.van.m - 1]} ${o.van.j} t/m ${MAAND[o.tot.m - 1]} ${o.tot.j}`;
+    o.peil = o.tot.m === 12 ? `1 januari ${o.tot.j + 1}` : `1 ${MAAND[o.tot.m]} ${o.tot.j}`;
+    return o;
   }
 
   // ---------- geboorte (37201) ----------
@@ -634,30 +652,47 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const E = jj.reduce((a, j) => a + S.verw.get(j), 0);
     return { j0: jj[0], j1: jj[jj.length - 1], n: jj.length, O, E, z: (O - E) / Math.sqrt(E) };
   }
+  // periode van de kop: de laatste twaalf maanden (voorlopig), anders het laatste definitieve jaar
+  function kopPeriode() {
+    const rs = S.jaren; if (!rs) return null;
+    const L = rs[rs.length - 1], nlL = S.nlJaren && S.nlJaren.find(r => r.j === L.j);
+    const P = twaalf(S.maanden);
+    if (P && !(P.kalender && P.tot.j <= L.j)) {
+      const nlP = twaalf(S.nlMaanden);
+      return { ...P, voorlopig: true, nl: nlP && nlP.tot.j === P.tot.j && nlP.tot.m === P.tot.m ? nlP : null, ref: L };
+    }
+    return { ...L, label: `in ${L.j}`, peil: `1 januari ${L.j + 1}`, voorlopig: false, nl: nlL, ref: null };
+  }
   function renderKern() {
     const g = S.g, rs = S.jaren;
     const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
     if (!rs) { $('#leadSub').textContent = 'de jaarcijfers konden niet worden opgehaald'; return; }
-    const L = rs[rs.length - 1], nl = S.nlJaren && S.nlJaren.find(r => r.j === L.j);
-    const pm = (v, r) => v == null || !r.gem ? null : 1000 * v / r.gem;
     $('#vanJaar').textContent = rs[0].j;
-    $('#leadBig').textContent = `${g.n}: ${fmt(L.b31)} inwoners op 1 januari ${L.j + 1}`;
-    const pct = L.b1 ? 100 * L.groei / L.b1 : null;
-    $('#leadSub').textContent = `${L.groei >= 0 ? 'groei' : 'krimp'} in ${L.j}: ${fS(L.groei)} (${fS1(pct)}%)`;
-    const delen = [['het geboorteoverschot', L.gov], ['andere gemeenten', L.bin], ['het buitenland', L.bui]];
+    const K = kopPeriode(), R = K.ref;
+    const pm = (v, r) => v == null || !r || !r.gem ? null : 1000 * v / r.gem;
+    const vl = K.voorlopig ? ' (voorlopig)' : '';
+    const per = K.voorlopig ? `in de laatste twaalf maanden (${K.label}, voorlopig)` : K.label;
+    $('#leadBig').textContent = `${g.n}: ${fmt(K.b31)} inwoners op ${K.peil}${vl}`;
+    const pct = K.b0 ? 100 * K.groei / K.b0 : null;
+    $('#leadSub').textContent = `${K.groei >= 0 ? 'groei' : 'krimp'} ${K.voorlopig ? 'in de laatste twaalf maanden' : K.label}: ${fS(K.groei)} (${fS1(pct)}%)`;
+    const delen = [['het geboorteoverschot', K.gov], ['andere gemeenten', K.bin], ['het buitenland', K.bui]];
     const opsom = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' en ' + a[a.length - 1];
     const plus = delen.filter(d => d[1] > 0).sort((a, b) => b[1] - a[1]).map(d => d[0]);
     const min = delen.filter(d => d[1] < 0).sort((a, b) => a[1] - b[1]).map(d => d[0]);
     const slot = (plus.length ? `Inwoners erbij door ${opsom(plus)}` : '') + (plus.length && min.length ? '; ' : '') + (min.length ? `${plus.length ? 'eraf' : 'Inwoners eraf'} door ${opsom(min)}` : '') + '.';
-    $('#groeiZin').innerHTML = `In ${L.j} werden er ${fmt(L.geb)} kinderen geboren en overleden er ${fmt(L.ovl)} mensen: een geboorteoverschot van <b>${fS(L.gov)}</b>. ` +
-      `Met andere gemeenten was het saldo <b>${fS(L.bin)}</b>, met het buitenland <b>${fS(L.bui)}</b>. ` +
+    const Per = per.charAt(0).toUpperCase() + per.slice(1);
+    $('#groeiZin').innerHTML = `${Per} werden er ${fmt(K.geb)} kinderen geboren en overleden er ${fmt(K.ovl)} mensen: een geboorteoverschot van <b>${fS(K.gov)}</b>. ` +
+      `Met andere gemeenten was het saldo <b>${fS(K.bin)}</b>, met het buitenland <b>${fS(K.bui)}</b>. ` +
       (plus.length || min.length ? slot : '') +
-      (L.rest ? ` <span class="muted">(Overige correcties: ${fS(L.rest)}.)</span>` : '');
+      (K.rest ? ` <span class="muted">(Overige correcties: ${fS(K.rest)}.)</span>` : '') +
+      (R ? `<br><span class="muted small">Heel ${R.j} (definitief): groei ${fS(R.groei)}; ${fmt(R.geb)} geboren, ${fmt(R.ovl)} overleden; saldo andere gemeenten ${fS(R.bin)}, buitenland ${fS(R.bui)}.</span>` : '');
+    const titel = t => K.voorlopig ? `${t}, laatste 12 mnd` : `${t} in ${K.j}`;
+    const was = (k, f) => R ? ` ${R.j}: ${f(R[k])}.` : '';
     let h = '';
-    h += unit(`Geboren in ${L.j}`, fmt(L.geb), `${f1(pm(L.geb, L))} per 1.000 inwoners${nl ? `; Nederland ${f1(pm(nl.geb, nl))}` : ''}.`);
-    h += unit(`Overleden in ${L.j}`, fmt(L.ovl), `${L.gov < 0 ? 'Meer overleden dan geboren.' : 'Minder overleden dan geboren.'} Of dat past bij de leeftijdsopbouw: zie Sterfte.`);
-    h += unit('Andere gemeenten', fS(L.bin), `${fmt(L.inGm)} kwamen uit, ${fmt(L.uitGm)} vertrokken naar een andere gemeente.`);
-    h += unit('Buitenland', fS(L.bui), `${fmt(L.imm)} immigranten, ${fmt(L.emi)} vertrokken naar het buitenland of afgevoerd uit de BRP${L.adm ? ` (waarvan administratief ${fmt(Math.abs(L.adm))})` : ''}.`);
+    h += unit(titel('Geboren'), fmt(K.geb), `${f1(pm(K.geb, K))} per 1.000 inwoners${K.nl ? `; Nederland ${f1(pm(K.nl.geb, K.nl))}` : ''}.${was('geb', fmt)}`);
+    h += unit(titel('Overleden'), fmt(K.ovl), `${K.gov < 0 ? 'Meer overleden dan geboren.' : 'Minder overleden dan geboren.'}${was('ovl', fmt)} Of dat past bij de leeftijdsopbouw: zie Sterfte (t/m ${rs[rs.length - 1].j}).`);
+    h += unit(K.voorlopig ? 'Andere gemeenten, 12 mnd' : 'Andere gemeenten', fS(K.bin), `${fmt(K.inGm)} kwamen uit, ${fmt(K.uitGm)} vertrokken naar een andere gemeente.${was('bin', fS)}`);
+    h += unit(K.voorlopig ? 'Buitenland, 12 mnd' : 'Buitenland', fS(K.bui), `${fmt(K.imm)} immigranten, ${fmt(K.emi)} vertrokken naar het buitenland of afgevoerd uit de BRP${!K.voorlopig && K.adm ? ` (waarvan administratief ${fmt(Math.abs(K.adm))})` : ''}.${was('bui', fS)}`);
     $('#top4').innerHTML = h;
   }
 
@@ -678,8 +713,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       }
     }
     if (rs) {
-      const L = rs[rs.length - 1];
-      if (L.groei > 0 && L.groei - L.bui < -25) regels.push(`Zonder het saldo met het buitenland (${fS(L.bui)}) was ${S.g.n} in ${L.j} gekrompen.`);
+      const K = kopPeriode();
+      if (K && K.groei > 0 && K.groei - K.bui < -25) regels.push(`Zonder het saldo met het buitenland (${fS(K.bui)}) was ${S.g.n} ${K.voorlopig ? `in de laatste twaalf maanden (${K.label}, voorlopig)` : K.label} gekrompen.`);
     }
     $('#opvallend').hidden = !regels.length;
     $('#opvallend').innerHTML = regels.length ? `<span class="eyebrow">Opvallend</span><ul class="small">${regels.slice(0, 3).map(r => `<li>${esc(r)}</li>`).join('')}</ul>` : '';
