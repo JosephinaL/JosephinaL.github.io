@@ -957,7 +957,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const tb = document.getElementById('dosTerug'); if (tb) tb.addEventListener('click', () => kiesWijk(null, true));
     if (o) {
       const wk = o.wijk;
-      const links = [['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad'], ['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+      const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['werkeninkomen', 'Werk en inkomen'], ['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
       const p = document.createElement('p'); p.className = 'small'; p.style.margin = '0';
       p.innerHTML = `<span class="muted">${isB ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> ${links}`;
       $('#dossier').appendChild(p);

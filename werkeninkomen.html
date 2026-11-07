@@ -1194,7 +1194,7 @@ main > * { min-width: 0; }
   function zelfdeWijk(wk) {
     const oud = document.getElementById('zelfdeWijk'); if (oud) oud.remove();
     if (!wk) return;
-    const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['huishoudens', 'Huishoudens'], ['bevolking', 'Bevolking'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
     const p = document.createElement('p');
     p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
     p.innerHTML = `<span class="muted">Dezelfde wijk in:</span> ${links}`;
