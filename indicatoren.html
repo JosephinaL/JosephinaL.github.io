@@ -341,7 +341,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.11';
+  const VERSIE = '0.12';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -417,6 +417,16 @@ main > * { min-width: 0; }
           bron: () => `${cbs('37890')}.`,
           herkomst: 'Voorstel atelier.',
           uit: { b: 'huw', w: x => deelU(x.BeidenWonenNietInHuwelijksgemeente_5, x.TotaalHuwelijkssluitingen_1), f: 'pct', l: 'van de huwelijken: beide partners wonen elders' } },
+        { k: 'context', b: 'intern', naam: 'Aktes van geboorte en overlijden naar plaats van gebeurtenis',
+          def: 'Aantal aktes van geboorte en van overlijden dat de burgerlijke stand van de gemeente opmaakt, en het deel voor kinderen of overledenen die in een andere gemeente woonden.',
+          zegt: 'Hoeveel werk de burgerlijke stand werkelijk heeft. Een akte wordt opgemaakt waar het gebeurt, dus een gemeente met een ziekenhuis of verpleeghuis maakt er meer dan haar inwonerscijfers laten zien. Valt de burgerlijke stand uit, dan raakt dat ook inwoners van andere gemeenten.',
+          niet: 'Hoeveel inwoners er geboren worden of overlijden. Dat publiceert het CBS naar woonplaats; zie Bevolkingsontwikkeling per gemeente.',
+          niveau: 'Gemeente. Per maand of jaar.',
+          norm: 'Eigen gemeente door de jaren; naast de geboorten en overlijdens van de eigen inwoners (CBS).', vgl: 'Nee: hangt af van ziekenhuizen en instellingen in de gemeente.',
+          bron: () => `Eigen registratie van de burgerlijke stand. Het CBS publiceert geboorten en overlijden alleen naar woonplaats (${cbs('37230ned')}); naar de plaats van gebeurtenis alleen huwelijken (${cbs('37890')}).`,
+          ggm: 'Geen entiteit voor een akte van de burgerlijke stand gevonden in GGM v2.5.1. Het domein Burgerzaken heeft <code>ingeschrevenpersoon</code>, <code>reisdocument</code> en <code>ingezetene</code>. Er zijn wel <code>natuurlijkpersoon.geboorteplaats</code> en <code>.overlijdensplaats</code>, maar die beschrijven de persoon, niet het werk van de burgerlijke stand. Dat is een bevinding voor de uitvraag.',
+          herkomst: 'Voorstel atelier.',
+          inst: ['bevolking.html', 'Bevolkingsontwikkeling per gemeente'] },
         { k: 'context', b: 'intern', naam: 'Verlopende reisdocumenten',
           def: 'Aantal paspoorten en identiteitskaarten van inwoners dat per maand verloopt, voor de komende jaren.',
           zegt: 'Wanneer de drukte aan de balie komt. Sinds 2014 is een document voor volwassenen tien jaar geldig; vanaf 2024 verlopen die eerste tienjarige documenten. Dit is het sterkste stuurgegeven voor capaciteit.',
