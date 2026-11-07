@@ -15,6 +15,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | **Thema · Energietransitie** (over de taakvelden heen; de Iv3 kent geen eigen taakveld) | | | |
 | Label C-kantoren | [labelc.html](https://josephinelinders.nl/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
 | Warmte per buurt | [warmte.html](https://josephinelinders.nl/warmte.html) | Van het gas af: hoe elke buurt nu verwarmt. Aardgas, aardgasvrij, gas- en stroomverbruik, stadsverwarming en zonnestroom per buurt. | CBS (Kerncijfers wijken en buurten, energie), PDOK |
+| Zonnestroom per gemeente | [zonnestroom.html](https://josephinelinders.nl/zonnestroom.html) | Wie wekt op, en waar: woningdaken, bedrijfsdaken, kassen of velden? Vermogen sinds 2019, met de eigen RES-regio. | CBS (zonnestroom 85005NED, wind per RES-regio 85004NED, Gebieden in Nederland, inwoners), PDOK |
 | **0 · Bestuur en ondersteuning (financiën)** | | | |
 | Iv3-spiegel | [iv3spiegel.html](https://josephinelinders.nl/iv3spiegel.html) | Waar gaat het geld van een gemeente heen, en deed ze wat ze van plan was? | Iv3 (CBS) |
 | Iv3-panorama | [iv3panorama.html](https://josephinelinders.nl/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |

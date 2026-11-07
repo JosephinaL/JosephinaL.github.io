@@ -388,6 +388,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
     <p class="terug-onder"><a class="terug" href="labelc.html">Kantoren en andere gebouwen: daar geldt een eigen labelplicht. Label C-kantoren →</a></p>
+    <p class="terug-onder"><a class="terug" href="zonnestroom.html" id="naarZon">Zonnepanelen in de hele gemeente: wie wekt op, en waar. Zonnestroom per gemeente →</a></p>
     <p class="terug-onder"><a class="terug" href="woningen.html" id="naarWoningen">Dezelfde woningen naar eigendom, bouwjaar en leegstand. Woningvoorraad en leegstand →</a></p>
     <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
   </section>
@@ -398,7 +399,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Warmte per buurt';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOGUS = "https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title&$filter=substringof('Kerncijfers wijken en buurten',Title)";
@@ -819,6 +820,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const h = '#gm=' + S.g.c + (S.jaar ? '&jaar=' + S.jaar : '') + (selCode ? (/^BU/.test(selCode) ? '&buurt=' : '&wijk=') + selCode : '') + (maat !== MAAT0 ? '&kaart=' + maat : '');
     try { if (location.hash !== h) history.replaceState(null, '', h); } catch (e) {}
     const nw = document.getElementById('naarWoningen');
+    const nz = document.getElementById('naarZon'); if (nz) nz.href = 'zonnestroom.html#gm=' + S.g.c;
     if (nw) nw.href = 'woningen.html#gm=' + S.g.c + (selCode && /^WK/.test(selCode) ? '&wijk=' + selCode : selCode ? '&wijk=WK' + selCode.slice(2, 8) : '');
   }
   function toonInfo(t) { $('#focusInfo').textContent = t; $('#focusInfo').hidden = !t; }
