@@ -14,6 +14,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 |---|---|---|---|
 | **Thema · Energietransitie** (over de taakvelden heen; de Iv3 kent geen eigen taakveld) | | | |
 | Label C-kantoren | [labelc.html](https://josephinelinders.nl/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
+| Warmte per buurt | [warmte.html](https://josephinelinders.nl/warmte.html) | Van het gas af: hoe elke buurt nu verwarmt. Aardgas, aardgasvrij, gas- en stroomverbruik, stadsverwarming en zonnestroom per buurt. | CBS (Kerncijfers wijken en buurten, energie), PDOK |
 | **0 · Bestuur en ondersteuning (financiën)** | | | |
 | Iv3-spiegel | [iv3spiegel.html](https://josephinelinders.nl/iv3spiegel.html) | Waar gaat het geld van een gemeente heen, en deed ze wat ze van plan was? | Iv3 (CBS) |
 | Iv3-panorama | [iv3panorama.html](https://josephinelinders.nl/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |
@@ -55,7 +56,7 @@ Wmo, Jeugdzorg, Schulden, Werk en inkomen, Huishoudens en Woningvoorraad delen d
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, werk en inkomen, bevolking en wonen (CBS), inburgering en studenten (DUO), vergunningen (gemeenteblad).
+2. **Open domeindata:** energie (RIVM; verbruik en verwarming per buurt: CBS), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, werk en inkomen, bevolking en wonen (CBS), inburgering en studenten (DUO), vergunningen (gemeenteblad).
 3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving. Eigen lijst op de kaart is daar het gereedschap voor.
 4. **Antwoord:** navolgbaar per object.
 
