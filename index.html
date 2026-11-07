@@ -434,6 +434,13 @@ main > * { min-width: 0; }
         <div class="tile-links"><a class="btn btn-sm" href="huishoudens.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-huish">Meer weten</button></div>
       </article>
       <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:166588;background:#0f5c66"></i><i style="flex:173494;background:#eda100"></i><i style="flex:308357;background:#1baf7a"></i><i style="flex:214821;background:#a7d3d8"></i></span></div>
+        <h4>Bevolkingsontwikkeling</h4>
+        <span class="meta">Door de jaren · per wijk · elke gemeente</span>
+        <p>Geboren, overleden, gekomen en gegaan: waar komt de groei of krimp vandaan, en past de sterfte bij de leeftijdsopbouw?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="bevolking.html">Open de pagina <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-bevolk">Meer weten</button></div>
+      </article>
+      <article class="tile">
         <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:57.9;background:#0f5c66"></i><i style="flex:28.1;background:#3a8f9a"></i><i style="flex:13.9;background:#a7d3d8"></i></span></div>
         <h4>Woningvoorraad en leegstand</h4>
         <span class="meta">Kaart · per buurt · elke gemeente</span>
@@ -657,6 +664,31 @@ main > * { min-width: 0; }
           <li>De pagina haalt alles live op zodra je een gemeente kiest.</li>
           <li>Wie de komende twintig jaar 65 wordt, staat erbij. Een prognose niet: die is niet per leeftijd en gemeente als open data beschikbaar.</li>
           <li>Kies een wijk en de pagina volgt die keuze. Dezelfde wijk open je met één klik in Wmo, Jeugdzorg, Schulden, Werk en inkomen, Huishoudens en Woningvoorraad.</li>
+        </ol>
+        <button class="close" type="button" hidden>Sluiten</button>
+      </div>
+    </article>
+    <article class="product" id="info-bevolk" aria-labelledby="h-bevolk">
+      <div class="product-body">
+        <h3 id="h-bevolk">Bevolkingsontwikkeling per gemeente</h3>
+        <div class="spread" role="img" aria-label="Nederland in 2025: 166.588 geboren, 173.494 overleden, 308.357 uit het buitenland gekomen, 214.821 naar het buitenland vertrokken">
+          <i style="flex:166588;background:#0f5c66"></i><i style="flex:173494;background:#eda100"></i><i style="flex:308357;background:#1baf7a"></i><i style="flex:214821;background:#a7d3d8"></i>
+        </div>
+        <p>Geboren, overleden, gekomen en gegaan. Waar de groei of krimp van een gemeente vandaan komt: het geboorteoverschot, het saldo met andere gemeenten en het saldo met het buitenland, sinds 2002. Met kinderen per vrouw, de leeftijd van de moeder, en de sterfte naast wat je bij de leeftijdsopbouw van de gemeente verwacht. Geen ranglijst. Voor beleidsmedewerkers wonen, ruimtelijke ordening, sociaal domein en publieke gezondheid.</p>
+        <div class="facts">
+          <div><b>−6.906</b><span>geboorteoverschot in Nederland in 2025: meer overleden dan geboren</span></div>
+          <div><b>238</b><span>van de 342 gemeenten met meer overleden dan geboren (2025)</span></div>
+          <div><b>+86.181</b><span>groei van Nederland in 2025, vooral uit het buitenland</span></div>
+        </div>
+        <a class="btn" href="bevolking.html">Open de pagina <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">Zo werkt het</span>
+        <ol>
+          <li>Het CBS telt per gemeente de geboorten, overlijdens en verhuizingen, per jaar en per maand, naar woonplaats.</li>
+          <li>De groei valt uiteen in drie delen: geboren min overleden, het saldo met andere gemeenten en het saldo met het buitenland.</li>
+          <li>De verwachte sterfte past de sterftekans van Nederland per leeftijdsjaar toe op de bevolking van de gemeente. Zo zie je of de sterfte afwijkt van wat de leeftijd voorspelt.</li>
+          <li>Per wijk geboorte en sterfte uit de Kerncijfers wijken en buurten, met de grenzen via PDOK. De pagina haalt alles live op zodra je een gemeente kiest.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>
       </div>

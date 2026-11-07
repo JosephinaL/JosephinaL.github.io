@@ -35,6 +35,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | Inburgering per gemeente | [inburgering.html](https://josephinelinders.nl/inburgering.html) | Wie werd inburgeringsplichtig onder de Wet inburgering 2021, hoe ver is elke jaargroep en in welke leerroute? | DUO (WI 2021 Instroom, Uitstroom en Leerroute), CBS (Regionale kerncijfers) |
 | **8 · Volkshuisvesting** | | | |
 | Huishoudens en vergrijzing | [huishoudens.html](https://josephinelinders.nl/huishoudens.html) | Hoe zijn de huishoudens samengesteld, hoe snel vergrijst de gemeente sinds 1995, en in welke buurten? | CBS (Regionale kerncijfers, Kerncijfers wijken en buurten), PDOK |
+| Bevolkingsontwikkeling per gemeente | [bevolking.html](https://josephinelinders.nl/bevolking.html) | Geboren, overleden, gekomen en gegaan: waar komt de groei vandaan, en past de sterfte bij de leeftijdsopbouw? | CBS (bevolkingsontwikkeling per jaar en maand, geboorte, bevolking en overledenen naar leeftijd, Kerncijfers wijken en buurten), PDOK |
 | Woningvoorraad en leegstand | [woningen.html](https://josephinelinders.nl/woningen.html) | Hoeveel woningen zijn er, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg? | CBS (Woningvoorraad, Levensloop van woningen, Kerncijfers wijken en buurten), PDOK |
 | Bouwstroom | [bouwstroom.html](https://josephinelinders.nl/bouwstroom.html) | Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? | BAG, Officiële bekendmakingen (gemeenteblad), CBS |
 | **Werkbank (buiten de Iv3-indeling)** | | | |
