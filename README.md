@@ -54,6 +54,8 @@ Wmo, Jeugdzorg, Schulden, Werk en inkomen, Huishoudens en Woningvoorraad delen d
 
 Tweede uitwerking: [BAG-werkbank](https://josephinelinders.nl/bagwerkbank.html), alle adressen en gebouwen van een gemeente als lijst, om mee te onderzoeken, te koppelen en te controleren: per adres de BAG-ID's van adres, object en pand, status, gebruiksdoel, oppervlakte, bouwjaar, wijk en buurt (CBS-indeling) en coördinaten, als CSV voor Excel of om te koppelen. De lijsten per gemeente worden maandelijks doorgerekend uit dezelfde BAG-GeoPackage en staan in een aparte repository ([bag-werkbank](https://github.com/JosephinaL/bag-werkbank)), zodat de geschiedenis van deze repository niet elke maand met honderden megabytes groeit. Afgeleid bestand, geen authentieke BAG.
 
+Derde uitwerking: [Levensloop van de bouw](https://josephinelinders.nl/levensloop.html), hoe de BAG de stappen van vergunning tot ingebruikname bijhoudt: per gemeente welke stappen worden geregistreerd (vergund, bouw gestart, niet ingemeten, in gebruik), hoe lang elke stap in de registratie duurt, hoe het bouwjaar bij de vergunning zich verhoudt tot de ingebruikname, en welke panden twee jaar of langer op dezelfde stap staan, met een link naar de BAG-viewer. Op basis van het BAG 2.0 Extract met historie (PDOK, CC0), panden met een bouwvergunning vanaf 2016, per gemeente naast Nederland. Het gaat om registratietijd, niet om bouwtijd: de datum van een stap is bijna altijd de dag van registreren.
+
 ## Werkwijze
 
 Vier lagen:

@@ -196,7 +196,7 @@ main > * { min-width: 0; }
             <li><b>Geen ranglijst</b>: de pagina zet je gemeente naast Nederland, niet naast andere gemeenten. Een gemeente die veel bouwt of splitst heeft vanzelf meer lopend werk.</li>
             <li><b>Eén pand per object</b>: het landelijke bestand geeft per verblijfsobject één pand. Een object in meer panden kan daardoor bij "buiten elk pand" ontbreken, niet ten onrechte opduiken: de controle kijkt naar alle panden in de buurt.</li>
             <li><b>Nevenadressen, ligplaatsen en standplaatsen</b> zijn niet meegeteld.</li>
-            <li><b>Vergunde en gestarte bouw</b> met een verwacht bouwjaar dat voorbij is, staat per pand in Bouwstroom; hier alleen het aantal.</li>
+            <li><b>Vergunde en gestarte bouw</b> met een verwacht bouwjaar dat voorbij is, staat per pand in Bouwstroom; hier alleen het aantal. Panden die twee jaar of langer op dezelfde stap staan, met de datum van die stap, staan in <a href="levensloop.html">Levensloop van de bouw</a>.</li>
           </ul>
         </div>
       </div>
@@ -225,7 +225,7 @@ const DATA = {"peil":"2026-11-01","leeftijd_peil":"2026-11-03","gm":{"0998":["Bu
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.1';
+  const VERSIE = '0.1.1';
   const PRODUCT = 'Kwaliteit van de BAG';
   const MAXRIJ = 300;
   const $ = s => document.querySelector(s);
@@ -262,7 +262,7 @@ const DATA = {"peil":"2026-11-01","leeftijd_peil":"2026-11-03","gm":{"0998":["Bu
       uitleg: 'Zelfde situatie, maar het pand staat in verbouwing of in aanbouw. De registratie klopt op zichzelf; de vraag is alleen of het werk nog loopt.',
       kol: [...KOP_ADRES, 'Nieuw object', 'Bestaand object', 'Status pand', 'Sinds', 'Maanden'], rij: r => [r[0], r[1], viewer(r[2]), r[3].split('|').map(viewer).join('<br>'), r[7], datum(r[5]), { r: r[6] }] },
     { groep: 'onderweg', k: 'pijp', titel: 'Vergunde of gestarte bouw met verwacht jaar 2024 of eerder',
-      uitleg: 'Panden die als vergund of in aanbouw staan, met verwacht jaar 2024 of eerder. De lijst per pand staat in Bouwstroom.',
+      uitleg: 'Panden die als vergund of in aanbouw staan, met verwacht jaar 2024 of eerder. Het verwachte jaar is meestal te vroeg ingevuld: landelijk komt 84% van de nieuwe panden later in gebruik. Hoe lang een pand echt op die stap staat, laat Levensloop van de bouw zien.',
       telling: g => g.pijpOud, noemer: g => g.pijp, link: g => `bouwstroom.html#gm=${g.c}&verwacht=2024&n=${g.pijpOud}&peil=${DATA.peil}` },
     { groep: 'opval', k: 'opp1', titel: 'Oppervlakte 1 m²',
       uitleg: 'De kleinst mogelijke waarde. Vaak een werkafspraak voor "nog niet gemeten"; wie gemiddelde oppervlaktes berekent, rekent er dan mee.',
@@ -329,7 +329,7 @@ const DATA = {"peil":"2026-11-01","leeftijd_peil":"2026-11-03","gm":{"0998":["Bu
             <span class="getal${n ? '' : ' nul'}">${fmt(n)}</span>
             <p>${esc(c.uitleg)}</p>
             <span class="ref">${noem ? `van ${fmt(noem)} panden in de pijplijn (${Math.round(100 * n / noem)}%)` : 'geen panden in de pijplijn'} · Nederland ${Math.round(100 * nl.n / nl.noem)}%</span>
-            <div class="acties"><a class="btn linkish" href="${c.link(g)}">Bekijk deze panden in Bouwstroom →</a></div></div>`;
+            <div class="acties"><a class="btn linkish" href="${c.link(g)}">Bekijk deze panden in Bouwstroom →</a><a class="btn linkish" href="levensloop.html#gm=${g.c}">Levensloop van de bouw →</a></div></div>`;
         }
         const l = L[c.k] || [], n = l.length, nl = NL[c.k];
         return `<div class="ctl" style="--kleur:${kleur}" id="ctl-${c.k}"><h3>${esc(c.titel)}</h3>
