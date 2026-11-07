@@ -8,10 +8,12 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 
 ## Instrumenten
 
-Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waar de gemeente het boekt.
+Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waar de gemeente het boekt. Uitzonderingen: een thema-plank voor een dwarsdoorsnede die de Iv3 niet als taakveld kent (Energietransitie), en de Werkbank.
 
 | Instrument | Pagina | Vraag | Bronnen |
 |---|---|---|---|
+| **Thema · Energietransitie** (over de taakvelden heen; de Iv3 kent geen eigen taakveld) | | | |
+| Label C-kantoren | [labelc.html](https://josephinelinders.nl/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
 | **0 · Bestuur en ondersteuning (financiën)** | | | |
 | Iv3-spiegel | [iv3spiegel.html](https://josephinelinders.nl/iv3spiegel.html) | Waar gaat het geld van een gemeente heen, en deed ze wat ze van plan was? | Iv3 (CBS) |
 | Iv3-panorama | [iv3panorama.html](https://josephinelinders.nl/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |
@@ -33,7 +35,6 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | Huishoudens en vergrijzing | [huishoudens.html](https://josephinelinders.nl/huishoudens.html) | Hoe zijn de huishoudens samengesteld, hoe snel vergrijst de gemeente sinds 1995, en in welke buurten? | CBS (Regionale kerncijfers, Kerncijfers wijken en buurten), PDOK |
 | Woningvoorraad en leegstand | [woningen.html](https://josephinelinders.nl/woningen.html) | Hoeveel woningen zijn er, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg? | CBS (Woningvoorraad, Levensloop van woningen, Kerncijfers wijken en buurten), PDOK |
 | Bouwstroom | [bouwstroom.html](https://josephinelinders.nl/bouwstroom.html) | Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? | BAG, Officiële bekendmakingen (gemeenteblad), CBS |
-| Label C-kantoren | [labelc.html](https://josephinelinders.nl/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
 | **Werkbank (buiten de Iv3-indeling)** | | | |
 | Eigen lijst op de kaart | [eigenlijst.html](https://josephinelinders.nl/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed in eigen beheer, eruit naast de BAG en open data? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
 

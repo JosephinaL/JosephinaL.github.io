@@ -116,6 +116,9 @@ nav a:hover { color: var(--accent); }
   .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
   .rail { grid-column: 1 / -1; grid-template-columns: subgrid; }
 }
+/* Thema-plank: een dwarsdoorsnede die de Iv3 zelf niet als taakveld kent; geen nummer, bovenaan, petrol lijn onder de kop */
+.shelf.thema .shelf-head { border-bottom: 2px solid var(--accent); }
+.shelf.thema .tile { border-color: var(--accent); }
 .tile h4 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0; }
 .meta { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
 .tile { transition: border-color .15s ease, transform .15s ease; }
@@ -283,6 +286,18 @@ main > * { min-width: 0; }
       <p class="lead">Een rapport legt vast wat er is gezien. Een dashboard volgt vaste cijfers door de tijd. Een instrument is gemaakt om een vraag uit te zoeken: je kiest zelf waar je kijkt, een gemeente, een wijk, een jaar, een pand. Het rekent ter plekke en laat zien waar het antwoord vandaan komt.</p>
     </div>
     <div class="shelves">
+      <div class="shelf thema">
+        <div class="shelf-head"><h3>Thema · Energietransitie</h3><span>Over de taakvelden heen: bouwtoezicht (8.3), omgevingsdienst (7.4) en eigen vastgoed. De Iv3 kent geen eigen taakveld voor energie.</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><div class="ladder"><span style="background:#1a8a3f">A</span><span style="background:#57a83a">B</span><span style="background:#b3c72a">C</span><i class="cut"></i><span style="background:#f2d01c;color:#222">D</span><span style="background:#f0a018">E</span><span style="background:#e4642a">F</span><span style="background:#d22a2a">G</span></div></div>
+        <h4>Label C-kantoren</h4>
+        <span class="meta">Kaart · per pand · elke gemeente</span>
+        <p>Welke kantoren voldoen aan de label C-plicht? Een kaart per gemeente, pand voor pand.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="labelc.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-labelc">Meer weten</button></div>
+      </article>
+        </div>
+      </div>
       <div class="shelf">
         <div class="shelf-head"><h3>0 · Bestuur en ondersteuning</h3><span>Financiën: wat een gemeente uitgeeft en ontvangt, en wat het Rijk betaalt</span></div>
         <div class="rail">
@@ -395,7 +410,7 @@ main > * { min-width: 0; }
         </div>
       </div>
       <div class="shelf">
-        <div class="shelf-head"><h3>8 · Volkshuisvesting</h3><span>Wonen en bouwen: wie er woont, de woningen, wat erbij komt en de labelplicht voor kantoren</span></div>
+        <div class="shelf-head"><h3>8 · Volkshuisvesting</h3><span>Wonen en bouwen: wie er woont, in welke woningen, en wat erbij komt</span></div>
         <div class="rail">
       <article class="tile">
         <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:40.1;background:#2a78d6"></i><i style="flex:28.4;background:#eda100"></i><i style="flex:31.5;background:#1baf7a"></i></span></div>
@@ -417,13 +432,6 @@ main > * { min-width: 0; }
         <span class="meta">Kaart · per pand · elke gemeente</span>
         <p>Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? Met de vergunningen uit het gemeenteblad.</p>
         <div class="tile-links"><a class="btn btn-sm" href="bouwstroom.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-bouw">Meer weten</button></div>
-      </article>
-      <article class="tile">
-        <div class="vis" aria-hidden="true"><div class="ladder"><span style="background:#1a8a3f">A</span><span style="background:#57a83a">B</span><span style="background:#b3c72a">C</span><i class="cut"></i><span style="background:#f2d01c;color:#222">D</span><span style="background:#f0a018">E</span><span style="background:#e4642a">F</span><span style="background:#d22a2a">G</span></div></div>
-        <h4>Label C-kantoren</h4>
-        <span class="meta">Kaart · per pand · elke gemeente</span>
-        <p>Welke kantoren voldoen aan de label C-plicht? Een kaart per gemeente, pand voor pand.</p>
-        <div class="tile-links"><a class="btn btn-sm" href="labelc.html">Open de kaart <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-labelc">Meer weten</button></div>
       </article>
         </div>
       </div>
