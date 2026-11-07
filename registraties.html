@@ -90,6 +90,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
   .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
   .rail { grid-column: 1 / -1; grid-template-columns: subgrid; }
   .tile.breed { grid-column: 1 / -1; }
+  .shelf.smal:has(.tile.breed) { grid-column: span 1; }
 }
 .tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; min-width: 0; transition: border-color .15s ease, transform .15s ease; }
 .tile:not(.breed):hover { border-color: var(--accent); }
@@ -229,15 +230,15 @@ main > * { min-width: 0; }
             <h4>Levensloop van de bouw</h4>
             <p>Hoe de BAG de stappen van vergunning tot ingebruikname bijhoudt: welke stappen worden geregistreerd, hoe lang ze duren in de registratie, hoe goed het verwachte bouwjaar klopt. Met de panden die al lang onderweg zijn.</p>
             <div class="vis"><div class="strook">
-              <div style="--k:var(--onderweg)"><b>__ZB__</b>zonder "bouw gestart"</div>
-              <div style="--k:var(--accent)"><b>__BJ__</b>bouwjaar klopte</div>
-              <div style="--k:var(--opval)"><b>__LANG__</b>twee jaar onderweg</div>
-            </div><span class="small muted">Nederland, panden met vergunning vanaf 2016, BAG-stand __PEIL__</span></div>
+              <div style="--k:var(--onderweg)"><b>30%</b>zonder "bouw gestart"</div>
+              <div style="--k:var(--accent)"><b>15%</b>bouwjaar klopte</div>
+              <div style="--k:var(--opval)"><b>24.155</b>twee jaar onderweg</div>
+            </div><span class="small muted">Nederland, panden met vergunning vanaf 2016, BAG-stand 8 oktober 2026</span></div>
             <div class="tile-links"><a class="btn-start" id="levenLink" href="levensloop.html">Open de levensloop <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-leven">Meer weten</button></div>
           </article>
         </div>
       </div>
-      <div class="shelf">
+      <div class="shelf smal">
         <div class="shelf-head"><h3>Binnenkort</h3><span>Registraties die in de instrumenten al opvielen, nog niet uitgewerkt</span></div>
         <div class="rail"><div class="tile breed"><ul class="binnenkort">
           <li>Wmo: registratie per type maatwerkvoorziening</li>
@@ -288,7 +289,7 @@ main > * { min-width: 0; }
           <span class="eyebrow">Meer weten · Levensloop van de bouw</span>
           <h3>Van vergunning tot ingebruikname, zoals de BAG het bijhoudt</h3>
           <p>De BAG bewaart elke statuswijziging van een pand. Daaruit volgt per gemeente welke stappen worden geregistreerd, hoeveel tijd er tussen de registraties zit, en hoe het bouwjaar bij de vergunning zich verhoudt tot het jaar waarin het pand echt in gebruik kwam. Het gaat over de registratie, niet over de bouw: de datum van een stap is bijna altijd de dag van registreren.</p>
-          <div class="facts"><div><b>__NIEUW__</b><span>panden met vergunning sinds 2016</span></div><div><b>4</b><span>routes naar in gebruik</span></div><div><b>342</b><span>gemeenten</span></div></div>
+          <div class="facts"><div><b>812.723</b><span>panden met vergunning sinds 2016</span></div><div><b>4</b><span>routes naar in gebruik</span></div><div><b>342</b><span>gemeenten</span></div></div>
           <button class="sluit" type="button" data-sluit>Sluiten</button>
         </div>
         <div class="product-aside">
@@ -324,7 +325,7 @@ main > * { min-width: 0; }
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> Dit is een overzicht; elke tegel opent een pagina met een eigen verantwoording. Kwaliteit van de BAG: BAG (Kadaster) via PDOK, landelijk bestand stand 1 november 2026, documentdatum van nieuwe verblijfsobjecten stand 3 november 2026. BAG-werkbank: zelfde landelijk bestand, stand 1 november 2026, met de CBS-wijk- en buurtindeling 2026. Levensloop van de bouw: BAG 2.0 Extract met historie, stand __PEILX__, met de CBS-gemeentegrenzen 2026. Alle drie maandelijks ververst, pas gepubliceerd na controle.</p>
+    <p><b>Bron en peildatum.</b> Dit is een overzicht; elke tegel opent een pagina met een eigen verantwoording. Kwaliteit van de BAG: BAG (Kadaster) via PDOK, landelijk bestand stand 1 november 2026, documentdatum van nieuwe verblijfsobjecten stand 3 november 2026. BAG-werkbank: zelfde landelijk bestand, stand 1 november 2026, met de CBS-wijk- en buurtindeling 2026. Levensloop van de bouw: BAG 2.0 Extract met historie, stand 8 oktober 2026, met de CBS-gemeentegrenzen 2026. Alle drie maandelijks ververst, pas gepubliceerd na controle.</p>
     <p><b>Licentie.</b> BAG: CC0. CBS-wijk- en buurtkaart: CC BY 4.0. De bewerking valt onder de gebruiksregel hieronder.</p>
     <p><b>Methode.</b> Per registratie een plank, per uitwerking een tegel. Een tegel laat zien welke signalen uit open data te halen zijn, voor elke gemeente; de uitleg per signaal staat op de pagina van de tegel.</p>
     <p><b>Wat dit niet is.</b> Geen oordeel over een gemeente of een bronhouder, en geen vervanging van de eigen kwaliteitscontroles van de bronhouder. Een signaal is een aanleiding om na te gaan; wie de registratie bijhoudt, weet vaak meteen waarom iets zo staat.</p>
