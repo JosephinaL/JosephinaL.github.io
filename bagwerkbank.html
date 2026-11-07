@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BAG-werkbank · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="BAG-werkbank: alle adressen en gebouwen van je gemeente, om mee te onderzoeken, te koppelen en te controleren. Per Nederlandse gemeente een lijst uit de BAG met BAG-ID's, adres, status, gebruiksdoel, oppervlakte, bouwjaar, wijk, buurt en coördinaten, als download.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --gebruik: #0f5c66; --onderweg: #c98a12; --buiten: #8a969a; --plaats: #5b6fa8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --gebruik: #5fb7c2; --onderweg: #e2ab3f; --buiten: #7d8b8f; --plaats: #93a5dc; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --gebruik: #5fb7c2; --onderweg: #e2ab3f; --buiten: #7d8b8f; --plaats: #93a5dc; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; min-width: 0; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; text-decoration: none; color: inherit; display: inline-block; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn[disabled] { opacity: .5; cursor: default; }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.intro .sub { font-family: var(--f-display); font-stretch: 90%; font-size: 1.15rem; font-weight: 600; color: var(--fg); }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; font-size: .9rem; }
+.info p { margin: 0; max-width: 90ch; }
+.info p + p { margin-top: 6px; }
+.laad { padding: 14px 0; color: var(--muted); }
+.fout { border-left-color: var(--warn); }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+
+.kern { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 165px), 1fr)); gap: 12px; }
+@media (max-width: 420px) { .kern { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kc b { font-size: 1.3rem; } }
+.kc { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--kleur, var(--accent)); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; align-content: start; min-width: 0; }
+.kc b { font-family: var(--f-display); font-stretch: 85%; font-size: 1.6rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.kc span { font-size: .86rem; color: var(--muted); }
+.balk { display: flex; height: 10px; border-radius: 3px; overflow: hidden; background: var(--sunk); margin-top: 4px; }
+.balk i { display: block; height: 100%; }
+
+.herken { max-width: 84ch; justify-self: start; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.werk { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; min-width: 0; }
+.filters { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: flex-end; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.filters input, .filters select { padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); max-width: 100%; }
+.filters #zoek { width: min(300px, 100%); }
+.filters select { width: 220px; max-width: 100%; }
+.filters .field { max-width: 100%; }
+.filters .field:not(:first-of-type) { width: 220px; }
+.telregel { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.telregel .acties { display: flex; flex-wrap: wrap; gap: 6px; }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; white-space: nowrap; z-index: 1; }
+td.id { font-family: var(--f-mono); font-size: .78rem; white-space: nowrap; }
+td.r, th.r { text-align: right; }
+td.r { font-variant-numeric: tabular-nums; }
+.st { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.st i { width: 8px; height: 8px; border-radius: 50%; background: var(--k); flex: none; }
+.meer { padding: 10px 14px; font-size: .85rem; color: var(--muted); margin: 0; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+code { font-family: var(--f-mono); font-size: .82em; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="registraties.html">← Open Data Atelier · Registraties belicht</a>
+      <span class="eyebrow">Adressen en gebouwen · open data</span>
+      <h1 id="title">BAG-werkbank</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p class="sub">Alle adressen en gebouwen van je gemeente, om mee te onderzoeken, te koppelen en te controleren.</p>
+    <p>Kies een gemeente. Je krijgt elk adres uit de Basisregistratie Adressen en Gebouwen (BAG) als regel: met de BAG-ID's van adres, object en pand, de status, het gebruiksdoel, de oppervlakte, het bouwjaar, de wijk en buurt en de coördinaten. Zoek, filter en download de lijst als CSV, om naast je eigen gegevens te leggen.</p>
+    <p class="muted small">De lijst is een afgeleid bestand uit open data van het Kadaster, maandelijks ververst. Voor formeel gebruik geldt de BAG zelf.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <div class="info fout" id="fout" hidden></div>
+  <p class="laad" id="laad" hidden></p>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="kern" id="kern"></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een andere stand.</b> De lijst gaat uit van de BAG van <span class="standdatum"></span>. De gemeente werkt de BAG elke dag bij; wat er sindsdien veranderde, staat hier nog niet. De viewerlink toont de actuele stand.</li>
+          <li><b>Alleen hoofdadressen.</b> Een object met meer adressen staat hier één keer, met het hoofdadres. Nevenadressen ontbreken. Lig- en standplaatsen staan er wel in.</li>
+          <li><b>Bronhouder, niet ligging.</b> Een adres hoort bij de gemeente die het in de BAG registreert. Wijk en buurt komen uit de ligging van het punt in de CBS-indeling <span class="buurtjaar"></span>; bij een grensobject kan dat een buurt van de buurgemeente zijn.</li>
+          <li><b>Een fout in deze bewerking.</b> Klopt een regel niet met de BAG-viewer, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het Kadaster door Josephine Linders, op eigen titel. Het is geen officiële publicatie van een gemeente of van het Kadaster, en geen authentieke BAG. Voor formeel gebruik de BAG zelf raadplegen.</p>
+        <div class="meld">
+          <span>Fout gezien, of een regel die je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <section class="werk" aria-labelledby="werkKop">
+        <div class="filters" id="filters">
+          <h2 id="werkKop" style="flex-basis:100%">De lijst</h2>
+          <div class="field"><label for="zoek">Zoek op adres, postcode of BAG-ID</label><input id="zoek" type="search" placeholder="Bijv. Markt 87 of 2611GW" aria-label="Zoek op adres, postcode of BAG-ID"></div>
+          <div class="field"><label for="fSoort">Soort</label><select id="fSoort"><option value="">Alle soorten</option><option value="V">Verblijfsobjecten</option><option value="L">Ligplaatsen</option><option value="S">Standplaatsen</option></select></div>
+          <div class="field"><label for="fStatus">Status</label><select id="fStatus"></select></div>
+          <div class="field"><label for="fDoel">Gebruiksdoel bevat</label><select id="fDoel"></select></div>
+          <div class="field"><label for="fWijk">Wijk</label><select id="fWijk"></select></div>
+          <div class="field"><label for="fBuurt">Buurt</label><select id="fBuurt"></select></div>
+          <button class="btn linkish" type="button" id="wis">Wis filters</button>
+        </div>
+        <div class="telregel">
+          <span id="telregel"></span>
+          <span class="acties">
+            <button class="btn linkish" type="button" id="csvExcel">Download CSV voor Excel</button>
+            <button class="btn linkish" type="button" id="csvKoppel">Download CSV om te koppelen</button>
+          </span>
+        </div>
+        <div class="scroll"><table><thead><tr>
+          <th>Adres</th><th>Postcode</th><th>Woonplaats</th><th>Status</th><th>Gebruiksdoel</th><th class="r">m²</th><th class="r">Bouwjaar</th><th>Buurt</th><th>Object-ID</th><th>Pand-ID</th>
+        </tr></thead><tbody id="tbody"></tbody></table></div>
+        <p class="meer" id="meer"></p>
+      </section>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is de lijst gemaakt</h2>
+          <ul class="small">
+            <li><b>Bron</b>: de BAG zoals het Kadaster die maandelijks als één bestand publiceert. Per adresseerbaar object één regel: verblijfsobjecten (woning, kantoor, winkel en andere ruimtes met een eigen adres), ligplaatsen (woonboten) en standplaatsen (woonwagens).</li>
+            <li><b>Gemeente</b>: de bronhouder van het object in de BAG.</li>
+            <li><b>Wijk en buurt</b>: het punt van het object in de CBS-wijk- en buurtindeling <span class="buurtjaar"></span>; ligt het punt net buiten elk buurtvlak (kustlijn, water), dan de dichtstbijzijnde buurt binnen 50 meter.</li>
+            <li><b>Pand-ID en bouwjaar</b>: het pand waarin het verblijfsobject ligt. Het landelijke bestand geeft één pand per object; ligt een object in meer panden, dan staat hier één ervan.</li>
+            <li><b>Coördinaten</b> in Rijksdriehoeksstelsel (RD, meters), het stelsel dat gemeenten zelf gebruiken.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Koppelen met je eigen gegevens</h2>
+          <ul class="small">
+            <li><b>Twee downloads.</b> De CSV voor Excel zet de BAG-ID's zo neer dat Excel de voorloopnul laat staan (gemeenten met een code onder 1000, zoals Delft 0503). De CSV om te koppelen geeft de ID's als platte tekst, voor een database, Power Query of een script.</li>
+            <li><b>Welke sleutel.</b> De nummeraanduiding-ID hoort bij het adres, de object-ID bij de ruimte, de pand-ID bij het gebouw. Een eigen lijst op adres koppel je op nummeraanduiding of op postcode met huisnummer, letter en toevoeging.</li>
+            <li><b>Wat de pagina met je gegevens doet.</b> Niets: de pagina haalt alleen de lijst van de gekozen gemeente op. Eigen gegevens op de kaart zetten kan met <a href="eigenlijst.html">Eigen lijst op de kaart</a>.</li>
+            <li><b>Signalen.</b> Waar de BAG van je gemeente zichzelf tegenspreekt of opvallende waarden heeft: <a id="kwLink" href="bagkwaliteit.html">Kwaliteit van de BAG →</a></li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> BAG (Kadaster) via PDOK: het landelijke <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-bestand</a> (GeoPackage), stand <span class="standdatum">van het bestand</span>. Wijken en buurten: CBS-wijk- en buurtindeling <span class="buurtjaar"></span> via PDOK. Per gemeente doorgerekend en als bestand gepubliceerd; maandelijks ververst, pas gepubliceerd na controle.</p>
+    <p><b>Licentie.</b> BAG: CC0. CBS-wijk- en buurtkaart: CC BY 4.0. Deze lijst is een afgeleid bestand, geen authentieke BAG.</p>
+    <p><b>Methode.</b> Per adresseerbaar object één regel met het hoofdadres; wijk en buurt op ligging. De volledige uitleg staat na de gemeentekeuze onder "Zo is de lijst gemaakt".</p>
+    <p><b>Wat dit niet is.</b> Geen authentieke BAG en geen vervanging van een afnemersaansluiting op de Landelijke Voorziening BAG. Geen oordeel over de registratie van een gemeente; signalen daarover staan in Kwaliteit van de BAG.</p>
+    <p><b>Bekende beperkingen.</b> Momentopname van één dag per maand. Nevenadressen ontbreken. Eén pand per verblijfsobject. Ingetrokken en beëindigde objecten staan niet in het landelijke bestand.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>. De gedownloade lijst gebruiken in je eigen werk mag, met de BAG als bron.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een regel of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="registraties.html">← Terug naar Registraties belicht</a></p>
+  </section>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '0.1';
+  const PRODUCT = 'BAG-werkbank';
+  const BASIS = '/bag-werkbank/';
+  const MAXRIJ = 200;
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const fmt = v => v == null || v === '' ? '' : nf.format(v);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const datum = s => new Date(s + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  const viewer = id => id ? `<a href="https://bagviewer.kadaster.nl/?objectId=${id}" target="_blank" rel="noopener">${id}</a>` : '';
+  const SOORT = { V: 'verblijfsobject', L: 'ligplaats', S: 'standplaats' };
+  const TYPE = { V: '01', L: '02', S: '03' };
+
+  // statusgroepen
+  const GROEP = s => /in gebruik/i.test(s) && !/niet ingemeten/.test(s) ? 'gebruik'
+    : /aangewezen/.test(s) ? 'plaats'
+    : /buiten gebruik/.test(s) ? 'buiten' : 'onderweg';
+  const GROEPNAAM = { gebruik: 'In gebruik', onderweg: 'Onderweg: gevormd, verbouwing, niet ingemeten', buiten: 'Buiten gebruik', plaats: 'Ligplaats of standplaats aangewezen' };
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const r = document.documentElement;
+    const dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', r.dataset.theme); } catch (e) {}
+  });
+
+  function toonFout(t) { const f = $('#fout'); f.innerHTML = '<p>' + t + '</p>'; f.hidden = false; $('#laad').hidden = true; }
+
+  // ---------- bestanden ----------
+  async function haalTekst(url) {
+    const r = await fetch(url, { cache: 'no-cache' });
+    if (!r.ok) throw new Error(r.status + ' bij ' + url);
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf[0] === 0x1f && buf[1] === 0x8b) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('deze browser kan het bestand niet uitpakken; gebruik een recente browser');
+      const s = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return await new Response(s).text();
+    }
+    return new TextDecoder().decode(buf);
+  }
+
+  let INDEX = null, GM = [], byName = new Map();
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+
+  // Kolommen: filters werken op getallen; een regel wordt pas uitgepakt voor tabel en download.
+  function lees(tekst, g) {
+    const nl = tekst.indexOf('\n');
+    const kop = JSON.parse(tekst.slice(0, nl));
+    const W = kop.w;
+    const lines = tekst.slice(nl + 1).split('\n');
+    if (lines.length && !lines[lines.length - 1]) lines.pop();
+    const n = lines.length;
+    const soort = new Uint8Array(n), st = new Uint8Array(n), doel = new Uint16Array(n), bu = new Uint16Array(n);
+    const SI = { V: 0, L: 1, S: 2 };
+    const panden = new Set();
+    for (let i = 0; i < n; i++) {
+      const f = lines[i].split('\t', 16);
+      soort[i] = SI[f[0]]; st[i] = +f[10]; doel[i] = +f[11]; bu[i] = +f[15];
+      if (f[0] === 'V' && f[3]) panden.add(f[3]);
+    }
+    const stGroep = W.st.map(GROEP);
+    const doelDelen = W.doel.map(d => (d || '').split(',').filter(Boolean));
+    return { kop, W, g, lines, n, soort, st, doel, bu, stGroep, doelDelen, nPanden: panden.size };
+  }
+  const SOORTEN = ['V', 'L', 'S'];
+  function rij(D, i) {
+    const f = D.lines[i].split('\t'), W = D.W, g = D.g, s = f[0];
+    const vol = (v, pre) => !v ? '' : v.length === 16 ? v : pre + v;
+    return { s, oid: vol(f[1], g + TYPE[s]), nid: vol(f[2], g + '20'), pid: vol(f[3], g + '10'),
+      str: W.str[+f[4]], nr: f[5], let: f[6], toe: f[7], pc: f[8], wp: W.wp[+f[9]],
+      st: W.st[+f[10]], g: D.stGroep[+f[10]], doel: W.doel[+f[11]], opp: f[12], bj: f[13], pst: W.pst[+f[14]], bu: W.bu[+f[15]], x: f[16], y: f[17] };
+  }
+  const adres = r => r.str + ' ' + r.nr + (r.let || '') + (r.toe ? '-' + r.toe : '');
+
+  // ---------- kiezen ----------
+  let S = null;
+  async function kies(g, opts) {
+    opts = opts || {};
+    $('#gmInput').value = g.n;
+    $('#intro').hidden = true; $('#fout').hidden = true; $('#result').hidden = true;
+    const laad = $('#laad'); laad.hidden = false;
+    laad.textContent = `De lijst van ${g.n} wordt opgehaald (ca. ${nf.format(Math.max(0.1, Math.round(g.kb / 102.4) / 10))} MB)…`;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    S = null;
+    let d;
+    try { d = lees(await haalTekst(BASIS + 'gm/' + g.c + '.txt.gz'), g.c); }
+    catch (e) { toonFout(`De lijst van ${esc(g.n)} kon niet worden opgehaald (${esc(e.message)}). Probeer het later opnieuw.`); return; }
+    laad.hidden = true;
+    S = { g, d, filt: { zoek: '', soort: '', status: '', doel: '', wijk: opts.wijk || '', buurt: opts.buurt || '' } };
+    document.title = 'BAG-werkbank ' + g.n + ' · Open Data Atelier';
+    $('#kwLink').href = 'bagkwaliteit.html#gm=' + g.c;
+    document.querySelectorAll('.standdatum').forEach(e => { e.textContent = datum(d.kop.peil); });
+    document.querySelectorAll('.buurtjaar').forEach(e => { e.textContent = d.kop.buurtjaar; });
+    vulKeuzes(); renderKern(); $('#result').hidden = false; pasToe(); vulMeld(); renderVoet();
+  }
+
+  function zetHash() {
+    if (!S) return;
+    const f = S.filt;
+    const h = '#gm=' + S.g.c + (f.buurt ? '&buurt=' + f.buurt : f.wijk ? '&wijk=' + f.wijk : '');
+    try { if (location.hash !== h) history.replaceState(null, '', h); } catch (e) {}
+  }
+
+  function renderKern() {
+    const D = S.d, g = S.g;
+    const tel = { gebruik: 0, onderweg: 0, buiten: 0, plaats: 0 };
+    const woon = D.doelDelen.map(d => d.includes('woonfunctie'));
+    let won = 0, V = 0; const buurten = new Set();
+    for (let i = 0; i < D.n; i++) {
+      tel[D.stGroep[D.st[i]]]++;
+      if (D.soort[i] === 0) { V++; if (woon[D.doel[i]]) won++; }
+      buurten.add(D.bu[i]);
+    }
+    const LS = D.n - V;
+    $('#leadBig').textContent = `${g.n}: ${nf.format(D.n)} adressen`;
+    $('#leadSub').textContent = `BAG-stand ${datum(D.kop.peil)} · elk adres één regel, met de BAG-ID's erbij`;
+    const balk = ['gebruik', 'onderweg', 'buiten', 'plaats'].filter(k => tel[k]).map(k => `<i style="width:${100 * tel[k] / D.n}%;background:var(--${k})" title="${GROEPNAAM[k]}: ${nf.format(tel[k])}"></i>`).join('');
+    $('#kern').innerHTML = `
+      <div class="kc"><b>${nf.format(V)}</b><span>verblijfsobjecten, waarvan ${nf.format(won)} met een woonfunctie</span></div>
+      <div class="kc" style="--kleur:var(--plaats)"><b>${nf.format(LS)}</b><span>lig- en standplaatsen</span></div>
+      <div class="kc"><b>${nf.format(D.nPanden)}</b><span>panden met een verblijfsobject</span></div>
+      <div class="kc" style="--kleur:var(--onderweg)"><b>${nf.format(tel.onderweg)}</b><span>onderweg: gevormd, in verbouwing of niet ingemeten</span><div class="balk" aria-hidden="true">${balk}</div></div>
+      <div class="kc"><b>${nf.format(buurten.size)}</b><span>buurten in de indeling ${D.kop.buurtjaar}</span></div>`;
+  }
+
+  function buurtLijst() { return S.d.W.bu.map((b, i) => ({ i, c: b[0], n: b[1], wk: b[2], wn: b[3] })).filter(b => b.c); }
+  function vulKeuzes() {
+    const D = S.d, W = D.W, f = S.filt;
+    const stc = new Array(W.st.length).fill(0), dc = new Map(), dcI = new Array(W.doel.length).fill(0), gr = new Set();
+    for (let i = 0; i < D.n; i++) { stc[D.st[i]]++; dcI[D.doel[i]]++; }
+    stc.forEach((n, k) => { if (n) gr.add(D.stGroep[k]); });
+    dcI.forEach((n, k) => { if (n) D.doelDelen[k].forEach(x => dc.set(x, (dc.get(x) || 0) + n)); });
+    const opt = (v, t, sel) => `<option value="${esc(v)}"${sel ? ' selected' : ''}>${esc(t)}</option>`;
+    $('#fStatus').innerHTML = opt('', 'Alle statussen') +
+      Object.keys(GROEPNAAM).filter(k => gr.has(k)).map(k => opt('g:' + k, GROEPNAAM[k])).join('') +
+      W.st.map((s, k) => [s, stc[k]]).filter(x => x[1]).sort((a, b) => b[1] - a[1]).map(([s, n]) => opt(s, `${s} (${nf.format(n)})`)).join('');
+    $('#fDoel').innerHTML = opt('', 'Alle gebruiksdoelen') + [...dc].sort((a, b) => b[1] - a[1]).map(([s, n]) => opt(s, `${s} (${nf.format(n)})`)).join('');
+    const BL = buurtLijst(), wk = new Map(BL.map(b => [b.wk, b.wn]));
+    const bb = BL.find(b => b.c === f.buurt);
+    if (f.buurt && !bb) f.buurt = '';
+    if (bb) f.wijk = bb.wk;
+    if (f.wijk && !wk.has(f.wijk)) f.wijk = '';
+    $('#fWijk').innerHTML = opt('', 'Alle wijken') + [...wk].sort((a, b) => a[0].localeCompare(b[0])).map(([c, n]) => opt(c, n, c === f.wijk)).join('');
+    vulBuurten();
+    ['#zoek', '#fSoort', '#fStatus', '#fDoel'].forEach(s => { $(s).value = ''; });
+  }
+  function vulBuurten() {
+    const f = S.filt;
+    $('#fBuurt').innerHTML = '<option value="">Alle buurten</option>' + buurtLijst().filter(b => !f.wijk || b.wk === f.wijk)
+      .sort((a, b) => a.n.localeCompare(b.n, 'nl')).map(b => `<option value="${esc(b.c)}"${b.c === f.buurt ? ' selected' : ''}>${esc(b.n)}</option>`).join('');
+  }
+
+  function gefilterd() {
+    const D = S.d, W = D.W, f = S.filt;
+    const termen = f.zoek.toLowerCase().replace(/(\d{4})\s+([a-z]{2})/g, '$1$2').split(/\s+/).filter(Boolean);
+    const sSoort = f.soort ? SOORTEN.indexOf(f.soort) : -1;
+    const stOk = W.st.map((s, k) => !f.status || (f.status.startsWith('g:') ? D.stGroep[k] === f.status.slice(2) : s === f.status));
+    const doelOk = D.doelDelen.map(d => !f.doel || d.includes(f.doel));
+    const buOk = W.bu.map(b => (!f.wijk || b[2] === f.wijk) && (!f.buurt || b[0] === f.buurt));
+    const uit = [];
+    for (let i = 0; i < D.n; i++) {
+      if (sSoort >= 0 && D.soort[i] !== sSoort) continue;
+      if (!stOk[D.st[i]] || !doelOk[D.doel[i]] || !buOk[D.bu[i]]) continue;
+      if (termen.length) {
+        const r = rij(D, i);
+        const z = (adres(r) + ' ' + r.pc + ' ' + r.wp + ' ' + r.oid + ' ' + r.nid + ' ' + r.pid).toLowerCase();
+        if (!termen.every(t => z.includes(t))) continue;
+      }
+      uit.push(i);
+    }
+    return uit;
+  }
+
+  function pasToe() {
+    const L = gefilterd(), D = S.d;
+    S.L = L;
+    const n = L.length, tot = D.n;
+    $('#telregel').innerHTML = n === tot ? `<b>${nf.format(n)}</b> adressen` : `<b>${nf.format(n)}</b> van ${nf.format(tot)} adressen`;
+    $('#csvExcel').disabled = $('#csvKoppel').disabled = n === 0;
+    const K = { gebruik: 'var(--gebruik)', onderweg: 'var(--onderweg)', buiten: 'var(--buiten)', plaats: 'var(--plaats)' };
+    $('#tbody').innerHTML = L.slice(0, MAXRIJ).map(i => rij(D, i)).map(r => `<tr>
+      <td>${esc(adres(r))}${r.s !== 'V' ? ` <span class="muted small">(${SOORT[r.s]})</span>` : ''}</td><td>${esc(r.pc)}</td><td>${esc(r.wp)}</td>
+      <td><span class="st" style="--k:${K[r.g]}"><i></i>${esc(r.st.replace(/^Verblijfsobject /, '').replace(/^Verbouwing verblijfsobject$/, 'verbouwing'))}</span></td>
+      <td>${esc((r.doel || '').replace(/functie/g, '').replace(/,/g, ', '))}</td><td class="r">${fmt(r.opp)}</td><td class="r">${esc(r.bj)}</td>
+      <td>${esc(r.bu[1])}</td><td class="id">${viewer(r.oid)}</td><td class="id">${viewer(r.pid)}</td></tr>`).join('');
+    $('#meer').textContent = n === 0 ? 'Geen adressen bij deze keuze.' : n > MAXRIJ ? `De eerste ${MAXRIJ} van ${nf.format(n)} staan hier; de download bevat ze allemaal. Een klik op een nummer opent de BAG-viewer met de actuele stand.` : 'Een klik op een nummer opent de BAG-viewer met de actuele stand.';
+    zetHash();
+  }
+
+  // ---------- download ----------
+  const KOL = ['nummeraanduiding_id', 'object_id', 'objecttype', 'pand_id', 'straat', 'huisnummer', 'huisletter', 'toevoeging', 'postcode', 'woonplaats',
+    'status', 'gebruiksdoel', 'oppervlakte_m2', 'bouwjaar', 'pandstatus', 'wijkcode', 'wijknaam', 'buurtcode', 'buurtnaam', 'x_rd', 'y_rd', 'bagviewer', 'bron'];
+  function csv(excel) {
+    const g = S.g, D = S.d, sep = excel ? ';' : ',';
+    const bron = `BAG (Kadaster) stand ${D.kop.peil}, buurtindeling CBS ${D.kop.buurtjaar}; ${PRODUCT} ${VERSIE}, Open Data Atelier, ${location.origin}${location.pathname}`;
+    const id = v => !v ? '' : excel ? '="' + v + '"' : v;
+    const moet = excel ? /[;"\n]/ : /[,"\n]/;
+    const cel = v => { const s = String(v == null ? '' : v); return moet.test(s) && !/^="\d+"$/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const xy = v => !v ? '' : excel ? (v / 10).toFixed(1).replace('.', ',') : (v / 10).toFixed(1);
+    const delen = [(excel ? '﻿' : '') + KOL.join(sep) + '\n'];
+    for (const i of S.L) {
+      const r = rij(D, i);
+      delen.push([id(r.nid), id(r.oid), SOORT[r.s], id(r.pid), r.str, r.nr, r.let, r.toe, r.pc, r.wp, r.st, r.doel, r.opp, r.bj, r.pst,
+        r.bu[2], r.bu[3], r.bu[0], r.bu[1], xy(r.x), xy(r.y), 'https://bagviewer.kadaster.nl/?objectId=' + r.oid, bron].map(cel).join(sep) + '\n');
+    }
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(delen, { type: 'text/csv;charset=utf-8' }));
+    a.download = `open-data-atelier-bag-werkbank-${g.n.replace(/[^\w-]+/g, '-').toLowerCase()}${excel ? '' : '-koppel'}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+  $('#csvExcel').addEventListener('click', () => csv(true));
+  $('#csvKoppel').addEventListener('click', () => csv(false));
+
+  // ---------- filters ----------
+  let tz = null;
+  $('#zoek').addEventListener('input', () => { clearTimeout(tz); tz = setTimeout(() => { if (!S) return; S.filt.zoek = $('#zoek').value.trim(); pasToe(); }, 200); });
+  $('#fSoort').addEventListener('change', e => { if (!S) return; S.filt.soort = e.target.value; pasToe(); });
+  $('#fStatus').addEventListener('change', e => { if (!S) return; S.filt.status = e.target.value; pasToe(); });
+  $('#fDoel').addEventListener('change', e => { if (!S) return; S.filt.doel = e.target.value; pasToe(); });
+  $('#fWijk').addEventListener('change', e => { if (!S) return; S.filt.wijk = e.target.value; S.filt.buurt = ''; vulBuurten(); pasToe(); });
+  $('#fBuurt').addEventListener('change', e => { if (!S) return; S.filt.buurt = e.target.value; pasToe(); });
+  $('#wis').addEventListener('click', () => { if (!S) return;
+    S.filt = { zoek: '', soort: '', status: '', doel: '', wijk: '', buurt: '' };
+    ['#zoek', '#fSoort', '#fStatus', '#fDoel', '#fWijk'].forEach(s => { $(s).value = ''; }); vulBuurten(); pasToe();
+  });
+
+  // ---------- melden ----------
+  function vulMeld() {
+    const m = $('#herkenMail'), gh = $('#herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk adres of BAG-ID:\n\nWat de pagina laat zien:\n\nWat de BAG-viewer laat zien, of wat je verwacht:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+  }
+
+  function renderVoet() {
+    $('#foot').innerHTML = `Bron: Basisregistratie Adressen en Gebouwen (BAG), Kadaster, via PDOK: <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-GeoPackage</a> (CC0), stand ${datum(S.d.kop.peil)}. Wijken en buurten: CBS-wijk- en buurtkaart ${S.d.kop.buurtjaar} via PDOK (CC BY 4.0). Afgeleid bestand, geen authentieke BAG.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- start ----------
+  function gmUitLink() {
+    const h = location.hash;
+    return { c: (h.match(/gm=(\d{4})/i) || [])[1], wijk: (h.match(/wijk=(WK\w+)/) || [])[1], buurt: (h.match(/buurt=(BU\w+)/) || [])[1] };
+  }
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  vulMeld();
+
+  haalTekst(BASIS + 'index.json').then(t => {
+    INDEX = JSON.parse(t);
+    GM = Object.entries(INDEX.gm).map(([c, v]) => ({ c, n: v.n, kb: v.kb, tot: v.V + v.L + v.S }))
+      .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+    byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+    Object.entries(ALIAS).forEach(([a, c]) => { const g = GM.find(x => x.c === c); if (g) byName.set(a.toLowerCase(), g); });
+    $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+    document.querySelectorAll('.standdatum').forEach(e => { e.textContent = datum(INDEX.peil); });
+    document.querySelectorAll('.buurtjaar').forEach(e => { e.textContent = INDEX.buurtjaar; });
+    let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+    const l = gmUitLink();
+    const g0 = GM.find(g => g.c === (l.c || bewaard));
+    if (g0) kies(g0, l.c ? l : {});
+  }).catch(e => toonFout(`De lijst met gemeenten kon niet worden opgehaald (${esc(e.message)}). Probeer het later opnieuw.`));
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p'); p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span'); var k = document.createElement('button');
+    k.type = 'button'; k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () { var v = tekst();
+      try { if (navigator.clipboard) { navigator.clipboard.writeText(v).then(function () { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }, function () { window.prompt('Kopieer de bronvermelding:', v); }); } else { window.prompt('Kopieer de bronvermelding:', v); } } catch (e) { window.prompt('Kopieer de bronvermelding:', v); } });
+    vul(); window.addEventListener('hashchange', vul); p.appendChild(s); p.appendChild(k); anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>

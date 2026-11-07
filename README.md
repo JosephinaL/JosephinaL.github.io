@@ -52,6 +52,8 @@ Wmo, Jeugdzorg, Schulden, Werk en inkomen, Huishoudens en Woningvoorraad delen d
 
 *Inzicht in de datakwaliteit van registraties.* [registraties.html](https://josephinelinders.nl/registraties.html) staat naast de instrumenten en Indicatoren belicht. Het toont per registratie de signalen uit open data dat de registratie zichzelf tegenspreekt, lang onderweg blijft of waarden bevat die opvallen, per gemeente en per object. Eerste uitwerking: [Kwaliteit van de BAG](https://josephinelinders.nl/bagkwaliteit.html), op basis van de BAG-GeoPackage van het Kadaster (PDOK, CC0), met per signaal de adressen en een link naar de BAG-viewer. Een signaal is een vraag, geen oordeel; de pagina is geen authentieke BAG.
 
+Tweede uitwerking: [BAG-werkbank](https://josephinelinders.nl/bagwerkbank.html), alle adressen en gebouwen van een gemeente als lijst, om mee te onderzoeken, te koppelen en te controleren: per adres de BAG-ID's van adres, object en pand, status, gebruiksdoel, oppervlakte, bouwjaar, wijk en buurt (CBS-indeling) en coördinaten, als CSV voor Excel of om te koppelen. De lijsten per gemeente worden maandelijks doorgerekend uit dezelfde BAG-GeoPackage en staan in een aparte repository ([bag-werkbank](https://github.com/JosephinaL/bag-werkbank)), zodat de geschiedenis van deze repository niet elke maand met honderden megabytes groeit. Afgeleid bestand, geen authentieke BAG.
+
 ## Werkwijze
 
 Vier lagen:
