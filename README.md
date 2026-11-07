@@ -8,32 +8,33 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 
 ## Instrumenten
 
+Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waar de gemeente het boekt.
+
 | Instrument | Pagina | Vraag | Bronnen |
 |---|---|---|---|
-| **Fysieke leefomgeving** | | | |
-| Label C-kantoren | [labelc.html](https://josephinelinders.nl/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
-| **Financiën** | | | |
+| **0 · Bestuur en ondersteuning (financiën)** | | | |
 | Iv3-spiegel | [iv3spiegel.html](https://josephinelinders.nl/iv3spiegel.html) | Waar gaat het geld van een gemeente heen, en deed ze wat ze van plan was? | Iv3 (CBS) |
 | Iv3-panorama | [iv3panorama.html](https://josephinelinders.nl/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |
 | Rijksgeld per gemeente | [rijksgeld.html](https://josephinelinders.nl/rijksgeld.html) | Welk ministerie betaalt wat aan je gemeente? | Financiële instrumenten (Rijk), budgetten SZW, Iv3 (CBS) |
-| **Economie en ondernemen** | | | |
+| Rijksverdeling per gemeente | [rijksverdeling.html](https://josephinelinders.nl/rijksverdeling.html) | Hoe verdeelt het Rijk het gemeentefonds over je gemeente, tot op de maatstaf, met zelf meerekenen? | BZK (rekenmodel en circulaire gemeentefonds), CBS (Maatstaven Financiële-verhoudingswet) |
+| **3 · Economie** | | | |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
-| **Onderwijs** | | | |
+| **4 · Onderwijs** | | | |
 | Basisonderwijs per buurt | [onderwijs.html](https://josephinelinders.nl/onderwijs.html) | Waar krimpen en groeien basisscholen tot 2035? | DUO, BAG/PDOK, CBS |
 | Hoger onderwijs: studenten per gemeente | [studenten.html](https://josephinelinders.nl/studenten.html) | Waar wonen de studenten van een stad, en waar studeren de jongeren uit een gemeente? | DUO (studenten per woon- en studeergemeente), CBS, PDOK |
-| **Bevolking en wonen** | | | |
+| **6 · Sociaal domein** | | | |
+| Wmo per wijk | [wmo.html](https://josephinelinders.nl/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
+| Jeugdzorg per wijk | [jeugdzorg.html](https://josephinelinders.nl/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, hoe begint en eindigt de hulp, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
+| Werk en inkomen per wijk | [werkeninkomen.html](https://josephinelinders.nl/werkeninkomen.html) | Wie leeft van bijstand, per maand, per leefvorm en per wijk, wat zet de gemeente in aan re-integratie en beschut werk, en hoe staan rijksbudget en uitkeringslasten naast elkaar, en wat gaat er naar Wsw, beschut werk en re-integratie (Iv3 6.4 en 6.5, sinds 2.1)? Met WW en arbeidsongeschiktheid van UWV als context, apart gehouden. (Tot versie 2.0: Bijstand per wijk; `bijstand.html` stuurt door.) | CBS (Personen met een uitkering, Bijstandsuitkeringen, Re-integratievoorzieningen, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
+| Schulden per wijk | [schulden.html](https://josephinelinders.nl/schulden.html) | Hoeveel huishoudens hebben problematische schulden, bij welke schuldeisers, wie zijn het en in welke wijken? | CBS (Schuldenproblematiek in beeld), PDOK |
+| Veilig Thuis per gemeente | [veiligthuis.html](https://josephinelinders.nl/veiligthuis.html) | Hoe vaak vragen inwoners en professionals Veilig Thuis om advies of doen ze een melding, over welk geweld, wie meldt en wat gebeurt er daarna? | CBS (Beleidsinformatie Veilig Thuis) |
+| Inburgering per gemeente | [inburgering.html](https://josephinelinders.nl/inburgering.html) | Wie werd inburgeringsplichtig onder de Wet inburgering 2021, hoe ver is elke jaargroep en in welke leerroute? | DUO (WI 2021 Instroom, Uitstroom en Leerroute), CBS (Regionale kerncijfers) |
+| **8 · Volkshuisvesting** | | | |
 | Huishoudens en vergrijzing | [huishoudens.html](https://josephinelinders.nl/huishoudens.html) | Hoe zijn de huishoudens samengesteld, hoe snel vergrijst de gemeente sinds 1995, en in welke buurten? | CBS (Regionale kerncijfers, Kerncijfers wijken en buurten), PDOK |
 | Woningvoorraad en leegstand | [woningen.html](https://josephinelinders.nl/woningen.html) | Hoeveel woningen zijn er, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg? | CBS (Woningvoorraad, Levensloop van woningen, Kerncijfers wijken en buurten), PDOK |
 | Bouwstroom | [bouwstroom.html](https://josephinelinders.nl/bouwstroom.html) | Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? | BAG, Officiële bekendmakingen (gemeenteblad), CBS |
-| **Sociaal domein · ondersteuning en meedoen** | | | |
-| Wmo per wijk | [wmo.html](https://josephinelinders.nl/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
-| Schulden per wijk | [schulden.html](https://josephinelinders.nl/schulden.html) | Hoeveel huishoudens hebben problematische schulden, bij welke schuldeisers, wie zijn het en in welke wijken? | CBS (Schuldenproblematiek in beeld), PDOK |
-| Werk en inkomen per wijk | [werkeninkomen.html](https://josephinelinders.nl/werkeninkomen.html) | Wie leeft van bijstand, per maand, per leefvorm en per wijk, wat zet de gemeente in aan re-integratie en beschut werk, en hoe staan rijksbudget en uitkeringslasten naast elkaar, en wat gaat er naar Wsw, beschut werk en re-integratie (Iv3 6.4 en 6.5, sinds 2.1)? Met WW en arbeidsongeschiktheid van UWV als context, apart gehouden. (Tot versie 2.0: Bijstand per wijk; `bijstand.html` stuurt door.) | CBS (Personen met een uitkering, Bijstandsuitkeringen, Re-integratievoorzieningen, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
-| Inburgering per gemeente | [inburgering.html](https://josephinelinders.nl/inburgering.html) | Wie werd inburgeringsplichtig onder de Wet inburgering 2021, hoe ver is elke jaargroep en in welke leerroute? | DUO (WI 2021 Instroom, Uitstroom en Leerroute), CBS (Regionale kerncijfers) |
-| **Sociaal domein · jeugd en veilig thuis** | | | |
-| Jeugdzorg per wijk | [jeugdzorg.html](https://josephinelinders.nl/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, hoe begint en eindigt de hulp, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
-| Veilig Thuis per gemeente | [veiligthuis.html](https://josephinelinders.nl/veiligthuis.html) | Hoe vaak vragen inwoners en professionals Veilig Thuis om advies of doen ze een melding, over welk geweld, wie meldt en wat gebeurt er daarna? | CBS (Beleidsinformatie Veilig Thuis) |
-| **Werkbank** | | | |
+| Label C-kantoren | [labelc.html](https://josephinelinders.nl/labelc.html) | Welke kantoren voldoen aan de energielabel C-plicht, pand voor pand? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS |
+| **Werkbank (buiten de Iv3-indeling)** | | | |
 | Eigen lijst op de kaart | [eigenlijst.html](https://josephinelinders.nl/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed in eigen beheer, eruit naast de BAG en open data? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
 
 ### Dezelfde wijk in vijf instrumenten
