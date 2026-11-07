@@ -83,13 +83,11 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 @media (max-width: 640px) { .rail { grid-template-columns: minmax(0, 1fr); } }
 @media (min-width: 1100px) {
   .shelves { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; margin-top: -32px; }
-  .shelf { grid-column: span 1; grid-row: span 2; grid-template-columns: subgrid; grid-template-rows: subgrid; row-gap: 0; }
-  .shelf:has(.tile + .tile) { grid-column: span 2; }
-  .shelf:has(.tile + .tile + .tile) { grid-column: span 3; }
-  .shelf:has(.tile + .tile + .tile + .tile) { grid-column: span 4; }
+  /* elk Iv3-domein een eigen plank over de volle breedte; meer dan vier thema's lopen door op een rij eronder */
+  .shelf { grid-column: 1 / -1; grid-template-columns: subgrid; row-gap: 0; }
   .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
   .rail { grid-column: 1 / -1; grid-template-columns: subgrid; }
-  .tile.breed { grid-column: 1 / -1; }
+  .tile.breed { grid-column: span 1; }
 }
 .tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; min-width: 0; transition: border-color .15s ease, transform .15s ease; }
 .tile:not(.breed):hover { border-color: var(--accent); }
@@ -343,7 +341,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.10';
+  const VERSIE = '0.11';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -386,14 +384,12 @@ main > * { min-width: 0; }
     ['3', 'Economie', 'Bedrijvigheid, bedrijventerreinen, markten en toerisme.'],
     ['4', 'Onderwijs', 'Onderwijshuisvesting, leerplicht en leerlingenvervoer.'],
     ['5', 'Sport, cultuur en recreatie', 'Sport, cultuur, erfgoed, groen en recreatie.'],
-    ['6', 'Sociaal domein', 'Ondersteuning, jeugd, inkomen, werk en veiligheid thuis.'],
+    ['6', 'Sociaal domein', 'Ondersteuning, jeugd, werk en inkomen, schulden en veiligheid thuis.'],
     ['7', 'Volksgezondheid en milieu', 'Publieke gezondheid, afval, milieu en begraven.'],
     ['8', 'Volkshuisvesting, leefomgeving en stedelijke vernieuwing', 'Ruimtelijke ordening, wonen en bouwen, grondexploitatie.']
   ];
 
   const PLANK = { '8': ['Volkshuisvesting', 'Ruimtelijke ordening, wonen en bouwen.'] }; // korte kop op de plank; de volledige naam staat bij het thema
-  // een domein met meer dan vier thema's krijgt meer planken met dezelfde kop (hoogstens vier tegels per plank)
-  const SUBPLANK = { '6': { '': 'Ondersteuning, jeugd en veiligheid thuis.', inkomen: 'Bestaanszekerheid: schulden, armoede, bijstand en re-integratie.' } };
   const D = {
     publiek: {
       tv: '0', kort: 'Publieke dienstverlening', naam: 'Publieke dienstverlening',
@@ -966,7 +962,6 @@ main > * { min-width: 0; }
       scope: 'Geldzorgen van inwoners: wie arm is of problematische schulden heeft, hoe de gemeente die mensen bereikt met vroegsignalering, schuldhulpverlening en minimaregelingen, en hoe het afloopt. Bijstand staat er als context; de bijstand zelf, de re-integratie en beschut werk staan bij het thema Werk en inkomen.',
       lees: 'Arm en schulden zijn niet dezelfde groep. Wie onder de armoedegrens leeft, heeft niet altijd schulden, en wie problematische schulden heeft, is niet altijd arm. Over de hulp zelf is nog niets open: de resultaten van schuldhulpverlening en vroegsignalering staan alleen in de eigen registratie. Dat verandert pas als de landelijke uitwisseling (DDAS) cijfers per gemeente publiceert.',
       atelier: 'schulden.html', atelierNaam: 'Schulden per wijk', tvkort: '6.3',
-      plank: 'inkomen',
       tegel: 'Schulden en armoede', oms: 'Van armoede en problematische schulden via vroegsignalering en schuldhulp tot hoe het afloopt.',
       kaarten: [
         { k: 'context', b: 'open', naam: 'Huishoudens met problematische schulden',
@@ -1110,7 +1105,6 @@ main > * { min-width: 0; }
       scope: 'Wie in de gemeente werkt en wie van een uitkering leeft, wat de gemeente onder de Participatiewet inzet om mensen aan het werk of mee te laten doen, en wat dat oplevert. De bijstand en de re-integratie zijn van de gemeente; de WW en de uitkeringen bij arbeidsongeschiktheid van UWV staan erbij als context. Banen en bedrijvigheid horen bij Economie (Iv3 3), niet hier.',
       lees: 'Twee lagen die je niet bij elkaar optelt. De gemeente gaat over de bijstand en de re-integratie; UWV over de WW en de uitkeringen bij arbeidsongeschiktheid. Wie WW of een arbeidsongeschiktheidsuitkering heeft en daarnaast bijstand, telt in beide. Over de uitkomst is per gemeente niets open: of mensen uitstromen naar werk en of een voorziening helpt, staat alleen in de eigen registratie. Het CBS koppelt dat wel, maar publiceert het alleen landelijk.',
       atelier: 'werkeninkomen.html', atelierNaam: 'Werk en inkomen per wijk', tvkort: '6.3–6.5',
-      plank: 'inkomen',
       tegel: 'Werk en inkomen', oms: 'Van wie werkt en wie een uitkering heeft, via re-integratie en beschut werk, tot wie uitstroomt naar werk.',
       kaarten: [
         { k: 'context', b: 'open', naam: 'Netto-arbeidsparticipatie',
@@ -1421,7 +1415,10 @@ main > * { min-width: 0; }
   function instLink(href) { return href + (S.gm ? '#gm=' + S.gm : ''); }
 
   // ---------- render ----------
-  function themasVan(nr) { return Object.entries(D).filter(([, d]) => d.tv === nr); }
+  // volgorde van de thema's op een plank (keuze Josephine, 7 nov 2026); niet genoemde thema's volgen in de volgorde van D
+  const VOLG = ['wmo', 'jeugd', 'werk', 'schulden', 'hg'];
+  const plek = k => { const i = VOLG.indexOf(k); return i < 0 ? 99 : i; };
+  function themasVan(nr) { return Object.entries(D).filter(([, d]) => d.tv === nr).sort((a, b) => plek(a[0]) - plek(b[0])); }
   function renderOverzicht() {
     const gmDeel = S.gm ? '&gm=' + S.gm : '';
     const blokjes = d => `<span class="blokjes" role="img" aria-label="${d.kaarten.length} indicatoren in de volgorde van de keten">${KETEN.map(([k]) => {
@@ -1438,13 +1435,9 @@ main > * { min-width: 0; }
     };
     const uitgewerkt = TV.filter(([nr]) => themasVan(nr).length);
     const rest = TV.filter(([nr]) => !themasVan(nr).length);
-    const planken = uitgewerkt.flatMap(([nr, naam, oms]) => {
-      const groepen = [...new Set(themasVan(nr).map(([, d]) => d.plank || ''))];
-      return groepen.map(p => [nr, naam, SUBPLANK[nr] && SUBPLANK[nr][p] ? SUBPLANK[nr][p] : (PLANK[nr] ? PLANK[nr][1] : oms), themasVan(nr).filter(([, d]) => (d.plank || '') === p)]);
-    });
-    $('#shelves').innerHTML = planken.map(([nr, naam, oms, ths]) => `<div class="shelf">
-        <div class="shelf-head"><h3>${nr} · ${esc(PLANK[nr] ? PLANK[nr][0] : naam)}</h3><span>${esc(oms)}</span></div>
-        <div class="rail">${ths.map(tegel).join('')}</div></div>`).join('')
+    $('#shelves').innerHTML = uitgewerkt.map(([nr, naam, oms]) => `<div class="shelf">
+        <div class="shelf-head"><h3>${nr} · ${esc(PLANK[nr] ? PLANK[nr][0] : naam)}</h3><span>${esc(PLANK[nr] ? PLANK[nr][1] : oms)}</span></div>
+        <div class="rail">${themasVan(nr).map(tegel).join('')}</div></div>`).join('')
       + (rest.length ? `<div class="shelf">
         <div class="shelf-head"><h3>Binnenkort</h3><span>Nog niet uitgewerkt.</span></div>
         <div class="rail"><div class="tile breed"><ul class="binnenkort">${rest.map(([nr, naam]) => `<li><b>${nr}</b> ${esc(naam)}</li>`).join('')}</ul></div></div></div>` : '');
