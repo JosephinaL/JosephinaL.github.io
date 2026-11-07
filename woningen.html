@@ -964,7 +964,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     if (!o) return;
     const isB = /^BU/.test(o.code), wk = isB ? o.wijk : o.code;
     if (!wk) return;
-    const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['bijstand', 'Bijstand'], ['huishoudens', 'Huishoudens']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const links = [['wmo', 'Wmo'], ['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['werkeninkomen', 'Werk en inkomen'], ['huishoudens', 'Huishoudens']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
     const p = document.createElement('p');
     p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
     p.innerHTML = `<span class="muted">${isB ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> ${links}`;

@@ -1392,7 +1392,7 @@ main > * { min-width: 0; }
     if (!o) return;
     const isB = /^BU/.test(o.code), wk = isB ? o.wijk : o.code;
     if (!wk) return;
-    const links = [['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['bijstand', 'Bijstand'], ['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
+    const links = [['jeugdzorg', 'Jeugdzorg'], ['schulden', 'Schulden'], ['werkeninkomen', 'Werk en inkomen'], ['huishoudens', 'Huishoudens'], ['woningen', 'Woningvoorraad']].map(([f, t]) => `<a href="${f}.html#gm=${S.g.c}&wijk=${wk}">${t}</a>`).join(' · ');
     const p = document.createElement('p');
     p.id = 'zelfdeWijk'; p.className = 'small'; p.style.margin = '0';
     p.innerHTML = `<span class="muted">${isB ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> ${links}`;

@@ -28,7 +28,7 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 | **Sociaal domein · ondersteuning en meedoen** | | | |
 | Wmo per wijk | [wmo.html](https://josephinelinders.nl/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
 | Schulden per wijk | [schulden.html](https://josephinelinders.nl/schulden.html) | Hoeveel huishoudens hebben problematische schulden, bij welke schuldeisers, wie zijn het en in welke wijken? | CBS (Schuldenproblematiek in beeld), PDOK |
-| Bijstand per wijk | [bijstand.html](https://josephinelinders.nl/bijstand.html) | Hoeveel inwoners leven van bijstand, per maand, per leefvorm en per wijk, en hoe staan rijksbudget en uitkeringslasten naast elkaar? | CBS (Personen met een uitkering, Bijstandsuitkeringen, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
+| Werk en inkomen per wijk | [werkeninkomen.html](https://josephinelinders.nl/werkeninkomen.html) | Wie leeft van bijstand, per maand, per leefvorm en per wijk, wat zet de gemeente in aan re-integratie en beschut werk, en hoe staan rijksbudget en uitkeringslasten naast elkaar? Met WW en arbeidsongeschiktheid van UWV als context, apart gehouden. (Tot versie 2.0: Bijstand per wijk; `bijstand.html` stuurt door.) | CBS (Personen met een uitkering, Bijstandsuitkeringen, Re-integratievoorzieningen, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
 | Inburgering per gemeente | [inburgering.html](https://josephinelinders.nl/inburgering.html) | Wie werd inburgeringsplichtig onder de Wet inburgering 2021, hoe ver is elke jaargroep en in welke leerroute? | DUO (WI 2021 Instroom, Uitstroom en Leerroute), CBS (Regionale kerncijfers) |
 | **Sociaal domein · jeugd en veilig thuis** | | | |
 | Jeugdzorg per wijk | [jeugdzorg.html](https://josephinelinders.nl/jeugdzorg.html) | Hoeveel jongeren krijgen jeugdzorg, hoe begint en eindigt de hulp, wat kost het en wie verwijst, door de jaren heen en per wijk? | CBS (Beleidsinformatie Jeugd, Kerncijfers wijken en buurten), PDOK |
@@ -38,7 +38,7 @@ Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. 
 
 ### Dezelfde wijk in vijf instrumenten
 
-Wmo, Jeugdzorg, Schulden, Bijstand, Huishoudens en Woningvoorraad delen de wijk als ingang. Kies je een wijk, dan volgen kop, kerncijfers, kaart en dossier die keuze, en staat de keuze in de link (`#gm=…&wijk=…`). Onder het dossier open je dezelfde wijk in de andere vijf. Bij Bijstand volgen alleen kaart, dossier en tabel: de cijfers per maand, de leefvorm en het geld bestaan alleen voor de hele gemeente. Elke pagina toont haar eigen laatste jaar; wat alleen voor de hele gemeente bestaat, zegt dat.
+Wmo, Jeugdzorg, Schulden, Werk en inkomen, Huishoudens en Woningvoorraad delen de wijk als ingang. Kies je een wijk, dan volgen kop, kerncijfers, kaart en dossier die keuze, en staat de keuze in de link (`#gm=…&wijk=…`). Onder het dossier open je dezelfde wijk in de andere vijf. Bij Werk en inkomen volgen alleen kaart, dossier en tabel: de cijfers per maand, de leefvorm, de re-integratie en het geld bestaan alleen voor de hele gemeente. Elke pagina toont haar eigen laatste jaar; wat alleen voor de hele gemeente bestaat, zegt dat.
 
 ## Indicatoren belicht
 
@@ -53,7 +53,7 @@ Wmo, Jeugdzorg, Schulden, Bijstand, Huishoudens en Woningvoorraad delen de wijk 
 Vier lagen:
 
 1. **Skelet:** BAG en CBS-buurten en -wijken als verbindende sleutel.
-2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, bijstand, bevolking en wonen (CBS), inburgering en studenten (DUO), vergunningen (gemeenteblad).
+2. **Open domeindata:** energie (RIVM), erfgoed (RCE), onderwijs (DUO), financiën (Iv3), jeugd, Veilig Thuis, Wmo, schulden, werk en inkomen, bevolking en wonen (CBS), inburgering en studenten (DUO), vergunningen (gemeenteblad).
 3. **Verrijking:** wat alleen de gemeente weet, toegevoegd in de eigen omgeving. Eigen lijst op de kaart is daar het gereedschap voor.
 4. **Antwoord:** navolgbaar per object.
 
