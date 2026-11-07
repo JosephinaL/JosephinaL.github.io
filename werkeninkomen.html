@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Werk en inkomen per wijk · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Werk en inkomen per Nederlandse gemeente en wijk: bijstand per maand en per wijk, wat de gemeente inzet aan re-integratie en beschut werk, het rijksbudget naast de uitkeringslasten (Iv3), en als context de WW en arbeidsongeschiktheid van UWV. Live uit open data van het CBS.">
+<meta name="description" content="Werk en inkomen per Nederlandse gemeente en wijk: bijstand per maand en per wijk, wat de gemeente inzet aan re-integratie en beschut werk, het rijksbudget naast de uitkeringslasten en de lasten voor Wsw, beschut werk en re-integratie (Iv3), en als context de WW en arbeidsongeschiktheid van UWV. Live uit open data van het CBS.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
 <script src="vendor/leaflet-1.9.4/leaflet.js"></script>
@@ -250,7 +250,10 @@ main > * { min-width: 0; }
 .lv-bar b { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--fg); }
 .geld { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
 @media (max-width: 1060px) { .geld { grid-template-columns: minmax(0, 1fr); } }
-#geldTabel table { font-size: .82rem; }
+#geldTabel table, #partTabel table { font-size: .82rem; }
+.subkop { margin: 22px 0 10px; }
+#partTabel td.r, #partTabel th { white-space: nowrap; }
+#partTabel th.r { white-space: normal; min-width: 6em; }
 #geldTabel td.r, #geldTabel th { white-space: nowrap; }
 #geldTabel th.r { white-space: normal; min-width: 5.5em; }
 </style>
@@ -302,7 +305,7 @@ main > * { min-width: 0; }
         <ol>
           <li><b>Een ander begrip.</b> Bijstand: personen tot de AOW-leeftijd met een algemene bijstandsuitkering uit de Participatiewet; IOAW, IOAZ, bijzondere bijstand en bijstand boven de AOW-leeftijd tellen niet mee. WW en arbeidsongeschiktheid: personen met een uitkering van UWV; wie daarnaast bijstand heeft, telt in beide. Re-integratie telt voorzieningen, geen personen. Per wijk tellen mensen in een instelling en dak- en thuislozen niet mee.</li>
           <li><b>Een andere peildatum of indeling.</b> Standcijfers op de laatste dag van de maand; de laatste maanden zijn voorlopig. Per wijk de stand in december, in de wijkindeling van dat jaar. Re-integratie staat bij de gemeente die de voorziening verstrekt. Eigen rapportages tellen vaak uitkeringen (een paar is één uitkering), niet personen.</li>
-          <li><b>Het geld.</b> De bedragen komen uit de jaarrekening die de gemeente aan het CBS levert (Iv3, taakveld 6.3). In de uitkeringslasten zit ook de bijzondere bijstand en minimaregelingen in geld. De eigen verantwoording van het rijksbudget (BUIG) kan daarom anders uitkomen.</li>
+          <li><b>Het geld.</b> De bedragen komen uit de jaarrekening die de gemeente aan het CBS levert (Iv3, taakveld 6.3 voor de uitkeringen, 6.4 en 6.5 voor Wsw, beschut werk en re-integratie). In de uitkeringslasten zit ook de bijzondere bijstand en minimaregelingen in geld. De eigen verantwoording van het rijksbudget (BUIG) kan daarom anders uitkomen.</li>
           <li><b>Een fout in deze bewerking.</b> Wijkt een aantal af van de CBS-tabellen zelf (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/80794ned/table" target="_blank" rel="noopener">uitkeringen</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85588NED/table" target="_blank" rel="noopener">re-integratie</a>), dan zit de fout hier. Meld het hieronder.</li>
         </ol>
         <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
@@ -343,11 +346,17 @@ main > * { min-width: 0; }
       </div>
       <details class="tabelview"><summary>Alle typen voorziening als tabel</summary><div class="scroll" id="reTabel" tabindex="0" role="region" aria-label="Tabel met re-integratievoorzieningen per type"></div></details>
 
-      <div class="sectiekop"><h2 id="geldKop">Het geld: rijksbudget en uitkeringslasten</h2></div>
+      <div class="sectiekop"><h2 id="geldKop">Het geld: rijksbudget, uitkeringslasten en lasten voor werk</h2></div>
       <div class="info" id="geldUitleg"><p></p></div>
       <div class="geld">
         <div class="chart" id="chGeld"></div>
         <div class="panel"><div class="scroll" id="geldTabel" tabindex="0" role="region" aria-label="Tabel met bedragen per jaar"></div></div>
+      </div>
+      <h3 class="subkop" id="partKop">Lasten voor werk: Wsw, beschut werk en re-integratie</h3>
+      <div class="info" id="partUitleg" hidden><p></p></div>
+      <div class="geld">
+        <div class="chart" id="chPart"></div>
+        <div class="panel"><div class="scroll" id="partTabel" tabindex="0" role="region" aria-label="Tabel met lasten participatie per jaar"></div></div>
       </div>
 
       <div class="sectiekop"><h2 id="wijkKop">Per wijk</h2><div class="jaren" id="jaren" role="group" aria-label="Jaar"></div></div>
@@ -377,6 +386,7 @@ main > * { min-width: 0; }
             <li><b>Rijksbudget</b>: de baten op taakveld 6.3 Inkomensregelingen in de categorie inkomensoverdrachten van het Rijk (B4.3.1). Dat is in hoofdzaak het budget voor de bijstandsuitkeringen (BUIG).</li>
             <li><b>Uitkeringslasten</b>: op hetzelfde taakveld de sociale uitkeringen in geld (L4.1.1) plus subsidies (L4.2, waaronder loonkostensubsidie), min het verhaal van uitkeringen (B4.1.2). Uit de jaarrekening, tweede plaatsing waar die er is.</li>
             <li><b>Verschil (indicatie)</b>: rijksbudget min uitkeringslasten. Alleen voor jaren waarin de gemeente de uitkeringen zelf boekt.</li>
+            <li><b>Lasten voor werk</b>: alle lasten (categorieën L) op taakveld 6.4 Wsw en beschut werk en 6.5 Arbeidsparticipatie, jaarrekening, tweede plaatsing waar die er is. Twee bedragen, geen baten en geen saldo. "Waarvan regeling" is de bijdrage aan gemeenschappelijke regelingen (L4.3.3) op hetzelfde taakveld. Titels van de taakvelden zoals het CBS ze nu geeft; in eerdere jaren heette 6.4 Begeleide participatie.</li>
             <li><b>Uitvoering via een regeling</b>: is de bijdrage aan gemeenschappelijke regelingen (L4.3.3) 50% of meer van uitkeringen plus die bijdrage, dan voert een regeling de bijstand uit. Tussen 10% en 50%: deels via een regeling.</li>
           </ul>
         </div>
@@ -387,6 +397,7 @@ main > * { min-width: 0; }
             <li><b>Bijzondere jaren</b>: in 2020 en 2021 zat de Tozo voor zelfstandigen in budget én lasten; beide liggen dan hoger. In 2022 en 2023 betaalden veel gemeenten de energietoeslag uit hetzelfde taakveld, terwijl het geld uit het gemeentefonds kwam. Dan vallen de lasten hoger uit dan het budget, zonder dat de bijstand zelf tekortschoot.</li>
             <li><b>Via een regeling</b>: voert een gemeenschappelijke regeling de bijstand uit, dan betaalt die de uitkeringen. De gemeente maakt een bijdrage over waarin ook uitvoering en re-integratie zitten. In de cijfers van de gemeente is dat niet te scheiden; daarom geen vergelijking.</li>
             <li><b>Personen en uitkeringen</b>: het bestand telt personen, de leefvorm telt uitkeringen. Een paar is twee personen en één uitkering. Ook met paren dubbel geteld blijft de leefvorm iets onder het aantal personen. Bij de personen telt ieders eigen leeftijd. Bij de uitkeringen telt de oudste partner: is die 67 of ouder, dan valt de uitkering onder "vanaf de AOW-leeftijd", terwijl de jongere partner wél bij de personen tot de AOW-leeftijd telt. Daarnaast rondt het CBS elk getal af op tientallen.</li>
+            <li><b>Lasten voor werk zijn geen tekort</b>: het rijksgeld voor Wsw, beschut werk en re-integratie zit grotendeels in het gemeentefonds (integratie-uitkering Participatie) en staat niet op taakveld 6.4 of 6.5. Hoge lasten zeggen dus niets over een tekort. Gemeenten boeken de eigen uitvoering verschillend: de ene op het taakveld, de andere op overhead (0.4). Loonkostensubsidie kan op 6.3 of op 6.5 staan, afhankelijk van hoe de gemeente boekt.</li>
             <li><b>Twee lagen</b>: bijstand, re-integratie en het geld zijn van de gemeente; WW en arbeidsongeschiktheid zijn van UWV. Wie WW of een arbeidsongeschiktheidsuitkering heeft en daarnaast bijstand, telt in beide. Tel de lagen niet op.</li>
             <li><b>Voorzieningen, geen personen</b>: één persoon kan meer voorzieningen tegelijk hebben, en een voorziening kan naar iemand zonder bijstand gaan. Deel de voorzieningen dus niet door het aantal mensen in de bijstand. Ontbreken bij een gemeente de laatste maanden, dan heeft het CBS die cijfers (nog) niet ontvangen.</li>
             <li><b>Een ontbrekende maand</b>: heeft het CBS voor een soort uitkering in de laatste maand geen cijfer, dan staat per soort de laatste maand mét een cijfer, met de maand erbij.</li>
@@ -402,7 +413,7 @@ main > * { min-width: 0; }
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> CBS: personen met een uitkering per maand (80794ned: bijstand, WW, arbeidsongeschiktheid), bijstandsuitkeringen naar leefvorm per maand (82015NED), re-integratie- en participatievoorzieningen per maand (85588NED), inwoners per leeftijdsgroep (70072ned) en Kerncijfers wijken en buurten per jaar (uitkeringen per wijk, stand december; netto-arbeidsparticipatie). Bedragen uit de onbewerkte Iv3-data van gemeenten (CBS, jaarrekening, taakveld 6.3). Wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze; de laatste maand en het tijdstip van ophalen staan onder de cijfers.</p>
+    <p><b>Bron en peildatum.</b> CBS: personen met een uitkering per maand (80794ned: bijstand, WW, arbeidsongeschiktheid), bijstandsuitkeringen naar leefvorm per maand (82015NED), re-integratie- en participatievoorzieningen per maand (85588NED), inwoners per leeftijdsgroep (70072ned) en Kerncijfers wijken en buurten per jaar (uitkeringen per wijk, stand december; netto-arbeidsparticipatie). Bedragen uit de onbewerkte Iv3-data van gemeenten (CBS, jaarrekening, taakveld 6.3, 6.4 en 6.5). Wijkgrenzen via PDOK. Alles live opgehaald bij de gemeentekeuze; de laatste maand en het tijdstip van ophalen staan onder de cijfers.</p>
     <p><b>Licentie.</b> CBS: CC BY 4.0. Wijkgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
     <p><b>Methode.</b> Aantallen zoals het CBS ze publiceert. Per 1.000 inwoners van 15 tot 65 jaar en het verschil tussen rijksbudget en uitkeringslasten rekent deze pagina zelf. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen tekort- of overschotmeter voor de bijstand en geen ranglijst van gemeenten of wijken. Geen werkloosheidscijfer en geen maat voor armoede: wie recht heeft op een uitkering maar die niet aanvraagt, staat er niet in. Geen effectmeting van re-integratie: of iemand na een voorziening werk vindt, publiceert het CBS niet per gemeente. Geen cijfers over instroom, uitstroom of duur van de bijstand. Geen optelling van gemeente en UWV.</p>
@@ -421,7 +432,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '2.0';
+  const VERSIE = '2.1';
   const PRODUCT = 'Werk en inkomen per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
@@ -544,8 +555,8 @@ main > * { min-width: 0; }
     S = { g, best: null, bev: null, leef: null, re: null, geld: null, w: null, wJaar: null, wJaren: [], wAll: {}, opgehaald: null, bounded: false };
     selWijk = null; WC = {}; fouten.clear(); toonMelding();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
-    ['#top3', '#chMaand', '#chPer', '#maandTabel', '#chUwv', '#chUwvPer', '#chLeef', '#chLeefTrend', '#chRe', '#chReType', '#reTabel', '#chGeld', '#geldTabel', '#tblWrap', '#dossier', '#jaren', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
-    $('#geldUitleg').hidden = true; $('#reUitleg').hidden = true;
+    ['#top3', '#chMaand', '#chPer', '#maandTabel', '#chUwv', '#chUwvPer', '#chLeef', '#chLeefTrend', '#chRe', '#chReType', '#reTabel', '#chGeld', '#geldTabel', '#chPart', '#partTabel', '#tblWrap', '#dossier', '#jaren', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
+    $('#geldUitleg').hidden = true; $('#partUitleg').hidden = true; $('#reUitleg').hidden = true;
     voortgang(0, 4, 'Tabellen zoeken bij het CBS…');
     await ontdek();
     if (S.g !== g) return;
@@ -665,24 +676,32 @@ main > * { min-width: 0; }
   }
   const reGroep = (d, s) => RE_GROEP.map(([k, t, keys]) => ({ k, t, v: keys.reduce((a, x) => a + (d && d[x] && d[x][s] != null ? d[x][s] : 0), 0) }));
 
-  // ---------- geld (Iv3, taakveld 6.3, jaarrekening) ----------
+  // ---------- geld (Iv3, taakveld 6.3, 6.4 en 6.5, jaarrekening) ----------
   const CATS = { 'B4.3.1': 'budget', 'L4.1.1': 'uitk', 'L4.2': 'subs', 'B4.1.2': 'verhaal', 'L4.3.3': 'gr' };
   async function laadGeld() {
     const c = S.g.c;
     const jaren = Object.keys(IV3).map(Number).sort();
-    const d = {}; let mis = 0;
+    const d = {}, pd = {}; let mis = 0;
     await Promise.all(jaren.map(async j => {
-      const f = `startswith(Gemeenten,'GM${c}') and startswith(TaakveldBalanspost,'6.3') and Verslagsoort eq '${j}X005'`;
+      const f = `startswith(Gemeenten,'GM${c}') and (startswith(TaakveldBalanspost,'6.3') or startswith(TaakveldBalanspost,'6.4') or startswith(TaakveldBalanspost,'6.5')) and Verslagsoort eq '${j}X005'`;
       try {
         const rows = await odata(DD, IV3[j], `TypedDataSet?$filter=${q(f)}&$select=TaakveldBalanspost,Categorie,k_1ePlaatsing_1,k_2ePlaatsing_2`);
         const o = { budget: 0, uitk: 0, subs: 0, verhaal: 0, gr: 0 }; let gevuld = false;
+        const p = { '6.4': { l: 0, gr: 0, gevuld: false }, '6.5': { l: 0, gr: 0, gevuld: false } };
         rows.forEach(r => {
-          if (tr(r.TaakveldBalanspost) !== '6.3') return;
-          const k = CATS[tr(r.Categorie)]; if (!k) return;
+          const tv = tr(r.TaakveldBalanspost), cat = tr(r.Categorie);
           const v = r.k_2ePlaatsing_2 != null ? r.k_2ePlaatsing_2 : r.k_1ePlaatsing_1;
           if (v == null) return;
+          if (p[tv]) { // participatie: alle lasten op het taakveld, geen baten, geen saldo
+            if (cat[0] === 'L') { p[tv].l += v; p[tv].gevuld = true; }
+            if (cat === 'L4.3.3') p[tv].gr += v;
+            return;
+          }
+          if (tv !== '6.3') return;
+          const k = CATS[cat]; if (!k) return;
           o[k] += v; gevuld = true;
         });
+        if (p['6.4'].gevuld || p['6.5'].gevuld) pd[j] = { wsw: p['6.4'].gevuld ? p['6.4'].l : null, wswGr: p['6.4'].gr, arb: p['6.5'].gevuld ? p['6.5'].l : null, arbGr: p['6.5'].gr };
         if (!gevuld) return;
         o.lasten = o.uitk + o.subs - o.verhaal;
         const basis = o.uitk + o.gr;
@@ -692,8 +711,8 @@ main > * { min-width: 0; }
         d[j] = o;
       } catch (e) { mis++; }
     }));
-    S.geld = { d, jaren: Object.keys(d).map(Number).sort() };
-    if (mis && !S.geld.jaren.length) S.geld = null; // geen antwoord is iets anders dan geen jaarrekening
+    S.geld = { d, jaren: Object.keys(d).map(Number).sort(), pd, pj: Object.keys(pd).map(Number).sort() };
+    if (mis && !S.geld.jaren.length && !S.geld.pj.length) S.geld = null; // geen antwoord is iets anders dan geen jaarrekening
     if (mis) { fouten.add('bedragen (Iv3)'); toonMelding(); }
   }
 
@@ -940,6 +959,7 @@ main > * { min-width: 0; }
   function renderGeld() {
     const ge = S.geld, uit = $('#geldUitleg');
     if (!ge) { $('#chGeld').innerHTML = '<p class="small muted" style="margin:0">De bedragen konden niet worden opgehaald.</p>'; return; }
+    renderPart();
     if (!ge.jaren.length) { uit.hidden = false; uit.querySelector('p').textContent = `Geen jaarrekening met bedragen op taakveld 6.3 gevonden voor ${S.g.n}.`; $('#chGeld').innerHTML = ''; $('#geldTabel').innerHTML = ''; return; }
     const jl = ge.jaren[ge.jaren.length - 1], ol = ge.d[jl];
     let t;
@@ -961,6 +981,30 @@ main > * { min-width: 0; }
     const m = v => nf1.format(v / 1000);
     const kol = [['Rijksbudget', o => m(o.budget)], ['Uitkeringen', o => m(o.uitk)], ['Subsidies', o => m(o.subs)], ['Verhaal', o => o.verhaal ? '−' + m(o.verhaal) : m(0)], ['Uitkeringslasten', o => o.groep === 'gr' ? '–' : m(o.lasten)], ['Verschil (indicatie)', o => o.verschil == null ? '–' : Math.abs(o.verschil) < 50 ? '±0,0' : (o.verschil > 0 ? '+' : '−') + m(Math.abs(o.verschil))], ['Bijdrage aan regeling', o => m(o.gr)]];
     $('#geldTabel').innerHTML = `<p class="small muted" style="margin:8px 12px 0">Bedragen in € mln, jaarrekening.</p><table><thead><tr><th>Jaar</th>${kol.map(k => `<th class="r">${k[0]}</th>`).join('')}<th>Uitvoering</th></tr></thead><tbody>${jr.slice().reverse().map(j => { const o = ge.d[j]; return `<tr><td>${j}</td>${kol.map(k => `<td class="r">${k[1](o)}</td>`).join('')}<td class="small">${groepTekst(o)}${noot(j, o) ? `<br><span class="muted">${noot(j, o)}</span>` : ''}</td></tr>`; }).join('')}</tbody></table>`;
+  }
+  // participatie: lasten 6.4 en 6.5 als twee bedragen, zonder baten en zonder saldo
+  function renderPart() {
+    const ge = S.geld, uit = $('#partUitleg');
+    $('#chPart').innerHTML = ''; $('#partTabel').innerHTML = '';
+    if (!ge.pj.length) { uit.hidden = false; uit.querySelector('p').textContent = `Geen jaarrekening met lasten op taakveld 6.4 of 6.5 gevonden voor ${S.g.n}.`; return; }
+    const jr = ge.pj, jl = jr[jr.length - 1], ol = ge.pd[jl];
+    const deelGr = (l, gr) => l > 0 && gr > 0 ? gr / l : 0;
+    const gWsw = deelGr(ol.wsw, ol.wswGr), gArb = deelGr(ol.arb, ol.arbGr);
+    let t = `Wat ${esc(S.g.n)} in ${jl} uitgaf aan <b>Wsw en beschut werk</b> (taakveld 6.4) en aan <b>arbeidsparticipatie</b> (taakveld 6.5, re-integratie en begeleiding naar werk). Twee bedragen naast elkaar, geen saldo: de baten op deze taakvelden zijn geen tegenhanger van de lasten. Het rijksgeld hiervoor zit grotendeels in het gemeentefonds en staat niet op het taakveld.`;
+    if (gWsw >= 0.5 || gArb >= 0.5) t += ` ${gWsw >= 0.5 && gArb >= 0.5 ? 'Bij beide' : gWsw >= 0.5 ? 'Bij Wsw en beschut werk' : 'Bij arbeidsparticipatie'} is het grootste deel een <b>bijdrage aan een gemeenschappelijke regeling</b> (${Math.round(100 * (gWsw >= 0.5 ? gWsw : gArb))}%): het werk loopt via een werkbedrijf of regeling, en in de bijdrage zit ook de uitvoering.`;
+    uit.hidden = false; uit.querySelector('p').innerHTML = t;
+    grafiek($('#chPart'), {
+      titel: 'Lasten participatie', laatst: `${fMln((ol.wsw || 0) + (ol.arb || 0))} <span class="muted">${jl}, samen</span>`,
+      sub: 'taakveld 6.4 en 6.5, jaarrekening, € mln', fy: v => nf.format(v),
+      series: [
+        { naam: 'Wsw en beschut werk (6.4)', kleur: 'var(--accent)', stip: true, punten: jr.map(j => ({ x: j, v: ge.pd[j].wsw == null ? null : ge.pd[j].wsw / 1000 })) },
+        { naam: 'Arbeidsparticipatie (6.5)', kleur: 'var(--vw-2)', stip: true, punten: jr.map(j => ({ x: j, v: ge.pd[j].arb == null ? null : ge.pd[j].arb / 1000 })) }
+      ],
+      tip: i => { const j = jr[i], o = ge.pd[j]; return `<b>${j}</b><br>Wsw en beschut werk: <span class="num">${fMln(o.wsw)}</span>${o.wswGr ? ` <span class="muted">(regeling ${fMln(o.wswGr)})</span>` : ''}<br>Arbeidsparticipatie: <span class="num">${fMln(o.arb)}</span>${o.arbGr ? ` <span class="muted">(regeling ${fMln(o.arbGr)})</span>` : ''}`; },
+      noot: 'Alle lasten op het taakveld, ook de eigen uitvoering. De Wsw is een afbouwregeling: er stromen geen nieuwe mensen in, dus dat deel van 6.4 daalt ook zonder beleidskeuze; beschut werk groeit juist.'
+    });
+    const m = v => v == null ? '–' : nf1.format(v / 1000);
+    $('#partTabel').innerHTML = `<p class="small muted" style="margin:8px 12px 0">Lasten in € mln, jaarrekening.</p><table><thead><tr><th>Jaar</th><th class="r">Wsw en beschut werk (6.4)</th><th class="r">waarvan regeling</th><th class="r">Arbeids&shy;participatie (6.5)</th><th class="r">waarvan regeling</th></tr></thead><tbody>${jr.slice().reverse().map(j => { const o = ge.pd[j]; return `<tr><td>${j}</td><td class="r">${m(o.wsw)}</td><td class="r">${o.wsw == null ? '–' : m(o.wswGr)}</td><td class="r">${m(o.arb)}</td><td class="r">${o.arb == null ? '–' : m(o.arbGr)}</td></tr>`; }).join('')}</tbody></table>`;
   }
   // jaren met een eenmalige regeling op hetzelfde taakveld
   const JAARNOOT = { 2020: 'Tozo in budget en lasten', 2021: 'Tozo in budget en lasten', 2022: 'energietoeslag in de lasten', 2023: 'energietoeslag in de lasten' };
@@ -1233,7 +1277,7 @@ main > * { min-width: 0; }
     const l = S.best && S.best.perioden.length ? S.best.perioden[S.best.perioden.length - 1] : null;
     const ivj = S.geld ? S.geld.jaren : [];
     const w = S.w || {};
-    $('#foot').innerHTML = `Bronnen: CBS (CC BY 4.0): personen met een uitkering ${link(T.bestand)}${l ? ', laatste maand ' + pNaam(l) : ''}; bijstandsuitkeringen naar leefvorm ${link(T.leef)}; re-integratie- en participatievoorzieningen ${link(T.re)}${S.re && S.re.perioden.length ? ', laatste maand ' + pNaam(S.re.perioden[S.re.perioden.length - 1]) : ''}; inwoners per leeftijdsgroep ${link(T.bev)} (1 januari); per wijk Kerncijfers wijken en buurten ${w.tabel ? link(w.tabel) + ' (uitkeringen december ' + w.jaar + ', netto-arbeidsparticipatie)' : '–'}. Bedragen: CBS, onbewerkte Iv3-data gemeenten ${ivj.length ? ivj[0] + '–' + ivj[ivj.length - 1] : ''} (<a href="https://dataderden.cbs.nl">dataderden.cbs.nl</a>), jaarrekening, taakveld 6.3; tweede plaatsing waar die er is. Wijkgrenzen: CBS Wijken en buurten via <a href="https://www.pdok.nl">PDOK</a>. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS (CC BY 4.0): personen met een uitkering ${link(T.bestand)}${l ? ', laatste maand ' + pNaam(l) : ''}; bijstandsuitkeringen naar leefvorm ${link(T.leef)}; re-integratie- en participatievoorzieningen ${link(T.re)}${S.re && S.re.perioden.length ? ', laatste maand ' + pNaam(S.re.perioden[S.re.perioden.length - 1]) : ''}; inwoners per leeftijdsgroep ${link(T.bev)} (1 januari); per wijk Kerncijfers wijken en buurten ${w.tabel ? link(w.tabel) + ' (uitkeringen december ' + w.jaar + ', netto-arbeidsparticipatie)' : '–'}. Bedragen: CBS, onbewerkte Iv3-data gemeenten ${ivj.length ? ivj[0] + '–' + ivj[ivj.length - 1] : ''} (<a href="https://dataderden.cbs.nl">dataderden.cbs.nl</a>), jaarrekening, taakveld 6.3, 6.4 en 6.5; tweede plaatsing waar die er is. Wijkgrenzen: CBS Wijken en buurten via <a href="https://www.pdok.nl">PDOK</a>. Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
