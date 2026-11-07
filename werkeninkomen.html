@@ -386,7 +386,7 @@ main > * { min-width: 0; }
             <li><b>Rijksbudget</b>: de baten op taakveld 6.3 Inkomensregelingen in de categorie inkomensoverdrachten van het Rijk (B4.3.1). Dat is in hoofdzaak het budget voor de bijstandsuitkeringen (BUIG).</li>
             <li><b>Uitkeringslasten</b>: op hetzelfde taakveld de sociale uitkeringen in geld (L4.1.1) plus subsidies (L4.2, waaronder loonkostensubsidie), min het verhaal van uitkeringen (B4.1.2). Uit de jaarrekening, tweede plaatsing waar die er is.</li>
             <li><b>Verschil (indicatie)</b>: rijksbudget min uitkeringslasten. Alleen voor jaren waarin de gemeente de uitkeringen zelf boekt.</li>
-            <li><b>Lasten voor werk</b>: alle lasten (categorieën L) op taakveld 6.4 Wsw en beschut werk en 6.5 Arbeidsparticipatie, jaarrekening, tweede plaatsing waar die er is. Twee bedragen, geen baten en geen saldo. "Waarvan regeling" is de bijdrage aan gemeenschappelijke regelingen (L4.3.3) op hetzelfde taakveld. Titels van de taakvelden zoals het CBS ze nu geeft; in eerdere jaren heette 6.4 Begeleide participatie.</li>
+            <li><b>Lasten voor werk</b>: alle lasten (categorieën L) op taakveld 6.4 Wsw en beschut werk en 6.5 Arbeidsparticipatie, jaarrekening, tweede plaatsing waar die er is. Twee bedragen, geen baten en geen saldo. "Waarvan regeling" is de bijdrage aan gemeenschappelijke regelingen (L4.3.3) op hetzelfde taakveld. Taakveld 6.4 heet bij het CBS tot en met 2024 Begeleide participatie, vanaf 2025 WSW en beschut werk; de inhoud is gelijk gebleven.</li>
             <li><b>Uitvoering via een regeling</b>: is de bijdrage aan gemeenschappelijke regelingen (L4.3.3) 50% of meer van uitkeringen plus die bijdrage, dan voert een regeling de bijstand uit. Tussen 10% en 50%: deels via een regeling.</li>
           </ul>
         </div>
@@ -397,7 +397,7 @@ main > * { min-width: 0; }
             <li><b>Bijzondere jaren</b>: in 2020 en 2021 zat de Tozo voor zelfstandigen in budget én lasten; beide liggen dan hoger. In 2022 en 2023 betaalden veel gemeenten de energietoeslag uit hetzelfde taakveld, terwijl het geld uit het gemeentefonds kwam. Dan vallen de lasten hoger uit dan het budget, zonder dat de bijstand zelf tekortschoot.</li>
             <li><b>Via een regeling</b>: voert een gemeenschappelijke regeling de bijstand uit, dan betaalt die de uitkeringen. De gemeente maakt een bijdrage over waarin ook uitvoering en re-integratie zitten. In de cijfers van de gemeente is dat niet te scheiden; daarom geen vergelijking.</li>
             <li><b>Personen en uitkeringen</b>: het bestand telt personen, de leefvorm telt uitkeringen. Een paar is twee personen en één uitkering. Ook met paren dubbel geteld blijft de leefvorm iets onder het aantal personen. Bij de personen telt ieders eigen leeftijd. Bij de uitkeringen telt de oudste partner: is die 67 of ouder, dan valt de uitkering onder "vanaf de AOW-leeftijd", terwijl de jongere partner wél bij de personen tot de AOW-leeftijd telt. Daarnaast rondt het CBS elk getal af op tientallen.</li>
-            <li><b>Lasten voor werk zijn geen tekort</b>: het rijksgeld voor Wsw, beschut werk en re-integratie zit grotendeels in het gemeentefonds (integratie-uitkering Participatie) en staat niet op taakveld 6.4 of 6.5. Hoge lasten zeggen dus niets over een tekort. Gemeenten boeken de eigen uitvoering verschillend: de ene op het taakveld, de andere op overhead (0.4). Loonkostensubsidie kan op 6.3 of op 6.5 staan, afhankelijk van hoe de gemeente boekt.</li>
+            <li><b>Lasten voor werk zijn geen tekort</b>: het rijksgeld voor Wsw, beschut werk en re-integratie zit grotendeels in het gemeentefonds (integratie-uitkering Participatie) en staat niet op taakveld 6.4 of 6.5. Hoge lasten zeggen dus niets over een tekort. Gemeenten boeken de eigen uitvoering verschillend: de ene op het taakveld, de andere op overhead (0.4). Loonkostensubsidie zit in de subsidies (L4.2), die het Iv3 niet verder uitsplitst. De meeste gemeenten boeken subsidies op 6.3 en tellen dus mee in de uitkeringslasten; een kleiner deel op 6.5, en dan staan ze hier (jaarrekening 2025: 156 gemeenten op 6.3, samen € 225 mln; 48 op 6.5, samen € 18 mln; 13 alleen op 6.5).</li>
             <li><b>Twee lagen</b>: bijstand, re-integratie en het geld zijn van de gemeente; WW en arbeidsongeschiktheid zijn van UWV. Wie WW of een arbeidsongeschiktheidsuitkering heeft en daarnaast bijstand, telt in beide. Tel de lagen niet op.</li>
             <li><b>Voorzieningen, geen personen</b>: één persoon kan meer voorzieningen tegelijk hebben, en een voorziening kan naar iemand zonder bijstand gaan. Deel de voorzieningen dus niet door het aantal mensen in de bijstand. Ontbreken bij een gemeente de laatste maanden, dan heeft het CBS die cijfers (nog) niet ontvangen.</li>
             <li><b>Een ontbrekende maand</b>: heeft het CBS voor een soort uitkering in de laatste maand geen cijfer, dan staat per soort de laatste maand mét een cijfer, met de maand erbij.</li>
@@ -432,7 +432,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '2.1';
+  const VERSIE = '2.1.1';
   const PRODUCT = 'Werk en inkomen per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const DD = 'https://dataderden.cbs.nl/ODataApi/OData/';
@@ -991,7 +991,7 @@ main > * { min-width: 0; }
     const deelGr = (l, gr) => l > 0 && gr > 0 ? gr / l : 0;
     const gWsw = deelGr(ol.wsw, ol.wswGr), gArb = deelGr(ol.arb, ol.arbGr);
     let t = `Wat ${esc(S.g.n)} in ${jl} uitgaf aan <b>Wsw en beschut werk</b> (taakveld 6.4) en aan <b>arbeidsparticipatie</b> (taakveld 6.5, re-integratie en begeleiding naar werk). Twee bedragen naast elkaar, geen saldo: de baten op deze taakvelden zijn geen tegenhanger van de lasten. Het rijksgeld hiervoor zit grotendeels in het gemeentefonds en staat niet op het taakveld.`;
-    if (gWsw >= 0.5 || gArb >= 0.5) t += ` ${gWsw >= 0.5 && gArb >= 0.5 ? 'Bij beide' : gWsw >= 0.5 ? 'Bij Wsw en beschut werk' : 'Bij arbeidsparticipatie'} is het grootste deel een <b>bijdrage aan een gemeenschappelijke regeling</b> (${Math.round(100 * (gWsw >= 0.5 ? gWsw : gArb))}%): het werk loopt via een werkbedrijf of regeling, en in de bijdrage zit ook de uitvoering.`;
+    if (gWsw >= 0.5 || gArb >= 0.5) t += ` ${gWsw >= 0.5 && gArb >= 0.5 ? 'Bij beide' : gWsw >= 0.5 ? 'Bij Wsw en beschut werk' : 'Bij arbeidsparticipatie'} is het grootste deel een <b>bijdrage aan een gemeenschappelijke regeling</b> (${gWsw >= 0.5 && gArb >= 0.5 ? `${Math.round(100 * gWsw)}% en ${Math.round(100 * gArb)}%` : Math.round(100 * (gWsw >= 0.5 ? gWsw : gArb)) + '%'}): het werk loopt via een werkbedrijf of regeling, en in de bijdrage zit ook de uitvoering.`;
     uit.hidden = false; uit.querySelector('p').innerHTML = t;
     grafiek($('#chPart'), {
       titel: 'Lasten participatie', laatst: `${fMln((ol.wsw || 0) + (ol.arb || 0))} <span class="muted">${jl}, samen</span>`,
