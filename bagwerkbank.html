@@ -161,7 +161,7 @@ main > * { min-width: 0; }
 
   <section class="intro" id="intro">
     <p class="sub">Alle adressen en gebouwen van je gemeente, om mee te onderzoeken, te koppelen en te controleren.</p>
-    <p>Kies een gemeente. Je krijgt elk adres uit de Basisregistratie Adressen en Gebouwen (BAG) als regel: met de BAG-ID's van adres, object en pand, de status, het gebruiksdoel, de oppervlakte, het bouwjaar, de wijk en buurt en de coördinaten. Zoek, filter en download de lijst als CSV, om naast je eigen gegevens te leggen.</p>
+    <p>Kies een gemeente. Je krijgt elk adres uit de Basisregistratie Adressen en Gebouwen (BAG) als regel: met de BAG-ID's van adres, object en pand, de status, het gebruiksdoel, de oppervlakte, het bouwjaar, de wijk en buurt en de coördinaten. Zoek, filter en download de lijst als CSV, om naast je eigen gegevens te leggen, of in de vorm van het Gemeentelijk Gegevensmodel om in een datawarehouse te laden.</p>
     <p class="muted small">De lijst is een afgeleid bestand uit open data van het Kadaster, maandelijks ververst. Voor formeel gebruik geldt de BAG zelf.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
@@ -207,6 +207,7 @@ main > * { min-width: 0; }
           <span class="acties">
             <button class="btn linkish" type="button" id="csvExcel">Download CSV voor Excel</button>
             <button class="btn linkish" type="button" id="csvKoppel">Download CSV om te koppelen</button>
+            <button class="btn linkish" type="button" id="ggmZip" title="Een zip met een CSV per objecttype, in de tabel- en kolomnamen van het Gemeentelijk Gegevensmodel">Download in GGM-vorm (zip)</button>
           </span>
         </div>
         <div class="scroll"><table><thead><tr>
@@ -230,6 +231,7 @@ main > * { min-width: 0; }
           <h2>Koppelen met je eigen gegevens</h2>
           <ul class="small">
             <li><b>Twee downloads.</b> De CSV voor Excel zet de BAG-ID's zo neer dat Excel de voorloopnul laat staan (gemeenten met een code onder 1000, zoals Delft 0503). De CSV om te koppelen geeft de ID's als platte tekst, voor een database, Power Query of een script.</li>
+            <li><b>In GGM-vorm.</b> Werkt je organisatie met een datawarehouse op het <a href="https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel" target="_blank" rel="noopener">Gemeentelijk Gegevensmodel</a> (GGM)? De zip geeft een CSV per objecttype (nummeraanduiding, verblijfsobject, pand, buurt en de rest) met de tabel- en kolomnamen van GGM 2.5.1, plus een koppeltabel en een leesmij. Relaties staan als BAG-ID van het doel, zodat je laadproces ze aan de eigen sleutels koppelt. Geen toetsing aan het GGM: alleen de namen zijn overgenomen. Welke instrumenten en indicatoren nog meer bij elke entiteit horen: <a href="gegevensmodel.html">Het gegevensmodel als ingang</a>.</li>
             <li><b>Welke sleutel.</b> De nummeraanduiding-ID hoort bij het adres, de object-ID bij de ruimte, de pand-ID bij het gebouw. Een eigen lijst op adres koppel je op nummeraanduiding of op postcode met huisnummer, letter en toevoeging.</li>
             <li><b>Wat de pagina met je gegevens doet.</b> Niets: de pagina haalt alleen de lijst van de gekozen gemeente op. Eigen gegevens op de kaart zetten kan met <a href="eigenlijst.html">Eigen lijst op de kaart</a>.</li>
             <li><b>Signalen.</b> Waar de BAG van je gemeente zichzelf tegenspreekt of opvallende waarden heeft: <a id="kwLink" href="bagkwaliteit.html">Kwaliteit van de BAG →</a></li>
@@ -243,10 +245,10 @@ main > * { min-width: 0; }
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
     <p><b>Bron en peildatum.</b> BAG (Kadaster) via PDOK: het landelijke <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-bestand</a> (GeoPackage), stand <span class="standdatum">van het bestand</span>. Wijken en buurten: CBS-wijk- en buurtindeling <span class="buurtjaar"></span> via PDOK. Per gemeente doorgerekend en als bestand gepubliceerd; maandelijks ververst, pas gepubliceerd na controle.</p>
-    <p><b>Licentie.</b> BAG: CC0. CBS-wijk- en buurtkaart: CC BY 4.0. Deze lijst is een afgeleid bestand, geen authentieke BAG.</p>
+    <p><b>Licentie.</b> BAG: CC0. CBS-wijk- en buurtkaart: CC BY 4.0. Deze lijst is een afgeleid bestand, geen authentieke BAG. De download in GGM-vorm neemt alleen tabel- en kolomnamen over uit het Gemeentelijk Gegevensmodel 2.5.1 (Gemeente Delft, EUPL-1.2).</p>
     <p><b>Methode.</b> Per adresseerbaar object één regel met het hoofdadres; wijk en buurt op ligging. De volledige uitleg staat na de gemeentekeuze onder "Zo is de lijst gemaakt".</p>
     <p><b>Wat dit niet is.</b> Geen authentieke BAG en geen vervanging van een afnemersaansluiting op de Landelijke Voorziening BAG. Geen oordeel over de registratie van een gemeente; signalen daarover staan in Kwaliteit van de BAG.</p>
-    <p><b>Bekende beperkingen.</b> Momentopname van één dag per maand. Nevenadressen ontbreken. Eén pand per verblijfsobject. Ingetrokken en beëindigde objecten staan niet in het landelijke bestand.</p>
+    <p><b>Bekende beperkingen.</b> Momentopname van één dag per maand. Nevenadressen ontbreken. Eén pand per verblijfsobject. Ingetrokken en beëindigde objecten staan niet in het landelijke bestand. De download in GGM-vorm is geen toetsing aan het GGM; begin- en einddatum, documentgegevens en pandgeometrie ontbreken erin.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>. De gedownloade lijst gebruiken in je eigen werk mag, met de BAG als bron.</p>
     <p><b>Contact en correcties.</b> Fout gezien in een regel of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -258,7 +260,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.1';
+  const VERSIE = '0.2';
   const PRODUCT = 'BAG-werkbank';
   const BASIS = '/bag-werkbank/';
   const MAXRIJ = 200;
@@ -328,10 +330,14 @@ main > * { min-width: 0; }
   function rij(D, i) {
     const f = D.lines[i].split('\t'), W = D.W, g = D.g, s = f[0];
     const vol = (v, pre) => !v ? '' : v.length === 16 ? v : pre + v;
+    const st4 = W.str[+f[4]], wp4 = W.wp[+f[9]];
     return { s, oid: vol(f[1], g + TYPE[s]), nid: vol(f[2], g + '20'), pid: vol(f[3], g + '10'),
-      str: W.str[+f[4]], nr: f[5], let: f[6], toe: f[7], pc: f[8], wp: W.wp[+f[9]],
+      str: naamVan(st4), orid: idVan(st4), nr: f[5], let: f[6], toe: f[7], pc: f[8], wp: naamVan(wp4), wpid: idVan(wp4),
       st: W.st[+f[10]], g: D.stGroep[+f[10]], doel: W.doel[+f[11]], opp: f[12], bj: f[13], pst: W.pst[+f[14]], bu: W.bu[+f[15]], x: f[16], y: f[17] };
   }
+  // Formaat 1: straat en woonplaats als naam. Formaat 2 (vanaf november 2026): [naam, BAG-ID].
+  function naamVan(v) { return Array.isArray(v) ? v[0] : v; }
+  function idVan(v) { return Array.isArray(v) ? v[1] || '' : ''; }
   const adres = r => r.str + ' ' + r.nr + (r.let || '') + (r.toe ? '-' + r.toe : '');
 
   // ---------- kiezen ----------
@@ -438,7 +444,7 @@ main > * { min-width: 0; }
     S.L = L;
     const n = L.length, tot = D.n;
     $('#telregel').innerHTML = n === tot ? `<b>${nf.format(n)}</b> adressen` : `<b>${nf.format(n)}</b> van ${nf.format(tot)} adressen`;
-    $('#csvExcel').disabled = $('#csvKoppel').disabled = n === 0;
+    $('#csvExcel').disabled = $('#csvKoppel').disabled = $('#ggmZip').disabled = n === 0;
     const K = { gebruik: 'var(--gebruik)', onderweg: 'var(--onderweg)', buiten: 'var(--buiten)', plaats: 'var(--plaats)' };
     $('#tbody').innerHTML = L.slice(0, MAXRIJ).map(i => rij(D, i)).map(r => `<tr>
       <td>${esc(adres(r))}${r.s !== 'V' ? ` <span class="muted small">(${SOORT[r.s]})</span>` : ''}</td><td>${esc(r.pc)}</td><td>${esc(r.wp)}</td>
@@ -473,6 +479,188 @@ main > * { min-width: 0; }
   }
   $('#csvExcel').addEventListener('click', () => csv(true));
   $('#csvKoppel').addEventListener('click', () => csv(false));
+
+  // ---------- download in GGM-vorm ----------
+  // Koppeltabel werkbank → Gemeentelijk Gegevensmodel (GGM) v2.5.1, diagrammen 99 Kern › BAG en Buurten en Wijken.
+  // Alleen tabel- en kolomnamen uit het model (EUPL-1.2), geen definities of DDL.
+  // Relaties: het GGM legt ze vast met surrogaatsleutels (bijv. LIGT_IN_BUURT_ID INTEGER) die een datawarehouse zelf uitdeelt.
+  // De download geeft daarom de BAG-ID (of CBS-code) van het doel, in een kolom <relatie>_IDENTIFICATIE.
+  // Deze tabel is ook de bron voor de controle bij een nieuwe GGM-versie (recepten/ggm/).
+  const GGM_VORM = {
+    versie: '2.5.1',
+    bron: 'https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel/tree/master/v2.5.1',
+    tabellen: [
+      { t: 'NUMMERAANDUIDING', d: '99 Kern/BAG', k: [
+        ['IDENTIFICATIE', 'a', 'nummeraanduiding_id'], ['HUISNUMMER', 'a', 'huisnummer'], ['HUISLETTER', 'a', 'huisletter'],
+        ['HUISNUMMERTOEVOEGING', 'a', 'toevoeging'], ['POSTCODE', 'a', 'postcode'], ['TYPEADRESSEERBAAROBJECT', 'a', 'objecttype'],
+        ['LIGT_IN_BUURT_IDENTIFICATIE', 'r:LIGT_IN_BUURT_ID>BUURT', 'buurtcode'],
+        ['LIGT_AAN_OPENBARERUIMTE_IDENTIFICATIE', 'r:LIGT_AAN_OPENBARERUIMTE_ID>OPENBARERUIMTE', 'openbare-ruimte-ID (formaat 2)'],
+        ['LIGT_IN_WOONPLAATS_IDENTIFICATIE', 'r:LIGT_IN_WOONPLAATS_ID>WOONPLAATS', 'woonplaats-ID (formaat 2)']] },
+      { t: 'ADRESSEERBAAROBJECT', d: '99 Kern/BAG', k: [
+        ['IDENTIFICATIE', 'a', 'object_id'], ['TYPEADRESSEERBAAROBJECT', 'a', 'objecttype'],
+        ['HEEFT_ALS_HOOFDADRES_IDENTIFICATIE', 'r:HEEFT_ALS_HOOFDADRES_NUMMERAANDUIDING_ID>NUMMERAANDUIDING', 'nummeraanduiding_id']] },
+      { t: 'VERBLIJFSOBJECT', d: '99 Kern/BAG', k: [
+        ['IDENTIFICATIE', 'a', 'object_id'], ['STATUS', 'a', 'status'], ['GEBRUIKSDOEL', 'a', 'gebruiksdoel'],
+        ['OPPERVLAKTE', 'a', 'oppervlakte_m2'], ['GEOMETRIE', 'a', 'x_rd, y_rd']] },
+      { t: 'LIGPLAATS', d: '99 Kern/BAG', k: [['IDENTIFICATIE', 'a', 'object_id'], ['STATUS', 'a', 'status'], ['GEOMETRIE', 'a', 'x_rd, y_rd']] },
+      { t: 'STANDPLAATS', d: '99 Kern/BAG', k: [['IDENTIFICATIE', 'a', 'object_id'], ['STATUS', 'a', 'status'], ['GEOMETRIE', 'a', 'x_rd, y_rd']] },
+      { t: 'PAND', d: '99 Kern/BAG', k: [['IDENTIFICATIE', 'a', 'pand_id'], ['OORSPRONKELIJKBOUWJAAR', 'a', 'bouwjaar'], ['STATUS', 'a', 'pandstatus']] },
+      { t: 'KP_VRBLJFSBJCT_PND', d: '99 Kern/BAG', k: [
+        ['VERBLIJFSOBJECT_IDENTIFICATIE', 'r:VERBLIJFSOBJECT_ID>VERBLIJFSOBJECT', 'object_id'], ['PAND_IDENTIFICATIE', 'r:PAND_ID>PAND', 'pand_id']] },
+      { t: 'OPENBARERUIMTE', d: '99 Kern/BAG', k: [
+        ['IDENTIFICATIE', 'a', 'openbare-ruimte-ID (formaat 2)'], ['NAAMOPENBARERUIMTE', 'a', 'straat'],
+        ['LIGT_IN_WOONPLAATS_IDENTIFICATIE', 'r:LIGT_IN_WOONPLAATS_ID>WOONPLAATS', 'woonplaats-ID (formaat 2)']] },
+      { t: 'WOONPLAATS', d: '99 Kern/BAG', k: [
+        ['IDENTIFICATIE', 'a', 'woonplaats-ID (formaat 2)'], ['WOONPLAATSNAAM', 'a', 'woonplaats'],
+        ['LIGT_IN_GEMEENTE_IDENTIFICATIE', 'r:LIGT_IN_GEMEENTE_ID>GEMEENTE', 'gemeentecode (bronhouder)']] },
+      { t: 'BUURT', d: '99 Kern/BAG', k: [
+        ['IDENTIFICATIE', 'a', 'buurtcode'], ['CODE', 'a', 'buurtcode'], ['NAAM', 'a', 'buurtnaam'],
+        ['LIGT_IN_WIJK_IDENTIFICATIE', 'r:LIGT_IN_WIJK_ID>WIJK', 'wijkcode']] },
+      { t: 'WIJK', d: '99 Kern/BAG', k: [['IDENTIFICATIE', 'a', 'wijkcode'], ['WIJKCODE', 'a', 'wijkcode'], ['WIJKNAAM', 'a', 'wijknaam']] },
+      { t: 'GEMEENTE', d: '99 Kern/BAG', k: [['IDENTIFICATIE', 'a', 'gemeentecode'], ['GEMEENTECODE', 'a', 'gemeentecode'], ['GEMEENTENAAM', 'a', 'gemeentenaam']] }
+    ]
+  };
+  const TYPENAAM = { V: 'Verblijfsobject', L: 'Ligplaats', S: 'Standplaats' };
+
+  function ggmTabellen() {
+    const g = S.g, D = S.d;
+    const T = {}; GGM_VORM.tabellen.forEach(x => { T[x.t] = new Map(); });
+    const metId = { or: 0, wp: 0 };
+    const orWp = new Map();   // openbare ruimte → telling woonplaatsen (meest voorkomende wint)
+    const wkt = r => r.x && r.y ? `POINT(${(r.x / 10).toFixed(1)} ${(r.y / 10).toFixed(1)})` : '';
+    for (const i of S.L) {
+      const r = rij(D, i);
+      if (r.orid) metId.or++;
+      if (r.wpid) metId.wp++;
+      T.NUMMERAANDUIDING.set(r.nid, [r.nid, r.nr, r.let, r.toe, r.pc, TYPENAAM[r.s], r.bu[0], r.orid, r.wpid]);
+      T.ADRESSEERBAAROBJECT.set(r.oid, [r.oid, TYPENAAM[r.s], r.nid]);
+      if (r.s === 'V') {
+        T.VERBLIJFSOBJECT.set(r.oid, [r.oid, r.st, r.doel, r.opp, wkt(r)]);
+        if (r.pid) {
+          T.PAND.set(r.pid, [r.pid, r.bj, r.pst]);
+          T.KP_VRBLJFSBJCT_PND.set(r.oid + '|' + r.pid, [r.oid, r.pid]);
+        }
+      } else (r.s === 'L' ? T.LIGPLAATS : T.STANDPLAATS).set(r.oid, [r.oid, r.st, wkt(r)]);
+      if (r.orid) {
+        const m = orWp.get(r.orid) || { naam: r.str, wp: new Map() };
+        if (r.wpid) m.wp.set(r.wpid, (m.wp.get(r.wpid) || 0) + 1);
+        orWp.set(r.orid, m);
+      }
+      if (r.wpid) T.WOONPLAATS.set(r.wpid, [r.wpid, r.wp, g.c]);
+      if (r.bu[0]) {
+        T.BUURT.set(r.bu[0], [r.bu[0], r.bu[0], r.bu[1], r.bu[2]]);
+        T.WIJK.set(r.bu[2], [r.bu[2], r.bu[2], r.bu[3]]);
+      }
+    }
+    for (const [id, m] of orWp) {
+      const wp = [...m.wp].sort((a, b) => b[1] - a[1])[0];
+      T.OPENBARERUIMTE.set(id, [id, m.naam, wp ? wp[0] : '']);
+    }
+    T.GEMEENTE.set(g.c, [g.c, g.c, g.n]);
+    return { T, metId, n: S.L.length };
+  }
+
+  const cel = v => { const s = String(v == null ? '' : v); return /[,"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  function ggmBestanden() {
+    const g = S.g, D = S.d, { T, metId, n } = ggmTabellen();
+    const stamp = `BAG (Kadaster) stand ${D.kop.peil}, buurtindeling CBS ${D.kop.buurtjaar}; ${PRODUCT} ${VERSIE}, Open Data Atelier, ${location.origin}${location.pathname}`;
+    const files = [];
+    const leeg = [];
+    for (const x of GGM_VORM.tabellen) {
+      const rows = [...T[x.t].values()];
+      if (!rows.length || rows.every(r => !r[0])) { leeg.push(x.t); continue; }
+      files.push({ naam: x.t + '.csv', tekst: x.k.map(k => k[0]).join(',') + '\n' + rows.filter(r => r[0]).map(r => r.map(cel).join(',')).join('\n') + '\n' });
+    }
+    const kt = ['ggm_tabel,kolom_in_download,ggm_kolom,soort,doeltabel,werkbankkolom'];
+    for (const x of GGM_VORM.tabellen) for (const k of x.k) {
+      const rel = k[1].startsWith('r:') ? k[1].slice(2).split('>') : null;
+      kt.push([x.t, k[0], rel ? rel[0] : k[0], rel ? 'relatie' : 'attribuut', rel ? rel[1] : '', k[2]].map(cel).join(','));
+    }
+    files.push({ naam: 'koppeltabel.csv', tekst: kt.join('\n') + '\n' });
+    const zonderId = metId.or < n;
+    files.unshift({ naam: 'LEESMIJ.txt', tekst: [
+      `BAG-werkbank in GGM-vorm — ${g.n} (${g.c})`,
+      '',
+      `Bron: ${stamp}`,
+      `Regels: ${n} adresseerbare objecten (de keuze op de pagina bij het downloaden).`,
+      '',
+      `Tabel- en kolomnamen volgen het Gemeentelijk Gegevensmodel (GGM) ${GGM_VORM.versie}, diagram 99 Kern > BAG:`,
+      GGM_VORM.bron,
+      'Het GGM is een model van Gemeente Delft onder de EUPL-1.2. Overgenomen zijn alleen tabel- en kolomnamen.',
+      'Dit is geen toetsing aan het GGM en geen verklaring dat het bestand GGM-conform is.',
+      '',
+      'Hoe de bestanden in een GGM-datawarehouse passen',
+      '- Elk bestand is een GGM-tabel; de kolommen zijn GGM-attributen met dezelfde naam.',
+      '- Relaties: het GGM gebruikt surrogaatsleutels (bijv. LIGT_IN_BUURT_ID) die je eigen omgeving uitdeelt.',
+      '  Hier staat in plaats daarvan de BAG-ID of CBS-code van het doel, in <relatie>_IDENTIFICATIE.',
+      '  Je laadproces zoekt bij die identificatie de eigen surrogaatsleutel op. Zie koppeltabel.csv.',
+      '- Een 16-cijferige BAG-ID past niet in een INTEGER; houd IDENTIFICATIE als tekst (voorloopnul!).',
+      '- GEOMETRIE: WKT-punt in Rijksdriehoeksstelsel (EPSG:28992). Lig- en standplaatsen zijn in de BAG een vlak;',
+      '  hier een punt binnen dat vlak.',
+      '- GEBRUIKSDOEL: zoals in de BAG, meerdere doelen gescheiden door een komma. Het GGM heeft er één',
+      '  verwijzing naar een lijst voor; meer doelen per object vragen dus een keuze bij het laden.',
+      '- BUURT en WIJK: CBS-indeling ' + D.kop.buurtjaar + ', op ligging van het punt. IDENTIFICATIE = CBS-code.',
+      '  Een buurt van een buurgemeente (grensobject) staat erbij met die code.',
+      '- OPENBARERUIMTE ligt in de woonplaats die bij de meeste adressen aan die straat hoort.',
+      '- WOONPLAATS ligt in de gemeente die bronhouder is.',
+      '- Niet in deze download: nevenadressen, geldigheid en documentgegevens (begin- en einddatum,',
+      '  documentnummer), pandgeometrie, ingetrokken objecten. Eén pand per verblijfsobject.',
+      ...(zonderId ? ['', `Let op: ${n - metId.or} van ${n} regels hebben nog geen openbare-ruimte-ID en ${n - metId.wp} geen woonplaats-ID.`,
+        'Die komen mee vanaf de verversing van de werkbank in GGM-vorm; tot dan staan OPENBARERUIMTE en WOONPLAATS niet of niet volledig in de zip.'] : []),
+      ...(leeg.length ? ['', 'Leeg bij deze keuze en daarom weggelaten: ' + leeg.join(', ') + '.'] : []),
+      '',
+      '© Josephine Linders voor de bewerking. Gebruik in eigen werk mag, met de BAG als bron.',
+      'Fout gezien? https://github.com/josephinal/josephinal.github.io/issues/new',
+      ''].join('\n') });
+    return files;
+  }
+
+  // Zip zonder bibliotheek: deflate via CompressionStream als de browser dat kan, anders opgeslagen.
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  function crc32(b) { let c = 0xFFFFFFFF; for (let i = 0; i < b.length; i++) c = CRC[(c ^ b[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+  async function deflate(b) {
+    if (typeof CompressionStream === 'undefined') return null;
+    try { return new Uint8Array(await new Response(new Blob([b]).stream().pipeThrough(new CompressionStream('deflate-raw'))).arrayBuffer()); }
+    catch (e) { return null; }
+  }
+  async function maakZip(files) {
+    const enc = new TextEncoder(), d = new Date();
+    const tijd = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    const dat = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    const delen = [], centraal = []; let pos = 0;
+    for (const f of files) {
+      const naam = enc.encode(f.naam), data = enc.encode(f.tekst), crc = crc32(data);
+      const z = await deflate(data), m = z ? 8 : 0, inh = z || data;
+      const h = new DataView(new ArrayBuffer(30));
+      h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, m, true);
+      h.setUint16(10, tijd, true); h.setUint16(12, dat, true); h.setUint32(14, crc, true);
+      h.setUint32(18, inh.length, true); h.setUint32(22, data.length, true); h.setUint16(26, naam.length, true);
+      const c = new DataView(new ArrayBuffer(46));
+      c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, m, true);
+      c.setUint16(12, tijd, true); c.setUint16(14, dat, true); c.setUint32(16, crc, true); c.setUint32(20, inh.length, true);
+      c.setUint32(24, data.length, true); c.setUint16(28, naam.length, true); c.setUint32(42, pos, true);
+      delen.push(h, naam, inh); centraal.push(c, naam);
+      pos += 30 + naam.length + inh.length;
+    }
+    const cgr = centraal.reduce((s, x) => s + x.byteLength, 0);
+    const e = new DataView(new ArrayBuffer(22));
+    e.setUint32(0, 0x06054b50, true); e.setUint16(8, files.length, true); e.setUint16(10, files.length, true);
+    e.setUint32(12, cgr, true); e.setUint32(16, pos, true);
+    return new Blob([...delen, ...centraal, e], { type: 'application/zip' });
+  }
+  $('#ggmZip').addEventListener('click', async () => {
+    const k = $('#ggmZip'), was = k.textContent;
+    k.disabled = true; k.textContent = 'Zip wordt gemaakt…';
+    try {
+      const blob = await maakZip(ggmBestanden());
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `open-data-atelier-bag-werkbank-${S.g.n.replace(/[^\w-]+/g, '-').toLowerCase()}-ggm.zip`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    } catch (e) { alert('De zip kon niet worden gemaakt: ' + e.message); }
+    k.textContent = was; k.disabled = !S || !S.L.length;
+  });
 
   // ---------- filters ----------
   let tz = null;
