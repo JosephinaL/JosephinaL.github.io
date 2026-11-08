@@ -978,6 +978,8 @@ footer { font-size: .8rem; color: var(--muted); }
             <div class="ggm-body">
               <p>Het GGM heeft geen veld voor de labelplicht; toezicht staat er als zaak. Heten de kolommen zoals hieronder, dan herkent de pagina het extract aan de kopregel en vertaalt ze elke zaak naar een status: een herkende uitkomst of laatste stap wordt die status; zonder herkende tekst wordt een lopende zaak <i>in behandeling</i> en een afgeronde zaak <i>niet beoordeeld</i>. Een uitkomst die de pagina niet herkent, wordt nooit een uitzondering. Staat een pand op meer zaken, dan telt de nieuwste; de eerdere staan in de redenering.</p>
               <table aria-label="Kolommen van het GGM-invoercontract"><tbody id="ggmKolommen"></tbody></table>
+              <p><b>Welke woorden de pagina herkent</b> in uitkomst en laatste stap, in deze volgorde; de eerste die past, telt. Getoetst aan de stappen en uitkomsten in het <a href="https://iplo.nl/thema/energiebesparing/energielabel-verplichting-kantoren/informatieblad-toezicht-handhaving-energielabel/" target="_blank" rel="noopener">IPLO-informatieblad over toezicht en handhaving</a>. Met een ontkenning (niet, geen, geweigerd, afgewezen, ingetrokken) wordt een tekst nooit vrijgesteld of voldoet, behalve bij "buiten de plicht".</p>
+              <ul class="plain" id="ggmWoorden"></ul>
               <p class="muted">Eén sleutelkolom is nodig, de rest is vrij. Hoofdletters, punt, underscore of spatie maken niet uit. Kolomnamen uit GGM v2.5.1 (Gemeente Delft, EUPL-1.2); alleen namen overgenomen, geen toetsing aan het GGM. Kolommen uit een GGM-entiteit over personen stoppen het inlezen. Niets gaat naar buiten.</p>
               <div class="eigen-knoppen">
                 <button class="btn linkish" id="ggmKop" type="button">Kopregel downloaden (CSV)</button>
@@ -1741,17 +1743,32 @@ footer { font-size: .8rem; color: var(--muted); }
     if (dt.getUTCMonth() !== mm - 1 || dt.getUTCDate() !== d) return null;
     return `${j}-${String(mm).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
   }
-  // Van een zaaktekst naar een status. Ruimer dan de gewone invoer (vrije tekst uit een zaaksysteem), maar een
-  // ontkenning (niet, geen, geweigerd, afgewezen, ingetrokken, buiten behandeling) leidt nooit tot vrijgesteld of voldoet.
+  // Van een zaaktekst naar een status. Ruimer dan de gewone invoer (vrije tekst uit een zaaksysteem), getoetst aan
+  // de stappen en uitkomsten in het IPLO-informatieblad Toezicht en handhaving energielabel C kantoren (8 nov 2026).
+  // Regels op volgorde; de eerste die past, telt. Een ontkenning (niet, geen, geweigerd, afgewezen, ingetrokken,
+  // vervallen, buiten behandeling) leidt nooit tot vrijgesteld of voldoet, behalve de expliciete regel "buiten de plicht".
+  const ZAAK_WOORDEN = [
+    { st: 'vrijgesteld', wat: 'buiten de plicht', vb: 'geen kantoorgebouw, niet plichtig, valt buiten de plicht',
+      re: /(geen kantoor(gebouw|functie)?\b|niet plichtig|buiten de (label ?)?plicht|niet onder de (label ?)?plicht)/ },
+    { st: 'niet_beoordeeld', wat: 'niet beoordeeld', vb: 'niet beoordeeld, geen prioriteit',
+      re: /(niet beoordeeld|geen prioriteit|niet geprioriteerd)/ },
+    { st: 'vrijgesteld', wat: 'uitzondering', vb: 'vrijgesteld, vrijstelling, uitzondering, hardheidsclausule, ontheffing', ontkenning: true,
+      re: /(vrijgesteld|vrijstelling|uitgezonderd|uitzondering|hardheidsclausule|ontheffing)/ },
+    { st: 'voldoet', wat: 'voldoet', vb: 'voldoet, voldaan, label A, B of C geregistreerd, overtreding opgeheven', ontkenning: true,
+      re: /(\bvoldoet\b|\bvoldaan\b|label [abc]\+*( of beter)?( is)? (geregistreerd|behaald|aanwezig)|label c of beter|overtreding (is )?opgeheven)/ },
+    { st: 'in_behandeling', wat: 'handhaving of controle loopt', vb: 'hercontrole, tussencontrole, maatwerkadvies of planning, voornemen tot handhaving, last onder dwangsom of bestuursdwang, begunstigingstermijn, invordering, verscherpt toezicht, gedogen, in behandeling, label aangevraagd',
+      re: /(controle|maatwerkadvies|energieadvies|planning|uitstel|voornemen|handhaving|last onder|dwangsom|bestuursdwang|begunstigingstermijn|invordering|verscherpt toezicht|stilleg|sluiting|gedoog|in behandeling|label aangevraagd|in onderzoek|lopend)/ },
+    { st: 'aangeschreven', wat: 'aangeschreven', vb: 'vooraankondiging, aanschrijving, aangeschreven, waarschuwing, brief',
+      re: /(aangeschreven|aanschrijving|vooraankondiging|waarschuwing|\bbrief\b)/ }
+  ];
   function zaakWoord(v) {
     const s = String(v || '').toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
     if (!s) return null;
     const ontkend = /\b(niet|geen|geweigerd|afgewezen|ingetrokken|vervallen|buiten behandeling)\b/.test(s);
-    if (/niet beoordeeld/.test(s)) return 'niet_beoordeeld';
-    if (!ontkend && /(vrijgesteld|vrijstelling|uitgezonderd|uitzondering)/.test(s)) return 'vrijgesteld';
-    if (!ontkend && /(\bvoldoet\b|\bvoldaan\b|label c (of beter|behaald|aanwezig))/.test(s)) return 'voldoet';
-    if (/(aangeschreven|aanschrijving|vooraankondiging|last onder)/.test(s)) return 'aangeschreven';
-    if (/(in behandeling|handhaving|label aangevraagd|in onderzoek|lopend)/.test(s)) return 'in_behandeling';
+    for (const w of ZAAK_WOORDEN) {
+      if (w.ontkenning && ontkend) continue;
+      if (w.re.test(s)) return w.st;
+    }
     return null;
   }
   // Leest een GGM-extract. Geeft regels in de vorm van leesLijst (plus zaakgegevens) en de uitkomst van de toets.
@@ -1824,7 +1841,7 @@ footer { font-size: .8rem; color: var(--muted); }
     return { lijst: g.stop.length ? [] : g.lijst, ggm: g };
   }
 
-  root.LabelC = { analyse, labelsOpnieuw, gemeenten, classify, leesLijst, leesInvoer, herkenGGM, leesGGM, zaakWoord, koppelLijst, GGM, STATUS, EIGEN_STATUS, KOPPELING, inGeom, bboxOf, distPtGeom, distGeomGeom };
+  root.LabelC = { analyse, labelsOpnieuw, gemeenten, classify, leesLijst, leesInvoer, herkenGGM, leesGGM, zaakWoord, ZAAK_WOORDEN, koppelLijst, GGM, STATUS, EIGEN_STATUS, KOPPELING, inGeom, bboxOf, distPtGeom, distGeomGeom };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1832,7 +1849,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.7';
+  const VERSIE = '1.7.1';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -2043,6 +2060,7 @@ footer { font-size: .8rem; color: var(--muted); }
   }
   const GGM_TYPE = LabelC.GGM.TYPE;
   $('#ggmKolommen').innerHTML = LabelC.GGM.kolommen.map(c => `<tr><td>${esc(c.naam)}</td><td>${esc(c.uitleg)}${c.sleutel ? ' <b>(sleutel)</b>' : ''}<br><span class="muted">${esc(GGM_TYPE[c.type])}</span></td></tr>`).join('');
+  $('#ggmWoorden').innerHTML = LabelC.ZAAK_WOORDEN.map(w => `<li><i>${esc(ES[w.st].toLowerCase())}</i> (${esc(w.wat)}): ${esc(w.vb)}</li>`).join('');
   $('#ggmKop').onclick = () => bewaarBestand('label-c-ggm-invoercontract.csv', [LabelC.GGM.kolommen.map(c => c.naam).join(';'), '# Kolomnamen uit het Gemeentelijk Gegevensmodel v2.5.1. Eén sleutelkolom is nodig. Geen namen of andere persoonsgegevens. Deze regel mag blijven staan.']);
   $('#ggmVoorbeeld').onclick = () => {
     const P = state.res.panden.filter(p => NOG.includes(p.status) || p.status === 'eigen' || p.status === 'voldoet_eigen').slice(0, 5);
