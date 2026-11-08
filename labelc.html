@@ -796,6 +796,19 @@ ol.werk b { font: 600 .72rem/1 var(--f-mono); color: var(--accent-fg); backgroun
 .annrij .chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 .eigen-uitleg summary { cursor: pointer; color: var(--accent); }
 .eigen-uitleg ul { margin-top: 6px; }
+.ggm-blok summary { cursor: pointer; color: var(--accent); }
+.ggm-blok .ggm-body { display: grid; gap: 8px; margin-top: 8px; }
+.ggm-blok { min-width: 0; }
+.ggm-blok table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .85rem; }
+.ggm-blok td { overflow-wrap: anywhere; white-space: normal; }
+.ggm-blok td:first-child { width: 42%; word-break: break-all; }
+.ggm-blok td:last-child { word-break: break-word; }
+.ggm-blok td { border-top: 1px solid var(--line); padding: 4px 6px; vertical-align: top; }
+.ggm-blok td:first-child { font-family: var(--f-mono); font-size: .78rem; overflow-wrap: anywhere; }
+.ggmtoets { border: 1px solid var(--accent); border-left-width: 4px; border-radius: var(--r); padding: 10px 12px; display: grid; gap: 6px; font-size: .88rem; background: color-mix(in srgb, var(--accent) 6%, var(--surface)); }
+.ggmtoets.stop { border-color: var(--st-voldoet_niet); background: color-mix(in srgb, var(--st-voldoet_niet) 7%, var(--surface)); }
+.ggmtoets p { margin: 0; }
+.ggmtoets ul { margin: 0; padding-left: 1.2em; }
 .eigen-knoppen { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 #eigenKaart:target { outline: 2px solid var(--st-eigen); outline-offset: 2px; }
 .intro p { margin: 0; }
@@ -957,7 +970,20 @@ footer { font-size: .8rem; color: var(--muted); }
               <li>Staat er geen bekende status, dan telt de regel als uitzondering en is de tekst de reden, zoals in eerdere lijsten.</li>
               <li>Scheid de velden met een tab of puntkomma. Bestaande panden worden verrijkt; panden toevoegen kan niet.</li>
               <li>Wat je invoert, staat wel in je CSV en in screenshots.</li>
+              <li>Komt je lijst uit een datawarehouse op het Gemeentelijk Gegevensmodel? Gebruik het <a href="#ggm">GGM-invoercontract</a> hieronder.</li>
             </ul>
+          </details>
+          <details class="small ggm-blok" id="ggm">
+            <summary><b>GGM-invoercontract</b> <span class="muted">voor een extract uit een datawarehouse op het Gemeentelijk Gegevensmodel (GGM), van een gemeente of een omgevingsdienst</span></summary>
+            <div class="ggm-body">
+              <p>Het GGM heeft geen veld voor de labelplicht; toezicht staat er als zaak. Heten de kolommen zoals hieronder, dan herkent de pagina het extract aan de kopregel en vertaalt ze elke zaak naar een status: een herkende uitkomst of laatste stap wordt die status; zonder herkende tekst wordt een lopende zaak <i>in behandeling</i> en een afgeronde zaak <i>niet beoordeeld</i>. Een uitkomst die de pagina niet herkent, wordt nooit een uitzondering. Staat een pand op meer zaken, dan telt de nieuwste; de eerdere staan in de redenering.</p>
+              <table aria-label="Kolommen van het GGM-invoercontract"><tbody id="ggmKolommen"></tbody></table>
+              <p class="muted">Eén sleutelkolom is nodig, de rest is vrij. Hoofdletters, punt, underscore of spatie maken niet uit. Kolomnamen uit GGM v2.5.1 (Gemeente Delft, EUPL-1.2); alleen namen overgenomen, geen toetsing aan het GGM. Kolommen uit een GGM-entiteit over personen stoppen het inlezen. Niets gaat naar buiten.</p>
+              <div class="eigen-knoppen">
+                <button class="btn linkish" id="ggmKop" type="button">Kopregel downloaden (CSV)</button>
+                <button class="btn linkish" id="ggmVoorbeeld" type="button">Probeer een GGM-voorbeeld</button>
+              </div>
+            </div>
           </details>
           <textarea id="eigen" spellcheck="false" aria-label="Eigen gegevens per pand" placeholder="0503100000001234;vrijgesteld;gemeentelijk monument&#10;0503100000005678;aangeschreven;eerste brief;2026-10-01"></textarea>
           <div class="eigen-knoppen">
@@ -968,6 +994,7 @@ footer { font-size: .8rem; color: var(--muted); }
             <button class="btn linkish" id="eigenVoorbeeld" type="button">Probeer een voorbeeld</button>
             <button class="btn linkish" id="eigenLeeg" type="button">Leegmaken</button>
           </div>
+          <div class="ggmtoets" id="ggmToets" hidden></div>
           <p class="small muted" id="eigenInfo" role="status">Blijft in deze browser; wordt nergens heen gestuurd.</p>
           <button class="btn linkish" id="eigenNiet" type="button" style="justify-self:start" hidden>Niet-gekoppelde regels downloaden</button>
         </div>
@@ -1012,6 +1039,7 @@ footer { font-size: .8rem; color: var(--muted); }
   <div class="verantwoording" aria-label="Verantwoording">
       <p><b>Wat dit niet is.</b> Een indicatie uit open data, geen juridische vaststelling en geen handhavingsbesluit. De status van een pand is een aanleiding om te controleren, geen oordeel over de eigenaar. Voor toezicht gelden de registratie in EP-Online en de situatie ter plaatse.</p>
       <p><b>Licenties van de brondata.</b> BAG (Kadaster): zonder gebruiksbeperkingen. Energielabels (RIVM, afgeleid uit EP-Online van RVO): Public Domain Mark 1.0. Rijksmonumenten (RCE): CC BY 4.0. Wijk- en gemeentegrenzen (CBS) en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+      <p><b>Eigen gegevens en GGM.</b> Wat je bij Eigen gegevens invoert, blijft in deze browser en is geen open data. Het GGM-invoercontract (sinds versie 1.7) neemt alleen kolomnamen over uit het Gemeentelijk Gegevensmodel v2.5.1 (Gemeente Delft, EUPL-1.2); het is geen toetsing aan het GGM. Een zaak wordt naar een status vertaald op de woorden in uitkomst en laatste stap; een tekst die de pagina niet herkent, wordt een aantekening, nooit een uitzondering.</p>
       <p>Gemaakt door Josephine Linders. Een verkenning met openbare gegevens, geen officiële publicatie van een gemeente.</p>
       <p>© Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
       <p>Fout gezien in een indeling, een cijfer of een tekst? Meld het per e-mail via <a href="./#samenwerken">Samenwerken</a>, of openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens), dan kan iedereen zien wat er gemeld en verbeterd is. <a href="https://github.com/josephinal/josephinal.github.io/issues">Bekijk eerdere meldingen</a>. Een verkeerd gebruiksdoel in de BAG zelf meld je bij de gemeente die het pand registreert.</p>
@@ -1621,19 +1649,182 @@ footer { font-size: .8rem; color: var(--muted); }
       else if (e.type === '20') tel.nra++;
       else tel.overigType++;
       if (!pid) { tel.niet.push(e); continue; }
-      const b = perPand.get(pid) || { status: e.status, redenen: [], via: [], peil: '', statussen: new Set() };
-      b.statussen.add(e.status);
-      if (EIGEN_RANG.indexOf(e.status) < EIGEN_RANG.indexOf(b.status)) b.status = e.status;
-      if (e.peil && !b.peil) b.peil = e.peil;
-      if (e.reden && !b.redenen.includes(e.reden)) b.redenen.push(e.reden);
+      const b = perPand.get(pid) || { status: e.status, redenen: [], via: [], peil: '', statussen: new Set(), zaken: [] };
+      if (e.ggm) {
+        // GGM-invoercontract: per pand telt de nieuwste zaak (op peildatum), niet de zwaarste status.
+        // Dezelfde zaak op pand- en verblijfsobjectregel telt één keer.
+        const dezelfde = e.zaak.nr && b.zaken.some(z => z.zaak.nr === e.zaak.nr);
+        if (!dezelfde) {
+          b.zaken.push(e);
+          if (b.zaken.length === 1 || (e.peil || '') > (b.peil || '')) { b.status = e.status; b.peil = e.peil || ''; b.redenen = e.reden ? [e.reden] : []; b.nieuwste = e; }
+        }
+      } else {
+        b.statussen.add(e.status);
+        if (EIGEN_RANG.indexOf(e.status) < EIGEN_RANG.indexOf(b.status)) b.status = e.status;
+        if (e.peil && !b.peil) b.peil = e.peil;
+        if (e.reden && !b.redenen.includes(e.reden)) b.redenen.push(e.reden);
+      }
       if (via && !b.via.includes(via)) b.via.push(via);
       perPand.set(pid, b);
     }
-    for (const b of perPand.values()) if (b.statussen.size > 1) tel.dubbel++;
+    tel.meerZaken = 0;
+    for (const b of perPand.values()) {
+      if (b.statussen.size > 1) tel.dubbel++;
+      if (b.zaken.length > 1) {
+        tel.meerZaken++;
+        const ouder = b.zaken.filter(z => z !== b.nieuwste).map(z => `${EIGEN_STATUS[z.status].toLowerCase()}${z.peil ? ' (' + z.peil + ')' : ''}${z.zaak.nr ? ', zaak ' + z.zaak.nr : ''}`);
+        b.redenen.push(`nieuwste van ${b.zaken.length} zaken; eerder: ${ouder.join('; ')}`);
+      }
+    }
     return { perPand, tel };
   }
 
-  root.LabelC = { analyse, labelsOpnieuw, gemeenten, classify, leesLijst, koppelLijst, STATUS, EIGEN_STATUS, KOPPELING, inGeom, bboxOf, distPtGeom, distGeomGeom };
+
+  // ---------- GGM-invoercontract (sinds 1.7) ----------
+  // Kolomnamen volgen het Gemeentelijk Gegevensmodel (GGM) v2.5.1: de BAG-sleutel uit 99 Kern › BAG en de
+  // toezichtszaak uit 1 Veiligheid en Vergunningen (VTH) en 99 Kern › RGBZPlus (zaak, zaaktype, status).
+  // Het GGM heeft geen attribuut voor de labelplicht; toezicht staat er als zaak. Het contract vertaalt een zaak
+  // naar de statussen van Eigen gegevens. Hoofdletters, punt, underscore of spatie maken niet uit.
+  const GGM = {
+    versie: '2.5.1', domein: 'BAG (99 Kern) en toezichtszaak (1 Veiligheid en Vergunningen, 99 Kern › RGBZPlus)',
+    bron: 'https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel',
+    kolommen: [
+      { naam: 'pand.identificatie', type: 'bagid', ot: '10', sleutel: true, rol: 'id', uitleg: 'BAG-ID van het pand' },
+      { naam: 'verblijfsobject.identificatie', type: 'bagid', ot: '01', sleutel: true, rol: 'id', uitleg: 'BAG-ID van een verblijfsobject in het pand' },
+      { naam: 'zaak.zaakidentificatie', type: 'tekst', rol: 'nr', uitleg: 'eigen zaaknummer; bij meer zaken per pand telt de nieuwste' },
+      { naam: 'zaaktype.zaaktypeomschrijving', type: 'tekst', rol: 'zaaktype', uitleg: 'soort zaak, bijv. toezicht energielabel C kantoren' },
+      { naam: 'zaak.datumstart', type: 'datum', rol: 'start', uitleg: 'start van de zaak' },
+      { naam: 'zaak.datumeinde', type: 'datum', rol: 'einde', uitleg: 'einde; leeg = de zaak loopt nog' },
+      { naam: 'zaak.omschrijvingresultaat', type: 'tekst', rol: 'resultaat', uitleg: 'uitkomst, bijv. vrijstelling verleend of voldoet' },
+      { naam: 'statustype.statustypeomschrijving', type: 'tekst', rol: 'stap', uitleg: 'laatste stap, bijv. aangeschreven of in behandeling' },
+      { naam: 'status.datumstatusgezet', type: 'datum', rol: 'stapdatum', uitleg: 'datum van de laatste stap; wordt de peildatum' },
+      { naam: 'zaak.toelichting', type: 'tekst', rol: 'toel', uitleg: 'toelichting; geen namen of andere persoonsgegevens' },
+      { naam: 'vthzaak.bevoegdgezag', type: 'tekst', rol: 'gezag', uitleg: 'bevoegd gezag' },
+      { naam: 'vthzaak.uitvoerendeinstantie', type: 'tekst', rol: 'uitvoerder', uitleg: 'wie het toezicht uitvoert, bijv. de omgevingsdienst' }
+    ],
+    TYPE: { bagid: 'BAG-ID, 16 cijfers', tekst: 'tekst', datum: 'datum (jjjj-mm-dd of dd-mm-jjjj)' }
+  };
+  const normKop = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
+  const GGM_INDEX = new Map(GGM.kolommen.map(c => [normKop(c.naam), c]));
+  const GGM_ENT = ['pand', 'verblijfsobject', 'zaak', 'zaaktype', 'status', 'statustype', 'vthzaak'];
+  // Kolommen uit een GGM-entiteit over personen stoppen het inlezen (zelfde lijst als Eigen lijst op de kaart).
+  const PERSOON_KOP = /(?<!niet[\s._-]?)natuurlijk[\s._-]?persoon|ingeschreven[\s._-]?persoon|(?<![a-z])(niet[\s._-]?)?ingezetene|nadaanvulling[\s._-]?brp/i;
+
+  function splitsRegel(r, sep) {
+    const uit = []; let cel = '', q = false;
+    for (let i = 0; i < r.length; i++) {
+      const c = r[i];
+      if (q) { if (c === '"') { if (r[i + 1] === '"') { cel += '"'; i++; } else q = false; } else cel += c; }
+      else if (c === '"') q = true;
+      else if (c === sep) { uit.push(cel); cel = ''; }
+      else cel += c;
+    }
+    uit.push(cel);
+    return uit.map(v => v.trim());
+  }
+  // Herkent een GGM-extract aan de kopregel: een sleutelkolom én minstens één zaakkolom.
+  function herkenGGM(t) {
+    const regels = String(t || '').replace(/^﻿/, '').split(/\r?\n/).filter(r => r.trim() && !/^#/.test(r.trim()));
+    if (!regels.length) return null;
+    const kop0 = regels[0];
+    const sep = (kop0.match(/\t/g) || []).length ? '\t' : (kop0.match(/;/g) || []).length >= (kop0.match(/,/g) || []).length ? ';' : ',';
+    const kop = splitsRegel(kop0, sep);
+    const veld = kop.map(k => GGM_INDEX.get(normKop(k)) || null);
+    if (!veld.some(v => v && v.sleutel) || !veld.some(v => v && !v.sleutel)) return null;
+    return { sep, kop, veld, regels: regels.slice(1) };
+  }
+  const DATUM_RE = /^(\d{4})-(\d{1,2})-(\d{1,2})$|^(\d{1,2})-(\d{1,2})-(\d{4})$/;
+  function isoDatum(v) {
+    const m = String(v || '').trim().match(DATUM_RE); if (!m) return null;
+    const j = +(m[1] || m[6]), mm = +(m[2] || m[5]), d = +(m[3] || m[4]);
+    const dt = new Date(Date.UTC(j, mm - 1, d));
+    if (dt.getUTCMonth() !== mm - 1 || dt.getUTCDate() !== d) return null;
+    return `${j}-${String(mm).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  // Van een zaaktekst naar een status. Ruimer dan de gewone invoer (vrije tekst uit een zaaksysteem), maar een
+  // ontkenning (niet, geen, geweigerd, afgewezen, ingetrokken, buiten behandeling) leidt nooit tot vrijgesteld of voldoet.
+  function zaakWoord(v) {
+    const s = String(v || '').toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!s) return null;
+    const ontkend = /\b(niet|geen|geweigerd|afgewezen|ingetrokken|vervallen|buiten behandeling)\b/.test(s);
+    if (/niet beoordeeld/.test(s)) return 'niet_beoordeeld';
+    if (!ontkend && /(vrijgesteld|vrijstelling|uitgezonderd|uitzondering)/.test(s)) return 'vrijgesteld';
+    if (!ontkend && /(\bvoldoet\b|\bvoldaan\b|label c (of beter|behaald|aanwezig))/.test(s)) return 'voldoet';
+    if (/(aangeschreven|aanschrijving|vooraankondiging|last onder)/.test(s)) return 'aangeschreven';
+    if (/(in behandeling|handhaving|label aangevraagd|in onderzoek|lopend)/.test(s)) return 'in_behandeling';
+    return null;
+  }
+  // Leest een GGM-extract. Geeft regels in de vorm van leesLijst (plus zaakgegevens) en de uitkomst van de toets.
+  // Meldingen noemen regelnummers, nooit waarden.
+  function leesGGM(h) {
+    const meld = [], stop = [], lijst = [];
+    h.kop.forEach((k, i) => {
+      if (PERSOON_KOP.test(k)) stop.push(`kolom ${i + 1} komt uit een GGM-entiteit over personen`);
+      else if (!h.veld[i] && GGM_ENT.some(e => normKop(k).startsWith(e))) meld.push({ s: 'kolom', t: `kolom ${i + 1} lijkt op het GGM maar staat niet in het contract; blijft buiten beschouwing` });
+    });
+    if (stop.length) return { stop, meld, lijst, n: h.regels.length };
+    const kolVan = rol => h.veld.map((v, i) => v && v.rol === rol ? i : -1).filter(i => i >= 0);
+    const idKol = h.veld.map((v, i) => v && v.sleutel ? i : -1).filter(i => i >= 0);
+    const get = (c, rol) => { const i = kolVan(rol)[0]; return i == null ? '' : (c[i] || '').trim(); };
+    const tel = { zonderId: [], fouteId: [], aangevuld: [], datum: [], volgorde: [], onbekend: [], nrs: new Map() };
+    h.regels.forEach((r, ri) => {
+      const nr = ri + 2, c = splitsRegel(r, h.sep);
+      const ids = [];
+      for (const i of idKol) {
+        const v = (c[i] || '').replace(/\s/g, ''); if (!v) continue;
+        const ot = h.veld[i].ot;
+        let id = v;
+        if (/^\d{15}$/.test(v)) { id = '0' + v; tel.aangevuld.push(nr); }
+        if (!/^\d{16}$/.test(id) || id.slice(4, 6) !== ot) { tel.fouteId.push(nr); continue; }
+        ids.push(id);
+      }
+      if (!ids.length) { tel.zonderId.push(nr); return; }
+      const d = {};
+      for (const rol of ['start', 'einde', 'stapdatum']) {
+        const v = get(c, rol); if (!v) continue;
+        const iso = isoDatum(v); if (!iso) { tel.datum.push(nr); continue; }
+        d[rol] = iso;
+      }
+      if (d.start && d.einde && d.einde < d.start) tel.volgorde.push(nr);
+      const zaak = { nr: get(c, 'nr'), zaaktype: get(c, 'zaaktype'), resultaat: get(c, 'resultaat'), stap: get(c, 'stap'),
+        toel: get(c, 'toel'), gezag: get(c, 'gezag'), uitvoerder: get(c, 'uitvoerder'), start: d.start || '', einde: d.einde || '', stapdatum: d.stapdatum || '' };
+      if (zaak.nr) tel.nrs.set(zaak.nr, (tel.nrs.get(zaak.nr) || 0) + 1);
+      // Zaak → status. Afgerond: eerst de uitkomst, dan de laatste stap. Lopend: eerst de laatste stap.
+      const afgerond = !!zaak.einde;
+      const volgorde = afgerond ? [zaak.resultaat, zaak.stap] : [zaak.stap, zaak.resultaat];
+      let status = null;
+      for (const w of volgorde) { status = zaakWoord(w); if (status) break; }
+      let onbekend = false;
+      if (!status) { status = afgerond ? 'niet_beoordeeld' : 'in_behandeling'; onbekend = !!(zaak.resultaat || zaak.stap); if (onbekend) tel.onbekend.push(nr); }
+      const peil = zaak.stapdatum || zaak.einde || zaak.start;
+      const delen = [];
+      if (zaak.toel) delen.push(zaak.toel);
+      if (onbekend) delen.push(`${afgerond ? 'uitkomst' : 'stap'} niet herkend: ${zaak.resultaat || zaak.stap}`);
+      else if (!zaak.resultaat && !zaak.stap) delen.push(afgerond ? 'zaak afgerond zonder uitkomst' : 'zaak loopt');
+      if (zaak.nr) delen.push(`zaak ${zaak.nr}`);
+      if (zaak.uitvoerder) delen.push(`door ${zaak.uitvoerder}`);
+      for (const id of ids) lijst.push({ id, type: id.slice(4, 6), status, reden: delen.join('; '), peil, aangevuld: false, ggm: true, zaak, onbekend, regel: nr });
+    });
+    const reeks = a => a.length > 8 ? a.slice(0, 8).join(', ') + ` en ${a.length - 8} meer` : a.join(', ');
+    if (tel.zonderId.length) meld.push({ s: 'id', t: `${tel.zonderId.length} ${tel.zonderId.length === 1 ? 'regel' : 'regels'} zonder bruikbaar BAG-ID (regel ${reeks(tel.zonderId)}); niet gekoppeld` });
+    if (tel.fouteId.length) meld.push({ s: 'id', t: `BAG-ID niet 16 cijfers of verkeerd objecttype (pand 10, verblijfsobject 01) in regel ${reeks(tel.fouteId)}` });
+    if (tel.aangevuld.length) meld.push({ s: 'info', t: `voorloopnul aangevuld in regel ${reeks(tel.aangevuld)}` });
+    if (tel.datum.length) meld.push({ s: 'datum', t: `ongeldige datum in regel ${reeks(tel.datum)}; die datum is genegeerd` });
+    if (tel.volgorde.length) meld.push({ s: 'datum', t: `einddatum vóór startdatum in regel ${reeks(tel.volgorde)}` });
+    const dub = [...tel.nrs.values()].filter(n => n > 1).length;
+    if (dub) meld.push({ s: 'info', t: `${dub} ${dub === 1 ? 'zaaknummer staat' : 'zaaknummers staan'} op meer regels (bijv. pand en verblijfsobject); geen fout` });
+    if (tel.onbekend.length) meld.push({ s: 'onbekend', t: `uitkomst of stap niet herkend in regel ${reeks(tel.onbekend)}: als aantekening opgenomen, nooit als uitzondering` });
+    return { stop, meld, lijst, n: h.regels.length };
+  }
+  // Eén ingang voor de invoer: GGM-extract of de gewone lijst.
+  function leesInvoer(t) {
+    const h = herkenGGM(t);
+    if (!h) return { lijst: leesLijst(t), ggm: null };
+    const g = leesGGM(h);
+    return { lijst: g.stop.length ? [] : g.lijst, ggm: g };
+  }
+
+  root.LabelC = { analyse, labelsOpnieuw, gemeenten, classify, leesLijst, leesInvoer, herkenGGM, leesGGM, zaakWoord, koppelLijst, GGM, STATUS, EIGEN_STATUS, KOPPELING, inGeom, bboxOf, distPtGeom, distGeomGeom };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1641,7 +1832,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.6';
+  const VERSIE = '1.7';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -1746,7 +1937,7 @@ footer { font-size: .8rem; color: var(--muted); }
   // ---------- tonen ----------
   function show(res) {
     state.res = res; state.sel = null; state.limit = 400; state.ann = '';
-    state.eigenLijst = LabelC.leesLijst(store.get('labelc-eigen-' + res.gm.code) || '');
+    state.eigenLijst = leesEigen(store.get('labelc-eigen-' + res.gm.code) || '');
     $('#eigen').value = store.get('labelc-eigen-' + res.gm.code) || '';
     applyEigen(false);
     $('#result').hidden = false;
@@ -1767,6 +1958,7 @@ footer { font-size: .8rem; color: var(--muted); }
     if (state.ann && !P.some(annGelijk)) state.ann = '';
     $('#eigenInfo').textContent = eigenInfoTekst(state.eigenTel);
     $('#eigenNiet').hidden = !tel.niet.length;
+    renderToets();
     eigenTekstElders();
     if (rerender) { styleLayer(); renderAll(); if (state.sel) showDossier(state.sel); }
   }
@@ -1779,6 +1971,7 @@ footer { font-size: .8rem; color: var(--muted); }
     if (t.aant) eff.push(`${fmt(t.aant)} met aantekening`);
     if (t.geen) eff.push(`${fmt(t.geen)} zonder effect op de status`);
     const d = [`${fmt(t.ids - t.niet.length)} van ${n(t.ids, 'regel', 'regels')} gekoppeld aan ${n(t.gekoppeld, 'pand', 'panden')}` + (t.aangevuld ? ` (${fmt(t.aangevuld)} met aangevulde voorloopnul)` : '') + (eff.length ? ': ' + eff.join(', ') : '')];
+    if (t.meerZaken) d.push(`${n(t.meerZaken, 'pand staat', 'panden staan')} op meer zaken; de nieuwste telt`);
     if (t.dubbel) d.push(`${n(t.dubbel, 'pand staat', 'panden staan')} er met meer dan één status; de zwaarste telt`);
     if (t.vbo) d.push(`${fmt(t.vbo - t.vboNiet)} van ${n(t.vbo, 'adres', 'adressen')} (verblijfsobject) gekoppeld aan een kantoorpand`);
     if (t.pandNiet) d.push(`${n(t.pandNiet, "pand-ID staat", "pand-ID's staan")} niet onder de kantoorpanden van deze gemeente`);
@@ -1808,7 +2001,7 @@ footer { font-size: .8rem; color: var(--muted); }
   };
   $('#eigenBtn').onclick = () => {
     const t = $('#eigen').value;
-    state.eigenLijst = LabelC.leesLijst(t);
+    state.eigenLijst = leesEigen(t);
     store.set('labelc-eigen-' + state.res.gm.code, t);
     applyEigen(true);
   };
@@ -1829,9 +2022,43 @@ footer { font-size: .8rem; color: var(--muted); }
     const P = state.res.panden.filter(p => NOG.includes(p.status) || p.status === 'eigen' || p.status === 'voldoet_eigen').slice(0, 5);
     const st = ['aangeschreven', 'in behandeling', 'voldoet', 'niet beoordeeld', 'vrijgesteld'];
     $('#eigen').value = P.map((p, i) => `${p.id};${st[i]};Voorbeeld, fictief`).join('\n');
-    state.eigenLijst = LabelC.leesLijst($('#eigen').value);
+    state.eigenLijst = leesEigen($('#eigen').value);
     applyEigen(true);
     $('#eigenInfo').textContent = P.length ? 'Fictief voorbeeld op echte panden; niet bewaard. ' + $('#eigenInfo').textContent.replace(' Blijft in deze browser.', '') + ' Maak leeg voordat je iets deelt.' : 'Geen plichtige panden om het voorbeeld op te tonen.';
+  };
+ // ---------- GGM-invoercontract ----------
+  function leesEigen(t) { const r = LabelC.leesInvoer(t); state.eigenGGM = r.ggm; return r.lijst; }
+  function renderToets() {
+    const el = $('#ggmToets'), g = state.eigenGGM;
+    if (!g) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.classList.toggle('stop', !!g.stop.length);
+    if (g.stop.length) {
+      el.innerHTML = `<p><b>GGM-invoercontract herkend, maar niet ingelezen.</b> ${esc(g.stop.join('; '))}. Haal die kolom uit het extract en lees opnieuw in. Er is niets gekoppeld en niets verstuurd.</p>`;
+      return;
+    }
+    const m = g.meld;
+    el.innerHTML = `<p><b>GGM-invoercontract herkend</b>: ${fmt(g.n)} ${g.n === 1 ? 'regel' : 'regels'} getoetst, elke zaak vertaald naar een status.${m.length ? '' : ' Geen meldingen.'}</p>` +
+      (m.length ? `<ul>${m.map(x => `<li>${esc(x.t)}</li>`).join('')}</ul>` : '');
+  }
+  const GGM_TYPE = LabelC.GGM.TYPE;
+  $('#ggmKolommen').innerHTML = LabelC.GGM.kolommen.map(c => `<tr><td>${esc(c.naam)}</td><td>${esc(c.uitleg)}${c.sleutel ? ' <b>(sleutel)</b>' : ''}<br><span class="muted">${esc(GGM_TYPE[c.type])}</span></td></tr>`).join('');
+  $('#ggmKop').onclick = () => bewaarBestand('label-c-ggm-invoercontract.csv', [LabelC.GGM.kolommen.map(c => c.naam).join(';'), '# Kolomnamen uit het Gemeentelijk Gegevensmodel v2.5.1. Eén sleutelkolom is nodig. Geen namen of andere persoonsgegevens. Deze regel mag blijven staan.']);
+  $('#ggmVoorbeeld').onclick = () => {
+    const P = state.res.panden.filter(p => NOG.includes(p.status) || p.status === 'eigen' || p.status === 'voldoet_eigen').slice(0, 5);
+    const kop = 'pand.identificatie;zaak.zaakidentificatie;zaaktype.zaaktypeomschrijving;zaak.datumstart;zaak.datumeinde;zaak.omschrijvingresultaat;statustype.statustypeomschrijving;status.datumstatusgezet;zaak.toelichting;vthzaak.uitvoerendeinstantie';
+    const zt = 'Toezicht energielabel C kantoren', od = 'Omgevingsdienst (voorbeeld)';
+    const R = [
+      p => [`${p.id};VB-001;${zt};2024-02-01;2024-06-14;Vrijstelling verleend;;;Voorbeeld, fictief;${od}`, `${p.id};VB-002;${zt};2026-03-02;;;Aangeschreven;2026-04-15;Voorbeeld, fictief: nieuwere zaak wint;${od}`],
+      p => [`${p.id};VB-003;${zt};2026-05-11;;;;;Voorbeeld, fictief: lopend zonder stap;${od}`],
+      p => [`${p.id};VB-004;${zt};2025-01-20;2025-09-30;Voldoet: label C aanwezig;;;Voorbeeld, fictief;${od}`],
+      p => [`${p.id};VB-005;${zt};2025-03-03;2025-08-01;Vrijstelling geweigerd;;;Voorbeeld, fictief: ontkenning wordt geen uitzondering;${od}`],
+      p => [`${p.id};VB-006;${zt};2025-04-01;2025-04-20;Overgedragen aan team bouw;;;Voorbeeld, fictief: onbekende uitkomst;${od}`]
+    ];
+    $('#eigen').value = [kop].concat(...P.map((p, i) => R[i](p))).join('\n');
+    state.eigenLijst = leesEigen($('#eigen').value);
+    applyEigen(true);
+    $('#eigenInfo').textContent = P.length ? 'Fictief GGM-voorbeeld op echte panden; niet bewaard. ' + $('#eigenInfo').textContent.replace(' Blijft in deze browser.', '') + ' Maak leeg voordat je iets deelt.' : 'Geen plichtige panden om het voorbeeld op te tonen.';
   };
   $('#eigenLeeg').onclick = () => { $('#eigen').value = ''; $('#eigenBtn').click(); };
   $('#eigenNiet').onclick = () => {
