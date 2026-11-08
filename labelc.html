@@ -794,9 +794,14 @@ ol.werk b { font: 600 .72rem/1 var(--f-mono); color: var(--accent-fg); backgroun
 .annrij .chip { padding: 3px 9px; }
 .annrij .chip[aria-pressed="false"] { opacity: 1; background: var(--surface); }
 .annrij .chip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.eigen-uitleg summary { cursor: pointer; color: var(--accent); }
+.eigen-uitleg summary, .ggm-blok summary { cursor: pointer; list-style: none; color: var(--fg); }
+.eigen-uitleg summary::-webkit-details-marker, .ggm-blok summary::-webkit-details-marker { display: none; }
+.klap { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; font-weight: 600; }
+.klap::before { content: '▸ '; display: inline-block; width: 1.1em; text-decoration: none; }
+details[open] > summary .klap::before { content: '▾ '; }
+summary:hover .klap, summary:focus-visible .klap { text-decoration-thickness: 2px; }
+details[open] > summary .dicht, details:not([open]) > summary .open { display: none; }
 .eigen-uitleg ul { margin-top: 6px; }
-.ggm-blok summary { cursor: pointer; color: var(--accent); }
 .ggm-blok .ggm-body { display: grid; gap: 8px; margin-top: 8px; }
 .ggm-blok { min-width: 0; }
 .ggm-blok table { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: .85rem; }
@@ -963,7 +968,7 @@ footer { font-size: .8rem; color: var(--muted); }
           <h2>Eigen gegevens</h2>
           <p class="small">Voeg per pand toe wat alleen de gemeente en haar uitvoeringspartners weten. Eén regel per pand: pand-ID of verblijfsobject-ID, status, toelichting, peildatum. Alleen de ID is verplicht. De lijst blijft in deze browser. Zet er geen namen of andere persoonsgegevens in.</p>
           <details class="small eigen-uitleg">
-            <summary>Hoe werkt dit?</summary>
+            <summary><span class="klap">Hoe werkt dit? <span class="dicht">Toon de uitleg</span><span class="open">Verberg de uitleg</span></span></summary>
             <ul class="plain">
               <li><b>Wijzigt de uitkomst:</b> <i>vrijgesteld</i> haalt het pand uit de plicht, bijvoorbeeld een gemeentelijk monument. <i>voldoet</i> markeert het als voldoet volgens de gemeente; het percentage hierboven blijft op open data.</li>
               <li><b>Alleen een aantekening:</b> <i>aangeschreven</i>, <i>in behandeling</i> en <i>niet beoordeeld</i>. Het pand houdt zijn status en je ziet waar al werk loopt.</li>
@@ -974,7 +979,7 @@ footer { font-size: .8rem; color: var(--muted); }
             </ul>
           </details>
           <details class="small ggm-blok" id="ggm">
-            <summary><b>GGM-invoercontract</b> <span class="muted">voor een extract uit een datawarehouse op het Gemeentelijk Gegevensmodel (GGM), van een gemeente of een omgevingsdienst</span></summary>
+            <summary><span class="klap">GGM-invoercontract: <span class="dicht">toon kolommen en herkende woorden</span><span class="open">verberg kolommen en woorden</span></span><br><span class="muted">Voor een extract uit een datawarehouse op het Gemeentelijk Gegevensmodel (GGM), van een gemeente of een omgevingsdienst.</span></summary>
             <div class="ggm-body">
               <p>Het GGM heeft geen veld voor de labelplicht; toezicht staat er als zaak. Heten de kolommen zoals hieronder, dan herkent de pagina het extract aan de kopregel en vertaalt ze elke zaak naar een status: een herkende uitkomst of laatste stap wordt die status; zonder herkende tekst wordt een lopende zaak <i>in behandeling</i> en een afgeronde zaak <i>niet beoordeeld</i>. Een uitkomst die de pagina niet herkent, wordt nooit een uitzondering. Staat een pand op meer zaken, dan telt de nieuwste; de eerdere staan in de redenering.</p>
               <table aria-label="Kolommen van het GGM-invoercontract"><tbody id="ggmKolommen"></tbody></table>
@@ -1849,7 +1854,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.7.1';
+  const VERSIE = '1.7.2';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
