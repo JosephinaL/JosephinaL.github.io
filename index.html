@@ -907,10 +907,10 @@ main > * { min-width: 0; }
         <div class="spread" role="img" aria-label="Voorbeeldlijst van 39 objecten: 3 met een label C-vraag, 6 om te controleren, 30 in orde">
           <i style="flex:3;background:#d98a12"></i><i style="flex:6;background:#7656b0"></i><i style="flex:30;background:#2a8a8a"></i>
         </div>
-        <p>Laag 3 van de site, om zelf te doen: wat alleen de gemeente weet, naast wat open data al weet. Plak of open een lijst met adressen of BAG-ID's, bijvoorbeeld het vastgoed in eigen beheer. De pagina herkent de kolommen, koppelt elke regel aan een verblijfsobject en pand, en vult aan met energielabel, rijksmonument en buurt. Wat niet klopt, zoals een adres dat niet in de BAG staat of een oppervlakte die flink afwijkt, staat apart. De kaart, de tabel of een GeoJSON neem je mee in een beleidsstuk, per object of samengevat per buurt. Voor beleidsmedewerkers vastgoed, duurzaamheid en informatiebeheer.</p>
+        <p>Laag 3 van de site, om zelf te doen: wat alleen de gemeente weet, naast wat open data al weet. Plak of open een lijst met adressen, BAG-ID's of kadastrale aanduidingen, bijvoorbeeld het vastgoed of de grond in eigen beheer. De pagina herkent de kolommen, koppelt elke regel aan een verblijfsobject, pand of perceel, en vult aan met perceel, energielabel, rijksmonument en buurt. Wat niet klopt, zoals een adres dat niet in de BAG staat of een oppervlakte die flink afwijkt, staat apart. De kaart, de tabel of een GeoJSON neem je mee in een beleidsstuk, per object of samengevat per buurt. Voor beleidsmedewerkers vastgoed, duurzaamheid en informatiebeheer.</p>
         <div class="facts">
           <div><b>0</b><span>regels bewaard: je lijst verdwijnt als je de pagina sluit</span></div>
-          <div><b>3</b><span>sleutels: BAG-ID, postcode met huisnummer, straat met huisnummer</span></div>
+          <div><b>4</b><span>sleutels: BAG-ID, postcode met huisnummer, straat met huisnummer, kadastrale aanduiding</span></div>
           <div><b>2</b><span>niveaus om te delen: per object of per buurt</span></div>
         </div>
         <a class="btn" href="eigenlijst.html">Open de kaart <span aria-hidden="true">→</span></a>
@@ -918,9 +918,9 @@ main > * { min-width: 0; }
       <div class="product-aside">
         <span class="eyebrow">Zo werkt het</span>
         <ol>
-          <li>Je lijst wordt in je browser gelezen. Alleen de adressen gaan als zoekvraag naar PDOK, om ze in de BAG te vinden.</li>
+          <li>Je lijst wordt in je browser gelezen. Alleen adressen, BAG-ID's en kadastrale aanduidingen gaan als zoekvraag naar PDOK, om ze in de BAG en op de kadastrale kaart te vinden.</li>
           <li>Een controle stopt lijsten met persoonsgegevens, zoals namen, BSN of cliënten, voordat er iets wordt opgezocht.</li>
-          <li>BAG, RIVM, RCE en CBS leveren pand, label, monument en buurt erbij.</li>
+          <li>BAG, kadastrale kaart, RIVM, RCE en CBS leveren pand, perceel, label, monument en buurt erbij. Eigenaar en rechten staan niet in open data; die komen uit je eigen lijst.</li>
           <li>Geen eigen lijst bij de hand? Het voorbeeld gebruikt het open vastgoedregister van Amsterdam.</li>
         </ol>
         <button class="close" type="button" hidden>Sluiten</button>

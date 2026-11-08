@@ -6,7 +6,7 @@
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' https://gc.zgo.at; style-src 'unsafe-inline' 'self'; font-src 'self'; img-src data: blob: https://service.pdok.nl https://josephinel.goatcounter.com; connect-src https://api.pdok.nl https://data.rivm.nl https://josephinel.goatcounter.com; form-action 'none'; base-uri 'none'">
 <title>Eigen lijst op de kaart · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Koppel een lijst van de gemeente, zoals het eigen vastgoed, aan de BAG en zie elk object op de kaart met energielabel, monument en buurt. De lijst blijft in je browser.">
+<meta name="description" content="Koppel een lijst van de gemeente, zoals het eigen vastgoed of grond, aan de BAG en de kadastrale kaart en zie elk object op de kaart met perceel, energielabel, monument en buurt. De lijst blijft in je browser.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>/* Leaflet 1.9.4, BSD-2-Clause */
 /* required styles */
@@ -910,7 +910,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
 <span id="inhoud" tabindex="-1"></span>
 
   <ol class="werk" aria-label="Zo werkt deze kaart">
-    <li><b>1</b><span>BAG en CBS-buurten: elke regel landt op een pand of adres.</span></li>
+    <li><b>1</b><span>BAG, kadastrale percelen en CBS-buurten: elke regel landt op een adres, pand of perceel.</span></li>
     <li><b>2</b><span>Open data per pand: energielabel (RIVM) en rijksmonument (RCE).</span></li>
     <li class="jij"><b>3</b><span>Jouw lijst: wat alleen de gemeente weet. Blijft in deze browser.</span></li>
     <li><b>4</b><span>Per object een status met redenering. Klik een object.</span></li>
@@ -919,7 +919,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
   <section class="invoer" id="invoer">
     <div class="card">
       <h2>Je lijst</h2>
-      <p class="small">Plak een lijst uit Excel of open een CSV-bestand, met een kopregel. Per regel is een BAG-ID genoeg (pand, verblijfsobject of nummeraanduiding); zonder ID koppelt de pagina op postcode en huisnummer, of op straat en huisnummer binnen de gekozen gemeente. Andere kolommen, zoals naam, gebruik of oppervlakte, komen mee in het dossier en de download.</p>
+      <p class="small">Plak een lijst uit Excel of open een CSV-bestand, met een kopregel. Per regel is een BAG-ID genoeg (pand, verblijfsobject of nummeraanduiding); zonder ID koppelt de pagina op postcode en huisnummer, of op straat en huisnummer binnen de gekozen gemeente. Grond zonder adres koppel je met de kadastrale aanduiding (zoals DEL00 C 63, in één kolom of in drie). Andere kolommen, zoals naam, gebruik of oppervlakte, komen mee in het dossier en de download.</p>
       <textarea id="lijst" spellcheck="false" placeholder="naam;postcode;huisnummer;huisletter;gebruik;oppervlakte&#10;Stadskantoor;2611AB;1;;kantoor;12000&#10;Sporthal Noord;2622EA;14;A;sport;1800"></textarea>
       <div class="rij">
         <button class="btn primary" id="leesBtn" type="button">Lees de lijst</button>
@@ -934,10 +934,10 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       <h2>Wat er met je lijst gebeurt</h2>
       <ul class="plain small">
         <li>De lijst wordt in deze browser gelezen en <b>niet bewaard</b>. Sluit je de pagina, dan is hij weg.</li>
-        <li>Naar buiten gaan alleen <b>zoekvragen naar openbare diensten</b>: BAG-ID's en adressen (postcode, huisnummer, straat) naar PDOK, pand-ID's naar RIVM. Namen, gebruik, oppervlakte en alle andere kolommen gaan nergens heen.</li>
+        <li>Naar buiten gaan alleen <b>zoekvragen naar openbare diensten</b>: BAG-ID's, adressen (postcode, huisnummer, straat) en kadastrale aanduidingen naar PDOK, pand-ID's naar RIVM. Voor het perceel onder elk object vraagt de pagina de kadastrale kaart op per vak van ongeveer 150 bij 220 meter, niet per adres. Namen, gebruik, oppervlakte en alle andere kolommen gaan nergens heen.</li>
         <li>De pagina kan technisch niets anders bereiken dan PDOK en RIVM, plus de bezoekersteller GoatCounter: dat legt haar beveiligingsregel (Content-Security-Policy) vast. GoatCounter telt alleen dat de pagina bezocht is, zonder gegevens uit je lijst. Lettertypen en kaartbibliotheek staan op deze site zelf.</li>
         <li>Geschikt voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed. Bij lijsten over inwoners zijn ook de adressen als zoekvraag al gevoelig; daarvoor is deze versie niet bedoeld.</li>
-        <li>Volgt de lijst het <a href="#ggm">GGM-invoercontract</a>, dan gaan alleen BAG-ID's naar buiten: de pagina zoekt dan niet op adres.</li>
+        <li>Volgt de lijst het <a href="#ggm">GGM-invoercontract</a>, dan gaan alleen BAG-ID's en kadastrale aanduidingen naar buiten: de pagina zoekt dan niet op adres.</li>
         <li>Daarom kijkt de pagina vóór het koppelen naar kolomkoppen en inhoud. Wijst iets op persoonsgegevens of op een lijst over mensen, dan koppelt ze niet: BSN, geboortedatum, e-mail, telefoon, IBAN, veelvoorkomende voor- en achternamen, of een kolomkop met cliënt, bewoner, inwoner of patiënt. Wijst een kolomkop op andere gegevens over inwoners (Wmo, huishouden, uitkering, huurder en dergelijke), of lijkt een naamkolom op persoonsnamen, dan pas na jouw bevestiging. Deze controle is een vangnet, geen garantie: de verantwoordelijkheid voor wat je inleest blijft bij jou.</li>
       </ul>
     </div>
@@ -949,8 +949,8 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       <div class="ggmbody">
         <p class="small">Een datamart op het GGM levert kolommen met vaste namen. Heten de kolommen zoals hieronder, dan herkent de pagina het bestand zonder vragen: geen rollen kiezen, geen vertaalslag. Eerst toetst ze het bestand tegen dit contract en meldt ze per kolom wat niet klopt, met regelnummers. Daarna koppel je zoals altijd.</p>
         <ul class="plain small">
-          <li><b>Sleutel:</b> per regel minstens één BAG-identificatie (verblijfsobject, pand of nummeraanduiding). Een regel zonder BAG-ID koppelt niet: met dit contract zoekt de pagina niet op adres.</li>
-          <li><b>Wat naar buiten gaat:</b> alleen BAG-identificaties, als zoekvraag naar PDOK (BAG en Locatieserver), en pand-ID's naar RIVM voor het energielabel. Geen adressen, namen, oppervlakten, bedragen of andere kolommen.</li>
+          <li><b>Sleutel:</b> per regel minstens één BAG-identificatie (verblijfsobject, pand of nummeraanduiding), of een kadastrale aanduiding uit KADASTRALEONROERENDEZAAK (gemeentecode, sectie en perceelnummer). Een regel zonder een van beide koppelt niet: met dit contract zoekt de pagina niet op adres.</li>
+          <li><b>Wat naar buiten gaat:</b> alleen BAG-identificaties en kadastrale aanduidingen, als zoekvraag naar PDOK (BAG, Locatieserver, kadastrale kaart), en pand-ID's naar RIVM voor het energielabel. Geen adressen, namen, oppervlakten, bedragen of andere kolommen.</li>
           <li><b>Andere kolommen</b> mogen erbij. Ze blijven in de browser en komen mee in het dossier en de download. Een kolom uit een GGM-entiteit over personen (natuurlijkpersoon, ingeschrevenpersoon, ingezetene) stopt het koppelen.</li>
           <li>Kolomnamen in de vorm <span class="mono">entiteit.attribuut</span>. Hoofdletters, punt, underscore of spatie als scheiding maken niet uit: <span class="mono">VASTGOEDOBJECT_NAAM</span> werkt ook.</li>
         </ul>
@@ -1051,8 +1051,10 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
             <li><b>BAG-ID</b> gaat voor. Verblijfsobject-ID's (objecttype 01) direct, pand-ID's (10) direct, nummeraanduiding-ID's (20) via hun adres. Elk 16-cijferig getal in een ID-kolom telt; 15 cijfers krijgt de voorloopnul terug.</li>
             <li><b>Postcode en huisnummer</b>, met huisletter en toevoeging als die er zijn, via de PDOK Locatieserver. Bestaat de huisletter of toevoeging niet in de BAG, dan koppelt de pagina aan het hoofdnummer en zegt dat in het dossier.</li>
             <li><b>Straat en huisnummer</b> binnen de gekozen gemeente, alleen als de straatnaam exact overeenkomt.</li>
+            <li><b>Kadastrale aanduiding</b>, als de regel verder geen adres of BAG-ID heeft: het perceel uit de kadastrale kaart, met de adressen (verblijfsobjectpunt op het perceel) en panden (midden op het perceel, of met een adres erop) die erop staan. Een appartementsrecht (A-index) koppelt aan het grondperceel. Vormen: <span class="mono">DEL00 C 63</span>, <span class="mono">DEL00-C-63</span>, <span class="mono">Delft C 63</span>, of gemeente, sectie en nummer in drie kolommen.</li>
+            <li><b>Perceel onder elk object</b>: voor elke gekoppelde regel zoekt de pagina het perceel waarop het adres ligt (of het midden van het pand). Geeft de lijst zelf een perceel en ligt het object op een ander perceel, dan is dat een signaal Controleren.</li>
             <li>Meer regels op hetzelfde verblijfsobject (bijvoorbeeld verhuurde units) komen op de kaart samen op één plek.</li>
-            <li><b>Met het <a href="#ggm">GGM-invoercontract</a></b> alleen op BAG-ID: een regel zonder BAG-ID koppelt dan niet, en er gaat geen adres naar buiten.</li>
+            <li><b>Met het <a href="#ggm">GGM-invoercontract</a></b> alleen op BAG-ID of kadastrale aanduiding: een regel zonder een van beide koppelt dan niet, en er gaat geen adres naar buiten.</li>
           </ul>
         </div>
         <div class="card">
@@ -1060,7 +1062,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
           <ul class="plain small">
             <li><b>Niet (meer) in gebruik in de BAG</b>: verblijfsobject ingetrokken, niet gerealiseerd of buiten gebruik; pand gesloopt, buiten gebruik of met sloopvergunning.</li>
             <li><b>Kantoor zonder label C</b>: het pand valt onder de label C-plicht (meer dan 100 m² en minstens de helft kantoor, geen rijksmonument) en heeft label D of slechter, of geen geregistreerd label. Volledige toets op <a href="labelc.html">Label C-kantoren</a>.</li>
-            <li><b>Controleren</b>: het eigen gebruik past niet bij het gebruiksdoel in de BAG, of de eigen oppervlakte is meer dan anderhalf keer de gebruiksoppervlakte in de BAG. Minder oppervlakte is geen signaal: een regel kan een deel van een verblijfsobject zijn. Let op: verhuurbare (VVO) en bruto vloeroppervlakte (BVO) wijken van nature af van de BAG-gebruiksoppervlakte.</li>
+            <li><b>Controleren</b>: het eigen gebruik past niet bij het gebruiksdoel in de BAG, de eigen oppervlakte is meer dan anderhalf keer de gebruiksoppervlakte in de BAG, het object ligt op een ander perceel dan de lijst noemt, of de eigen perceelgrootte wijkt meer dan 2% (minstens 5 m²) af van de kadastrale kaart. Minder oppervlakte is geen signaal: een regel kan een deel van een verblijfsobject zijn. Let op: verhuurbare (VVO) en bruto vloeroppervlakte (BVO) wijken van nature af van de BAG-gebruiksoppervlakte.</li>
             <li>Het eigen gebruik wordt herkend aan woorden (kantoor, school, sport, winkel, buurthuis, zorg, opslag, atelier, parkeren en dergelijke). Termen als "multifunctioneel" of "leegstandbeheer" worden niet getoetst.</li>
           </ul>
           <p class="small">Een signaal is een vraag, geen oordeel. De eerste twee soorten zijn vaak een terugmelding op de BAG; daar is de gemeente zelf bronhouder van.</p>
@@ -1068,8 +1070,9 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         <div class="card">
           <h2>Grenzen van open data</h2>
           <ul class="plain small">
-            <li>Eigendom staat in de Basisregistratie Kadaster (BRK) en is niet open; daarom komt het uit je eigen lijst.</li>
-            <li>Gronden zonder gebouw (percelen) en objecten zonder adres of pand-ID koppelen niet.</li>
+            <li>Eigendom, appartementsrechten, erfpacht en andere zakelijke rechten staan in de Basisregistratie Kadaster (BRK) en zijn niet open; daarom komen ze uit je eigen lijst. Open is alleen de kadastrale kaart: ligging, aanduiding en grootte van het perceel. De kaart geeft de ligging van grenzen bij benadering; er zijn geen maten aan te ontlenen.</li>
+            <li>Een perceel heeft in open data geen sleutel naar een adres: de koppeling tussen perceel en adres of pand is ruimtelijk (ligt het punt op het perceel).</li>
+            <li>Objecten zonder adres, pand-ID of kadastrale aanduiding koppelen niet.</li>
             <li>Rijksmonumenten op ligging (registerpunt in het pand, of adres binnen de monumentcontour); gemeentelijke en provinciale monumenten staan niet in een landelijk open bestand.</li>
             <li>Energielabels: RIVM-afleiding uit EP-Online per pand, maandelijks bijgewerkt en enkele weken achter.</li>
             <li>Buurt en wijk volgen de CBS-indeling van het getoonde jaar.</li>
@@ -1082,11 +1085,11 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> Twee soorten gegevens. <i>Jouw lijst</i>: wat je zelf inleest; die wordt in deze browser gelezen en niet bewaard. <i>Open bronnen</i>, live opgehaald op het moment van koppelen: BAG (Kadaster) via PDOK (dagstand), energielabels van het RIVM (afgeleid uit EP-Online van RVO, maandelijks, enkele weken achter), rijksmonumenten (RCE) en CBS-buurten en -wijken via PDOK. Het voorbeeld komt uit de open dataset Gemeentelijk Vastgoed van Amsterdam (opgehaald 24 oktober 2026); de kolomnamen van het GGM-invoercontract uit GGM v2.5.1. Het tijdstip van koppelen staat onder de uitkomst.</p>
-    <p><b>Licentie.</b> BAG: CC0. Energielabels (RIVM): Public Domain Mark 1.0. Rijksmonumenten (RCE), CBS-grenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0. Voorbeeld Amsterdam: "public" volgens de bron. GGM (Gemeente Delft): EUPL-1.2; alleen kolomnamen en typen overgenomen. Jouw lijst blijft van jou, ook in de downloads.</p>
-    <p><b>Methode.</b> Elke regel wordt gekoppeld op BAG-ID, anders op postcode en huisnummer, anders op straat en huisnummer binnen de gemeente; passen meer adressen, dan koppelt de pagina niet. Signalen leggen jouw lijst naast de BAG en de open data. De volledige uitleg staat na het koppelen onder "Zo is gekoppeld" en "Signalen".</p>
+    <p><b>Bron en peildatum.</b> Twee soorten gegevens. <i>Jouw lijst</i>: wat je zelf inleest; die wordt in deze browser gelezen en niet bewaard. <i>Open bronnen</i>, live opgehaald op het moment van koppelen: BAG (Kadaster) via PDOK (dagstand), energielabels van het RIVM (afgeleid uit EP-Online van RVO, maandelijks, enkele weken achter), rijksmonumenten (RCE), de kadastrale kaart (Kadaster, dagstand) en CBS-buurten en -wijken via PDOK. Het voorbeeld komt uit de open dataset Gemeentelijk Vastgoed van Amsterdam (opgehaald 24 oktober 2026); de kolomnamen van het GGM-invoercontract uit GGM v2.5.1. Het tijdstip van koppelen staat onder de uitkomst.</p>
+    <p><b>Licentie.</b> BAG: CC0. Energielabels (RIVM): Public Domain Mark 1.0. Rijksmonumenten (RCE), kadastrale kaart (Kadaster; bron Kadaster, aanduiding en grootte overgenomen, ligging gebruikt om te koppelen), CBS-grenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0. Voorbeeld Amsterdam: "public" volgens de bron. GGM (Gemeente Delft): EUPL-1.2; alleen kolomnamen en typen overgenomen. Jouw lijst blijft van jou, ook in de downloads.</p>
+    <p><b>Methode.</b> Elke regel wordt gekoppeld op BAG-ID, anders op postcode en huisnummer, anders op straat en huisnummer binnen de gemeente, anders op kadastrale aanduiding (het perceel met de adressen en panden erop); passen meer adressen, dan koppelt de pagina niet. Onder elk gekoppeld object zoekt de pagina het perceel op ligging. Signalen leggen jouw lijst naast de BAG en de open data. De volledige uitleg staat na het koppelen onder "Zo is gekoppeld" en "Signalen".</p>
     <p><b>Wat dit niet is.</b> Geen register en geen vaststelling: signalen zijn indicatief. Geen gereedschap voor lijsten over inwoners: de controle vooraf is een vangnet, geen garantie, en de verantwoordelijkheid voor wat je inleest blijft bij jou. De label C-toets is vereenvoudigd; de volledige toets staat in Label C-kantoren.</p>
-    <p><b>Bekende beperkingen.</b> Adressen en BAG-ID's gaan als zoekvraag naar PDOK, pand-ID's naar RIVM; daaraan is af te lezen welke objecten in de lijst staan. Met het GGM-invoercontract gaan alleen BAG-ID's naar buiten. Rijksmonumenten alleen op ligging. Excel-bestanden niet direct: plak de lijst of gebruik CSV.</p>
+    <p><b>Bekende beperkingen.</b> Adressen, BAG-ID's en kadastrale aanduidingen gaan als zoekvraag naar PDOK, pand-ID's naar RIVM; daaraan is af te lezen welke objecten in de lijst staan. Met het GGM-invoercontract gaan alleen BAG-ID's en kadastrale aanduidingen naar buiten. Perceel en adres zijn alleen ruimtelijk te koppelen; bij een adrespunt vlak op een perceelgrens kan het buurperceel uitkomen. Van een zeer groot perceel worden hoogstens 10.000 adressen en panden opgehaald. Rijksmonumenten alleen op ligging. Excel-bestanden niet direct: plak de lijst of gebruik CSV.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. De open data is bewerkt; wat je zelf inleest is geen open data en geen publicatie van een gemeente.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Fout gezien in een koppeling, een signaal of een tekst? Meld het per e-mail via <a href="./#samenwerken">Samenwerken</a>, of openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens), of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Zet er geen regels uit je eigen lijst in. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -1104,6 +1107,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
   const WB = jaar => `https://api.pdok.nl/cbs/wijken-en-buurten-${jaar}/ogc/v1/collections`;
   const RCE = 'https://api.pdok.nl/rce/beschermde-gebieden-cultuurhistorie/ogc/v1/collections';
   const RIVM = 'https://data.rivm.nl/geo/nl/wfs';
+  const BRK = 'https://api.pdok.nl/kadaster/brk-kadastrale-kaart/ogc/v1/collections/perceel/items';
 
   const VBO_INACTIEF = new Set(['Verblijfsobject ingetrokken', 'Niet gerealiseerd verblijfsobject', 'Verblijfsobject ten onrechte opgevoerd', 'Verblijfsobject buiten gebruik']);
   const VBO_ACTIEF = new Set(['Verblijfsobject in gebruik', 'Verblijfsobject in gebruik (niet ingemeten)', 'Verbouwing verblijfsobject', 'Verblijfsobject gevormd']);
@@ -1142,10 +1146,11 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     }
     throw last;
   }
-  async function getAllPages(url) {
+  async function getAllPages(url, maxPaginas = Infinity) {
     const out = [];
-    let next = url;
+    let next = url, n = 0;
     while (next) {
+      if (n++ >= maxPaginas) { out.afgekapt = true; break; }
       const d = await getJSON(next);
       if (!d) break;
       out.push(...(d.features || []));
@@ -1255,19 +1260,52 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
   const ROLLEN = {
     id: 'BAG-ID (pand, verblijfsobject of nummeraanduiding)', postcode: 'Postcode', huisnummer: 'Huisnummer',
     huisletter: 'Huisletter', toevoeging: 'Toevoeging', straat: 'Straat', adres: 'Adres (straat en huisnummer in één cel)', plaats: 'Plaats',
-    naam: 'Naam of omschrijving', gebruik: 'Eigen gebruik of functie', opp: 'Eigen oppervlakte (m²)', overig: '–'
+    perceel: 'Kadastrale aanduiding (gemeente, sectie en nummer in één cel)', kadgem: 'Kadastrale gemeente', sectie: 'Kadastrale sectie', perceelnr: 'Perceelnummer', app: 'Appartementsindex',
+    naam: 'Naam of omschrijving', gebruik: 'Eigen gebruik of functie', opp: 'Eigen oppervlakte (m²)', kadopp: 'Eigen perceelgrootte (m²)', overig: '–'
   };
   const ID_RE = /(^|\D)(\d{15,16})(?=\D|$)/g;
+
+  // Kadastrale aanduiding: "DEL00 C 63", "DEL00-C-63", "DEL00C63", "206 C 63", "Delft C 63", "Delft (DEL00) C 63",
+  // eventueel met appartementsindex ("DEL00 C 63 A 12"). Geeft { gem, soort, sectie, nr, app } of null.
+  const KAD_STAART = /[\s-]*([A-Za-z]{1,2})[\s-]*0*(\d{1,5})(?:[\s-]*A[\s-]*0*(\d{1,4}))?\s*$/;
+  function leesKad(t) {
+    let s = String(t || '').trim().replace(/\s+/g, ' ');
+    if (!s) return null;
+    const tussen = s.match(/\(([A-Za-z]{3}\d{2})\)/);
+    if (tussen) s = tussen[1] + s.slice(s.indexOf(')') + 1);
+    let m = s.match(new RegExp('^([A-Za-z]{3}\\d{2})' + KAD_STAART.source));
+    if (m) return { gem: m[1].toUpperCase(), soort: 'akr', sectie: m[2].toUpperCase(), nr: +m[3], app: m[4] ? +m[4] : null };
+    m = s.match(new RegExp('^(\\d{1,4})[\\s-]+' + KAD_STAART.source.replace(/^\[\\s-\]\*/, '')));
+    if (m) return { gem: String(+m[1]), soort: 'code', sectie: m[2].toUpperCase(), nr: +m[3], app: m[4] ? +m[4] : null };
+    m = s.match(/^([A-Za-zÀ-ÿ'’][A-Za-zÀ-ÿ'’ .()-]*?)\s+([A-Z]{1,2})[\s-]*0*(\d{1,5})(?:[\s-]*A[\s-]*0*(\d{1,4}))?$/);
+    if (m && /[A-Za-z]{2}/.test(m[1])) return { gem: m[1].trim(), soort: 'naam', sectie: m[2], nr: +m[3], app: m[4] ? +m[4] : null };
+    return null;
+  }
+  // Uit losse kolommen (gemeente, sectie, nummer), zoals in het GGM of een grondadministratie.
+  function kadUitDelen(g, s, n, a) {
+    g = String(g || '').trim(); s = String(s || '').trim().toUpperCase(); n = String(n || '').trim();
+    if (!g || !/^[A-Z]{1,2}$/.test(s) || !/^\d{1,5}$/.test(n)) return null;
+    const app = /^\d{1,4}$/.test(String(a || '').trim()) && +a > 0 ? +a : null;
+    if (/^[A-Za-z]{3}\d{2}$/.test(g)) return { gem: g.toUpperCase(), soort: 'akr', sectie: s, nr: +n, app };
+    if (/^\d{1,4}$/.test(g)) return { gem: String(+g), soort: 'code', sectie: s, nr: +n, app };
+    return { gem: g, soort: 'naam', sectie: s, nr: +n, app };
+  }
+  const kadTekst = k => `${k.gem} ${k.sectie} ${k.nr}${k.app ? ' A ' + k.app : ''}`;
+  const KAD_VORM = /^\s*([A-Za-z]{3}\d{2}|\d{1,4}|[^()]*\([A-Za-z]{3}\d{2}\))[\s-]*[A-Za-z]{1,2}[\s-]*\d{1,5}([\s-]*A[\s-]*\d{1,4})?\s*$/;
+
   function herkenRollen(kop, regels) {
     const n = kop.length, rol = Array(n).fill('overig');
     const vb = i => regels.slice(0, 200).map(r => r[i]).filter(v => v);
     const aandeel = (i, re) => { const v = vb(i); return v.length ? v.filter(x => re.test(x)).length / v.length : 0; };
     const vrij = r => !rol.includes(r);
     const zet = (i, r) => { if (rol[i] === 'overig' && (r === 'id' || vrij(r))) rol[i] = r; };
-    // eerst inhoud: ID's en postcodes zijn ondubbelzinnig
+    // eerst inhoud: ID's, postcodes en kadastrale aanduidingen zijn ondubbelzinnig
     for (let i = 0; i < n; i++) if (aandeel(i, /(^|\D)\d{15,16}(\D|$)/) >= 0.5) rol[i] = 'id';
     for (let i = 0; i < n; i++) if (rol[i] === 'overig' && aandeel(i, /^\d{4}\s?[A-Za-z]{2}$/) >= 0.6) zet(i, 'postcode');
+    for (let i = 0; i < n; i++) if (rol[i] === 'overig' && (aandeel(i, KAD_VORM) >= 0.5 || (/kadastra|perceel|kad\.?\s?aand/i.test(kop[i]) && aandeel(i, { test: leesKad }) >= 0.5))) zet(i, 'perceel');
     const regels_ = [
+      ['kadopp', /(perceel|kadastra).*(opp|grootte)|(opp|grootte).*(perceel|kadastra)/i],
+      ['kadgem', /kad(astrale)?\.?[\s_-]*gem(eente)?(code)?|^akr/i], ['sectie', /sectie/i], ['perceelnr', /perceel[\s._-]?(n(umme)?r)?$/i],
       ['toevoeging', /toevoeg/i], ['huisletter', /letter/i], ['huisnummer', /^(?!.*aanduiding).*(huis.?n(umme)?r|^nr\.?$|^nummer$)/i],
       ['straat', /straat|openbare.?ruimte|^adres$/i], ['plaats', /plaats|^stad$|^kern$/i], ['postcode', /post.?code|^pc6?$/i],
       ['opp', /opp|^vvo$|^bvo$|m2|m²|vloer/i], ['gebruik', /gebruik/i], ['gebruik', /functie|soort|bestemming|categorie/i],
@@ -1330,6 +1368,8 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     k.naam = col('naam').trim();
     k.gebruik = col('gebruik').trim();
     k.opp = getal(col('opp'));
+    k.kadopp = getal(col('kadopp'));
+    k.kad = leesKad(col('perceel')) || kadUitDelen(col('kadgem'), col('sectie'), col('perceelnr'), col('app'));
     return k;
   }
 
@@ -1393,9 +1433,12 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
         } else if (k.lig.length) {
           const d = (await ls('adresseerbaarobject_id:' + k.lig[0]))[0];
           if (d) { r.lig = d; r.ls = d; r.koppeling = 'ligplaats of standplaats'; } else r.reden = 'Ligplaats of standplaats niet gevonden';
+        } else if (k.kad && (opts.alleenIds || !k.hnr)) {
+          // Alleen een kadastrale aanduiding: koppelt in de volgende stap op het perceel.
+          r.wachtPerceel = true;
         } else if (opts.alleenIds) {
-          // GGM-invoercontract: alleen BAG-identificaties gaan naar buiten, nooit adressen.
-          r.reden = k.ids.length ? 'Geen bruikbaar BAG-ID (alleen pand-, verblijfsobject- of nummeraanduiding-ID werkt)' : 'Geen BAG-ID; volgens het GGM-invoercontract wordt niet op adres gezocht';
+          // GGM-invoercontract: alleen BAG-identificaties en kadastrale aanduidingen gaan naar buiten, nooit adressen.
+          r.reden = k.ids.length ? 'Geen bruikbaar BAG-ID (alleen pand-, verblijfsobject- of nummeraanduiding-ID werkt)' : 'Geen BAG-ID en geen kadastrale aanduiding; volgens het GGM-invoercontract wordt niet op adres gezocht';
         } else if (k.pc && /^\d{4}[A-Z]{2}$/.test(k.pc) && k.hnr) {
           const keus = kiesAdres(await ls(`postcode:${k.pc} AND huisnummer:${k.hnr}`), k);
           if (keus.doc) { zetAdres(r, keus, 'postcode en huisnummer'); }
@@ -1416,30 +1459,85 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       if (r.k.pand.length) { r.pand = [...r.k.pand]; r.koppeling = r.koppeling || 'BAG-ID'; }
     }
 
+    // 1b. kadastrale aanduidingen: perceel opzoeken op de kadastrale kaart.
+    // Heeft een regel verder geen object, dan horen de adressen en panden op het perceel bij die regel.
+    const V = new Map(), P = new Map(), PU = new Map();
+    const zetV = x => {
+      const p = x.properties;
+      V.set(p.identificatie, { id: p.identificatie, hoofd: p.hoofdadres_identificatie, status: p.status, gd: p.gebruiksdoel || '', opp: p.oppervlakte || 0, bron: p.bronhouder_identificatie,
+        adres: `${p.openbare_ruimte_naam || ''} ${p.huisnummer || ''}${p.huisletter || ''}${p.toevoeging ? '-' + p.toevoeging : ''}`.trim() + (p.woonplaats_naam ? ', ' + p.woonplaats_naam : ''),
+        xy: x.geometry && x.geometry.coordinates, panden: (p['pand.href'] || []).map(uuidOf) });
+    };
+    const zetPand = x => { const p = x.properties; const o = { uuid: x.id, id: p.identificatie, status: p.status, bouwjaar: p.bouwjaar, gd: p.gebruiksdoel || '', aantal: p.aantal_verblijfsobjecten, geom: x.geometry }; o.bb = bboxOf(o.geom); P.set(o.id, o); PU.set(o.uuid, o); };
+    const metKad = R.filter(r => r.k.kad);
+    if (metKad.length) {
+      step('percelen', 'Percelen zoeken op kadastrale aanduiding (kadastrale kaart)');
+      const cache = new Map();
+      const zoekPerceel = kad => {
+        const sl = `${kad.soort}:${kad.gem}:${kad.sectie}:${kad.nr}`;
+        if (!cache.has(sl)) cache.set(sl, (async () => {
+          const basis = `${BRK}?f=json&limit=5&sectie=${encodeURIComponent(kad.sectie)}&perceelnummer=${kad.nr}`;
+          const hoofd = s => s.replace(/(^|[\s-])([a-zà-ÿ])/g, (a, b, c) => b + c.toUpperCase());
+          const pogingen = kad.soort === 'akr' ? [`akr_kadastrale_gemeente_code_waarde=${kad.gem}`]
+            : kad.soort === 'code' ? [`kadastrale_gemeente_code=${kad.gem}`]
+            : uniq([kad.gem, kad.gem.charAt(0).toUpperCase() + kad.gem.slice(1), hoofd(kad.gem)]).map(n => `kadastrale_gemeente_waarde=${encodeURIComponent(n)}`);
+          for (const q of pogingen) {
+            const d = await getJSON(`${basis}&${q}`);
+            const f = d && d.features && d.features[0];
+            if (f) return maakPerceel(f);
+          }
+          return null;
+        })());
+        return cache.get(sl);
+      };
+      done = 0;
+      await pool(metKad, conc, async r => {
+        try {
+          r.perceel = await zoekPerceel(r.k.kad);
+          if (!r.perceel) r.percReden = `Kadastrale aanduiding ${kadTekst(r.k.kad)} niet gevonden op de kadastrale kaart`;
+          else if (r.k.kad.app) r.info.push(`${kadTekst(r.k.kad)} is een appartementsrecht: gekoppeld aan het grondperceel ${r.perceel.tekst}. Welk appartement het is, staat niet in open data.`);
+        } catch (e) { r.percReden = 'Perceel zoeken mislukt: ' + e.message; }
+        prog(++done / Math.max(1, metKad.length));
+      });
+      // Regels met alleen een perceel: adressen (verblijfsobjectpunt op het perceel) en panden (midden op het perceel, of met een adres erop).
+      const viaPerceel = R.filter(r => r.perceel && !r.vbo.length && !r.pand.length && !r.lig);
+      const opPerceel = new Map();
+      await pool(uniq(viaPerceel.map(r => r.perceel)), conc, async pc => {
+        const bb = pc.bb.map(r6).join(',');
+        const [vs, ps] = await Promise.all([
+          getAllPages(`${BAG}/verblijfsobject/items?f=json&limit=1000&bbox=${bb}`, 10),
+          getAllPages(`${BAG}/pand/items?f=json&limit=1000&bbox=${bb}`, 10)
+        ]);
+        const vOp = vs.filter(x => VBO_ACTIEF.has(x.properties.status) && x.geometry && inGeom(x.geometry.coordinates[0], x.geometry.coordinates[1], pc.geom));
+        const uu = new Set(vOp.flatMap(x => (x.properties['pand.href'] || []).map(uuidOf)));
+        const pOp = ps.filter(x => !/gesloopt|niet gerealiseerd|ten onrechte/i.test(x.properties.status) && x.geometry && (uu.has(x.id) || (m => m && inGeom(m[0], m[1], pc.geom))(middenVan(x.geometry))));
+        vOp.forEach(zetV); pOp.forEach(zetPand);
+        opPerceel.set(pc.id, { vbo: vOp.map(x => x.properties.identificatie), pand: pOp.map(x => x.properties.identificatie), afgekapt: !!(vs.afgekapt || ps.afgekapt) });
+      });
+      for (const r of viaPerceel) {
+        const o = opPerceel.get(r.perceel.id);
+        if (!o) continue;
+        r.vbo = o.vbo; r.pand = o.pand; r.viaPerceel = true; r.koppeling = 'kadastrale aanduiding';
+        if (o.afgekapt) r.info.push('Groot perceel: niet alle adressen en panden op het perceel zijn opgehaald.');
+      }
+    }
+
     // 2. verblijfsobjecten
     step('bag', 'Verblijfsobjecten ophalen');
-    const vboIds = uniq(R.flatMap(r => r.vbo));
-    const V = new Map();
+    const vboIds = uniq(R.flatMap(r => r.vbo)).filter(id => !V.has(id));
     done = 0;
     const vb = chunks(vboIds, 40);
     await pool(vb, conc, async b => {
       const f = encodeURIComponent(`identificatie IN (${b.map(x => `'${x}'`).join(',')})`);
       const fs = await getAllPages(`${BAG}/verblijfsobject/items?f=json&limit=1000&filter-lang=cql2-text&filter=${f}`);
-      for (const x of fs) {
-        const p = x.properties;
-        V.set(p.identificatie, { id: p.identificatie, hoofd: p.hoofdadres_identificatie, status: p.status, gd: p.gebruiksdoel || '', opp: p.oppervlakte || 0, bron: p.bronhouder_identificatie,
-          adres: `${p.openbare_ruimte_naam || ''} ${p.huisnummer || ''}${p.huisletter || ''}${p.toevoeging ? '-' + p.toevoeging : ''}`.trim() + (p.woonplaats_naam ? ', ' + p.woonplaats_naam : ''),
-          xy: x.geometry && x.geometry.coordinates, panden: (p['pand.href'] || []).map(uuidOf) });
-      }
+      fs.forEach(zetV);
       prog(++done / Math.max(1, vb.length));
     });
-    log(`${V.size} van ${vboIds.length} verblijfsobjecten gevonden`);
+    log(`${V.size} verblijfsobjecten gevonden`);
 
     // 3. panden: via verblijfsobject (uuid) en via pand-ID uit de lijst
     step('panden', 'Panden ophalen');
-    const P = new Map(), PU = new Map();
-    const zetPand = x => { const p = x.properties; const o = { uuid: x.id, id: p.identificatie, status: p.status, bouwjaar: p.bouwjaar, gd: p.gebruiksdoel || '', aantal: p.aantal_verblijfsobjecten, geom: x.geometry }; o.bb = bboxOf(o.geom); P.set(o.id, o); PU.set(o.uuid, o); };
-    const pandIds = uniq(R.flatMap(r => r.pand));
+    const pandIds = uniq(R.flatMap(r => r.pand)).filter(id => !P.has(id));
     const pb = chunks(pandIds, 40);
     const uuids = uniq([...V.values()].flatMap(v => v.panden));
     done = 0;
@@ -1461,16 +1559,65 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       r.P = uniq([...r.pand.map(id => P.get(id)), ...r.V.flatMap(v => v.panden.map(u => PU.get(u)))].filter(Boolean));
       if (r.vbo.length && !r.V.length && !r.reden) r.reden = 'Verblijfsobject niet gevonden in de BAG';
       if (r.pand.length && !r.P.length && !r.V.length && !r.reden) r.reden = 'Pand niet gevonden in de BAG';
-      r.gekoppeld = r.V.length > 0 || r.P.length > 0 || !!r.lig;
+      r.gekoppeld = r.V.length > 0 || r.P.length > 0 || !!r.lig || !!r.viaPerceel;
       if (r.gekoppeld) r.reden = null;
+      else if (r.percReden && (r.wachtPerceel || !r.reden)) r.reden = r.percReden;
       const v0 = r.V.find(v => v.xy);
-      r.xy = v0 ? v0.xy : r.P[0] ? middenVan(r.P[0].geom) : r.lig ? ll(r.lig.centroide_ll) : r.ls ? ll(r.ls.centroide_ll) : null;
-      r.plek = r.V[0] ? 'v' + r.V[0].id : r.P[0] ? 'p' + r.P[0].id : r.lig ? 'l' + r.lig.adresseerbaarobject_id : null;
-      r.adresBAG = r.ls ? r.ls.weergavenaam : r.V[0] ? r.V[0].adres : r.lig ? r.lig.weergavenaam : '';
+      if (r.viaPerceel) {
+        // Eén plek per perceel, midden op het perceel: de regel gaat over de grond, niet over één adres.
+        r.xy = middenVan(r.perceel.geom);
+        r.plek = 'k' + r.perceel.id;
+        r.adresBAG = 'Perceel ' + r.perceel.tekst;
+        r.info.push(r.V.length || r.P.length
+          ? `Op het perceel volgens de BAG: ${r.V.length} ${r.V.length === 1 ? 'adres' : 'adressen'} in gebruik en ${r.P.length} ${r.P.length === 1 ? 'pand' : 'panden'}.`
+          : 'Geen pand op dit perceel volgens de BAG: onbebouwd, of alleen bouwwerken zonder pand (zoals een steiger of een tuinhuis zonder registratie).');
+      } else {
+        r.xy = v0 ? v0.xy : r.P[0] ? middenVan(r.P[0].geom) : r.lig ? ll(r.lig.centroide_ll) : r.ls ? ll(r.ls.centroide_ll) : null;
+        r.plek = r.V[0] ? 'v' + r.V[0].id : r.P[0] ? 'p' + r.P[0].id : r.lig ? 'l' + r.lig.adresseerbaarobject_id : null;
+        r.adresBAG = r.ls ? r.ls.weergavenaam : r.V[0] ? r.V[0].adres : r.lig ? r.lig.weergavenaam : '';
+      }
       if (r.ls && r.V[0] && r.V[0].hoofd && r.ls.nummeraanduiding_id && r.ls.nummeraanduiding_id !== r.V[0].hoofd)
         r.info.push(`${r.ls.weergavenaam} is een nevenadres: het hoort bij verblijfsobject ${r.V[0].id}, met hoofdadres ${r.V[0].adres}. Gebruiksdoel en oppervlakte gelden voor dat hele verblijfsobject.`);
       if (r.V.some(v => v.bron && v.bron !== gmc)) r.info.push(`Verblijfsobject van een andere gemeente (code ${uniq(r.V.map(v => v.bron)).join(', ')})`);
+      if (r.gekoppeld && r.percReden) r.info.push(r.percReden + '; gekoppeld op ' + r.koppeling + '.');
     }
+
+    // 3b. perceel onder elk gekoppeld object: het perceel waarop het adres (of het midden van het pand) ligt.
+    // Gevraagd per vak van ca. 150 bij 220 meter, zodat er per object geen apart verzoek naar buiten gaat.
+    step('perceelbij', 'Percelen onder de objecten zoeken (kadastrale kaart)');
+    let perceelFout = null;
+    try {
+      const punten = new Map();
+      for (const r of R) {
+        if (!r.gekoppeld || r.viaPerceel) continue;
+        const pts = r.V.filter(v => v.xy).map(v => v.xy);
+        if (!pts.length && r.P[0]) { const m = middenVan(r.P[0].geom); if (m) pts.push(m); }
+        if (!pts.length && r.xy) pts.push(r.xy);
+        r.punten = pts;
+        for (const [x, y] of pts) { const k = Math.floor(x / CEL) + ':' + Math.floor(y / CEL); if (!punten.has(k)) punten.set(k, [x, y]); }
+      }
+      const vakken = [...punten.keys()];
+      const PC = new Map();
+      done = 0;
+      await pool(vakken, conc, async k => {
+        const [i, j] = k.split(':').map(Number);
+        const bb = [i * CEL, j * CEL, (i + 1) * CEL, (j + 1) * CEL].map(r6).join(',');
+        for (const f of await getAllPages(`${BRK}?f=json&limit=1000&bbox=${bb}`, 5)) { const o = maakPerceel(f); if (!PC.has(o.id)) PC.set(o.id, o); }
+        prog(++done / Math.max(1, vakken.length));
+      });
+      const pg = gridIndex([...PC.values()]);
+      for (const r of R) {
+        if (r.viaPerceel) { r.percelen = [r.perceel]; continue; }
+        if (!r.punten) { r.percelen = r.perceel ? [r.perceel] : []; continue; }
+        const gevonden = uniq(r.punten.map(([x, y]) => gridAt(pg, x, y).find(p => x >= p.bb[0] && x <= p.bb[2] && y >= p.bb[1] && y <= p.bb[3] && inGeom(x, y, p.geom))).filter(Boolean));
+        r.percelen = gevonden;
+        // Opgegeven perceel naast het perceel onder het object: verschillen ze, dan is dat een vraag aan de eigen administratie.
+        if (r.perceel && gevonden.length && !gevonden.some(p => p.id === r.perceel.id))
+          r.perceelAnders = `Het object ligt op perceel ${gevonden.map(p => p.tekst).join(', ')}, niet op het opgegeven perceel ${r.perceel.tekst}.`;
+        if (r.perceel && !r.percelen.some(p => p.id === r.perceel.id)) r.percelen.unshift(r.perceel);
+        delete r.punten;
+      }
+    } catch (e) { perceelFout = e.message || String(e); log('Percelen niet beschikbaar: ' + perceelFout); for (const r of R) if (!r.percelen) r.percelen = r.perceel ? [r.perceel] : []; }
     const panden = [...P.values()];
 
     // 4. energielabels per pand
@@ -1567,9 +1714,19 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     return {
       gm: { code: gm.code, naam: gm.naam }, kop, rol, regels: R, panden, wbJaar,
       buurten: buurten.map(b => ({ code: b.code, naam: b.naam, wijk: wijkNaam.get(b.wijk) || '', geom: b.geom })),
-      fouten: { labels: labelsFout, monumenten: monFout }, opgehaald: new Date().toISOString(),
+      fouten: { labels: labelsFout, monumenten: monFout, percelen: perceelFout }, opgehaald: new Date().toISOString(),
       gemeenten: (() => { const t = {}; for (const r of R) { const c = (r.V[0] && r.V[0].bron) || (r.ls && r.ls.gemeentecode); if (c) t[c] = (t[c] || 0) + 1; } return t; })()
     };
+  }
+  // Perceel uit de kadastrale kaart (BRK, open deel): ligging, aanduiding en grootte; geen eigenaar en geen rechten.
+  function maakPerceel(f) {
+    const p = f.properties;
+    const o = { id: `${p.akr_kadastrale_gemeente_code_waarde}-${p.sectie}-${p.perceelnummer}`, akr: p.akr_kadastrale_gemeente_code_waarde, gemNaam: p.kadastrale_gemeente_waarde,
+      sectie: p.sectie, nr: p.perceelnummer, grootte: p.kadastrale_grootte_waarde, soortGrootte: p.soort_grootte_waarde, geom: f.geometry };
+    o.tekst = `${o.gemNaam} (${o.akr}) ${o.sectie} ${o.nr}`;
+    o.kort = `${o.akr} ${o.sectie} ${o.nr}`;
+    o.bb = bboxOf(o.geom);
+    return o;
   }
   function zetAdres(r, keus, via) {
     const d = keus.doc;
@@ -1632,6 +1789,11 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     for (const v of r.V) if (VBO_INACTIEF.has(v.status)) r.signalen.push({ s: 'bag', t: `Verblijfsobject ${v.id}: ${v.status.toLowerCase()}.` });
     for (const p of r.P) if (PAND_SIGNAAL.has(p.status)) r.signalen.push({ s: 'bag', t: `Pand ${p.id}: ${p.status.toLowerCase()}.` });
     for (const p of r.P) if (p.kantoor && p.kantoor.plicht === 'ja' && p.kantoor.uitkomst !== 'voldoet') r.signalen.push({ s: 'label_c', t: `Pand ${p.id}: ${p.kantoor.uitkomst === 'geen_label' ? 'kantoor onder de label C-plicht zonder geregistreerd label' : 'kantoor onder de label C-plicht met label ' + p.label.dominant_label}.` });
+    if (r.perceelAnders) r.signalen.push({ s: 'controleren', t: r.perceelAnders });
+    if (r.k.kadopp != null && r.perceel && r.perceel.grootte) {
+      const g = r.perceel.grootte, d = Math.abs(r.k.kadopp - g);
+      if (d > Math.max(5, 0.02 * g)) r.signalen.push({ s: 'controleren', t: `Eigen perceelgrootte ${Math.round(r.k.kadopp).toLocaleString('nl-NL')} m² tegen ${g.toLocaleString('nl-NL')} m² op de kadastrale kaart (perceel ${r.perceel.kort}).` });
+    }
     const verwacht = verwachtGebruik(r.k.gebruik);
     r.gebruikGetoetst = !!verwacht;
     if (verwacht) {
@@ -1753,6 +1915,11 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       { naam: 'verblijfsobject.identificatie', type: 'bagid', ot: '01', sleutel: true, rol: 'id', uitleg: 'BAG-ID van het verblijfsobject' },
       { naam: 'pand.identificatie', type: 'bagid', ot: '10', sleutel: true, rol: 'id', uitleg: 'BAG-ID van het pand' },
       { naam: 'nummeraanduiding.identificatie', type: 'bagid', ot: '20', sleutel: true, rol: 'id', uitleg: 'BAG-ID van het adres' },
+      { naam: 'kadastraleonroerendezaak.kadastralegemeentecode', type: 'kadgem', max: 20, sleutel: true, rol: 'kadgem', uitleg: 'kadastrale gemeente: AKR-code (zoals DEL00) of het BRK-nummer; met sectie en perceelnummer een sleutel' },
+      { naam: 'kadastraleonroerendezaak.sectie', type: 'sectie', deel: true, rol: 'sectie', uitleg: 'kadastrale sectie' },
+      { naam: 'kadastraleonroerendezaak.perceelnummer', type: 'geheel', deel: true, rol: 'perceelnr', uitleg: 'perceelnummer' },
+      { naam: 'kadastraleonroerendezaak.appartementsrechtvolgnummer', type: 'geheel', rol: 'app', uitleg: 'appartementsindex; gekoppeld wordt het grondperceel' },
+      { naam: 'kadastraleonroerendezaak.oppervlakte', type: 'geheel', rol: 'kadopp', uitleg: 'perceelgrootte in m²; getoetst tegen de kadastrale kaart' },
       { naam: 'vastgoedobject.identificatie', type: 'tekst', max: 80, rol: 'overig', uitleg: 'eigen objectnummer' },
       { naam: 'vastgoedobject.naam', type: 'tekst', max: 80, rol: 'naam', uitleg: 'naam van het object' },
       { naam: 'vastgoedobject.objecttype', type: 'tekst', max: 80, rol: 'gebruik', uitleg: 'soort object; getoetst tegen het BAG-gebruiksdoel' },
@@ -1768,11 +1935,11 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
       { naam: 'verhuurbaar_eenheid.naam', type: 'tekst', max: 80, rol: 'overig', uitleg: 'naam van de verhuurbare eenheid' },
       { naam: 'verhuurbaar_eenheid.nettooppervlak', type: 'geheel', rol: 'overig', uitleg: 'netto oppervlak in m²' }
     ],
-    TYPE: { bagid: 'BAG-ID, 16 cijfers', tekst: 'tekst', geheel: 'geheel getal', jaar: 'jaartal', label: 'A++++ t/m G, LEEG, ONBEKEND' }
+    TYPE: { bagid: 'BAG-ID, 16 cijfers', tekst: 'tekst', geheel: 'geheel getal', jaar: 'jaartal', label: 'A++++ t/m G, LEEG, ONBEKEND', kadgem: 'AKR-code (3 letters, 2 cijfers) of BRK-nummer', sectie: '1 of 2 letters' }
   };
   const normKop = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]/g, '');
   const GGM_INDEX = new Map(GGM.kolommen.map(c => [normKop(c.naam), c]));
-  const GGM_ENT = ['verblijfsobject', 'pand', 'nummeraanduiding', 'vastgoedobject', 'verhuurbaareenheid'];
+  const GGM_ENT = ['verblijfsobject', 'pand', 'nummeraanduiding', 'vastgoedobject', 'verhuurbaareenheid', 'kadastraleonroerendezaak'];
   // Herkent een GGM-extract: minstens één sleutelkolom uit het contract. Geeft per kolom het contractveld (of null).
   function herkenGGM(kop) {
     const veld = kop.map(k => GGM_INDEX.get(normKop(k)) || null);
@@ -1811,14 +1978,21 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
           if (!/^\d{4}$/.test(v) || +v < 1000 || +v > jaarNu + 5) telFout(t, nr, 'geen jaartal');
         } else if (c.type === 'label') {
           if (!/^(A\+{0,4}|[B-G]|LEEG|ONBEKEND)$/i.test(v.replace(/\s/g, ''))) telFout(t, nr, 'geen geldig energielabel');
+        } else if (c.type === 'kadgem') {
+          if (!/^([A-Za-z]{3}\d{2}|\d{1,4})$/.test(v)) telFout(t, nr, 'geen AKR-code of BRK-nummer');
+        } else if (c.type === 'sectie') {
+          if (!/^[A-Za-z]{1,2}$/.test(v)) telFout(t, nr, 'geen sectie (1 of 2 letters)');
         } else if (c.type === 'tekst' && c.max && v.length > c.max) telFout(t, nr, `langer dan ${c.max} tekens`);
         if (c.naam === 'vastgoedobject.identificatie') { if (!dubbel.has(v)) dubbel.set(v, []); dubbel.get(v).push(nr); }
       });
       t.reden = [...t.reden];
       kolommen.push(t);
     });
-    const sleutelI = veld.map((c, i) => (c && c.sleutel ? i : -1)).filter(i => i >= 0);
-    regels.forEach((r, j) => { if (!sleutelI.some(i => /\d{15,16}/.test(r[i] || ''))) zonderSleutel.push(j + 1); });
+    const sleutelI = veld.map((c, i) => (c && c.type === 'bagid' ? i : -1)).filter(i => i >= 0);
+    const kolVan = rol => veld.findIndex(c => c && c.rol === rol);
+    const [ig, is, ip] = ['kadgem', 'sectie', 'perceelnr'].map(kolVan);
+    const heeftKad = r => ig >= 0 && is >= 0 && ip >= 0 && !!kadUitDelen(r[ig], r[is], r[ip]);
+    regels.forEach((r, j) => { if (!sleutelI.some(i => /\d{15,16}/.test(r[i] || '')) && !heeftKad(r)) zonderSleutel.push(j + 1); });
     const dubbeleIds = [...dubbel.values()].filter(a => a.length > 1);
     const ontbreekt = GGM.kolommen.filter(c => !veld.includes(c)).map(c => c.naam);
     const nFout = kolommen.reduce((s, c) => s + c.fout, 0);
@@ -1828,7 +2002,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
   // Rollen voor de rekenkern: contractvelden krijgen hun vaste rol, al het andere 'overig' (geen adresrol: er wordt niet op adres gezocht).
   const rollenGGM = veld => veld.map(c => (c ? c.rol : 'overig'));
 
-  root.EigenLijst = { controleerPrivacy, elfproef, leesTekst, herkenRollen, sleutels, splitsAdres, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal, GGM, herkenGGM, toetsGGM, rollenGGM };
+  root.EigenLijst = { controleerPrivacy, elfproef, leesTekst, herkenRollen, sleutels, splitsAdres, analyse, toetsOppervlakte, verwachtGebruik, gemeenten, ROLLEN, STATUS, GEBRUIK, inGeom, bboxOf, getal, GGM, herkenGGM, toetsGGM, rollenGGM, leesKad, kadUitDelen, kadTekst };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>
@@ -1874,25 +2048,27 @@ Lesruimte ROC,Karspeldreef,505,,,1102BX,AMSTERDAM,Kantoorfunctie,133.23,MBO/HBO/
 Gymzaal,Herman Poortstraat,17,,,1064BR,AMSTERDAM,Sportfunctie,403.73,Leegstandbeheer,0363010000665565`;
 // Synthetische testset voor het GGM-invoercontract: echte BAG-objecten in Zwolle (willekeurige kantoorpanden),
 // alle andere waarden verzonnen. Met opzet een paar fouten en signalen. Geen vastgoed van een gemeente.
-const GGM_TEST = `vastgoedobject.identificatie;vastgoedobject.naam;vastgoedobject.objecttype;verblijfsobject.identificatie;pand.identificatie;nummeraanduiding.identificatie;vastgoedobject.verhuurbaarvloeroppervlak;vastgoedobject.bouwjaar;vastgoedobject.energielabel;vastgoedobject.portefeuille;toelichting testset
-TST-001;Testobject 01;Kantoor;0193010000010054;;;3100;1998;C;Fictief kantoren;in orde
-TST-002;Testobject 02;Kantoor;193010000012965;;;640;2004;B;Fictief kantoren;voorloopnul weggevallen, wordt aangevuld
-TST-003;Testobject 03;Kantoor;;0193100000001960;;1900;2008;A;Fictief kantoren;alleen pand-ID
-TST-004;Testobject 04;Kantoor;;;0193200000018993;230;1925;D;Fictief kantoren;alleen nummeraanduiding-ID
-TST-005;Testobject 05;Opslag;0193010000013755;;;3200;1972;;Fictief bedrijfsruimte;eigen soort wijkt af van de BAG
-TST-006;Testobject 06;Kantoor;0193100000032230;;;650;1930;C;Fictief monumenten;pand-ID in de kolom verblijfsobject
-TST-007;Testobject 07;Kantoor;0193010000016093;;;1950;2008;H;Fictief kantoren;ongeldig energielabel
-TST-008;Testobject 08;Kantoor;0193010000012729;;;ca. 1500;1990;C;Fictief kantoren;oppervlakte als tekst
-TST-009;Testobject 09;Grond;;;;;;;Fictief gronden;geen BAG-ID, wordt niet gezocht
-TST-010;Testobject 10;Kantoor;0193010000018124;;;9000;2008;A;Fictief kantoren;eigen VVO veel groter dan de BAG
-TST-011;Testobject 11;Kantoor;0193010000016517;;;260;1985;E;Fictief kantoren;in orde
-TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;in orde`;
+const GGM_TEST = `vastgoedobject.identificatie;vastgoedobject.naam;vastgoedobject.objecttype;verblijfsobject.identificatie;pand.identificatie;nummeraanduiding.identificatie;kadastraleonroerendezaak.kadastralegemeentecode;kadastraleonroerendezaak.sectie;kadastraleonroerendezaak.perceelnummer;kadastraleonroerendezaak.appartementsrechtvolgnummer;kadastraleonroerendezaak.oppervlakte;vastgoedobject.verhuurbaarvloeroppervlak;vastgoedobject.bouwjaar;vastgoedobject.energielabel;vastgoedobject.portefeuille;toelichting testset
+TST-001;Testobject 01;Kantoor;0193010000010054;;;ZLE00;P;2693;;;3100;1998;C;Fictief kantoren;perceel wijkt af van waar het object ligt
+TST-002;Testobject 02;Kantoor;193010000012965;;;;;;;;640;2004;B;Fictief kantoren;voorloopnul weggevallen, wordt aangevuld
+TST-003;Testobject 03;Kantoor;;0193100000001960;;;;;;;1900;2008;A;Fictief kantoren;alleen pand-ID
+TST-004;Testobject 04;Kantoor;;;0193200000018993;;;;;;230;1925;D;Fictief kantoren;alleen nummeraanduiding-ID
+TST-005;Testobject 05;Opslag;0193010000013755;;;;;;;;3200;1972;;Fictief bedrijfsruimte;eigen soort wijkt af van de BAG
+TST-006;Testobject 06;Kantoor;0193100000032230;;;;;;;;650;1930;C;Fictief monumenten;pand-ID in de kolom verblijfsobject
+TST-007;Testobject 07;Kantoor;0193010000016093;;;;;;;;1950;2008;H;Fictief kantoren;ongeldig energielabel
+TST-008;Testobject 08;Kantoor;0193010000012729;;;;;;;;ca. 1500;1990;C;Fictief kantoren;oppervlakte als tekst
+TST-009;Testobject 09;Grond;;;;ZLE00;P;3798;;4600;;;;Fictief gronden;alleen een perceel, geen BAG-ID: koppelt op de kadastrale aanduiding, eigen grootte wijkt af
+TST-010;Testobject 10;Kantoor;0193010000018124;;;;;;;;9000;2008;A;Fictief kantoren;eigen VVO veel groter dan de BAG
+TST-011;Testobject 11;Kantoor;0193010000016517;;;ZLE00;P;3262;;;260;1985;E;Fictief kantoren;in orde, met perceel
+TST-012;Testobject 12;Kantoor;0193010000010699;;;;;;;;450;1890;F;Fictief monumenten;in orde
+TST-013;Testobject 13;Kantoor;;;;ZLE00;P;3261;;;2600;;;Fictief kantoren;alleen een perceel met meer adressen erop
+TST-014;Testobject 14;Kantoor;;;;ZLE00;P;3600;2;;;;;Fictief kantoren;appartementsrecht, koppelt aan het grondperceel`;
 </script>
 <script>(function () {
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.3.0';
+  const VERSIE = '0.4.0';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
@@ -2019,10 +2195,11 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
     });
     const heeft = r => state.rol.includes(r);
     const nr = heeft('huisnummer') || heeft('adres');
-    const sleutel = heeft('id') ? 'BAG-ID' : heeft('postcode') && nr ? 'postcode en huisnummer' : (heeft('straat') || heeft('adres')) && nr ? 'straat en huisnummer' : null;
-    $('#kolInfo').textContent = sleutel ? `Koppelen op ${sleutel}${heeft('id') && nr ? '; regels zonder ID op adres' : ''}.`
+    const kad = heeft('perceel') || (heeft('kadgem') && heeft('sectie') && heeft('perceelnr'));
+    const sleutel = heeft('id') ? 'BAG-ID' : heeft('postcode') && nr ? 'postcode en huisnummer' : (heeft('straat') || heeft('adres')) && nr ? 'straat en huisnummer' : kad ? 'kadastrale aanduiding' : null;
+    $('#kolInfo').textContent = sleutel ? `Koppelen op ${sleutel}${heeft('id') && nr ? '; regels zonder ID op adres' : ''}${kad && sleutel !== 'kadastrale aanduiding' ? '; regels zonder ander object op het perceel' : ''}.`
       : heeft('straat') && !nr ? 'Geen huisnummer: staat het huisnummer in de straatkolom, kies dan de rol "Adres (straat en huisnummer in één cel)".'
-      : 'Geen sleutel: kies een kolom met BAG-ID, of postcode of straat met huisnummer.';
+      : 'Geen sleutel: kies een kolom met BAG-ID, postcode of straat met huisnummer, of een kadastrale aanduiding.';
     renderPrivacy();
     updateGo();
   }
@@ -2036,7 +2213,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
       const rol = c ? `<span class="mono small">${esc(c.naam)}</span><br><span class="small muted">${esc(c.rol === 'overig' ? c.uitleg : E.ROLLEN[c.rol])}</span>` : '<span class="small muted">niet in het contract: blijft in de browser, komt mee in dossier en download</span>';
       return `<tr><td>${esc(k)}</td><td>${rol}</td><td class="vb" title="${esc(vb)}">${esc(vb)}</td></tr>`;
     }).join('');
-    $('#kolInfo').textContent = 'GGM-invoercontract herkend: koppelen alleen op BAG-ID, niet op adres.';
+    $('#kolInfo').textContent = 'GGM-invoercontract herkend: koppelen op BAG-ID of kadastrale aanduiding, niet op adres.';
     $('#kolUitleg').textContent = 'De kolomnamen volgen het GGM-invoercontract; de rollen liggen daarmee vast. Een weggevallen voorloopnul in een BAG-ID wordt aangevuld.';
     renderGGMToets();
     renderPrivacy();
@@ -2052,7 +2229,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
       return `<tr><td>${esc(c.naam)}</td><td class="num">${fmt(c.gevuld)}</td><td>${status}${extra}</td></tr>`;
     };
     const punten = [];
-    if (t.zonderSleutel.length) punten.push(`<li><b>${fmt(t.zonderSleutel.length)} ${t.zonderSleutel.length === 1 ? 'regel' : 'regels'} zonder BAG-ID</b> (regel ${regelLijst(t.zonderSleutel)}): koppelt niet; er wordt niet op adres gezocht.</li>`);
+    if (t.zonderSleutel.length) punten.push(`<li><b>${fmt(t.zonderSleutel.length)} ${t.zonderSleutel.length === 1 ? 'regel' : 'regels'} zonder BAG-ID en zonder volledige kadastrale aanduiding</b> (regel ${regelLijst(t.zonderSleutel)}): koppelt niet; er wordt niet op adres gezocht.</li>`);
     if (t.dubbeleIds.length) punten.push(`<li><b>Dubbel objectnummer</b> in vastgoedobject.identificatie: regels ${t.dubbeleIds.slice(0, 4).map(a => a.join(' en ')).join('; ')}${t.dubbeleIds.length > 4 ? ' …' : ''}.</li>`);
     if (t.onbekend.length) punten.push(`<li>Lijkt op het GGM, maar staat niet in het contract: <span class="mono">${t.onbekend.map(esc).join(', ')}</span>. Komt mee als gewone kolom.</li>`);
     box.innerHTML = `<p><b>${t.oordeel === 'voldoet' ? 'Het bestand voldoet aan het GGM-invoercontract.' : 'Het bestand volgt het GGM-invoercontract, met meldingen.'}</b> ${fmt(state.regels.length)} regels, ${fmt(t.kolommen.length)} van ${fmt(E.GGM.kolommen.length)} contractkolommen. Er is nog niets verstuurd.</p>
@@ -2062,9 +2239,9 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   }
   function vulGGM() {
     const G = E.GGM;
-    $('#ggmBody').innerHTML = G.kolommen.map(c => `<tr><td>${esc(c.naam)}${c.sleutel ? ' <b>*</b>' : ''}</td><td class="small">${esc(c.type === 'bagid' ? `BAG-ID, objecttype ${c.ot}` : c.type === 'tekst' ? `tekst, max. ${c.max}` : G.TYPE[c.type])}</td><td class="small">${esc(c.uitleg)}${c.rol !== 'overig' && c.rol !== 'id' ? ` <span class="muted">(rol: ${esc(E.ROLLEN[c.rol])})</span>` : ''}</td></tr>`).join('')
-      + '<tr><td colspan="3" class="small muted"><b>*</b> sleutel: per regel minstens één van de drie. Alle andere kolommen zijn optioneel.</td></tr>';
-    $('#ggmBron').innerHTML = `Bron van de kolomnamen en typen: <a href="${G.bron}" rel="noopener">Gemeentelijk Gegevensmodel</a> v${G.versie}, domein ${esc(G.domein)}, tabellen VASTGOEDOBJECT, VERHUURBAAR_EENHEID, VERBLIJFSOBJECT, PAND en NUMMERAANDUIDING; laatste wijziging in de repository ${G.peildatum}. Het model valt onder EUPL-1.2 (Gemeente Delft); deze pagina neemt alleen kolomnamen en typen over. Synthetische testset: twaalf regels op echte BAG-objecten in Zwolle (willekeurige kantoorpanden), met verzonnen naam, soort, oppervlakte, bouwjaar, label en portefeuille, en met opzet een paar fouten en signalen. Geen vastgoed van een gemeente.`;
+    $('#ggmBody').innerHTML = G.kolommen.map(c => `<tr><td>${esc(c.naam)}${c.sleutel || c.deel ? ' <b>*</b>' : ''}</td><td class="small">${esc(c.type === 'bagid' ? `BAG-ID, objecttype ${c.ot}` : c.type === 'tekst' ? `tekst, max. ${c.max}` : G.TYPE[c.type])}</td><td class="small">${esc(c.uitleg)}${c.rol !== 'overig' && c.rol !== 'id' ? ` <span class="muted">(rol: ${esc(E.ROLLEN[c.rol])})</span>` : ''}</td></tr>`).join('')
+      + '<tr><td colspan="3" class="small muted"><b>*</b> sleutel: per regel minstens één BAG-ID, of een kadastrale aanduiding (gemeentecode, sectie en perceelnummer samen). Alle andere kolommen zijn optioneel.</td></tr>';
+    $('#ggmBron').innerHTML = `Bron van de kolomnamen en typen: <a href="${G.bron}" rel="noopener">Gemeentelijk Gegevensmodel</a> v${G.versie}, domein ${esc(G.domein)}, tabellen VASTGOEDOBJECT, VERHUURBAAR_EENHEID, VERBLIJFSOBJECT, PAND, NUMMERAANDUIDING en KADASTRALEONROERENDEZAAK; laatste wijziging in de repository ${G.peildatum}. Het model valt onder EUPL-1.2 (Gemeente Delft); deze pagina neemt alleen kolomnamen en typen over. Synthetische testset: twaalf regels op echte BAG-objecten in Zwolle (willekeurige kantoorpanden), met verzonnen naam, soort, oppervlakte, bouwjaar, label en portefeuille, en met opzet een paar fouten en signalen; vijf regels met een kadastrale aanduiding van een echt perceel in Zwolle (verzonnen bij het object; regel 1 met opzet op het verkeerde perceel). Geen vastgoed van een gemeente.`;
   }
   vulGGM();
   $('#ggmLink').onclick = () => { $('#ggmDetails').open = true; };
@@ -2095,7 +2272,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   const privacyVrij = () => !state.privacy || (!state.privacy.hard.length && (!state.privacy.zacht.length || ($('#privacyOk') && $('#privacyOk').checked)));
   function updateGo() {
     const heeft = r => state.rol && state.rol.includes(r);
-    const ok = state.regels && (heeft('id') || heeft('adres') || ((heeft('postcode') || heeft('straat')) && heeft('huisnummer')));
+    const ok = state.regels && (heeft('id') || heeft('adres') || ((heeft('postcode') || heeft('straat')) && heeft('huisnummer')) || heeft('perceel') || (heeft('kadgem') && heeft('sectie') && heeft('perceelnr')));
     const vrij = privacyVrij();
     $('#goBtn').disabled = !(ok && state.gm && vrij);
     $('#goInfo').textContent = !state.gm ? 'Kies eerst een gemeente (rechtsboven).' : !vrij ? (state.privacy.hard.length ? 'Koppelen staat uit vanwege mogelijke persoonsgegevens.' : 'Bevestig eerst dat de lijst niet over inwoners gaat.') : ok ? `Gemeente: ${state.gm.naam}.` : '';
@@ -2103,7 +2280,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   $('#goBtn').onclick = () => run();
 
   // ---------- koppelen ----------
-  const STEPS = ['adressen', 'bag', 'panden', 'labels', 'monumenten', 'buurten', 'kantoren'];
+  const STEPS = ['adressen', 'percelen', 'bag', 'panden', 'perceelbij', 'labels', 'monumenten', 'buurten', 'kantoren'];
   async function run() {
     const gm = state.gm; if (!gm || !state.regels) return;
     // dubbele zekerheid: ook bij een aanroep buiten de knop om gaat er niets weg zolang de controle niet vrij is
@@ -2157,6 +2334,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
     const f = res.fouten, mel = [];
     if (f.labels) mel.push('De energielabels konden niet worden opgehaald bij RIVM; de label C-toets ontbreekt.');
     if (f.monumenten) mel.push('De rijksmonumenten konden niet worden opgehaald.');
+    if (f.percelen) mel.push('De percelen onder de objecten konden niet worden opgehaald bij de kadastrale kaart.');
     if (!res.wbJaar) mel.push('De buurtgrenzen konden niet worden opgehaald.');
     // Liggen de meeste objecten in een andere gemeente dan gekozen, dan dat melden met een knop om te wisselen.
     const tel = Object.entries(res.gemeenten || {}).sort((a, b) => b[1] - a[1]);
@@ -2171,7 +2349,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
     drawMap(); renderAll(); renderDeel();
     $('#dossier').innerHTML = '<span class="eyebrow">Object</span><p class="muted" style="margin:0">Klik een object op de kaart of een regel in de tabel om te zien hoe het gekoppeld is en waarom het een signaal heeft.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Gekoppeld ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Lijst: ${state.bron === 'voorbeeld' ? 'voorbeeld, 39 verhuurbare eenheden uit de open dataset Gemeentelijk Vastgoed van de gemeente Amsterdam (api.data.amsterdam.nl), opgehaald 24 oktober 2026' : state.bron === 'ggmtest' ? `synthetische testset volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed): echte BAG-objecten in Zwolle, alle andere waarden verzonnen; geen vastgoed van een gemeente` : state.ggm ? `eigen invoer volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed), alleen in deze browser (geen open data); alleen BAG-ID's als zoekvraag verstuurd` : 'eigen invoer, alleen in deze browser (geen open data)'}. Bronnen: BAG (Kadaster, via PDOK; live), adressen (PDOK Locatieserver), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks, enkele weken achter), rijksmonumenten (RCE, via PDOK), buurten en wijken ${res.wbJaar || '–'} (CBS, via PDOK). Signalen zijn indicatief.<br><a href="./">Josephine Linders</a> · Eigen lijst op de kaart · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Gekoppeld ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Lijst: ${state.bron === 'voorbeeld' ? 'voorbeeld, 39 verhuurbare eenheden uit de open dataset Gemeentelijk Vastgoed van de gemeente Amsterdam (api.data.amsterdam.nl), opgehaald 24 oktober 2026' : state.bron === 'ggmtest' ? `synthetische testset volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed): echte BAG-objecten in Zwolle, alle andere waarden verzonnen; geen vastgoed van een gemeente` : state.ggm ? `eigen invoer volgens het GGM-invoercontract (GGM v${E.GGM.versie}, Vastgoed), alleen in deze browser (geen open data); alleen BAG-ID's als zoekvraag verstuurd` : 'eigen invoer, alleen in deze browser (geen open data)'}. Bronnen: BAG (Kadaster, via PDOK; live), adressen (PDOK Locatieserver), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks, enkele weken achter), rijksmonumenten (RCE, via PDOK), kadastrale percelen (kadastrale kaart, Kadaster, via PDOK; dagstand), buurten en wijken ${res.wbJaar || '–'} (CBS, via PDOK). Signalen zijn indicatief.<br><a href="./">Josephine Linders</a> · Eigen lijst op de kaart · versie ${VERSIE}`;
     $('#result').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function counts() {
@@ -2183,9 +2361,10 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   function renderLead() {
     const R = state.res.regels, c = counts();
     const gek = R.filter(r => r.gekoppeld).length, sig = c.bag + c.label_c + c.controleren;
-    $('#leadBig').textContent = `${fmt(gek)} van ${fmt(R.length)} regels gekoppeld aan de BAG; ${fmt(sig)} met een signaal.`;
+    $('#leadBig').textContent = `${fmt(gek)} van ${fmt(R.length)} regels gekoppeld aan de BAG${R.some(r => r.viaPerceel) ? ' of de kadastrale kaart' : ''}; ${fmt(sig)} met een signaal.`;
     const panden = new Set(R.flatMap(r => r.P.map(p => p.id)));
-    $('#leadSub').textContent = `${fmt(state.plek.size)} plekken op de kaart, ${fmt(panden.size)} panden.`;
+    const perc = new Set(R.flatMap(r => (r.percelen || []).map(p => p.id)));
+    $('#leadSub').textContent = `${fmt(state.plek.size)} plekken op de kaart, ${fmt(panden.size)} panden, ${fmt(perc.size)} percelen.`;
     const P = state.res.panden.filter(p => R.some(r => r.P.includes(p)));
     const kant = P.filter(p => p.kantoor && p.kantoor.plicht === 'ja');
     const ok = kant.filter(p => p.kantoor.uitkomst === 'voldoet').length;
@@ -2217,18 +2396,32 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   $('#allBtn').onclick = () => { state.on = new Set(ORDER); renderChips(); styleLayer(); renderTable(); };
 
   // ---------- kaart ----------
-  let map, layer, pandLayer, outline, buurtLayer, byKey = new Map();
+  let map, layer, pandLayer, perceelLayer, kadLayer, outline, buurtLayer, byKey = new Map();
+  // Percelen: een perceel dat zelf de regel is, altijd; de percelen onder de andere objecten pas bij inzoomen.
+  function toonDetail() {
+    if (!map) return;
+    const dicht = map.getZoom() >= 16 && state.niveau !== 'buurt';
+    [pandLayer, perceelLayer].forEach(l => { if (!l) return; if (dicht) l.addTo(map); else l.remove(); });
+    if (kadLayer) { if (state.niveau !== 'buurt') kadLayer.addTo(map); else kadLayer.remove(); }
+    if (layer && map.hasLayer(layer)) layer.bringToFront();
+  }
   function drawMap() {
     if (!map) {
       map = L.map('map', { preferCanvas: true, zoomSnap: .5 });
       L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT-Achtergrondkaart' }).addTo(map);
-      map.on('zoomend', () => { if (pandLayer) { if (map.getZoom() >= 16 && state.niveau !== 'buurt') pandLayer.addTo(map); else pandLayer.remove(); } });
+      map.on('zoomend', toonDetail);
     }
     map.invalidateSize();
-    [layer, pandLayer, outline, buurtLayer].forEach(l => l && l.remove());
+    [layer, pandLayer, perceelLayer, kadLayer, outline, buurtLayer].forEach(l => l && l.remove());
     outline = L.geoJSON(state.gm.geom, { interactive: false, style: { color: css('--accent'), weight: 2, fill: false, dashArray: '6 4' } }).addTo(map);
     const P = state.res.panden.filter(p => state.res.regels.some(r => r.P.includes(p)) && p.geom);
     pandLayer = L.geoJSON({ type: 'FeatureCollection', features: P.map(p => ({ type: 'Feature', geometry: p.geom, properties: {} })) }, { interactive: false, style: { color: css('--muted'), weight: 1, fillOpacity: .08 } });
+    const eigen = new Map(), onder = new Map();
+    for (const r of state.res.regels) for (const pc of r.percelen || []) (r.viaPerceel && pc === r.perceel ? eigen : onder).set(pc.id, pc);
+    for (const id of eigen.keys()) onder.delete(id);
+    const fc = m => ({ type: 'FeatureCollection', features: [...m.values()].map(pc => ({ type: 'Feature', geometry: pc.geom, properties: {} })) });
+    perceelLayer = L.geoJSON(fc(onder), { interactive: false, style: { color: css('--accent'), weight: 1, dashArray: '3 3', fillOpacity: 0 } });
+    kadLayer = L.geoJSON(fc(eigen), { interactive: false, style: { color: css('--accent'), weight: 2, dashArray: '5 3', fillColor: css('--accent'), fillOpacity: .08 } });
     byKey = new Map();
     layer = L.featureGroup();
     for (const pl of state.plek.values()) {
@@ -2244,8 +2437,10 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
       onEachFeature: (ft, l) => l.bindTooltip(() => { const t = buurtTelling().get(ft.properties.code) || { objecten: 0, signaal: 0 }; const b = state.res.buurten.find(x => x.code === ft.properties.code); return `${esc(b.naam)}<br>${afg(t.objecten)} objecten · ${afg(t.signaal)} met een signaal`; }, { sticky: true })
     });
     const b = layer.getLayers().length ? layer.getBounds() : outline.getBounds();
+    if (kadLayer.getLayers().length) b.extend(kadLayer.getBounds());
     map.fitBounds(b, { padding: [30, 30], maxZoom: 18 });
     styleLayer();
+    toonDetail();
   }
   function plekZichtbaar(pl) { return pl.regels.some(r => state.on.has(r.status)); }
   function plekStatus(pl) { return ORDER.find(s => state.on.has(s) && pl.regels.some(r => r.status === s)) || pl.status; }
@@ -2270,6 +2465,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   function labelHtml(L_) {
     return L_ ? `<span class="lbl" style="background:${lblCol(L_.dominant_label)};${/^D/.test(L_.dominant_label) ? 'color:#222' : ''}">${esc(L_.dominant_label)}</span>${L_.hoogste_label && L_.hoogste_label !== L_.laagste_label ? ` <span class="muted small">(${esc(L_.hoogste_label)} – ${esc(L_.laagste_label)})</span>` : ''}` : '<span class="lbl none">geen</span>';
   }
+  const percelenVan = pl => [...new Map(pl.regels.flatMap(r => r.percelen || []).map(p => [p.id, p])).values()];
   function showDossier(key) {
     const pl = state.plek.get(key); if (!pl) return;
     const r0 = pl.regels[0];
@@ -2282,8 +2478,9 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
       <h3>${esc(r0.adresBAG || (panden[0] ? 'Pand ' + panden[0].id : '–'))}</h3>
       <div><span class="pill" style="background:${col(pl.status)}">${ST[pl.status]}</span></div>
       <dl class="kv">
-        ${vbos.map(v => `<dt>Verblijfsobject</dt><dd><span class="mono"><a href="https://bagviewer.kadaster.nl/lvbag/bag-viewer/?objectId=${v.id}" target="_blank" rel="noopener">${v.id}</a></span><br>${esc(gdf(v.gd))} · ${fmt(v.opp)} m² · <span class="muted">${esc(v.status)}</span></dd>`).join('')}
-        ${panden.map(p => `<dt>Pand</dt><dd><span class="mono"><a href="https://bagviewer.kadaster.nl/lvbag/bag-viewer/?objectId=${p.id}" target="_blank" rel="noopener">${p.id}</a></span><br>bouwjaar ${esc(p.bouwjaar ?? '–')} · <span class="muted">${esc(p.status)}</span></dd><dt>Label</dt><dd>${labelHtml(p.label)}</dd>${p.kantoor ? `<dt>Label C</dt><dd class="small">${esc(p.kantoor.tekst)}</dd>` : ''}${p.monument ? `<dt>Monument</dt><dd><a href="${esc(p.monument.url)}" target="_blank" rel="noopener">Rijksmonument ${esc(p.monument.nr)}</a> <span class="muted small">(${esc(p.monument.how)})</span></dd>` : ''}`).join('')}
+        ${vbos.slice(0, 12).map(v => `<dt>Verblijfsobject</dt><dd><span class="mono"><a href="https://bagviewer.kadaster.nl/lvbag/bag-viewer/?objectId=${v.id}" target="_blank" rel="noopener">${v.id}</a></span><br>${esc(gdf(v.gd))} · ${fmt(v.opp)} m² · <span class="muted">${esc(v.status)}</span></dd>`).join('')}${vbos.length > 12 ? `<dt></dt><dd class="muted small">en ${fmt(vbos.length - 12)} verblijfsobjecten meer; zie de download</dd>` : ''}
+        ${panden.slice(0, 12).map(p => `<dt>Pand</dt><dd><span class="mono"><a href="https://bagviewer.kadaster.nl/lvbag/bag-viewer/?objectId=${p.id}" target="_blank" rel="noopener">${p.id}</a></span><br>bouwjaar ${esc(p.bouwjaar ?? '–')} · <span class="muted">${esc(p.status)}</span></dd><dt>Label</dt><dd>${labelHtml(p.label)}</dd>${p.kantoor ? `<dt>Label C</dt><dd class="small">${esc(p.kantoor.tekst)}</dd>` : ''}${p.monument ? `<dt>Monument</dt><dd><a href="${esc(p.monument.url)}" target="_blank" rel="noopener">Rijksmonument ${esc(p.monument.nr)}</a> <span class="muted small">(${esc(p.monument.how)})</span></dd>` : ''}`).join('')}${panden.length > 12 ? `<dt></dt><dd class="muted small">en ${fmt(panden.length - 12)} panden meer</dd>` : ''}
+        ${percelenVan(pl).map(pc => `<dt>Perceel</dt><dd><span class="mono">${esc(pc.kort)}</span> <span class="muted small">(${esc(pc.gemNaam)})</span><br>${fmt(pc.grootte)} m²${pc.soortGrootte && pc.soortGrootte !== 'Vastgesteld' ? ` <span class="muted small">(${esc(pc.soortGrootte.toLowerCase())})</span>` : ''}</dd>`).join('')}
         <dt>Buurt</dt><dd>${esc(r0.buurt ? r0.buurt.naam + (r0.buurt.wijk ? ' · ' + r0.buurt.wijk : '') : '–')}</dd>
       </dl>
       ${pl.regels.map(r => `<div class="regel">
@@ -2299,11 +2496,12 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   $('#search').oninput = e => { state.q = e.target.value.trim().toLowerCase(); state.limit = 400; renderTable(); };
   const cel = (r, rolnaam) => { const i = state.res.rol.indexOf(rolnaam); return i < 0 ? '' : r.cel[i] || ''; };
   const lijstAdres = r => [cel(r, 'straat'), [cel(r, 'huisnummer'), cel(r, 'huisletter'), cel(r, 'toevoeging')].filter(Boolean).join(' '), cel(r, 'postcode'), cel(r, 'plaats')].filter(Boolean).join(' ');
-  const zoek = r => `${r.nr} ${r.cel.join(' ')} ${r.adresBAG} ${r.buurt ? r.buurt.naam + ' ' + r.buurt.wijk : ''} ${r.V.map(v => v.id).join(' ')} ${r.P.map(p => p.id).join(' ')}`.toLowerCase();
+  const zoek = r => `${r.nr} ${r.cel.join(' ')} ${r.adresBAG} ${r.buurt ? r.buurt.naam + ' ' + r.buurt.wijk : ''} ${r.V.map(v => v.id).join(' ')} ${r.P.map(p => p.id).join(' ')} ${(r.percelen || []).map(p => p.tekst).join(' ')}`.toLowerCase();
   const COLS = [
     { k: 'nr', t: '#', r: 1, v: r => r.nr },
     { k: 'naam', t: 'Naam', v: r => cel(r, 'naam') },
     { k: 'adres', t: 'Adres (BAG)', v: r => r.adresBAG || (r.P[0] ? 'Pand ' + r.P[0].id : '') },
+    { k: 'perceel', t: 'Perceel', v: r => (r.percelen || []).map(p => p.kort).join(', ') },
     { k: 'gebruik', t: 'Eigen gebruik', v: r => cel(r, 'gebruik') },
     { k: 'gd', t: 'Gebruiksdoel BAG', v: r => gdf([...new Set(r.V.map(v => v.gd))].join('; ') || (r.P[0] ? r.P[0].gd : '')) },
     { k: 'opp', t: 'm² eigen', r: 1, v: r => r.k.opp ?? -1, f: r => r.k.opp == null ? '–' : fmt(r.k.opp) },
@@ -2330,7 +2528,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
     const rows = state.res.regels.filter(r => !r.gekoppeld && (!state.q || zoek(r).includes(state.q)));
     $('#rowCount').textContent = `${fmt(rows.length)} regels niet gekoppeld`;
     const idKol = state.res.rol.map((r, i) => r === 'id' ? i : -1).filter(i => i >= 0);
-    $('#tblWrap').innerHTML = rows.length ? `<table><thead><tr><th class="r">#</th><th>Naam</th><th>Adres in de lijst</th><th>ID's in de lijst</th><th>Reden</th></tr></thead><tbody>${rows.map(r => `<tr><td class="r num">${r.nr}</td><td>${esc(cel(r, 'naam'))}</td><td>${esc(lijstAdres(r))}</td><td class="mono small">${esc(idKol.map(i => r.cel[i]).filter(Boolean).join(' '))}</td><td class="wrap">${esc(r.reden || '')}</td></tr>`).join('')}</tbody></table>` : '<p class="more muted" style="margin:0">Alle regels zijn gekoppeld.</p>';
+    $('#tblWrap').innerHTML = rows.length ? `<table><thead><tr><th class="r">#</th><th>Naam</th><th>Adres in de lijst</th><th>ID's of perceel in de lijst</th><th>Reden</th></tr></thead><tbody>${rows.map(r => `<tr><td class="r num">${r.nr}</td><td>${esc(cel(r, 'naam'))}</td><td>${esc(lijstAdres(r))}</td><td class="mono small">${esc([...idKol.map(i => r.cel[i]), r.k.kad ? E.kadTekst(r.k.kad) : ''].filter(Boolean).join(' '))}</td><td class="wrap">${esc(r.reden || '')}</td></tr>`).join('')}</tbody></table>` : '<p class="more muted" style="margin:0">Alle regels zijn gekoppeld.</p>';
   }
   function renderBuurt() {
     const g = new Map();
@@ -2352,10 +2550,11 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   }
 
   // ---------- verrijkte lijst ----------
-  const EXTRA = ['koppeling', 'reden_niet_gekoppeld', 'bag_verblijfsobject', 'bag_pand', 'bag_adres', 'bag_status', 'bag_gebruiksdoel', 'bag_oppervlakte_m2', 'bouwjaar', 'energielabel', 'label_c_plicht', 'rijksmonument', 'buurtcode', 'buurt', 'wijk', 'status', 'signalen'];
+  const EXTRA = ['koppeling', 'reden_niet_gekoppeld', 'bag_verblijfsobject', 'bag_pand', 'bag_adres', 'kadastraal_perceel', 'perceel_m2', 'bag_status', 'bag_gebruiksdoel', 'bag_oppervlakte_m2', 'bouwjaar', 'energielabel', 'label_c_plicht', 'rijksmonument', 'buurtcode', 'buurt', 'wijk', 'status', 'signalen'];
   const uq = a => [...new Set(a.filter(x => x != null && x !== ''))].join(', ');
   function verrijkt(r) {
     return [r.koppeling || '', r.reden || '', uq(r.V.map(v => v.id)), uq(r.P.map(p => p.id)), r.adresBAG || '',
+      uq((r.percelen || []).map(p => p.kort)), uq((r.percelen || []).map(p => p.grootte)),
       uq([...r.V.map(v => v.status), ...r.P.map(p => p.status)]), uq(r.V.map(v => v.gd)), r.V.length ? r.V.reduce((s, v) => s + v.opp, 0) : '',
       uq(r.P.map(p => p.bouwjaar)), uq(r.P.map(p => p.label && p.label.dominant_label)), uq(r.P.map(p => p.kantoor && p.kantoor.plicht)),
       uq(r.P.map(p => p.monument && p.monument.nr)), r.buurt ? r.buurt.code : '', r.buurt ? r.buurt.naam : '', r.buurt ? r.buurt.wijk : '',
@@ -2404,10 +2603,11 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
       });
       if (!map.hasLayer(buurtLayer)) buurtLayer.addTo(map);
       if (map.hasLayer(layer)) layer.remove();
-      if (pandLayer && map.hasLayer(pandLayer)) pandLayer.remove();
+      [pandLayer, perceelLayer, kadLayer].forEach(l => { if (l && map.hasLayer(l)) l.remove(); });
     } else {
       if (map.hasLayer(buurtLayer)) buurtLayer.remove();
       if (!map.hasLayer(layer)) layer.addTo(map);
+      toonDetail();
     }
     if (outline) outline.bringToFront();
   }
@@ -2431,7 +2631,7 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
   function datumTekst() { return new Date(state.res.opgehaald).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }); }
   function bronTekst() {
     const lijst = state.bron === 'voorbeeld' ? 'lijst: Gemeente Amsterdam, Gemeentelijk Vastgoed (open data)' : state.bron === 'ggmtest' ? 'lijst: synthetische testset (verzonnen gegevens op echte BAG-objecten)' : 'lijst: eigen gegevens van de gemeente';
-    return `Bronnen: ${lijst}; BAG (Kadaster); energielabels (RIVM, afgeleid uit EP-Online van RVO); rijksmonumenten (RCE); buurten (CBS ${state.res.wbJaar || ''}); achtergrondkaart (Kadaster, via PDOK). Gekoppeld op ${datumTekst()}. Signalen zijn indicatief, geen vaststelling.` + (state.niveau === 'buurt' ? ' Aantallen van 1 of 2 zijn afgeschermd.' : '');
+    return `Bronnen: ${lijst}; BAG en kadastrale kaart (Kadaster); energielabels (RIVM, afgeleid uit EP-Online van RVO); rijksmonumenten (RCE); buurten (CBS ${state.res.wbJaar || ''}); achtergrondkaart (Kadaster, via PDOK). Gekoppeld op ${datumTekst()}. Signalen zijn indicatief, geen vaststelling.` + (state.niveau === 'buurt' ? ' Aantallen van 1 of 2 zijn afgeschermd.' : '');
   }
   const makerTekst = () => $('#makerCheck').checked ? 'Gemaakt met Eigen lijst op de kaart · josephinelinders.nl' : '';
   const titel = () => $('#titelInput').value.trim() || `Eigen lijst op de kaart · ${state.res.gm.naam}`;
@@ -2570,8 +2770,8 @@ TST-012;Testobject 12;Kantoor;0193010000010699;;;450;1890;F;Fictief monumenten;i
         rijen: rij.map(({ b, o }) => [b.naam, b.wijk, afg(o.objecten), afg(o.signaal), afg(o.bag), afg(o.label_c), afg(o.controleren)]) };
     }
     const lbl = r => { const p = r.P.find(p => p.label); return p ? p.label.dominant_label : ''; };
-    return { kop: ['#', 'Naam', 'Adres (BAG)', 'Eigen gebruik', 'Gebruiksdoel BAG', 'm² eigen', 'm² BAG', 'Label', 'Buurt', 'Status', 'Signalen'], rechts: [0, 5, 6],
-      rijen: zichtbareRegels().map(r => [r.nr, cel(r, 'naam'), r.adresBAG || (r.P[0] ? 'Pand ' + r.P[0].id : ''), cel(r, 'gebruik'), COLS[4].v(r), r.k.opp == null ? '' : fmt(r.k.opp), r.V.length ? fmt(r.V.reduce((s, v) => s + v.opp, 0)) : '', lbl(r), r.buurt ? r.buurt.naam : '', ST[r.status], r.signalen.map(s => s.t).join(' ')]) };
+    return { kop: ['#', 'Naam', 'Adres (BAG)', 'Perceel', 'Eigen gebruik', 'Gebruiksdoel BAG', 'm² eigen', 'm² BAG', 'Label', 'Buurt', 'Status', 'Signalen'], rechts: [0, 6, 7],
+      rijen: zichtbareRegels().map(r => [r.nr, cel(r, 'naam'), r.adresBAG || (r.P[0] ? 'Pand ' + r.P[0].id : ''), (r.percelen || []).map(p => p.kort).join(', '), cel(r, 'gebruik'), COLS.find(c => c.k === 'gd').v(r), r.k.opp == null ? '' : fmt(r.k.opp), r.V.length ? fmt(r.V.reduce((s, v) => s + v.opp, 0)) : '', lbl(r), r.buurt ? r.buurt.naam : '', ST[r.status], r.signalen.map(s => s.t).join(' ')]) };
   }
   $('#kopTabelBtn').onclick = async () => {
     const d = tabelData();

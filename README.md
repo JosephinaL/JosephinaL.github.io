@@ -39,7 +39,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | Woningvoorraad en leegstand | [woningen.html](https://josephinelinders.nl/woningen.html) | Hoeveel woningen zijn er, wie bezit ze, wat komt er elk jaar bij en hoeveel staan er leeg? | CBS (Woningvoorraad, Levensloop van woningen, Kerncijfers wijken en buurten), PDOK |
 | Bouwstroom | [bouwstroom.html](https://josephinelinders.nl/bouwstroom.html) | Welke woningen zijn vergund, in aanbouw of net klaar, en waar is het verwachte bouwjaar al voorbij? | BAG, Officiële bekendmakingen (gemeenteblad), CBS |
 | **Werkbank (buiten de Iv3-indeling)** | | | |
-| Eigen lijst op de kaart | [eigenlijst.html](https://josephinelinders.nl/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed in eigen beheer, eruit naast de BAG en open data? | BAG, RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
+| Eigen lijst op de kaart | [eigenlijst.html](https://josephinelinders.nl/eigenlijst.html) | Hoe ziet een eigen lijst van de gemeente, zoals het vastgoed of de grond in eigen beheer, eruit naast de BAG en open data? | BAG, kadastrale kaart (Kadaster), RIVM (energielabels), RCE (rijksmonumenten), CBS; voorbeeld: Gemeentelijk Vastgoed Amsterdam |
 
 ### Dezelfde wijk in vijf instrumenten
 
@@ -85,7 +85,8 @@ Label C-kantoren en Eigen lijst op de kaart nemen eigen gegevens van de gemeente
 
 - De lijst wordt in de browser gelezen en niet verstuurd. Er is geen eigen server. Eigen lijst op de kaart bewaart niets: sluit je de pagina, dan is de lijst weg. Label C-kantoren onthoudt de lijst per gemeente in je eigen browser, tot je hem leegmaakt.
 - Label C-kantoren neemt per pand een status op. Vrijgesteld en voldoet wijzigen de uitkomst; aangeschreven, in behandeling en niet beoordeeld zijn alleen een aantekening. Het percentage label C of beter blijft op open data, op vrijgestelde panden na: die vallen uit de plicht.
-- Eigen lijst op de kaart stuurt alleen de adressen als zoekvraag naar PDOK, om ze in de BAG te vinden. Dat staat op de pagina.
+- Eigen lijst op de kaart stuurt alleen adressen, BAG-ID's en kadastrale aanduidingen als zoekvraag naar PDOK, om ze in de BAG en op de kadastrale kaart te vinden; voor het perceel onder elk object vraagt ze de kadastrale kaart op per vak van ongeveer 150 bij 220 meter. Dat staat op de pagina.
+- Met het GGM-invoercontract (kolomnamen uit GGM v2.5.1, domein Vastgoed, met KADASTRALEONROERENDEZAAK) gaan alleen BAG-ID's en kadastrale aanduidingen naar buiten, geen adressen.
 - In Eigen lijst op de kaart staat een beveiligingsregel (Content-Security-Policy) die de verbindingen beperkt tot `api.pdok.nl`, `data.rivm.nl` en de bezoekerstelling GoatCounter (alleen bezoek, geen lijstgegevens). Zo is na te gaan welke diensten de pagina kan bereiken.
 - Een controle vooraf stopt lijsten met persoonsgegevens (namen, BSN, contactgegevens, cliënten of bewoners) voordat er iets wordt opgezocht. De pagina is bedoeld voor lijsten zonder persoonsgegevens, zoals het eigen vastgoed.
 
