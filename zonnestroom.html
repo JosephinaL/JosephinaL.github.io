@@ -379,7 +379,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.0.1';
   const PRODUCT = 'Zonnestroom per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_ZON = '85005NED', T_RESW = '85004NED', T_BEV = '70072ned';
@@ -687,7 +687,17 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       if (pts.length > 1) s += `<path d="${pts.map((p, k) => (k ? 'L' : 'M') + p[0].toFixed(1) + ' ' + y(p[1]).toFixed(1)).join(' ')}" fill="none" stroke="${css('--muted')}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
     }
     s += `<line class="ax0" x1="${Lm}" x2="${W - R}" y1="${y(0)}" y2="${y(0)}"/></svg>`;
-    const leg = delen.map(([, t, c]) => `<span><i class="sw" style="background:var(${c})"></i>${t}</span>`).join('') + '<span><i class="sw" style="background:var(--sunk);border:1px dashed var(--line)"></i>niet uitgesplitst</span>' + (nlLijn ? '<span><i class="sw streep"></i>Nederland per inwoner</span>' : '');
+    // legenda: een deel dat in geen enkel jaar zichtbaar is, zegt dat met het getal erbij (feedback 8 nov 2026)
+    const ZICHTBAAR = 2; // hoogte in viewBox-eenheden; lager is op het scherm niet te zien
+    const pxHoog = v => (H - Tp - B) * v / hiT;
+    const grijs = z.some(x => { const tv = totaal(x); if (tv == null) return false; const a = delen.reduce((t, [k]) => t + deel(x, k), 0); return a < tv * 0.995; });
+    const leg = delen.filter(([k]) => k !== 'grootOnb' || z.some(x => x.kw.grootOnb)).map(([k, t, c]) => {
+      const vs = z.map(x => x.kw[k]).filter(v => v != null);
+      const maxKw = vs.length ? Math.max(...vs) : 0;
+      const maxPx = Math.max(0, ...z.map(x => pxHoog(deel(x, k))));
+      const extra = !vs.length ? ': niet gepubliceerd' : !maxKw ? ': geen' : maxPx < ZICHTBAAR ? `: hoogstens ${fMW(maxKw)}, te klein om te zien` : '';
+      return `<span${extra ? ' class="muted"' : ''}><i class="sw" style="background:var(${c})"></i>${t}${extra}</span>`;
+    }).join('') + (grijs ? '<span><i class="sw" style="background:var(--sunk);border:1px dashed var(--line)"></i>niet uitgesplitst</span>' : '') + (nlLijn ? '<span><i class="sw streep"></i>Nederland per inwoner</span>' : '');
     el.innerHTML = `<span class="noemer">${modus === 'inw' ? 'kWp per inwoner' : 'MWp'}, stand 31 december · * nader voorlopig</span>${s}<div class="legend">${leg}</div>`;
     el.querySelectorAll('.hb').forEach(hb => {
       const x = z[+hb.dataset.i];
