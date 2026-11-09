@@ -356,6 +356,20 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
+  // Wijk- en buurtkaart (PDOK): tot en met 2025 de velden gemeentecode, wijkcode, buurtcode en filteren op gemeentecode;
+  // vanaf 2026 gm_code, wk_code, bu_code, en buurten alleen te filteren met CQL op bu_code. wbUrl maakt de vraag,
+  // wbOud zet de oude veldnamen erbij, zodat de rest van de pagina gelijk blijft.
+  const WB_VELD = { gm_code: 'gemeentecode', gm_naam: 'gemeentenaam', wk_code: 'wijkcode', wk_naam: 'wijknaam', bu_code: 'buurtcode', bu_naam: 'buurtnaam' };
+  function wbUrl(j, laag, c, limit) {
+    const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/${laag}/items?f=json&limit=${limit}`;
+    if (j < 2026) return u + `&gemeentecode=GM${c}`;
+    return laag === 'buurten' ? u + '&filter=' + encodeURIComponent(`bu_code LIKE 'BU${c}%'`) : u + `&gm_code=GM${c}`;
+  }
+  function wbOud(gj) {
+    ((gj && gj.features) || []).forEach(f => { const p = f.properties || {}; for (const k in WB_VELD) if (p[k] != null && p[WB_VELD[k]] == null) p[WB_VELD[k]] = p[k]; });
+    return gj;
+  }
+
   const VERSIE = '1.4';
   const PRODUCT = 'Huishoudens en vergrijzing';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
@@ -640,7 +654,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const kand = []; for (let j = new Date().getFullYear(); j >= EERSTE_KWB; j--) kand.push(j);
     const ok = await Promise.all(kand.map(async j => {
       try {
-        const gj = await getJSON(PDOK(j) + `buurten/items?f=json&gemeentecode=GM${c}&limit=20`, 1);
+        const gj = await getJSON(wbUrl(j, 'buurten', c, 20), 1).then(wbOud);
         return (gj.features || []).some(f => num(f.properties.aantal_huishoudens) && num(f.properties.percentage_personen_65_jaar_en_ouder) != null) ? j : null;
       } catch (e) { return null; }
     }));
@@ -673,9 +687,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     fouten.delete('buurtcijfers (PDOK)');
     try {
       const [bu, wk, gm] = await Promise.all([
-        getJSON(PDOK(j) + `buurten/items?f=json&gemeentecode=GM${g.c}&limit=1000`),
-        getJSON(PDOK(j) + `wijken/items?f=json&gemeentecode=GM${g.c}&limit=1000`),
-        getJSON(PDOK(j) + `gemeenten/items?f=json&gemeentecode=GM${g.c}&limit=10`)
+        getJSON(wbUrl(j, 'buurten', g.c, 1000)).then(wbOud),
+        getJSON(wbUrl(j, 'wijken', g.c, 1000)).then(wbOud),
+        getJSON(wbUrl(j, 'gemeenten', g.c, 10)).then(wbOud)
       ]);
       if (S.g !== g || S.jaar !== j) return;
       const buurten = bu.features.filter(f => f.properties.water !== 'JA').map(f => obj(f.properties, 'buurt'));

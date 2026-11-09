@@ -364,7 +364,21 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '2.0';
+  // Wijk- en buurtkaart (PDOK): tot en met 2025 de velden gemeentecode, wijkcode, buurtcode en filteren op gemeentecode;
+  // vanaf 2026 gm_code, wk_code, bu_code, en buurten alleen te filteren met CQL op bu_code. wbUrl maakt de vraag,
+  // wbOud zet de oude veldnamen erbij, zodat de rest van de pagina gelijk blijft.
+  const WB_VELD = { gm_code: 'gemeentecode', gm_naam: 'gemeentenaam', wk_code: 'wijkcode', wk_naam: 'wijknaam', bu_code: 'buurtcode', bu_naam: 'buurtnaam' };
+  function wbUrl(j, laag, c, limit) {
+    const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/${laag}/items?f=json&limit=${limit}`;
+    if (j < 2026) return u + `&gemeentecode=GM${c}`;
+    return laag === 'buurten' ? u + '&filter=' + encodeURIComponent(`bu_code LIKE 'BU${c}%'`) : u + `&gm_code=GM${c}`;
+  }
+  function wbOud(gj) {
+    ((gj && gj.features) || []).forEach(f => { const p = f.properties || {}; for (const k in WB_VELD) if (p[k] != null && p[WB_VELD[k]] == null) p[WB_VELD[k]] = p[k]; });
+    return gj;
+  }
+
+  const VERSIE = '2.0.1';
   const PRODUCT = 'Bouwstroom';
   const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
   const SRU = 'https://repository.overheid.nl/sru';
@@ -586,30 +600,20 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderAlles() { renderStandOud(); $('#nietWoon').textContent = S.nietWoon ? ` (in ${S.g.n} nu ${nf.format(S.nietWoon)} panden)` : ''; renderKern(); renderStroom(); renderJaar(); renderBekMat(); renderLagen(); renderKaart(); renderDossier(null); renderFilter(); renderTabel(); renderVoet(); }
 
   // ---------- gebied: gemeente, buurten, wijken (CBS via PDOK) ----------
-  // Vanaf de kaart 2026 heten de velden gm_code, wk_code, bu_code en zijn buurten niet op gemeente te filteren:
-  // dan buurten binnen het vak van de gemeente ophalen en op gm_code selecteren.
   async function laadGebied() {
     const c = S.g.c;
     for (let j = JAAR; j >= 2023; j--) {
       try {
-        let nieuw = false;
-        let gm = await getJSON(PDOK(j) + `gemeenten/items?f=json&gemeentecode=GM${c}&limit=10`, 1).catch(() => null);
-        if (!gm || !(gm.features || []).length) { gm = await getJSON(PDOK(j) + `gemeenten/items?f=json&gm_code=GM${c}&limit=10`, 1); nieuw = true; }
+        const gm = wbOud(await getJSON(wbUrl(j, 'gemeenten', c, 10), 1));
         const land = (gm.features || []).filter(f => f.properties.water !== 'JA');
         if (!land.length) continue;
-        const polys = land.flatMap(f => polysVan(f.geometry));
-        const gebied = maakGebied({ type: 'MultiPolygon', coordinates: polys }, {});
-        const bb = gebied.bb.map(v => v.toFixed(6)).join(',');
-        const [bu, wk] = await Promise.all([
-          alles(PDOK(j) + (nieuw ? `buurten/items?f=json&bbox=${bb}&limit=1000` : `buurten/items?f=json&gemeentecode=GM${c}&limit=1000`)),
-          alles(PDOK(j) + `wijken/items?f=json&${nieuw ? 'gm_code' : 'gemeentecode'}=GM${c}&limit=1000`)
-        ]);
-        const pr = f => f.properties;
-        const eigen = bu.features.filter(f => (pr(f).gemeentecode || pr(f).gm_code) === 'GM' + c && pr(f).water !== 'JA');
+        const [bu, wk] = await Promise.all([alles(wbUrl(j, 'buurten', c, 1000)).then(wbOud), alles(wbUrl(j, 'wijken', c, 1000)).then(wbOud)]);
+        const eigen = bu.features.filter(f => f.properties.water !== 'JA');
         if (!eigen.length) continue;
-        S.gebied = gebied;
-        S.buurten = eigen.map(f => maakGebied(f.geometry, { code: pr(f).buurtcode || pr(f).bu_code, naam: pr(f).buurtnaam || pr(f).bu_naam, wijk: pr(f).wijkcode || pr(f).wk_code }));
-        wk.features.forEach(f => S.wijken.set(pr(f).wijkcode || pr(f).wk_code, pr(f).wijknaam || pr(f).wk_naam));
+        const polys = land.flatMap(f => polysVan(f.geometry));
+        S.gebied = maakGebied({ type: 'MultiPolygon', coordinates: polys }, {});
+        S.buurten = eigen.map(f => maakGebied(f.geometry, { code: f.properties.buurtcode, naam: f.properties.buurtnaam, wijk: f.properties.wijkcode }));
+        wk.features.forEach(f => S.wijken.set(f.properties.wijkcode, f.properties.wijknaam));
         S.bjaar = j;
         return true;
       } catch (e) { /* volgend jaar proberen */ }

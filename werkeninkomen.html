@@ -432,6 +432,20 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
+  // Wijk- en buurtkaart (PDOK): tot en met 2025 de velden gemeentecode, wijkcode, buurtcode en filteren op gemeentecode;
+  // vanaf 2026 gm_code, wk_code, bu_code, en buurten alleen te filteren met CQL op bu_code. wbUrl maakt de vraag,
+  // wbOud zet de oude veldnamen erbij, zodat de rest van de pagina gelijk blijft.
+  const WB_VELD = { gm_code: 'gemeentecode', gm_naam: 'gemeentenaam', wk_code: 'wijkcode', wk_naam: 'wijknaam', bu_code: 'buurtcode', bu_naam: 'buurtnaam' };
+  function wbUrl(j, laag, c, limit) {
+    const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/${laag}/items?f=json&limit=${limit}`;
+    if (j < 2026) return u + `&gemeentecode=GM${c}`;
+    return laag === 'buurten' ? u + '&filter=' + encodeURIComponent(`bu_code LIKE 'BU${c}%'`) : u + `&gm_code=GM${c}`;
+  }
+  function wbOud(gj) {
+    ((gj && gj.features) || []).forEach(f => { const p = f.properties || {}; for (const k in WB_VELD) if (p[k] != null && p[WB_VELD[k]] == null) p[WB_VELD[k]] = p[k]; });
+    return gj;
+  }
+
   const VERSIE = '2.1.1';
   const PRODUCT = 'Werk en inkomen per wijk';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
@@ -1048,7 +1062,7 @@ main > * { min-width: 0; }
     } catch (e) { res.fout = true; return res; }
     if (j >= 2023) {
       try {
-        const gj = await getJSON(`https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/wijken/items?f=json&gemeentecode=GM${c}&limit=1000`, 2);
+        const gj = await getJSON(wbUrl(j, 'wijken', c, 1000), 2).then(wbOud);
         if (gj && gj.features && gj.features.length) res.geo = gj;
       } catch (e) { res.geo = null; }
     }

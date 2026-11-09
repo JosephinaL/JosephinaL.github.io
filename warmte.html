@@ -399,6 +399,20 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
+  // Wijk- en buurtkaart (PDOK): tot en met 2025 de velden gemeentecode, wijkcode, buurtcode en filteren op gemeentecode;
+  // vanaf 2026 gm_code, wk_code, bu_code, en buurten alleen te filteren met CQL op bu_code. wbUrl maakt de vraag,
+  // wbOud zet de oude veldnamen erbij, zodat de rest van de pagina gelijk blijft.
+  const WB_VELD = { gm_code: 'gemeentecode', gm_naam: 'gemeentenaam', wk_code: 'wijkcode', wk_naam: 'wijknaam', bu_code: 'buurtcode', bu_naam: 'buurtnaam' };
+  function wbUrl(j, laag, c, limit) {
+    const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/${laag}/items?f=json&limit=${limit}`;
+    if (j < 2026) return u + `&gemeentecode=GM${c}`;
+    return laag === 'buurten' ? u + '&filter=' + encodeURIComponent(`bu_code LIKE 'BU${c}%'`) : u + `&gm_code=GM${c}`;
+  }
+  function wbOud(gj) {
+    ((gj && gj.features) || []).forEach(f => { const p = f.properties || {}; for (const k in WB_VELD) if (p[k] != null && p[WB_VELD[k]] == null) p[WB_VELD[k]] = p[k]; });
+    return gj;
+  }
+
   const VERSIE = '1.1';
   const PRODUCT = 'Warmte per buurt';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
@@ -571,8 +585,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const c = S.g.c;
     const [rs, bu, wk] = await Promise.all([
       haal(t, `startswith(WijkenEnBuurten,'BU${c}') or startswith(WijkenEnBuurten,'WK${c}')`),
-      getJSON(PDOK(t.j) + `buurten/items?f=json&gemeentecode=GM${c}&limit=1000`),
-      getJSON(PDOK(t.j) + `wijken/items?f=json&gemeentecode=GM${c}&limit=1000`).catch(() => null)
+      getJSON(wbUrl(t.j, 'buurten', c, 1000)).then(wbOud),
+      getJSON(wbUrl(t.j, 'wijken', c, 1000)).then(wbOud).catch(() => null)
     ]);
     const land = f => f.properties.water !== 'JA';
     const naamB = new Map(bu.features.map(f => [f.properties.buurtcode, f.properties.buurtnaam]));
