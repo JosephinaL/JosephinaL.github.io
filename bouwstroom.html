@@ -360,7 +360,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.4';
+  const VERSIE = '1.4.1';
   const PRODUCT = 'Bouwstroom';
   const BAG = 'https://api.pdok.nl/kadaster/bag/ogc/v2/collections/';
   const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
@@ -609,15 +609,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- BAG ----------
   const q = s => encodeURIComponent(s);
   async function laadBAG() {
-    const g = S.g, bb = S.gebied.bb.map(v => v.toFixed(6)).join(',');
-    const url = (coll, flt) => `${BAG}${coll}/items?f=json&limit=1000&bbox=${bb}&filter=${q(flt)}`;
-    let n = 0; const tel = () => { voortgang(2, 4, `BAG: ${fmt(++n)} pagina's ontvangen…`); };
+    const g = S.g;
+    let n = 0; const tel = () => { voortgang(2, 4, `BAG: ${fmt(++n)} vakken ontvangen…`); };
     try {
       const [vg, vn, pp, po] = await Promise.all([
-        alles(url('verblijfsobject', "status='Verblijfsobject gevormd'"), tel),
-        alles(url('verblijfsobject', "status='Verblijfsobject in gebruik (niet ingemeten)'"), tel),
-        alles(url('pand', Object.keys(PAND_FASE).map(s => `status='${s}'`).join(' OR ')), tel),
-        alles(url('pand', `status='Pand in gebruik' AND bouwjaar>=${JAAR - 1}`), tel)
+        inVakken('verblijfsobject', "status='Verblijfsobject gevormd'", S.gebied.bb, tel),
+        inVakken('verblijfsobject', "status='Verblijfsobject in gebruik (niet ingemeten)'", S.gebied.bb, tel),
+        inVakken('pand', Object.keys(PAND_FASE).map(s => `status='${s}'`).join(' OR '), S.gebied.bb, tel),
+        inVakken('pand', `status='Pand in gebruik' AND bouwjaar>=${JAAR - 1}`, S.gebied.bb, tel)
       ]);
       if (S.g !== g) return;
       S.bagStamp = vg.stamp || pp.stamp;
@@ -627,7 +626,34 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       fouten.add('BAG (PDOK)'); toonMelding();
     }
   }
-  const pandId = href => String(href || '').split('/').pop();
+  // PDOK breekt een BAG-vraag met statusfilter na 60 s af, en een tweede pagina haalt dat
+  // bij een middelgrote gemeente al niet (getest 9 nov 2026). Daarom niet doorbladeren:
+  // past een vak niet in één pagina, of komt er geen antwoord, dan in vier kleinere vakken.
+  let bagBezig = 0; const bagWacht = [];
+  async function bagJSON(u) {
+    while (bagBezig >= 6) await new Promise(r => bagWacht.push(r));
+    bagBezig++;
+    try { return JSON.parse(await getText(u, 1, 65000)); }
+    finally { bagBezig--; const r = bagWacht.shift(); if (r) r(); }
+  }
+  async function inVakken(coll, flt, bb, onVak, diepte = 0) {
+    const u = `${BAG}${coll}/items?f=json&limit=1000&bbox=${bb.map(v => v.toFixed(6)).join(',')}&filter=${q(flt)}`;
+    let d = null;
+    try { d = await bagJSON(u); } catch (e) { if (diepte >= 5) throw e; }
+    if (d) {
+      const nx = (d.links || []).find(l => l.rel === 'next');
+      if (!nx || !(d.features || []).length) { if (onVak) onVak(); return { features: d.features || [], stamp: d.timeStamp }; }
+      if (diepte >= 5) { const rest = await alles(nx.href); if (onVak) onVak(); return { features: d.features.concat(rest.features), stamp: d.timeStamp }; }
+    }
+    const [x0, y0, x1, y1] = bb, xm = (x0 + x1) / 2, ym = (y0 + y1) / 2;
+    const delen = await Promise.all([[x0, y0, xm, ym], [xm, y0, x1, ym], [x0, ym, xm, y1], [xm, ym, x1, y1]]
+      .map(b => inVakken(coll, flt, b, onVak, diepte + 1)));
+    // een object op de rand van twee vakken komt in beide terug: één keer tellen
+    const gezien = new Set(), features = [];
+    delen.forEach(r => r.features.forEach(f => { if (!gezien.has(f.id)) { gezien.add(f.id); features.push(f); } }));
+    return { features, stamp: (d && d.timeStamp) || delen.map(r => r.stamp).find(Boolean) || null };
+  }
+  const pandId = href =>String(href || '').split('/').pop();
   function adresVan(p) {
     return [p.openbare_ruimte_naam, [p.huisnummer, p.huisletter || '', p.toevoeging ? '-' + p.toevoeging : ''].join('')].filter(Boolean).join(' ');
   }
@@ -795,14 +821,16 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     let h = '';
     h += card('bek', 'Aangevraagd en verleend', S.bek ? fmt(bAanv.length + bBes.length) : '–',
       S.bek ? `publicaties voor nieuwbouw en transformatie in 12 maanden: ${mv(bAanv.length, 'aanvraag', 'aanvragen')}, ${mv(bBes.length, 'besluit', 'besluiten')}. In de besluiten genoemd: ${mv(som(bBes, 'n'), 'woning', 'woningen')}.` : 'bekendmakingen niet beschikbaar', BEK_KLEUR);
+    const geenBAG = !S.proj.length && fouten.has('BAG (PDOK)');
     ['vergund', 'bouw', 'klaar', 'opgeleverd'].forEach(k => {
       const x = f[k];
+      if (geenBAG) { h += card(k, FASE[k].t, '–', 'BAG niet beschikbaar', FASE[k].c); return; }
       h += card(k, FASE[k].t, (k === 'opgeleverd' ? 'ca. ' : '') + fmt(x.woon), `woningen in ${fmt(x.panden)} panden${x.ander ? `, plus ${fmt(x.ander)} andere verblijfsobjecten` : ''}`, FASE[k].c);
     });
     $('#stroom').innerHTML = h;
     const sp = bek.filter(r => r.soort === 'Splitsen'), sv = bek.filter(r => r.soort === 'Samenvoegen');
-    $('#zijstroom').innerHTML = `<span><i style="background:var(${FASE.bestaand.c})"></i>In bestaande panden: <b>${fmt(f.bestaand.woon)}</b> nieuwe woningen in ${fmt(f.bestaand.panden)} panden (splitsing, transformatie)</span>` +
-      `<span><i style="background:var(${FASE.sloop.c})"></i>Sloopvergunning: <b>${fmt(f.sloop.panden)}</b> panden met ${fmt(f.sloop.woon)} woningen</span>` +
+    $('#zijstroom').innerHTML = (geenBAG ? '' : `<span><i style="background:var(${FASE.bestaand.c})"></i>In bestaande panden: <b>${fmt(f.bestaand.woon)}</b> nieuwe woningen in ${fmt(f.bestaand.panden)} panden (splitsing, transformatie)</span>` +
+      `<span><i style="background:var(${FASE.sloop.c})"></i>Sloopvergunning: <b>${fmt(f.sloop.panden)}</b> panden met ${fmt(f.sloop.woon)} woningen</span>`) +
       (S.bek ? `<span><i style="background:var(${BEK_KLEUR})"></i>Bekendmakingen splitsen: <b>${fmt(sp.length)}</b> · samenvoegen: <b>${fmt(sv.length)}</b></span>` : '');
     $('#stroomNoot').textContent = 'Woningen tellen per fase één keer. De bekendmakingen zijn publicaties, geen woningen: één project kan meerdere publicaties hebben.';
   }
@@ -811,7 +839,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderJaar() {
     const el = $('#chJaar');
     const rs = S.proj.filter(p => (p.fase === 'vergund' || p.fase === 'bouw') && p.woon);
-    if (!rs.length) { el.innerHTML = '<h3>Wanneer verwacht?</h3><p class="small muted" style="margin:0">Geen vergunde of in aanbouw zijnde woningen in de BAG.</p>'; return; }
+    if (!rs.length) { el.innerHTML = '<h3>Wanneer verwacht?</h3><p class="small muted" style="margin:0">' + (fouten.has('BAG (PDOK)') ? 'De BAG kon niet worden bevraagd.' : 'Geen vergunde of in aanbouw zijnde woningen in de BAG.') + '</p>'; return; }
     const bins = []; for (let j = JAAR - 3; j <= JAAR + 3; j++) bins.push(j);
     const key = j => j == null ? null : Math.min(JAAR + 3, Math.max(JAAR - 3, j));
     const lab = j => j === JAAR - 3 ? `≤${j}` : j === JAAR + 3 ? `≥${j}` : String(j);
