@@ -204,6 +204,7 @@ main > * { min-width: 0; }
 th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
 th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 td .rijknop { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.stand-oud { margin: 0 0 12px; padding: 10px 14px; border-left: 4px solid var(--warn); background: var(--surface); }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -233,7 +234,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="intro" id="intro">
     <p>Welke woningen komen eraan in je gemeente, hoe ver zijn ze, en waar staat iets stil? Kies een gemeente. Je ziet per pand wat er vergund is, in aanbouw is of net klaar, welke nieuwe woningen in bestaande panden ontstaan, en welke vergunningen voor woningen het afgelopen jaar zijn aangevraagd en verleend.</p>
-    <p class="muted small">De gegevens komen live uit de Basisregistratie Adressen en Gebouwen (BAG, dagelijks bijgewerkt) en uit de officiële bekendmakingen van de gemeente, op het moment dat je een gemeente kiest.</p>
+    <p class="muted small">De BAG-cijfers komen uit de maandstand van de Basisregistratie Adressen en Gebouwen (BAG), dezelfde stand als in Kwaliteit van de BAG en de BAG-werkbank. De bekendmakingen van de gemeente worden live opgehaald, op het moment dat je een gemeente kiest.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
     <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=wonen">Welke indicatoren horen bij wonen, en waar staan ze? Indicatoren belicht →</a></p>
   </section>
@@ -244,6 +245,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <p id="meldingTekst"></p>
         <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
       </div>
+      <p class="stand-oud" id="standOud" role="status" hidden></p>
       <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
 
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
@@ -252,7 +254,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
         <ol>
           <li><b>Een ander begrip.</b> Dit is de stand in de BAG, niet het woningbouwprogramma of de planlijst van de gemeente. Een project telt pas mee als de panden in de BAG zijn opgevoerd; "vergund" is een pand met de BAG-status bouwvergunning verleend. Een woning is een verblijfsobject met woonfunctie, dus elke zelfstandige studio telt als woning.</li>
-          <li><b>Een andere peildatum of indeling.</b> De BAG van vandaag en de bekendmakingen van de afgelopen twaalf maanden. Panden horen bij de gemeente waarin ze liggen. "Opgeleverd" telt panden met bouwjaar vorig en dit jaar; het CBS telt nieuwbouw per kalenderjaar en komt daarom anders uit (zie <a href="woningen.html">Woningvoorraad</a>).</li>
+          <li><b>Een andere peildatum of indeling.</b> De BAG-stand van het begin van de maand (de datum staat bij de cijfers) en de bekendmakingen van de afgelopen twaalf maanden tot vandaag. Wat de gemeente na de standdatum in de BAG zette, staat er pas bij de volgende maandstand in. Panden horen bij de gemeente waarin ze liggen. "Opgeleverd" telt panden met bouwjaar vorig en dit jaar; het CBS telt nieuwbouw per kalenderjaar en komt daarom anders uit (zie <a href="woningen.html">Woningvoorraad</a>).</li>
           <li><b>Registratie bij de bron.</b> Gemeenten houden de levensloop in de BAG verschillend bij. Sommige zetten een pand zelden op "bouw gestart", en het bouwjaar bij een vergund pand is niet overal het verwachte jaar van oplevering. Dan klopt de pagina met de BAG, maar loopt de BAG achter op de praktijk; het signaal "verwacht jaar voorbij" maakt dat vaak zichtbaar. Bekendmakingen worden op hun tekst ingedeeld; een ongewone formulering kan verkeerd vallen.</li>
           <li><b>Een fout in deze bewerking.</b> Wijkt een pand af van de BAG zelf (link naar de BAG-viewer in het dossier), dan zit de fout hier. Meld het hieronder.</li>
         </ol>
@@ -316,9 +318,10 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>Woning</b>: een verblijfsobject in de BAG met een woonfunctie. Een studentenkamer met eigen voordeur telt als woning. Andere functies (kantoor, winkel) in hetzelfde pand tellen apart. Panden zonder woning, zoals een kas, schuur of bedrijfshal, tellen niet mee<span id="nietWoon"></span>.</li>
             <li><b>Vergund</b>: een nieuw verblijfsobject ("gevormd") in een pand met de status "bouwvergunning verleend". <b>In aanbouw</b>: hetzelfde, in een pand met de status "bouw gestart". <b>Klaar, nog in te meten</b>: pand of verblijfsobject "in gebruik (niet ingemeten)": opgeleverd, de gemeente moet het nog definitief inmeten.</li>
             <li><b>In bestaand pand</b>: een nieuw verblijfsobject in een pand dat al in gebruik is of verbouwd wordt. Dat zijn splitsingen en transformaties, bijvoorbeeld een kantoor dat woningen wordt.</li>
-            <li><b>Opgeleverd</b>: panden die in gebruik zijn met bouwjaar <span class="jY1"></span> of <span class="jY"></span>. Het aantal woningen is het aantal verblijfsobjecten in panden met een woonfunctie; in een gemengd pand telt ook een winkel of kantoor mee.</li>
+            <li><b>Opgeleverd</b>: panden die in gebruik zijn met bouwjaar <span class="jY1"></span> of <span class="jY"></span>, met het aantal verblijfsobjecten met woonfunctie erin. Het blijft "ca.": het bouwjaar benadert het jaar van oplevering.</li>
             <li><b>Verwacht bouwjaar</b>: bij een vergund pand registreert de gemeente het jaar waarin het pand naar verwachting klaar is. Is dat jaar voorbij terwijl het pand nog op "vergund" of "bouw gestart" staat, dan krijgt het het <b>signaal "verwacht jaar voorbij"</b>.</li>
-            <li><b>Sloop</b>: panden met de status "sloopvergunning verleend", met het aantal verblijfsobjecten dat erin staat.</li>
+            <li><b>Sloop</b>: panden met de status "sloopvergunning verleend", met het aantal woningen dat erin staat.</li>
+            <li><b>Pand zonder nieuw verblijfsobject</b>: staat een pand op vergund, in aanbouw of klaar zonder nieuw verblijfsobject, dan tellen de verblijfsobjecten die het al heeft. Ingetrokken verblijfsobjecten tellen nooit mee (tot versie 2.0 telde een pand met alleen ingetrokken objecten die toch mee).</li>
             <li><b>Bekendmakingen</b>: omgevingsvergunningen in het gemeenteblad van de afgelopen twaalf maanden waarin woningen genoemd worden. Elke publicatie is ingedeeld naar soort (nieuwbouw, splitsen, transformatie, samenvoegen) en stap (aanvraag, besluit, termijn verlengd, wijziging van een eerder verleende vergunning, ingetrokken, geweigerd), op basis van de tekst. Een wijziging telt niet mee in de woningen uit besluiten, zodat een project niet twee keer meetelt. Het aantal woningen is het eerste getal vóór "woningen" of "appartementen".</li>
             <li><b>Buurt</b>: de buurt waarin het pand of het punt van de bekendmaking ligt, volgens de CBS-buurtgrenzen.</li>
           </ul>
@@ -328,7 +331,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <ul class="small">
             <li><b>De BAG volgt de gemeente</b>: een status verandert pas als de gemeente de melding verwerkt. Een signaal kan een vertraagd project zijn, maar ook een start of oplevering die nog niet in de BAG is bijgewerkt. Beide zijn de moeite van het nagaan waard; de BAG-beheerder van de gemeente kan het verschil zien.</li>
             <li><b>Verwacht bouwjaar is een schatting</b>, ingevuld bij de vergunning. Een project in fasen kan meerdere panden met verschillende jaren hebben. Landelijk komt 84% van de nieuwe panden later in gebruik dan dat jaar, meestal een tot twee jaar; "verwacht jaar voorbij" zegt daarom vaak meer over de schatting dan over vertraging. Hoe dat in je gemeente uitpakt, staat in <a href="levensloop.html" class="levLink">Levensloop van de bouw</a>.</li>
-            <li><b>Geen datum van de statuswijziging</b>: de dagstand van de BAG die deze pagina ophaalt, geeft alleen de datum van het laatste brondocument, en die verandert ook bij correcties. Hoe lang een pand al in een fase staat, staat per gemeente in <a href="levensloop.html" class="levLink">Levensloop van de bouw</a>, uit het maandelijkse BAG-bestand met historie.</li>
+            <li><b>Maandstand</b>: de BAG-cijfers zijn de stand van het begin van de maand, de bekendmakingen zijn van vandaag. Een vergunning die deze maand is verleend, kan dus al in de bekendmakingen staan en nog niet in de BAG. Tot versie 2.0 las de pagina de BAG van de dag; de cijfers verschilden daardoor op tijd, en bij opgeleverd en sloop omdat toen alle verblijfsobjecten van een pand met woonfunctie meetelden.</li>
+            <li><b>Geen datum van de statuswijziging</b>: de maandstand geeft per pand de status, niet sinds wanneer. Hoe lang een pand al in een fase staat, staat per gemeente in <a href="levensloop.html" class="levLink">Levensloop van de bouw</a>, uit het maandelijkse BAG-bestand met historie.</li>
             <li><b>Bekendmakingen tellen niet op</b>: één project heeft vaak een aanvraag, een verlenging van de termijn en een besluit. Dat zijn drie publicaties. Tel ze niet bij elkaar op en ook niet bij de BAG.</li>
             <li><b>De indeling van bekendmakingen is tekstherkenning</b>: gemeenten schrijven hun publicaties verschillend. Een publicatie zonder herkenbare beschrijving valt erbuiten; soms valt een verbouwing er ten onrechte in. Elke regel linkt naar de publicatie zelf.</li>
             <li><b>Sloop en samenvoegen</b> halen woningen weg. In de stroom staan ze apart, niet als min op het totaal.</li>
@@ -342,11 +346,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> BAG (Kadaster) via de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API van PDOK</a>, dagstand: de pagina haalt bij elke gemeentekeuze de stand van vandaag op, zonder de mutaties van de dag zelf. Omgevingsvergunningen uit het gemeenteblad (<a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a>, KOOP), laatste twaalf maanden, live. Buurten en wijken: CBS Wijk- en buurtkaart via PDOK. Het exacte tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Bron en peildatum.</b> BAG (Kadaster), landelijke <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-GeoPackage van PDOK</a>, maandstand: elke maand per gemeente klaargezet in de data van de <a href="bagwerkbank.html">BAG-werkbank</a>, dezelfde stand als Kwaliteit van de BAG. De standdatum staat bij de cijfers; is de stand ouder dan 45 dagen, dan zegt de pagina dat. Omgevingsvergunningen uit het gemeenteblad (<a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a>, KOOP), laatste twaalf maanden, live. Buurten en wijken: CBS Wijk- en buurtkaart via PDOK, live.</p>
     <p><b>Licentie.</b> BAG: CC0. Officiële bekendmakingen (KOOP): CC0. Wijk- en buurtgrenzen (CBS) en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
     <p><b>Methode.</b> De fase van een woning volgt uit de status van pand en verblijfsobject in de BAG; een woning is een verblijfsobject met woonfunctie. Bekendmakingen worden op tekst ingedeeld naar soort en stap. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen woningbouwprogramma en geen planning van de gemeente: alleen wat in de BAG en het gemeenteblad staat. Het signaal "verwacht jaar voorbij" is een aanleiding om na te gaan, geen vaststelling van vertraging. Geen vergelijking of oordeel over een gemeente.</p>
-    <p><b>Bekende beperkingen.</b> De BAG volgt de verwerking door de gemeente; gemeenten registreren de levensloop verschillend (sommige zetten panden nauwelijks op "bouw gestart"). Geen datum van de statuswijziging in de dagstand (wel in Levensloop van de bouw, uit het maandbestand met historie). Bekendmakingen tellen niet op en de tekstherkenning mist soms een publicatie.</p>
+    <p><b>Bekende beperkingen.</b> De BAG volgt de verwerking door de gemeente; gemeenten registreren de levensloop verschillend (sommige zetten panden nauwelijks op "bouw gestart"). De BAG is een maandstand, de bekendmakingen zijn van vandaag. Geen datum van de statuswijziging (wel in Levensloop van de bouw, uit het maandbestand met historie). Bekendmakingen tellen niet op en de tekstherkenning mist soms een publicatie.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -360,9 +364,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.4.1';
+  const VERSIE = '2.0';
   const PRODUCT = 'Bouwstroom';
-  const BAG = 'https://api.pdok.nl/kadaster/bag/ogc/v2/collections/';
   const PDOK = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/`;
   const SRU = 'https://repository.overheid.nl/sru';
   const NU = new Date();
@@ -559,8 +562,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     document.querySelectorAll('.levLink').forEach(a => { a.href = 'levensloop.html#gm=' + g.c; });
     document.title = 'Bouwstroom ' + g.n;
     try { localStorage.setItem('jl-gemeente', g.c); history.replaceState(null, '', '#gm=' + g.c + (oud ? `&verwacht=${oud.tot}` + (oud.gm === g.c && oud.n ? `&n=${oud.n}&peil=${oud.peil}` : '') : '')); } catch (e) {}
-    S = { g, gebied: null, buurten: [], wijken: new Map(), bjaar: null, panden: new Map(), proj: [], projAlle: [], bek: null, bekN: null, bekNaam: null, bagStamp: null, opgehaald: null, klaar: false };
-    selId = null; fouten.clear(); toonMelding();
+    S = { g, gebied: null, buurten: [], wijken: new Map(), bjaar: null, panden: new Map(), proj: [], projAlle: [], bek: null, bekN: null, bekNaam: null, bagPeil: null, opgehaald: null, klaar: false };
+    selId = null; fouten.clear(); toonMelding(); $('#standOud').hidden = true;
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'gegevens ophalen…';
     ['#top4', '#stroom', '#zijstroom', '#chJaar', '#chBek', '#tblWrap', '#dossier', '#mapLegend', '#stroomNoot'].forEach(s => { $(s).innerHTML = ''; });
     voortgang(0, 4, 'Gemeentegrens en buurten ophalen bij PDOK…');
@@ -575,25 +578,38 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     renderAlles();
     if (oudScroll) { oudScroll = false; $('#oudNoot').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }
-  function renderAlles() { $('#nietWoon').textContent = S.nietWoon ? ` (in ${S.g.n} nu ${nf.format(S.nietWoon)} panden)` : ''; renderKern(); renderStroom(); renderJaar(); renderBekMat(); renderLagen(); renderKaart(); renderDossier(null); renderFilter(); renderTabel(); renderVoet(); }
+  function renderStandOud() {
+    const el = $('#standOud'), n = standDagen();
+    el.hidden = !(S.bagPeil && n > OUD_DAGEN);
+    if (!el.hidden) el.textContent = `De BAG-stand is van ${datumNL(S.bagPeil)}, ${n} dagen geleden. De maandelijkse verversing loopt achter; de cijfers kunnen verouderd zijn. De bekendmakingen zijn wel van vandaag.`;
+  }
+  function renderAlles() { renderStandOud(); $('#nietWoon').textContent = S.nietWoon ? ` (in ${S.g.n} nu ${nf.format(S.nietWoon)} panden)` : ''; renderKern(); renderStroom(); renderJaar(); renderBekMat(); renderLagen(); renderKaart(); renderDossier(null); renderFilter(); renderTabel(); renderVoet(); }
 
   // ---------- gebied: gemeente, buurten, wijken (CBS via PDOK) ----------
+  // Vanaf de kaart 2026 heten de velden gm_code, wk_code, bu_code en zijn buurten niet op gemeente te filteren:
+  // dan buurten binnen het vak van de gemeente ophalen en op gm_code selecteren.
   async function laadGebied() {
     const c = S.g.c;
     for (let j = JAAR; j >= 2023; j--) {
       try {
-        const gm = await getJSON(PDOK(j) + `gemeenten/items?f=json&gemeentecode=GM${c}&limit=10`, 1);
+        let nieuw = false;
+        let gm = await getJSON(PDOK(j) + `gemeenten/items?f=json&gemeentecode=GM${c}&limit=10`, 1).catch(() => null);
+        if (!gm || !(gm.features || []).length) { gm = await getJSON(PDOK(j) + `gemeenten/items?f=json&gm_code=GM${c}&limit=10`, 1); nieuw = true; }
         const land = (gm.features || []).filter(f => f.properties.water !== 'JA');
         if (!land.length) continue;
-        const [bu, wk] = await Promise.all([
-          alles(PDOK(j) + `buurten/items?f=json&gemeentecode=GM${c}&limit=1000`),
-          alles(PDOK(j) + `wijken/items?f=json&gemeentecode=GM${c}&limit=1000`)
-        ]);
-        if (!bu.features.length) continue;
         const polys = land.flatMap(f => polysVan(f.geometry));
-        S.gebied = maakGebied({ type: 'MultiPolygon', coordinates: polys }, {});
-        S.buurten = bu.features.filter(f => f.properties.water !== 'JA').map(f => maakGebied(f.geometry, { code: f.properties.buurtcode, naam: f.properties.buurtnaam, wijk: f.properties.wijkcode }));
-        wk.features.forEach(f => S.wijken.set(f.properties.wijkcode, f.properties.wijknaam));
+        const gebied = maakGebied({ type: 'MultiPolygon', coordinates: polys }, {});
+        const bb = gebied.bb.map(v => v.toFixed(6)).join(',');
+        const [bu, wk] = await Promise.all([
+          alles(PDOK(j) + (nieuw ? `buurten/items?f=json&bbox=${bb}&limit=1000` : `buurten/items?f=json&gemeentecode=GM${c}&limit=1000`)),
+          alles(PDOK(j) + `wijken/items?f=json&${nieuw ? 'gm_code' : 'gemeentecode'}=GM${c}&limit=1000`)
+        ]);
+        const pr = f => f.properties;
+        const eigen = bu.features.filter(f => (pr(f).gemeentecode || pr(f).gm_code) === 'GM' + c && pr(f).water !== 'JA');
+        if (!eigen.length) continue;
+        S.gebied = gebied;
+        S.buurten = eigen.map(f => maakGebied(f.geometry, { code: pr(f).buurtcode || pr(f).bu_code, naam: pr(f).buurtnaam || pr(f).bu_naam, wijk: pr(f).wijkcode || pr(f).wk_code }));
+        wk.features.forEach(f => S.wijken.set(pr(f).wijkcode || pr(f).wk_code, pr(f).wijknaam || pr(f).wk_naam));
         S.bjaar = j;
         return true;
       } catch (e) { /* volgend jaar proberen */ }
@@ -607,95 +623,81 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
 
   // ---------- BAG ----------
-  const q = s => encodeURIComponent(s);
+  // Maandstand uit de BAG-GeoPackage (PDOK), per gemeente klaargezet in de data van de BAG-werkbank,
+  // dezelfde stand als Kwaliteit van de BAG, de BAG-werkbank en Levensloop van de bouw.
+  // Tot versie 1.4.1 vroeg de pagina de BAG live op met een statusfilter; PDOK breekt zo'n vraag na 60 s af.
+  const BOUW = '/bag-werkbank/bouw/';
+  const BAGFOUT = 'BAG-stand (Open Data Atelier)';
+  const OUD_DAGEN = 45;
+  const VBO_NIEUW = { 'Verblijfsobject gevormd': false, 'Verblijfsobject in gebruik (niet ingemeten)': true };
+  async function haalGz(url) {
+    const r = await fetch(url, { cache: 'no-cache' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf[0] === 0x1f && buf[1] === 0x8b) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('deze browser kan het bestand niet uitpakken');
+      const st = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return JSON.parse(await new Response(st).text());
+    }
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
   async function laadBAG() {
     const g = S.g;
-    let n = 0; const tel = () => { voortgang(2, 4, `BAG: ${fmt(++n)} vakken ontvangen…`); };
+    voortgang(2, 4, 'BAG-stand ophalen…');
     try {
-      const [vg, vn, pp, po] = await Promise.all([
-        inVakken('verblijfsobject', "status='Verblijfsobject gevormd'", S.gebied.bb, tel),
-        inVakken('verblijfsobject', "status='Verblijfsobject in gebruik (niet ingemeten)'", S.gebied.bb, tel),
-        inVakken('pand', Object.keys(PAND_FASE).map(s => `status='${s}'`).join(' OR '), S.gebied.bb, tel),
-        inVakken('pand', `status='Pand in gebruik' AND bouwjaar>=${JAAR - 1}`, S.gebied.bb, tel)
-      ]);
+      const d = await haalGz(BOUW + g.c + '.json.gz');
       if (S.g !== g) return;
-      S.bagStamp = vg.stamp || pp.stamp;
-      bouwProjecten(vg.features, vn.features, pp.features, po.features);
+      S.bagPeil = d.peil;
+      bouwProjecten(d);
     } catch (e) {
       if (S.g !== g) return;
-      fouten.add('BAG (PDOK)'); toonMelding();
+      fouten.add(BAGFOUT); toonMelding();
     }
   }
-  // PDOK breekt een BAG-vraag met statusfilter na 60 s af, en een tweede pagina haalt dat
-  // bij een middelgrote gemeente al niet (getest 9 nov 2026). Daarom niet doorbladeren:
-  // past een vak niet in één pagina, of komt er geen antwoord, dan in vier kleinere vakken.
-  let bagBezig = 0; const bagWacht = [];
-  async function bagJSON(u) {
-    while (bagBezig >= 6) await new Promise(r => bagWacht.push(r));
-    bagBezig++;
-    try { return JSON.parse(await getText(u, 1, 65000)); }
-    finally { bagBezig--; const r = bagWacht.shift(); if (r) r(); }
+  const datumNL = iso => new Date(iso + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  const standDagen = () => S.bagPeil ? Math.floor((Date.now() - new Date(S.bagPeil + 'T00:00:00')) / 864e5) : 0;
+  const volId = (v, g, t) => !v ? '' : v.length === 16 ? v : g + t + v;
+  // ringen als [x0, y0, dx, dy, …] in miljoenste graden
+  function ringen(enc) {
+    return enc.map(r => { const out = []; let x = 0, y = 0; for (let i = 0; i < r.length; i += 2) { x += r[i]; y += r[i + 1]; out.push([x / 1e6, y / 1e6]); } return out; });
   }
-  async function inVakken(coll, flt, bb, onVak, diepte = 0) {
-    const u = `${BAG}${coll}/items?f=json&limit=1000&bbox=${bb.map(v => v.toFixed(6)).join(',')}&filter=${q(flt)}`;
-    let d = null;
-    try { d = await bagJSON(u); } catch (e) { if (diepte >= 5) throw e; }
-    if (d) {
-      const nx = (d.links || []).find(l => l.rel === 'next');
-      if (!nx || !(d.features || []).length) { if (onVak) onVak(); return { features: d.features || [], stamp: d.timeStamp }; }
-      if (diepte >= 5) { const rest = await alles(nx.href); if (onVak) onVak(); return { features: d.features.concat(rest.features), stamp: d.timeStamp }; }
-    }
-    const [x0, y0, x1, y1] = bb, xm = (x0 + x1) / 2, ym = (y0 + y1) / 2;
-    const delen = await Promise.all([[x0, y0, xm, ym], [xm, y0, x1, ym], [x0, ym, xm, y1], [xm, ym, x1, y1]]
-      .map(b => inVakken(coll, flt, b, onVak, diepte + 1)));
-    // een object op de rand van twee vakken komt in beide terug: één keer tellen
-    const gezien = new Set(), features = [];
-    delen.forEach(r => r.features.forEach(f => { if (!gezien.has(f.id)) { gezien.add(f.id); features.push(f); } }));
-    return { features, stamp: (d && d.timeStamp) || delen.map(r => r.stamp).find(Boolean) || null };
-  }
-  const pandId = href =>String(href || '').split('/').pop();
-  function adresVan(p) {
-    return [p.openbare_ruimte_naam, [p.huisnummer, p.huisletter || '', p.toevoeging ? '-' + p.toevoeging : ''].join('')].filter(Boolean).join(' ');
-  }
-  function bouwProjecten(vg, vn, pp, po) {
-    const gc = S.g.c;
-    const panden = new Map();
-    const eigenPand = f => { const m = midden(f.geometry); return m && inGeom(m[0], m[1], S.gebied) ? m : null; };
-    pp.forEach(f => {
-      const m = eigenPand(f); if (!m) return;
-      const p = f.properties;
-      panden.set(f.id, { uid: f.id, id: p.identificatie, status: p.status, fase: PAND_FASE[p.status], bouwjaar: p.bouwjaar, doel: p.gebruiksdoel || '', nvbo: p.aantal_verblijfsobjecten || 0, geom: f.geometry, xy: m, vbo: [], hrefs: p['verblijfsobject.href'] || [] });
+  function bouwProjecten(d) {
+    const gc = S.g.c, W = d.w;
+    const panden = new Map(), losse = new Map();
+    d.p.forEach(([pk, ps, bj, enc]) => {
+      const id = volId(pk, gc, '10'), status = W.pst[ps];
+      const fase = PAND_FASE[status] || (status === 'Pand in gebruik' && bj >= JAAR - 1 ? 'opgeleverd' : null);
+      if (!fase) return;
+      const geom = enc && enc.length ? { type: 'Polygon', coordinates: ringen(enc) } : null;
+      panden.set(id, { uid: id, id, status, fase, bouwjaar: bj || null, doel: '', geom, xy: geom ? midden(geom) : null, vbo: [], alle: [] });
     });
-    po.forEach(f => {
-      const p = f.properties; if (!(p.aantal_verblijfsobjecten > 0)) return;
-      const m = eigenPand(f); if (!m) return;
-      panden.set(f.id, { uid: f.id, id: p.identificatie, status: p.status, fase: 'opgeleverd', bouwjaar: p.bouwjaar, doel: p.gebruiksdoel || '', nvbo: p.aantal_verblijfsobjecten, geom: f.geometry, xy: m, vbo: [], hrefs: p['verblijfsobject.href'] || [] });
-    });
-    const losse = new Map(); // nieuwe vbo in panden buiten de pijplijn: bestaand pand
-    const voegToe = (f, klaarStatus) => {
-      const p = f.properties;
-      if (String(p.bronhouder_identificatie || '').padStart(4, '0') !== gc) return;
-      const v = { id: p.identificatie, status: p.status, doel: p.gebruiksdoel || '', woon: /woonfunctie/.test(p.gebruiksdoel || ''), opp: p.oppervlakte, adres: adresVan(p), pc: p.postcode, wp: p.woonplaats_naam, xy: f.geometry && f.geometry.coordinates, klaar: klaarStatus };
-      const pid = pandId((p['pand.href'] || [])[0]);
+    d.v.forEach(([vk, pk, vs, dl, opp, str, nr, lt, toe, pc, wp, x, y]) => {
+      const status = W.vst[vs], doel = W.doel[dl] || '';
+      const v = { id: volId(vk, gc, '01'), status, doel, woon: /woonfunctie/.test(doel), opp, pc, wp: W.wp[wp],
+        adres: [W.str[str], [nr, lt || '', toe ? '-' + toe : ''].join('')].filter(Boolean).join(' '),
+        xy: [x / 1e6, y / 1e6], nieuw: status in VBO_NIEUW, klaar: VBO_NIEUW[status] === true };
+      const pid = volId(pk, gc, '10');
       let pd = panden.get(pid);
-      if (!pd) {
-        pd = losse.get(pid);
-        if (!pd) { pd = { uid: pid, id: null, status: null, fase: 'bestaand', bouwjaar: null, doel: '', nvbo: null, geom: null, xy: v.xy, vbo: [], hrefs: [] }; losse.set(pid, pd); }
-      }
-      pd.vbo.push(v);
-    };
-    vg.forEach(f => voegToe(f, false));
-    vn.forEach(f => voegToe(f, true));
-    // vbo 'in gebruik (niet ingemeten)' in een pand buiten de pijplijn: dat pand is klaar
+      if (pd) { pd.alle.push(v); if (v.nieuw) pd.vbo.push(v); return; }
+      if (!v.nieuw) return;
+      pd = losse.get(pid);
+      if (!pd) { pd = { uid: pid, id: null, pandId: pid, status: null, fase: 'bestaand', bouwjaar: null, doel: '', geom: null, xy: v.xy, vbo: [], alle: [] }; losse.set(pid, pd); }
+      pd.vbo.push(v); pd.alle.push(v);
+    });
+    // nieuw verblijfsobject 'in gebruik (niet ingemeten)' in een pand buiten de pijplijn: dat pand is klaar
     losse.forEach(pd => { if (pd.vbo.some(v => v.klaar)) pd.fase = 'klaar'; });
-    const proj = [...panden.values(), ...losse.values()];
+    const proj = [...panden.values(), ...losse.values()].filter(pd => pd.fase !== 'opgeleverd' || pd.alle.length);
     proj.forEach(pd => {
-      pd.woon = pd.vbo.filter(v => v.woon).length;
-      pd.ander = pd.vbo.length - pd.woon;
-      if (pd.fase === 'opgeleverd' || pd.fase === 'sloop') { pd.woon = /woonfunctie/.test(pd.doel) ? pd.nvbo : 0; pd.ander = pd.nvbo - pd.woon; }
-      else if (!pd.vbo.length && pd.nvbo) { pd.woon = /woonfunctie/.test(pd.doel) ? pd.nvbo : 0; pd.ander = pd.nvbo - pd.woon; pd.zonderVbo = true; }
+      // Opgeleverd en sloop: alle verblijfsobjecten van het pand. Pijplijn: de nieuwe; heeft het pand die niet,
+      // dan de verblijfsobjecten die het al heeft. Ingetrokken objecten staan niet in de GeoPackage en tellen dus niet.
+      let tel = pd.vbo;
+      if (pd.fase === 'opgeleverd' || pd.fase === 'sloop') tel = pd.alle;
+      else if (!pd.vbo.length && pd.alle.length) { tel = pd.alle; pd.zonderVbo = true; }
+      pd.woon = tel.filter(v => v.woon).length;
+      pd.ander = tel.length - pd.woon;
+      pd.doel = [...new Set(pd.alle.flatMap(v => v.doel.split(',')).filter(Boolean))].join(',');
       pd.buurt = buurtVan(pd.xy);
-      pd.adres = adresLijst(pd.vbo);
+      pd.adres = adresLijst(pd.alle);
       pd.sig = (pd.fase === 'vergund' || pd.fase === 'bouw') && pd.bouwjaar && pd.bouwjaar < JAAR ? JAAR - pd.bouwjaar : 0;
       if (pd.fase === 'bestaand') pd.uid = 'b:' + pd.uid;
     });
@@ -792,14 +794,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderKern() {
     const g = S.g;
     const unit = (titel, val, sub, cls = '') => `<div class="unit ${cls}"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
-    if (!S.proj.length && fouten.has('BAG (PDOK)')) {
+    if (!S.proj.length && fouten.has(BAGFOUT)) {
       $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'de BAG kon niet worden bevraagd';
       $('#top4').innerHTML = ''; return;
     }
     const f = perFase();
     const pijp = f.vergund.woon + f.bouw.woon + f.klaar.woon;
     $('#leadBig').textContent = `${g.n}: ${fmt(pijp)} nieuwe woningen onderweg`;
-    $('#leadSub').textContent = `${fmt(f.vergund.woon)} vergund · ${fmt(f.bouw.woon)} in aanbouw · ${fmt(f.klaar.woon)} klaar, nog in te meten · daarnaast ${fmt(f.bestaand.woon)} in bestaande panden`;
+    $('#leadSub').textContent = `${fmt(f.vergund.woon)} vergund · ${fmt(f.bouw.woon)} in aanbouw · ${fmt(f.klaar.woon)} klaar, nog in te meten · daarnaast ${fmt(f.bestaand.woon)} in bestaande panden · BAG-stand ${datumNL(S.bagPeil)}`;
     const sig = S.proj.filter(p => p.sig);
     const sigW = som(sig, 'woon');
     const sig2 = sig.filter(p => p.sig >= 2);
@@ -821,7 +823,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     let h = '';
     h += card('bek', 'Aangevraagd en verleend', S.bek ? fmt(bAanv.length + bBes.length) : '–',
       S.bek ? `publicaties voor nieuwbouw en transformatie in 12 maanden: ${mv(bAanv.length, 'aanvraag', 'aanvragen')}, ${mv(bBes.length, 'besluit', 'besluiten')}. In de besluiten genoemd: ${mv(som(bBes, 'n'), 'woning', 'woningen')}.` : 'bekendmakingen niet beschikbaar', BEK_KLEUR);
-    const geenBAG = !S.proj.length && fouten.has('BAG (PDOK)');
+    const geenBAG = !S.proj.length && fouten.has(BAGFOUT);
     ['vergund', 'bouw', 'klaar', 'opgeleverd'].forEach(k => {
       const x = f[k];
       if (geenBAG) { h += card(k, FASE[k].t, '–', 'BAG niet beschikbaar', FASE[k].c); return; }
@@ -832,14 +834,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#zijstroom').innerHTML = (geenBAG ? '' : `<span><i style="background:var(${FASE.bestaand.c})"></i>In bestaande panden: <b>${fmt(f.bestaand.woon)}</b> nieuwe woningen in ${fmt(f.bestaand.panden)} panden (splitsing, transformatie)</span>` +
       `<span><i style="background:var(${FASE.sloop.c})"></i>Sloopvergunning: <b>${fmt(f.sloop.panden)}</b> panden met ${fmt(f.sloop.woon)} woningen</span>`) +
       (S.bek ? `<span><i style="background:var(${BEK_KLEUR})"></i>Bekendmakingen splitsen: <b>${fmt(sp.length)}</b> · samenvoegen: <b>${fmt(sv.length)}</b></span>` : '');
-    $('#stroomNoot').textContent = 'Woningen tellen per fase één keer. De bekendmakingen zijn publicaties, geen woningen: één project kan meerdere publicaties hebben.';
+    $('#stroomNoot').textContent = (S.bagPeil ? `BAG-stand ${datumNL(S.bagPeil)}; bekendmakingen tot en met vandaag. ` : '') + 'Woningen tellen per fase één keer. De bekendmakingen zijn publicaties, geen woningen: één project kan meerdere publicaties hebben.';
   }
 
   // ---------- grafiek: verwacht bouwjaar ----------
   function renderJaar() {
     const el = $('#chJaar');
     const rs = S.proj.filter(p => (p.fase === 'vergund' || p.fase === 'bouw') && p.woon);
-    if (!rs.length) { el.innerHTML = '<h3>Wanneer verwacht?</h3><p class="small muted" style="margin:0">' + (fouten.has('BAG (PDOK)') ? 'De BAG kon niet worden bevraagd.' : 'Geen vergunde of in aanbouw zijnde woningen in de BAG.') + '</p>'; return; }
+    if (!rs.length) { el.innerHTML = '<h3>Wanneer verwacht?</h3><p class="small muted" style="margin:0">' + (fouten.has(BAGFOUT) ? 'De BAG kon niet worden bevraagd.' : 'Geen vergunde of in aanbouw zijnde woningen in de BAG.') + '</p>'; return; }
     const bins = []; for (let j = JAAR - 3; j <= JAAR + 3; j++) bins.push(j);
     const key = j => j == null ? null : Math.min(JAAR + 3, Math.max(JAAR - 3, j));
     const lab = j => j === JAAR - 3 ? `≤${j}` : j === JAAR + 3 ? `≥${j}` : String(j);
@@ -971,17 +973,6 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
 
   // ---------- dossier ----------
-  async function vulAdres(p) {
-    if (p.adres || !p.hrefs || !p.hrefs.length || p.adresBezig) return;
-    p.adresBezig = true;
-    try {
-      const vs = await Promise.all(p.hrefs.slice(0, 6).map(h => getJSON(h + (h.includes('?') ? '&' : '?') + 'f=json', 1).catch(() => null)));
-      const lijst = vs.filter(Boolean).map(f => ({ adres: adresVan(f.properties), doel: f.properties.gebruiksdoel, status: f.properties.status, pc: f.properties.postcode, wp: f.properties.woonplaats_naam }));
-      p.adres = adresLijst(lijst) + (p.hrefs.length > 6 ? ' e.a.' : '');
-      p.vboExtra = lijst;
-    } catch (e) { /* zonder adres verder */ }
-    if (selId === p.uid) renderDossier(p);
-  }
   const bagLink = id => `https://bagviewer.kadaster.nl/lvbag/bag-viewer/?objectId=${id}`;
   const bekLink = id => `https://zoek.officielebekendmakingen.nl/${encodeURIComponent(id)}.html`;
   function afstand(a, b) { const dx = (a[0] - b[0]) * 68500, dy = (a[1] - b[1]) * 111300; return Math.sqrt(dx * dx + dy * dy); }
@@ -1006,9 +997,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>`;
     } else {
       const p = o;
-      vulAdres(p);
       const bek = (S.bek || []).filter(r => r.xy && p.xy && afstand(r.xy, p.xy) < 75).slice(0, 6);
-      const vbo = (p.vbo.length ? p.vbo : p.vboExtra || []);
+      const vbo = p.vbo.length ? p.vbo : p.alle;
       const doelen = {}; vbo.forEach(v => { (v.doel || 'onbekend').split(',').forEach(d => { doelen[d] = (doelen[d] || 0) + 1; }); });
       el.innerHTML = `<span class="eyebrow">${esc(FASE[p.fase].t)}${p.buurt ? ' · ' + esc(p.buurt.naam) : ''}</span><h2>${esc(p.adres || (p.adresBezig ? 'Adres ophalen…' : 'Pand ' + (p.id || '')))}</h2>
         ${p.sig ? `<div class="sigtxt">Verwacht bouwjaar ${p.bouwjaar} is voorbij; de BAG-status is nog "${esc(p.status)}". Vertraagd project, of een start of oplevering die nog niet in de BAG staat.</div>` : ''}
@@ -1021,7 +1011,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           ${p.buurt ? `<dt>Wijk</dt><dd>${esc(S.wijken.get(p.buurt.wijk) || '–')}</dd>` : ''}
         </dl>
         ${p.id ? `<a href="${bagLink(p.id)}" target="_blank" rel="noopener">Pand ${esc(p.id)} in de BAG-viewer</a>` : (vbo[0] && vbo[0].id ? `<a href="${bagLink(vbo[0].id)}" target="_blank" rel="noopener">Verblijfsobject in de BAG-viewer</a>` : '')}
-        ${p.zonderVbo ? '<p class="small muted" style="margin:0">Dit pand heeft (nog) geen nieuwe verblijfsobjecten in de BAG; het aantal komt van het pand zelf.</p>' : ''}
+        ${p.zonderVbo ? '<p class="small muted" style="margin:0">Dit pand heeft geen nieuwe verblijfsobjecten in de BAG; hier tellen de verblijfsobjecten die het al heeft.</p>' : ''}
         ${bek.length ? `<span class="eyebrow">Bekendmakingen binnen 75 m</span><ul>${bek.map(r => `<li><a href="#" data-uid="${esc(r.uid)}">${dmy(r.datum)}</a> · ${esc(r.soort.toLowerCase())}, ${esc(r.stap.toLowerCase())}${r.n ? `, ${fmt(r.n)} woningen` : ''}</li>`).join('')}</ul>` : ''}
         <button class="btn linkish" type="button" id="dosTerug">← Terug naar ${esc(S.g.n)}</button>`;
     }
@@ -1059,7 +1049,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   const chip = (k, extra = '') => `<span class="chip"><i class="d" style="background:var(${FASE[k].c})"></i>${esc(FASE[k].t)}${extra}</span>`;
   const projBron = () => filter === 'oud' && view === 'proj' ? projOud() : S.proj;
   function rijenProj() {
-    return projBron().map(p => ({ uid: p.uid, adres: p.adres || '', buurt: p.buurt ? p.buurt.naam : '', wijk: p.buurt ? (S.wijken.get(p.buurt.wijk) || '') : '', fase: p.fase, faseT: FASE[p.fase].t, woon: p.woon, ander: p.ander, bouwjaar: p.bouwjaar, sig: p.sig, status: p.status || '', pand: p.id || '', geenAdres: !p.nvbo && !p.vbo.length }));
+    return projBron().map(p => ({ uid: p.uid, adres: p.adres || '', buurt: p.buurt ? p.buurt.naam : '', wijk: p.buurt ? (S.wijken.get(p.buurt.wijk) || '') : '', fase: p.fase, faseT: FASE[p.fase].t, woon: p.woon, ander: p.ander, bouwjaar: p.bouwjaar, sig: p.sig, status: p.status || '', pand: p.id || '', geenAdres: !p.alle.length }));
   }
   function rijenBuurt() {
     const m = new Map();
@@ -1071,7 +1061,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
   function rijenBek() { return (S.bek || []).map(r => ({ uid: r.uid, datum: r.datum, soort: r.soort, stap: r.stap, n: r.n, tekst: (r.abs && r.abs.length > 20 ? r.abs : r.titel), titel: r.titel, buurt: r.buurt ? r.buurt.naam : '', id: r.id })); }
   const COLS = {
-    proj: [{ k: 'adres', t: 'Adres', f: r => r.adres ? esc(r.adres) : `<span class="muted">pand ${esc(r.pand.slice(-6))} · ${r.geenAdres ? 'nog geen adres in de BAG' : 'klik voor adres'}</span>` }, { k: 'buurt', t: 'Buurt' }, { k: 'faseT', t: 'Fase', f: r => chip(r.fase) + (r.sig ? ` <span class="chip sig">verwacht ${r.bouwjaar}</span>` : '') },
+    proj: [{ k: 'adres', t: 'Adres', f: r => r.adres ? esc(r.adres) : `<span class="muted">pand ${esc(r.pand.slice(-6))} · nog geen adres in de BAG</span>` }, { k: 'buurt', t: 'Buurt' }, { k: 'faseT', t: 'Fase', f: r => chip(r.fase) + (r.sig ? ` <span class="chip sig">verwacht ${r.bouwjaar}</span>` : '') },
       { k: 'woon', t: 'Woningen', r: 1 }, { k: 'ander', t: 'Anders', r: 1 }, { k: 'bouwjaar', t: 'Bouwjaar', r: 1, f: r => r.bouwjaar || '–' }],
     buurt: [{ k: 'buurt', t: 'Buurt' }, { k: 'wijk', t: 'Wijk' }, { k: 'vergund', t: 'Vergund', r: 1 }, { k: 'bouw', t: 'In aanbouw', r: 1 }, { k: 'klaar', t: 'Klaar', r: 1 },
       { k: 'opgeleverd', t: 'Opgeleverd (ca.)', r: 1 }, { k: 'bestaand', t: 'Bestaand pand', r: 1 }, { k: 'sloop', t: 'Sloop', r: 1 }, { k: 'sigW', t: 'Verwacht jaar voorbij', r: 1 },
@@ -1095,7 +1085,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     el.hidden = !aan;
     if (!aan) return;
     const l = projBron(), w = l.filter(p => p.woon > 0).length, zonder = l.length - w;
-    const t = oud.gm === S.g.c && oud.n && oud.peil ? ` Kwaliteit van de BAG telde er ${fmt(+oud.n)} op ${new Date(oud.peil + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}; deze lijst leest de BAG van vandaag, dus het aantal kan afwijken.` : '';
+    const t = oud.gm === S.g.c && oud.n && oud.peil ? ` Kwaliteit van de BAG telde er ${fmt(+oud.n)} op ${new Date(oud.peil + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}; ${oud.peil === S.bagPeil ? 'deze lijst gebruikt dezelfde BAG-stand.' : `deze lijst gebruikt de BAG-stand van ${datumNL(S.bagPeil)}, dus het aantal kan afwijken.`}` : '';
     el.innerHTML = `<b>${mv(l.length, 'pand', 'panden')} op vergund of bouw gestart, met verwacht bouwjaar ${oud.tot} of eerder.</b> ${w === l.length ? 'Alle met woningen.' : `${mv(w, 'pand', 'panden')} met woningen, ${mv(zonder, 'pand', 'panden')} zonder. Die laatste staan alleen in deze lijst, niet in de cijfers van Bouwstroom.`}${t}<div style="margin-top:8px"><button class="btn" type="button" id="oudUit">← Terug naar alle panden</button></div>`;
     $('#oudUit').addEventListener('click', () => {
       filter = 'alle'; oud = null;
@@ -1167,8 +1157,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderVoet() {
     renderHerken();
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
-    const bs = S.bagStamp ? new Date(S.bagStamp).toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : null;
-    $('#foot').innerHTML = `Bronnen: <a href="https://www.kadaster.nl/zakelijk/registraties/basisregistraties/bag">Basisregistratie Adressen en Gebouwen</a> (Kadaster, CC0), panden en verblijfsobjecten via de <a href="https://api.pdok.nl/kadaster/bag/ogc/v2">BAG OGC API van PDOK</a>, dagelijks bijgewerkt${bs ? `; antwoord van ${bs}` : ''}. Bekendmakingen: <a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a> (KOOP, CC0), gemeenteblad, omgevingsvergunningen sinds ${S.bekVan ? dmy(S.bekVan) : '–'}${S.bekNaam ? ` (uitgever "${esc(S.bekNaam)}")` : ''}, via de SRU-dienst van overheid.nl. Buurten en wijken: CBS Wijk- en buurtkaart ${S.bjaar || ''} via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${S.bjaar}/ogc/v1">PDOK</a> (CC-BY 4.0). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Bouwstroom · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: <a href="https://www.kadaster.nl/zakelijk/registraties/basisregistraties/bag">Basisregistratie Adressen en Gebouwen</a> (Kadaster, CC0), panden en verblijfsobjecten uit de <a href="https://service.pdok.nl/kadaster/bag/atom/bag.xml">BAG-GeoPackage van PDOK</a>, stand ${S.bagPeil ? datumNL(S.bagPeil) : '–'}, klaargezet in de data van de <a href="bagwerkbank.html">BAG-werkbank</a>. Bekendmakingen: <a href="https://data.overheid.nl/dataset/officiele-bekendmakingen">Officiële bekendmakingen</a> (KOOP, CC0), gemeenteblad, omgevingsvergunningen sinds ${S.bekVan ? dmy(S.bekVan) : '–'}${S.bekNaam ? ` (uitgever "${esc(S.bekNaam)}")` : ''}, via de SRU-dienst van overheid.nl. Buurten en wijken: CBS Wijk- en buurtkaart ${S.bjaar || ''} via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${S.bjaar}/ogc/v1">PDOK</a> (CC-BY 4.0). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Bouwstroom · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
