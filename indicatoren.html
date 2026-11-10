@@ -341,7 +341,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.14.1';
+  const VERSIE = '0.15';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -587,7 +587,8 @@ main > * { min-width: 0; }
           norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (regionale inkoop, platform, schrijfwijze van de naam).',
           bron: () => 'TenderNed, Datasets aanbesteden (CC0, data-eigenaar PIANOo); ook in OCDS-vorm in het <a href="https://data.open-contracting.org/en/publication/133" target="_blank" rel="noopener">Open Contracting Data Registry</a>.',
           ggm: '<code>aanbesteding.tendernedkenmerk</code>, <code>.procedure</code>, <code>.type</code>; <code>cpv_code.code</code>; <code>gunning.datumgunning</code>. Met het TenderNed-kenmerk is de eigen registratie te koppelen aan de open data.',
-          herkomst: 'Aanbestedingswet 2012 (publicatieplicht).' },
+          herkomst: 'Aanbestedingswet 2012 (publicatieplicht).',
+          inst: ['tenderned.html', 'Aanbestedingen in TenderNed'] },
         { k: 'inspanning', b: 'open', naam: 'Externe inhuur',
           def: 'Lasten ingehuurd personeel als deel van de lasten personeel plus inhuur.',
           zegt: 'Hoe afhankelijk de organisatie is van inhuur, de grootste dienst die de gemeente voor zichzelf inkoopt.',
@@ -626,11 +627,12 @@ main > * { min-width: 0; }
         { k: 'bereik', b: 'open', naam: 'Inschrijvingen per aanbesteding',
           def: 'Gemiddeld aantal inschrijvingen per openbare aanbesteding, en het aandeel aanbestedingen met één inschrijving.',
           zegt: 'Of de markt reageert. Een strenge eis zonder reactie is een signaal.',
-          niet: 'Waarom bedrijven niet inschrijven. Aankondigingen die via een ander platform binnenkomen (zoals Mercell of een inhuurplatform) hebben meestal geen aantal inschrijvingen: de maat zegt dan alleen iets over wat de gemeente op TenderNed zelf plaatst.',
+          niet: 'Waarom bedrijven niet inschrijven. Bij inhuuraanvragen ontbreekt het aantal vaak, en een inhuuraanvraag is geen aanbesteding: tel die niet mee.',
           niveau: 'Aanbestedende dienst, per perceel. Bij een kleine gemeente een handvol gunningen per jaar: alleen over meer jaren samen.', norm: 'Eigen gemeente door de jaren; sector.', vgl: 'Beperkt (verschilt sterk per sector en per platform).',
-          bron: () => 'TenderNed, Datasets aanbesteden (onderdeel bids: aantal inschrijvingen per perceel; bij niet-openbare procedures alleen verzoeken tot deelneming). In 2025 bij twee derde van de percelen in gegunde opdrachten van gemeenten ingevuld (gezien 10 november 2026).',
+          bron: () => 'TenderNed, Datasets aanbesteden (onderdeel bids: aantal inschrijvingen per perceel; bij niet-openbare procedures alleen verzoeken tot deelneming). Bij gunningen van gemeenten 2024–2026 bij 97% van de percelen op TenderNed zelf, 84% via Mercell en 55% via een inhuurplatform ingevuld (gezien 10 november 2026).',
           ggm: '<code>inschrijving.datum</code>, <code>.prijs</code>, <code>.score</code> per <code>aanbesteding</code>.',
-          herkomst: 'TenderNed, benchmark aanbestedingen; voorstel atelier.' },
+          herkomst: 'TenderNed, benchmark aanbestedingen; voorstel atelier.',
+          inst: ['tenderned.html', 'Aanbestedingen in TenderNed'] },
         { k: 'bereik', b: 'open', naam: 'Gunning aan het mkb',
           def: 'Aandeel gunningen aan micro-, kleine en middelgrote ondernemingen.',
           zegt: 'Of de inkoop toegankelijk is voor kleinere bedrijven.',
@@ -638,7 +640,8 @@ main > * { min-width: 0; }
           niveau: 'Aanbestedende dienst, per gunning.', norm: 'Eigen gemeente door de jaren.', vgl: 'Nee (het kenmerk wordt per aankondiging verschillend ingevuld).',
           bron: () => 'TenderNed, Datasets aanbesteden (mkb-kenmerk bij de winnaar). Als aandeel nu niet te gebruiken; wel te volgen in de eigen registratie, met het KvK-nummer van de opdrachtnemer (gezien 10 november 2026).',
           ggm: 'Geen omvangsklasse en geen KvK-nummer bij <code>leverancier</code> in GGM v2.5.1 (alleen naam en nummer).',
-          herkomst: 'Aanbestedingswet 2012 (proportionaliteit); PIANOo, mkb-vriendelijk inkopen.' },
+          herkomst: 'Aanbestedingswet 2012 (proportionaliteit); PIANOo, mkb-vriendelijk inkopen.',
+          inst: ['tenderned.html', 'Aanbestedingen in TenderNed'] },
         { k: 'bereik', b: 'intern', naam: 'Opdrachten aan sociale ondernemers',
           def: 'Aantal en bedrag van opdrachten aan sociale ondernemers, waarvan voorbehouden opdrachten (artikel 2.82 Aanbestedingswet).',
           zegt: 'Hoeveel werk de gemeente rechtstreeks naar inclusieve bedrijven brengt.',

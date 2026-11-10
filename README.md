@@ -60,6 +60,8 @@ Tweede uitwerking: [BAG-werkbank](https://josephinelinders.nl/bagwerkbank.html),
 
 Derde uitwerking: [Levensloop van de bouw](https://josephinelinders.nl/levensloop.html), hoe de BAG de stappen van vergunning tot ingebruikname bijhoudt: per gemeente welke stappen worden geregistreerd (vergund, bouw gestart, niet ingemeten, in gebruik), hoe lang elke stap in de registratie duurt, hoe het bouwjaar bij de vergunning zich verhoudt tot de ingebruikname, en welke panden twee jaar of langer op dezelfde stap staan, met een link naar de BAG-viewer. Op basis van het BAG 2.0 Extract met historie (PDOK, CC0), panden met een bouwvergunning vanaf 2016, per gemeente naast Nederland. Het gaat om registratietijd, niet om bouwtijd: de datum van een stap is bijna altijd de dag van registreren.
 
+Vierde uitwerking, op een eigen plank Aanbestedingen: [Aanbestedingen in TenderNed](https://josephinelinders.nl/tenderned.html), wat een gemeente in TenderNed aankondigt, via welk platform (TenderNed zelf, Mercell, een inhuurplatform), en welke velden daardoor gevuld zijn of ontbreken: gunningscriterium, aantal inschrijvingen, gunningswaarde, mkb-kenmerk. Met de lijst van aankondigingen en een link naar TenderNed. Op basis van de open datasets van TenderNed (CC0, data-eigenaar PIANOo), 2024 tot 1 oktober 2026, per gemeente naast alle gemeenten samen. Het gaat over de registratie, niet over de inkoop; namen van winnaars en contactpersonen staan niet op de pagina.
+
 ## Werkwijze
 
 Vier lagen:
