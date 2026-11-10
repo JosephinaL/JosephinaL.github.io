@@ -21,6 +21,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | Iv3-panorama | [iv3panorama.html](https://josephinelinders.nl/iv3panorama.html) | Waar wijkt een gemeente af in de verdeling van haar uitgaven? | Iv3 (CBS) |
 | Rijksgeld per gemeente | [rijksgeld.html](https://josephinelinders.nl/rijksgeld.html) | Welk ministerie betaalt wat aan je gemeente? | Financiële instrumenten (Rijk), budgetten SZW, Iv3 (CBS) |
 | Rijksverdeling per gemeente | [rijksverdeling.html](https://josephinelinders.nl/rijksverdeling.html) | Hoe verdeelt het Rijk het gemeentefonds over je gemeente, tot op de maatstaf, met zelf meerekenen? | BZK (rekenmodel en circulaire gemeentefonds), CBS (Maatstaven Financiële-verhoudingswet) |
+| Woonlasten per gemeente | [woonlasten.html](https://josephinelinders.nl/woonlasten.html) | Wat vraagt de gemeente voor wonen aan OZB, riool en afval, en dempt de raad de WOZ-stijging? | CBS (heffingen per gemeente 83642NED, WOZ 85036NED, woningvoorraad 86286NED, kerncijfers wijken en buurten) |
 | **3 · Economie** | | | |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
 | **4 · Onderwijs** | | | |

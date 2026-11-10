@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Woonlasten per gemeente · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Woonlasten per Nederlandse gemeente: OZB, rioolheffing en afvalstoffenheffing per woning, het afgeleide OZB-tarief en wat de WOZ-stijging en de raad daaraan bijdragen, live uit CBS-open data.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --grijs: #b9c4c5;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; font-size: .9rem; max-width: 100%; }
+.info p { margin: 0; max-width: 90ch; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.jaren { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .ax { stroke: var(--line); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .val { fill: var(--fg); font: 600 11px var(--f-mono); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart-kop .laatst { font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .tick { display: inline-block; width: 0; height: 12px; border-left: 2px solid var(--fg); vertical-align: -1px; margin-right: 6px; }
+
+/* rijen met een balk en een streep voor Nederland */
+.rijen { display: grid; gap: 8px; }
+.rij { display: grid; grid-template-columns: minmax(120px, 13em) minmax(0, 1fr) 8.5em; gap: 4px 12px; align-items: center; font-size: .9rem; }
+.rij .naam { min-width: 0; }
+.rij .baan { position: relative; height: 16px; background: var(--sunk); border-radius: 3px; }
+.rij .baan i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.rij .baan b { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--fg); }
+.rij .w { text-align: right; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rij .w .muted { font-family: var(--f-body); }
+@media (max-width: 520px) { .rij { grid-template-columns: minmax(0, 1fr) 7.5em; } .rij .baan { grid-column: 1 / -1; grid-row: 2; } }
+
+/* gestapelde balk gemeente tegen Nederland */
+.stapel { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 6px 12px; align-items: center; font-size: .88rem; }
+.stapel .s { display: flex; height: 22px; border-radius: 3px; overflow: hidden; background: var(--sunk); }
+.stapel .s i { display: block; height: 100%; }
+.stapel .s i + i { border-left: 1px solid var(--surface); }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 14px 10px; }
+.scroll { overflow: auto; max-height: 520px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; white-space: nowrap; z-index: 1; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tr.grp td { font-weight: 600; background: var(--sunk); }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.hulp { font-size: .85rem; color: var(--muted); }
+
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+
+/* rekenvoorbeeld en legenda */
+.reken { display: grid; gap: 8px; }
+.reken label { font-size: .85rem; color: var(--muted); }
+.rekenrij { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.rekenrij input { width: min(180px, 60vw); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); font-family: var(--f-mono); }
+#reken th { position: static; }
+.legend .dash { display: inline-block; width: 18px; height: 0; border-top: 2px dashed var(--fg); vertical-align: 3px; margin-right: 6px; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Financiën · open data</span>
+      <h1 id="title">Woonlasten per gemeente</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · wat de gemeente vraagt voor wonen: OZB, riool en afval</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Wat vraagt de gemeente van een woning aan onroerendezaakbelasting (OZB), rioolheffing en afvalstoffenheffing? En als de WOZ-waarde stijgt: gaat de OZB dan mee omhoog, of verlaagt de raad het tarief? Kies een gemeente. Je ziet de eigen gemeente door de jaren heen, met Nederland als enige referentie. Er is geen ranglijst van gemeenten.</p>
+    <p class="muted small">De cijfers komen live van het CBS op het moment dat je een gemeente kiest. Het tarief is afgeleid uit open data, niet overgenomen uit de belastingverordening.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="top3" id="top3"></div>
+      <div class="info" id="uitzInfo" hidden><p id="uitzTxt"></p></div>
+      <div class="info"><p><b>Zo lees je de OZB.</b> De OZB is de WOZ-waarde maal het tarief dat de raad elk jaar vaststelt. Stijgt de WOZ-waarde en blijft het tarief gelijk, dan stijgt de OZB even hard mee. Verlaagt de raad het tarief, dan dempt de gemeente de stijging. Het tarief is dus het deel dat de gemeente zelf besluit.</p></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit zijn gemiddelden: de begrote opbrengst van een heffing gedeeld door alle woningen (riool: door alle adressen, ook bedrijfspanden). Het tarief is daaruit afgeleid, niet overgenomen uit de belastingverordening. Een eigen aanslag volgt uit de eigen WOZ-waarde en de eigen huishoudsituatie.</li>
+          <li><b>Een andere peildatum.</b> De opbrengst is de begroting van dat jaar (het laatste jaar voorlopig), de woningen staan op 1 januari, de WOZ-waarde hoort bij het belastingjaar met de waardepeildatum een jaar eerder.</li>
+          <li><b>Heffing of boeking.</b> Een heffing die een gemeenschappelijke regeling oplegt, staat niet in de begroting van de gemeente. Recreatiewoningen en andere objecten die voor de OZB als woning gelden maar niet in de woningvoorraad staan, verschuiven het gemiddelde. Kwijtschelding en vrijstellingen zitten erin zoals de gemeente ze begroot.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een opbrengst af van <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83642NED/table" target="_blank" rel="noopener">de CBS-tabel zelf</a>, of het afgeleide tarief van <a id="verordLink" href="https://zoek.officielebekendmakingen.nl/" target="_blank" rel="noopener">de belastingverordening</a>, meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers of tarieven van een gemeente, en het CBS is niet verantwoordelijk voor de bewerking.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <!-- rekenvoorbeeld -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Reken zelf</span><h2>Wat betaalt een woning met deze WOZ-waarde?</h2></div>
+      </div>
+      <div class="duo">
+        <div class="chart">
+          <div class="reken">
+            <label for="wozIn">WOZ-waarde van de woning</label>
+            <div class="rekenrij"><span>€</span><input id="wozIn" inputmode="numeric" autocomplete="off"><button class="btn linkish" id="wozGem" type="button">gemiddelde</button></div>
+            <div class="seg" id="wieSeg" role="group" aria-label="Eigenaar-bewoner of huurder">
+              <button type="button" data-m="e" aria-pressed="true">Eigenaar-bewoner</button>
+              <button type="button" data-m="h" aria-pressed="false">Huurder</button>
+            </div>
+          </div>
+          <div id="reken"></div>
+        </div>
+        <div class="chart">
+          <h3>Wat erin zit</h3>
+          <ul class="small" id="rekenUitleg"></ul>
+        </div>
+      </div>
+
+      <!-- door de jaren -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2>Woningmarkt en besluit</h2></div>
+        <p class="small muted" id="jarenSub"></p>
+      </div>
+      <div class="duo">
+        <div class="chart" id="indexChart"></div>
+        <div class="chart" id="stapelChart"></div>
+      </div>
+      <details class="tabelview" id="tabel"><summary>Toon de cijfers per jaar als tabel</summary>
+        <div class="tools"><button class="btn" id="csvBtn" type="button">Download als CSV</button><span class="small muted">Bedragen in euro, afgerond; tarief in procent van de WOZ-waarde.</span></div>
+        <div class="scroll" id="tabelIn"></div>
+      </details>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>OZB per woning</b>: de begrote opbrengst van de OZB op woningen (eigenarenbelasting) gedeeld door het aantal woningen op 1 januari.</li>
+            <li><b>Afgeleid tarief</b>: die opbrengst gedeeld door de totale WOZ-waarde van de woningen (gemiddelde WOZ-waarde maal het aantal woningen). Bij een steekproef van vier gemeenten lag dit binnen 2% van het tarief in de belastingverordening van 2026.</li>
+            <li><b>Rioolheffing per adres</b>: de begrote opbrengst gedeeld door woningen en niet-woningen samen, omdat ook bedrijfspanden rioolheffing betalen. Niet-woningen staan in de kerncijfers pas vanaf 2024; voor eerdere jaren telt de stand van 2024.</li>
+            <li><b>Afvalstoffenheffing per woning</b>: de begrote opbrengst (met reinigingsrechten voor bedrijven, die klein zijn) gedeeld door het aantal woningen. Dat is het gemiddelde over een- en meerpersoonshuishoudens, inclusief een eventueel bedrag per lediging.</li>
+            <li><b>Woningmarkt en besluit</b>: de verandering van de OZB per woning is de verandering van de WOZ-waarde maal de verandering van het tarief. Bijvoorbeeld: WOZ +12% en tarief −2% geeft OZB ongeveer +10%.</li>
+            <li><b>Nederland</b>: de opbrengsten van alle gemeenten opgeteld, gedeeld door alle woningen in Nederland. Wat een gemeenschappelijke regeling zelf heft, zit er niet in; het landelijke afvalbedrag ligt daardoor iets te laag.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Begroting, geen aanslag</b>: wat de gemeente verwacht op te halen. Wat ze werkelijk ophaalt, staat in de jaarrekening en komt hier niet in.</li>
+            <li><b>Gemiddelden</b>: de OZB per woning geldt voor alle woningen, ook die van corporaties en verhuurders. Wie zelf wil rekenen, gebruikt het rekenvoorbeeld met de eigen WOZ-waarde.</li>
+            <li><b>Huurders</b> betalen geen OZB (de eigenaar betaalt) en meestal geen eigenarendeel rioolheffing. Of de gemeente een gebruikersdeel riool heft, staat niet in open data.</li>
+            <li><b>Een- en meerpersoonshuishoudens</b> betalen in veel gemeenten een verschillende afvalstoffenheffing. De pagina toont het gemiddelde.</li>
+            <li><b>Heffing door een gemeenschappelijke regeling</b>: in een paar regio's legt een samenwerkingsverband de afvalstoffenheffing op, niet de gemeente. Die staat dan niet in deze cijfers; de pagina zegt dat.</li>
+            <li><b>Waar het geld heen gaat</b>: de OZB is een algemeen middel; de gemeente mag er alles mee betalen. Riool- en afvalstoffenheffing mogen niet meer opbrengen dan de kosten. Wat de gemeente uitgeeft, staat in de <a href="iv3spiegel.html" id="spiegelLink">Iv3-spiegel</a>.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Naast deze pagina</h2>
+        <ul class="small">
+          <li><a href="woningen.html" id="lnkWoning">Woningvoorraad en leegstand</a>: de WOZ-waarde naar eigenaar en per buurt, waar deze OZB op rust.</li>
+          <li><a href="bedrijvigheid.html" id="lnkBedr">Bedrijvigheid per buurt</a>: wat bedrijfsruimte aan OZB oplevert, de andere helft van de OZB.</li>
+        </ul>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS: Gemeentebegrotingen; heffingen per gemeente (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83642NED/table">83642NED</a>, begrote opbrengst OZB woningen, rioolheffing, reinigingsrechten en afvalstoffenheffing; laatste jaar voorlopig), Gemiddelde WOZ-waarde van woningen (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85036NED/table">85036NED</a>), Voorraad woningen op 1 januari (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86286NED/table">86286NED</a>) en de niet-woningvoorraad uit de Kerncijfers wijken en buurten (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85984NED/table">85984NED</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86165NED/table">86165NED</a>). Jaren vanaf 2021. Live opgehaald bij de gemeentekeuze; het tijdstip staat onder de cijfers.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0.</p>
+    <p><b>Methode.</b> Bedragen per woning (riool per adres) en een afgeleid OZB-tarief, zelf berekend uit de CBS-cijfers. Het afgeleide tarief lag bij vier gemeenten binnen 2% van het tarief in de verordening 2026, en landelijk op 0,0875%. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen aanslag en geen officieel tarief: de verordening van de gemeente is leidend. Geen oordeel of de lasten te hoog of te laag zijn, en geen ranglijst; Nederland staat er alleen als referentiepunt.</p>
+    <p><b>Bekende beperkingen.</b> Begroting, geen realisatie. Een heffing door een gemeenschappelijke regeling ontbreekt. Rioolheffing is een benadering (bedrijven betalen mee, soms per m³ water). Afval is een gemiddelde over een- en meerpersoonshuishoudens. Recreatiewoningen kunnen het OZB-gemiddelde verschuiven.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const PRODUCT = 'Woonlasten per gemeente';
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const T_HEF = '83642NED', T_WOZ = '85036NED', T_VOOR = '86286NED';
+  const KWB = { 2024: '85984NED', 2025: '86165NED', 2026: '86358NED' }; // niet-woningvoorraad vanaf 2024
+  const H = { ozb: 'A047000', riool: 'A047006', afval: 'A047007' };
+  const EERSTE = 2021; // woningvoorraad per gemeente in 86286NED vanaf 2021
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const eur = v => v == null || !isFinite(v) ? '–' : '€ ' + nf.format(Math.round(v));
+  const pctT = v => v == null || !isFinite(v) ? '–' : new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 4, maximumFractionDigits: 4 }).format(v) + '%';
+  const sgn = v => { if (v == null || !isFinite(v)) return '–'; const r = Math.round(v); return (r > 0 ? '+' : r < 0 ? '−' : '') + nf.format(Math.abs(r)) + '%'; };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tr = s => String(s == null ? '' : s).trim();
+  const num = v => (v == null || typeof v !== 'number' || v < 0) ? null : v;
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- ophalen ----------
+  async function getJSON(u) {
+    let last;
+    for (let i = 0; i < 3; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 45000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  const odata = async (t, q) => (await getJSON(CBS + t + '/' + q.replace(/ /g, '%20'))).value;
+  const jr = p => +String(p).slice(0, 4);
+
+  // ---------- staat ----------
+  let S = null, wieModus = 'e';
+  const fouten = new Set();
+  let NL = null; // landelijke optelling, één keer per bezoek
+
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Het CBS gaf om ${t} geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt waar dat kan.`;
+    $('#melding').hidden = false;
+  }
+
+  // niet-woningen per KWB-jaar: veldnaam verschilt per tabel
+  const kwbVeld = {};
+  async function kwbLaad(c) {
+    const uit = {};
+    await Promise.all(Object.entries(KWB).map(async ([j, t]) => {
+      try {
+        if (!kwbVeld[t]) {
+          const p = await odata(t, 'DataProperties?$select=Key');
+          kwbVeld[t] = { nw: (p.find(x => /^NietWoningvoorraad_/.test(x.Key)) || {}).Key };
+        }
+        const f = kwbVeld[t].nw; if (!f) return;
+        const rows = await odata(t, `TypedDataSet?$filter=startswith(WijkenEnBuurten,'GM${c}') or startswith(WijkenEnBuurten,'NL00')&$select=WijkenEnBuurten,${f}`);
+        rows.forEach(r => { const k = tr(r.WijkenEnBuurten) === 'NL00' ? 'nl' : 'gm'; const v = num(r[f]); if (v != null) (uit[k] = uit[k] || {})[+j] = v; });
+      } catch (e) { /* een ontbrekend jaar valt terug op een ander jaar */ }
+    }));
+    return uit;
+  }
+  const nwVoor = (m, j) => {
+    if (!m) return null;
+    const js = Object.keys(m).map(Number).sort((a, b) => a - b);
+    if (!js.length) return null;
+    const kl = js.filter(x => x <= j); return m[kl.length ? kl[kl.length - 1] : js[0]];
+  };
+
+  async function laadNL() {
+    if (NL) return NL;
+    const [hef, woz, voor, perioden] = await Promise.all([
+      odata(T_HEF, `TypedDataSet?$filter=(GemeentelijkeHeffingenVanaf2017 eq '${H.ozb}' or GemeentelijkeHeffingenVanaf2017 eq '${H.riool}' or GemeentelijkeHeffingenVanaf2017 eq '${H.afval}') and Perioden ge '${EERSTE}JJ00'&$select=RegioS,GemeentelijkeHeffingenVanaf2017,Perioden,GemeentelijkeHeffingenIn1000Euro_1`),
+      odata(T_WOZ, `TypedDataSet?$filter=startswith(RegioS,'NL01') and Eigendom eq 'T001132'&$select=Perioden,GemiddeldeWOZWaardeVanWoningen_1`),
+      odata(T_VOOR, `TypedDataSet?$filter=startswith(RegioS,'NL01') and startswith(StatusVanBewoning,'T001742')&$select=Perioden,TotaleWoningvoorraad_1`),
+      odata(T_HEF, 'Perioden?$select=Key,Status')
+    ]);
+    const n = { som: {}, woz: {}, won: {}, voorlopig: new Set() };
+    hef.forEach(r => {
+      if (!/^GM/.test(tr(r.RegioS))) return;
+      const v = num(r.GemeentelijkeHeffingenIn1000Euro_1); if (v == null) return;
+      const j = jr(r.Perioden), k = Object.keys(H).find(x => H[x] === tr(r.GemeentelijkeHeffingenVanaf2017));
+      ((n.som[j] = n.som[j] || {})[k] = ((n.som[j] || {})[k] || 0) + v * 1000);
+    });
+    woz.forEach(r => { const v = num(r.GemiddeldeWOZWaardeVanWoningen_1); if (v != null) n.woz[jr(r.Perioden)] = v * 1000; });
+    voor.forEach(r => { const v = num(r.TotaleWoningvoorraad_1); if (v != null) n.won[jr(r.Perioden)] = v; });
+    perioden.forEach(p => { if (/voorlopig/i.test(p.Status || '')) n.voorlopig.add(jr(p.Key)); });
+    NL = n; return n;
+  }
+
+  async function laadGM(c) {
+    const [hef, woz, voor] = await Promise.all([
+      odata(T_HEF, `TypedDataSet?$filter=startswith(RegioS,'GM${c}') and (GemeentelijkeHeffingenVanaf2017 eq '${H.ozb}' or GemeentelijkeHeffingenVanaf2017 eq '${H.riool}' or GemeentelijkeHeffingenVanaf2017 eq '${H.afval}')&$select=GemeentelijkeHeffingenVanaf2017,Perioden,GemeentelijkeHeffingenIn1000Euro_1`),
+      odata(T_WOZ, `TypedDataSet?$filter=startswith(RegioS,'GM${c}') and Eigendom eq 'T001132'&$select=Perioden,GemiddeldeWOZWaardeVanWoningen_1`),
+      odata(T_VOOR, `TypedDataSet?$filter=startswith(RegioS,'GM${c}') and startswith(StatusVanBewoning,'T001742')&$select=Perioden,TotaleWoningvoorraad_1`)
+    ]);
+    const g = { som: {}, woz: {}, won: {} };
+    hef.forEach(r => {
+      const j = jr(r.Perioden), k = Object.keys(H).find(x => H[x] === tr(r.GemeentelijkeHeffingenVanaf2017));
+      const v = r.GemeentelijkeHeffingenIn1000Euro_1;
+      (g.som[j] = g.som[j] || {})[k] = v == null ? null : v * 1000;
+    });
+    woz.forEach(r => { const v = num(r.GemiddeldeWOZWaardeVanWoningen_1); if (v != null) g.woz[jr(r.Perioden)] = v * 1000; });
+    voor.forEach(r => { const v = num(r.TotaleWoningvoorraad_1); if (v != null) g.won[jr(r.Perioden)] = v; });
+    return g;
+  }
+
+  // per jaar: bedragen per woning, riool per adres, afgeleid tarief
+  function reeks(d, nw) {
+    const uit = [];
+    Object.keys(d.won).map(Number).filter(j => j >= EERSTE).sort((a, b) => a - b).forEach(j => {
+      const s = d.som[j] || {}, won = d.won[j], woz = d.woz[j], n = nwVoor(nw, j);
+      if (!won || s.ozb == null) return;
+      const ozb = s.ozb / won;
+      const tarief = woz ? 100 * s.ozb / (woz * won) : null;
+      const riool = s.riool == null ? null : s.riool / (won + (n || 0));
+      const afval = s.afval == null ? null : s.afval / won;
+      uit.push({ j, won, woz, nw: n, ozb, tarief, riool, afval, ozbTot: s.ozb, rioolTot: s.riool, afvalTot: s.afval,
+        totaal: ozb + (riool || 0) + (afval || 0) });
+    });
+    return uit;
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = 'Woonlasten ' + g.n + ' · Open Data Atelier';
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    try { if (location.hash !== '#gm=' + g.c) history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
+    S = { g, opgehaald: null, wozEigen: null };
+    fouten.clear(); toonMelding();
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
+    ['#top3', '#indexChart', '#stapelChart', '#tabelIn', '#reken', '#rekenUitleg', '#jarenSub'].forEach(s => { $(s).innerHTML = ''; });
+    $('#uitzInfo').hidden = true;
+    ['lnkWoning', 'lnkBedr', 'spiegelLink'].forEach(id => { const a = document.getElementById(id); a.href = a.href.split('#')[0] + '#gm=' + g.c; });
+    $('#verordLink').href = 'https://zoek.officielebekendmakingen.nl/resultaten?q=' + encodeURIComponent('(c.product-area=="officielepublicaties")and(dt.creator=="' + g.n + '")and(cql.textAndIndexes="onroerende zaakbelastingen")');
+    voortgang(0, 2, 'Heffingen, WOZ en woningen ophalen…');
+    let gd = null, nw = null;
+    try { [gd, nw] = await Promise.all([laadGM(g.c), kwbLaad(g.c)]); }
+    catch (e) { fouten.add('heffingen, WOZ of woningen van de gemeente'); }
+    if (S.g !== g) return;
+    voortgang(1, 2, 'Nederland optellen…');
+    let nl = null;
+    try { nl = await laadNL(); } catch (e) { fouten.add('Nederland'); }
+    if (S.g !== g) return;
+    toonMelding();
+    S.opgehaald = new Date();
+    S.gm = gd ? reeks(gd, nw && nw.gm) : [];
+    S.nl = nl ? reeks(nl, nw && nw.nl) : [];
+    S.voorlopig = nl ? nl.voorlopig : new Set();
+    renderKern(); renderReken(); renderJaren(); renderTabel(); renderVoet(); vulMeld();
+    voortgang(2, 2, '');
+  }
+  const nlJaar = j => (S.nl || []).find(x => x.j === j);
+  const vl = j => S.voorlopig && S.voorlopig.has(j) ? ' (voorlopig)' : '';
+
+  // ---------- kern ----------
+  function renderKern() {
+    const g = S.g, R = S.gm;
+    const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    if (!R.length) { $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'Voor deze gemeente zijn geen cijfers gevonden.'; return; }
+    const x = R[R.length - 1], v = R.length > 1 ? R[R.length - 2] : null, n = nlJaar(x.j), nv = v && nlJaar(v.j);
+    $('#leadBig').textContent = `${g.n} ${x.j}${vl(x.j)}: ${eur(x.totaal)} per woning aan gemeentelijke woonlasten` + (x.afval ? '' : ' (zonder afval)');
+    $('#leadSub').textContent = `OZB ${eur(x.ozb)} · riool ca. ${x.riool ? eur(x.riool) : 'niet in de begroting'} · afval ${x.afval ? eur(x.afval) : 'niet in de begroting'}` + (n ? `. Nederland ${eur(n.totaal)}.` : '');
+    let h = unit('OZB per woning', eur(x.ozb), `Afgeleid tarief ${pctT(x.tarief)} van de WOZ-waarde (gemiddeld ${eur(x.woz)}).` + (n ? ` Nederland ${eur(n.ozb)} en ${pctT(n.tarief)}.` : ''));
+    h += unit('Rioolheffing per adres', 'ca. ' + eur(x.riool), 'Woningen en bedrijfspanden samen.' + (n ? ` Nederland ca. ${eur(n.riool)}.` : ''));
+    h += unit('Afvalstoffenheffing per woning', x.afval ? eur(x.afval) : '–', (x.afval ? 'Gemiddeld over een- en meerpersoonshuishoudens.' : 'Niet in de begroting van de gemeente.') + (n ? ` Nederland ${eur(n.afval)}.` : ''));
+    if (v && v.tarief && x.tarief && v.woz && x.woz) {
+      const dO = 100 * (x.ozb / v.ozb - 1), dW = 100 * (x.woz / v.woz - 1), dT = 100 * (x.tarief / v.tarief - 1);
+      let sub = `WOZ-waarde ${sgn(dW)} (woningmarkt), tarief ${sgn(dT)} (besluit van de raad).`;
+      if (n && nv && nv.tarief) sub += ` Nederland: OZB ${sgn(100 * (n.ozb / nv.ozb - 1))}, WOZ ${sgn(100 * (n.woz / nv.woz - 1))}, tarief ${sgn(100 * (n.tarief / nv.tarief - 1))}.`;
+      h += unit(`OZB per woning ${v.j} → ${x.j}`, sgn(dO), sub);
+    }
+    $('#top3').innerHTML = h;
+    // uitzonderingen
+    const t = [];
+    if (!x.afval) t.push(`${g.n} heeft in ${x.j} geen afvalstoffenheffing in de begroting. Meestal betekent dat: een gemeenschappelijke regeling legt de heffing zelf op (zoals in Rivierenland). Wat inwoners daar betalen, staat niet in deze cijfers; het totaal is zonder afval.`);
+    else if (n && n.afval && x.afval < .5 * n.afval) t.push(`De afvalstoffenheffing per woning is minder dan de helft van het landelijke gemiddelde. Mogelijk legt een ander deel van de heffing buiten de begroting van de gemeente, of boekt de gemeente anders. Kijk in de verordening voor het tarief.`);
+    if (!x.riool) t.push(`${g.n} heeft in ${x.j} geen rioolheffing in de begroting.`);
+    if (n && n.tarief && x.tarief && (x.tarief > 2 * n.tarief || x.tarief < .5 * n.tarief)) t.push(`Het afgeleide OZB-tarief wijkt sterk af van Nederland. Dat kan kloppen, maar ook komen door objecten die voor de OZB als woning gelden en niet in de woningvoorraad staan, zoals recreatiewoningen. Vergelijk met de belastingverordening.`);
+    $('#uitzInfo').hidden = !t.length; $('#uitzTxt').textContent = t.join(' ');
+  }
+
+  // ---------- rekenvoorbeeld ----------
+  document.querySelectorAll('#wieSeg button').forEach(b => b.addEventListener('click', () => {
+    wieModus = b.dataset.m;
+    document.querySelectorAll('#wieSeg button').forEach(y => y.setAttribute('aria-pressed', y === b));
+    renderReken();
+  }));
+  $('#wozIn').addEventListener('input', () => { const v = +$('#wozIn').value.replace(/\D/g, ''); S.wozEigen = v || null; renderReken(false); });
+  $('#wozGem').addEventListener('click', () => { S.wozEigen = null; renderReken(); });
+  function renderReken(zetVeld = true) {
+    const R = S && S.gm; if (!R || !R.length) { $('#reken').innerHTML = ''; return; }
+    const x = R[R.length - 1];
+    const woz = S.wozEigen || x.woz;
+    if (zetVeld) $('#wozIn').value = woz ? nf.format(Math.round(woz)) : '';
+    const ozb = woz && x.tarief ? woz * x.tarief / 100 : null;
+    const r = (n, v, s) => `<tr><td>${n}${s ? `<div class="small muted">${s}</div>` : ''}</td><td class="r">${v}</td></tr>`;
+    let rows = '', tot = 0;
+    if (wieModus === 'e') {
+      rows += r('OZB', eur(ozb), `${eur(woz)} × ${pctT(x.tarief)}`); tot += ozb || 0;
+      rows += r('Rioolheffing', 'ca. ' + eur(x.riool), 'gemiddeld per adres'); tot += x.riool || 0;
+    } else {
+      rows += r('OZB', '€ 0', 'betaalt de eigenaar');
+      rows += r('Rioolheffing', '?', 'alleen als de gemeente een gebruikersdeel heft; staat niet in open data');
+    }
+    rows += r('Afvalstoffenheffing', x.afval ? eur(x.afval) : '–', x.afval ? 'gemiddeld per woning' : 'niet in de begroting van de gemeente'); tot += x.afval || 0;
+    rows += `<tr class="grp"><td>Samen, ongeveer</td><td class="r">${eur(tot)}</td></tr>`;
+    $('#reken').innerHTML = `<table><thead><tr><th>${x.j}${vl(x.j)}</th><th class="r">per jaar</th></tr></thead><tbody>${rows}</tbody></table>`;
+    $('#rekenUitleg').innerHTML = [
+      'Vul de WOZ-waarde van een woning in, bijvoorbeeld van je eigen aanslag of het <a href="https://www.wozwaardeloket.nl" target="_blank" rel="noopener">WOZ-waardeloket</a>. Standaard staat hier de gemiddelde WOZ-waarde van de gemeente.',
+      'De OZB is die waarde maal het afgeleide tarief. Het echte tarief staat in de belastingverordening; het verschil is meestal klein.',
+      'Riool en afval zijn gemiddelden, geen tarief: het tarief kan verschillen per huishoudgrootte, per afvalbak of per kubieke meter water.',
+      'Kwijtschelding, heffingskortingen en een eventuele waterschapsaanslag zitten er niet in.'
+    ].map(t => `<li>${t}</li>`).join('');
+  }
+
+  // ---------- door de jaren ----------
+  function lijnGrafiek(R, N) {
+    const W = 520, Hh = 220, L = 40, Rr = 12, Tp = 14, B = 26;
+    if (R.length < 2) return '<h3>Woningmarkt en besluit</h3><p class="small muted">Te weinig jaren voor een verloop.</p>';
+    const b = R[0];
+    const ser = [
+      { n: 'WOZ-waarde', k: 'woz', kl: 'var(--seq-3)', d: '' },
+      { n: 'Afgeleid tarief', k: 'tarief', kl: 'var(--warn)', d: '' },
+      { n: 'OZB per woning', k: 'ozb', kl: 'var(--accent)', d: '' }
+    ];
+    const idx = (r, k) => r[k] && b[k] ? 100 * r[k] / b[k] : null;
+    const nb = N.find(x => x.j === b.j);
+    const nlIdx = r => { const n = N.find(x => x.j === r.j); return n && nb ? 100 * n.ozb / nb.ozb : null; };
+    const vals = [];
+    R.forEach(r => { ser.forEach(s => vals.push(idx(r, s.k))); vals.push(nlIdx(r)); });
+    const v2 = vals.filter(v => v != null), lo = Math.min(...v2, 100), hi = Math.max(...v2, 100);
+    const mn = Math.floor((lo - 5) / 10) * 10, mx = Math.ceil((hi + 5) / 10) * 10;
+    const x = i => L + (W - L - Rr) * (R.length === 1 ? .5 : i / (R.length - 1));
+    const y = v => Tp + (Hh - Tp - B) * (1 - (v - mn) / (mx - mn));
+    let svg = '';
+    for (let v = mn; v <= mx; v += 10) svg += `<line class="ax" x1="${L}" x2="${W - Rr}" y1="${y(v)}" y2="${y(v)}"${v === 100 ? ' stroke-width="1.5"' : ''}/><text class="lbl" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+    R.forEach((r, i) => { svg += `<text class="lbl" x="${x(i)}" y="${Hh - 6}" text-anchor="middle">${r.j}${S.voorlopig.has(r.j) ? '*' : ''}</text>`; });
+    const pl = (pts, kl, dash) => `<polyline points="${pts.filter(p => p[1] != null).map(p => p[0] + ',' + y(p[1])).join(' ')}" fill="none" stroke="${kl}" stroke-width="2"${dash ? ' stroke-dasharray="4 3"' : ''}/>`;
+    svg += pl(R.map((r, i) => [x(i), nlIdx(r)]), 'var(--fg)', true);
+    ser.forEach(s => {
+      svg += pl(R.map((r, i) => [x(i), idx(r, s.k)]), s.kl);
+      R.forEach((r, i) => { const v = idx(r, s.k); if (v != null) svg += `<circle cx="${x(i)}" cy="${y(v)}" r="3" fill="${s.kl}"><title>${s.n} ${r.j}: ${nf.format(Math.round(v))} (${b.j} = 100)</title></circle>`; });
+    });
+    const leg = ser.map(s => `<span><span class="sw" style="background:${s.kl}"></span>${s.n}</span>`).join('') + '<span><span class="dash"></span>OZB per woning, Nederland</span>';
+    return `<div class="chart-kop"><h3>WOZ-waarde, tarief en OZB</h3></div><div class="noemer">Index, ${b.j} = 100. Ligt de oranje lijn onder 100, dan heeft de raad het tarief verlaagd.</div><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Verloop van WOZ-waarde, afgeleid tarief en OZB per woning, geïndexeerd">${svg}</svg><div class="legend">${leg}</div>`;
+  }
+  function stapelGrafiek(R, N) {
+    const W = 520, Hh = 220, L = 48, Rr = 8, Tp = 14, B = 26;
+    if (!R.length) return '';
+    const kl = { ozb: 'var(--accent)', riool: 'var(--seq-3)', afval: 'var(--seq-1)' };
+    const max = Math.max(...R.map(r => r.totaal), ...N.map(n => n.totaal)) * 1.1;
+    const stap = max > 1500 ? 500 : max > 600 ? 200 : 100;
+    const y = v => Tp + (Hh - Tp - B) * (1 - v / max);
+    const bw = (W - L - Rr) / R.length;
+    let svg = '';
+    for (let v = 0; v <= max; v += stap) svg += `<line class="ax" x1="${L}" x2="${W - Rr}" y1="${y(v)}" y2="${y(v)}"/><text class="lbl" x="${L - 6}" y="${y(v) + 4}" text-anchor="end">€ ${nf.format(v)}</text>`;
+    R.forEach((r, i) => {
+      let acc = 0; const x0 = L + i * bw + bw * .2, w = bw * .6;
+      ['ozb', 'riool', 'afval'].forEach(k => { const v = r[k] || 0; if (v > 0) svg += `<rect x="${x0}" y="${y(acc + v)}" width="${w}" height="${y(acc) - y(acc + v)}" fill="${kl[k]}"><title>${r.j} ${k === 'ozb' ? 'OZB' : k === 'riool' ? 'riool (per adres)' : 'afval'}: ${eur(v)}</title></rect>`; acc += v; });
+      svg += `<text class="lbl" x="${x0 + w / 2}" y="${Hh - 6}" text-anchor="middle">${r.j}${S.voorlopig.has(r.j) ? '*' : ''}</text>`;
+    });
+    const pts = R.map((r, i) => { const n = N.find(z => z.j === r.j); return n ? [L + i * bw + bw / 2, y(n.totaal)] : null; }).filter(Boolean);
+    svg += `<polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+    pts.forEach(p => { svg += `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="var(--fg)"/>`; });
+    const leg = `<span><span class="sw" style="background:${kl.ozb}"></span>OZB</span><span><span class="sw" style="background:${kl.riool}"></span>Riool (per adres)</span><span><span class="sw" style="background:${kl.afval};border:1px solid var(--line)"></span>Afval</span><span><span class="dash"></span>Nederland, samen</span>`;
+    return `<div class="chart-kop"><h3>Wat een woning gemiddeld betaalt</h3><span class="laatst">${eur(R[R.length - 1].totaal)}</span></div><div class="noemer">Euro per woning per jaar, begroting</div><svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="Woonlasten per woning per jaar, gestapeld naar OZB, riool en afval">${svg}</svg><div class="legend">${leg}</div>`;
+  }
+  function renderJaren() {
+    const R = S.gm, N = S.nl || [];
+    $('#indexChart').innerHTML = lijnGrafiek(R, N);
+    $('#stapelChart').innerHTML = stapelGrafiek(R, N);
+    const vj = [...S.voorlopig].filter(j => R.some(r => r.j === j));
+    $('#jarenSub').textContent = R.length ? `${R[0].j} tot en met ${R[R.length - 1].j}` + (vj.length ? `; * = voorlopige begroting ${vj.join(', ')}` : '') + '.' : '';
+  }
+
+  // ---------- tabel en CSV ----------
+  const KOL = [['j', 'Jaar'], ['woz', 'WOZ-waarde'], ['tarief', 'Tarief OZB'], ['ozb', 'OZB per woning'], ['riool', 'Riool per adres'], ['afval', 'Afval per woning'], ['totaal', 'Samen'], ['nl', 'Nederland, samen']];
+  function waarde(r, k) {
+    if (k === 'j') return r.j + (S.voorlopig.has(r.j) ? '*' : '');
+    if (k === 'tarief') return pctT(r.tarief);
+    if (k === 'nl') { const n = nlJaar(r.j); return n ? eur(n.totaal) : '–'; }
+    return eur(r[k]);
+  }
+  function renderTabel() {
+    const R = S.gm;
+    $('#tabelIn').innerHTML = `<table><thead><tr>${KOL.map(([k, n]) => `<th${k === 'j' ? '' : ' class="r"'}>${n}</th>`).join('')}</tr></thead><tbody>${R.slice().reverse().map(r => `<tr>${KOL.map(([k]) => `<td${k === 'j' ? '' : ' class="r"'}>${waarde(r, k)}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+  }
+  $('#csvBtn').addEventListener('click', () => {
+    const bron = `${PRODUCT}, Open Data Atelier, ${location.origin + location.pathname}#gm=${S.g.c}, versie ${VERSIE}; CBS 83642NED, 85036NED, 86286NED, kerncijfers wijken en buurten`;
+    const kop = ['jaar', 'voorlopig', 'gemeentecode', 'gemeente', 'woningen', 'niet_woningen', 'woz_gemiddeld', 'opbrengst_ozb_woningen', 'opbrengst_riool', 'opbrengst_afval', 'ozb_per_woning', 'tarief_ozb_afgeleid_pct', 'riool_per_adres', 'afval_per_woning', 'samen_per_woning', 'nederland_samen_per_woning', 'bron'];
+    const rnd = v => v == null || !isFinite(v) ? '' : Math.round(v);
+    const regels = [kop].concat(S.gm.map(r => { const n = nlJaar(r.j); return [r.j, S.voorlopig.has(r.j) ? 'ja' : 'nee', 'GM' + S.g.c, S.g.n, r.won, r.nw == null ? '' : r.nw, rnd(r.woz), rnd(r.ozbTot), rnd(r.rioolTot), rnd(r.afvalTot), rnd(r.ozb), r.tarief == null ? '' : r.tarief.toFixed(4).replace('.', ','), rnd(r.riool), rnd(r.afval), rnd(r.totaal), n ? rnd(n.totaal) : '', bron]; }));
+    const csv = '﻿' + regels.map(r => r.map(v => /[;"\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(';')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = `open-data-atelier-woonlasten-${S.g.n.replace(/[^\w-]+/g, '-').toLowerCase()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  // ---------- melden ----------
+  function vulMeld() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+  }
+
+  // ---------- voet ----------
+  function renderVoet() {
+    const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+    const link = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${id}</a>`;
+    const R = S.gm, per = R.length ? `${R[0].j}–${R[R.length - 1].j}` : '–';
+    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Heffingen: Gemeentebegrotingen; heffingen per gemeente ${link(T_HEF)} (${per}, begroting${S.voorlopig.size ? ', ' + [...S.voorlopig].join(', ') + ' voorlopig' : ''}). WOZ-waarde: ${link(T_WOZ)}. Woningen op 1 januari: ${link(T_VOOR)}. Niet-woningen: Kerncijfers wijken en buurten ${link(KWB[2024])}, ${link(KWB[2025])}. Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', () => { if (S) { NL = null; kies(S.g); } });
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  vulMeld();
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const hh = (location.hash.match(/gm=(\d{4})/) || [])[1] || bewaard;
+  const g0 = hh && GM.find(g => g.c === hh);
+  if (g0) kies(g0);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>

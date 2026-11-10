@@ -304,6 +304,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       <!-- woz-waarde -->
       <div class="sectiekop">
         <div><span class="eyebrow">Waarde</span><h2>WOZ-waarde sinds <span id="wozVan">2019</span></h2></div>
+        <p class="small"><a id="lnkWoonl" href="woonlasten.html">Wat de gemeente op deze waarde heft aan OZB, riool en afval: Woonlasten per gemeente →</a></p>
       </div>
       <div class="duo">
         <div class="chart" id="chWoz"></div>
@@ -410,7 +411,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.8';
+  const VERSIE = '1.8.1';
   const PRODUCT = 'Woningvoorraad en leegstand';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_VOOR = '86286NED';   // voorraad; eigendom, type eigenaar, status van bewoning, regio
@@ -585,6 +586,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     } catch (e) { S.woz = null; fouten.add('WOZ-waarde (CBS)'); toonMelding(); }
   }
   function renderWoz() {
+    try { document.getElementById('lnkWoonl').href = 'woonlasten.html#gm=' + S.g.c; } catch (e) {}
     const rs = S.woz, el = $('#chWoz'), tb = $('#wozTabel');
     if (!rs) { el.innerHTML = '<p class="small muted" style="margin:0">Geen WOZ-cijfers voor deze gemeente.</p>'; tb.innerHTML = ''; return; }
     const nl = new Map((S.wozNl || []).map(r => [r.j, r]));
