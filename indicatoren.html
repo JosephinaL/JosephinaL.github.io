@@ -341,7 +341,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.15';
+  const VERSIE = '0.15.1';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -613,7 +613,7 @@ main > * { min-width: 0; }
           niet: 'Of de eis ook is nagekomen.',
           niveau: 'Aanbesteding, opgeteld per jaar.',
           norm: 'Eigen ambitie per thema in het actieplan.', vgl: 'Beperkt (eigen drempel en definitie).',
-          bron: () => 'Eigen aanbestedingsregistratie. In Europese aankondigingen staat het als eForms-veld BT-06 (strategisch aanbesteden), maar niet in de open OCDS-set van TenderNed (gezien 10 november 2026).',
+          bron: () => 'Eigen aanbestedingsregistratie. In Europese aankondigingen staat het als eForms-veld BT-06 (strategisch aanbesteden), maar niet in de open data van TenderNed. In TED, waar het veld wel open is, staat het bij gemeenten in 98,7% van de ingevulde aankondigingen op "geen" (2024 tot oktober 2026): eisen op milieu of sociaal staan in de aanbestedingsstukken, niet in dit veld (gezien 10 november 2026).',
           ggm: 'Geen attribuut voor een maatschappelijke eis bij <code>aanbesteding</code> of <code>contract</code> in GGM v2.5.1.',
           herkomst: 'Manifest MVOI; eForms (Europese aankondigingsformulieren).' },
         { k: 'inspanning', b: 'intern', naam: 'MVI-zelfevaluatie per aanbesteding',
