@@ -184,7 +184,7 @@ td.mist { color: var(--warn); font-size: .82rem; }
         <ol>
           <li><b>Een andere naam.</b> De pagina telt aankondigingen van een dienst waarvan de naam begint met "Gemeente" en de gemeentenaam, ook met een afdeling erachter. Een ambtelijke samenwerking, een regionale inkooporganisatie of een gemeenschappelijke regeling staat op eigen naam en telt niet mee.</li>
           <li><b>Een ander begrip.</b> Alleen aankondigingen van een opdracht en aankondigingen van een gegunde opdracht. Marktconsultaties, vooraankondigingen, rectificaties en wijzigingen staan apart. Inhuuraanvragen tellen mee als ze in TenderNed staan.</li>
-          <li><b>Een andere stand.</b> TenderNed vult de datasets elk halfjaar aan. De pagina loopt van <span class="van"></span> tot <span class="tot"></span>; het jaartal is het jaar van publicatie.</li>
+          <li><b>Een andere stand.</b> TenderNed vult de datasets elk halfjaar aan. De pagina loopt van <span class="van"></span> tot <span class="tot"></span>; het jaartal is het jaar van publicatie in TenderNed. Inhuuraanvragen komen in partijen binnen, soms maanden na de aanvraag.</li>
           <li><b>Het platform.</b> Een aankondiging via Mercell of een inhuurplatform komt in TenderNed zonder gunningscriterium; bij inhuur ontbreekt ook vaak het aantal inschrijvingen. Welke velden gevuld zijn, zegt dus vooral welk platform de gemeente gebruikt.</li>
           <li><b>Een fout in deze bewerking.</b> Klopt een aankondiging of een aantal niet met wat je op TenderNed ziet, dan kan de fout hier zitten. Meld het hieronder.</li>
         </ol>
@@ -208,7 +208,7 @@ td.mist { color: var(--warn); font-size: .82rem; }
 
       <section class="blok" aria-labelledby="h-plat">
         <h2 id="h-plat">Via welk platform</h2>
-        <p class="small muted">Aankondigingen van een opdracht en van een gunning, naar de plek waar ze zijn geplaatst. Het laatste jaar is niet compleet.</p>
+        <p class="small muted">Aankondigingen van een opdracht en van een gunning, naar de plek waar ze zijn geplaatst. Het laatste jaar is niet compleet. Inhuurplatforms leveren in partijen aan TenderNed, een paar keer per jaar; tussen mei 2025 en maart 2026 kwam er niets binnen en in april 2026 een grote partij. Het jaar van een inhuuraanvraag zegt dus vooral wanneer die partij binnenkwam.</p>
         <div class="legenda" id="platLeg"></div>
         <div class="balken" id="platBalk"></div>
         <div class="scroll"><table id="platTab"></table></div>
@@ -298,7 +298,7 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.1';
+  const VERSIE = '0.1.1';
   const PRODUCT = 'Aanbestedingen in TenderNed';
   const MIN = 20, MAXRIJ = 300;
   const $ = s => document.querySelector(s);
@@ -411,6 +411,12 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
       aEig >= .9 ? `${g.n} plaatst bijna alles op TenderNed zelf. Daardoor staat het gunningscriterium er bij.` :
       aEig <= .1 ? `${g.n} publiceert bijna alles via een ander platform. TenderNed heeft daardoor geen gunningscriterium; wie dat wil zien, kijkt op het platform zelf.` :
       `${g.n} plaatst ${pct(e.n, s.n)} op TenderNed zelf (alle gemeenten ${pct(ne.n, NL.n)}). Wat via een ander platform binnenkomt, mist het gunningscriterium; zie hieronder.`;
+    // overstap: aandeel Mercell (zonder inhuurplatforms) in het eerste tegenover het laatste jaar, elk minstens 8 aankondigingen
+    const merc = y => { const j = s.jaar[y] || [0, 0, 0, 0], n = j[0] + j[1] + j[2]; return n >= 8 ? j[1] / n : null; };
+    const j0 = jaren[0], j1 = jaren[jaren.length - 1], m0 = merc(j0), m1 = merc(j1);
+    if (m0 != null && m1 != null && Math.abs(m1 - m0) >= .5) {
+      $('#platLees').textContent += ` Tussen ${j0} en ${j1} is ${g.n} overgestapt: zonder inhuur ging in ${j0} ${Math.round(100 * m0)}% via Mercell, in ${j1} ${Math.round(100 * m1)}%. De tabel met velden hieronder telt alle jaren samen en mengt dus twee werkwijzen.`;
+    }
 
     // velden
     const rij = (t, u, a, b, c, d) => `<tr><td>${esc(t)}${u ? `<br><span class="small muted">${esc(u)}</span>` : ''}</td><td class="r">${a}</td><td class="r muted">${b}</td><td class="r">${c}</td><td class="r muted">${d}</td></tr>`;
