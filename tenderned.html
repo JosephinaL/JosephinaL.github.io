@@ -176,6 +176,7 @@ td.mist { color: var(--warn); font-size: .82rem; }
   <section id="result" hidden>
     <div class="wrap">
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <p class="leesregel" id="telUitleg" style="margin:0;max-width:84ch">Een aanbesteding staat in TenderNed op twee momenten: bij de <b>start</b> maakt de gemeente bekend wat ze wil inkopen, bij de <b>gunning</b> aan wie de opdracht gaat. De pagina telt die apart. Ze tellen niet op: een aanbesteding die in deze periode begon en werd gegund, staat bij allebei; een die in 2023 begon, staat alleen bij gegund. Inhuuraanvragen (tijdelijk personeel) staan apart.</p>
       <div class="info"><p><b>Lees dit eerst.</b> Deze pagina laat zien wat de open data van TenderNed over je gemeente bevatten, niet hoe goed de gemeente inkoopt. Aankondigingen die via een ander platform binnenkomen, zoals Mercell of een inhuurplatform, missen het gunningscriterium en soms het aantal inschrijvingen; dat is geen fout van de gemeente. Onderhandse inkoop, afroepen binnen raamovereenkomsten en inkoop door een ambtelijke samenwerking staan hier niet onder de gemeente.</p>
         <p class="small muted" id="stand"></p></div>
 
@@ -183,7 +184,7 @@ td.mist { color: var(--warn); font-size: .82rem; }
         <summary>Herken je je gemeente niet? <span class="muted">Vijf mogelijke oorzaken, en waar je een fout meldt</span></summary>
         <ol>
           <li><b>Een andere naam.</b> De pagina telt aankondigingen van een dienst waarvan de naam begint met "Gemeente" en de gemeentenaam, ook met een afdeling erachter. Een ambtelijke samenwerking, een regionale inkooporganisatie of een gemeenschappelijke regeling staat op eigen naam en telt niet mee.</li>
-          <li><b>Een ander begrip.</b> Alleen aankondigingen van een opdracht en aankondigingen van een gegunde opdracht. Marktconsultaties, vooraankondigingen, rectificaties en wijzigingen staan apart. Inhuuraanvragen tellen mee als ze in TenderNed staan.</li>
+          <li><b>Een ander begrip.</b> Alleen de start van een aanbesteding (aankondiging van een opdracht) en de gunning (aankondiging van een gegunde opdracht). Marktconsultaties, vooraankondigingen, rectificaties en wijzigingen staan apart. Inhuuraanvragen tellen mee als ze in TenderNed staan.</li>
           <li><b>Een andere stand.</b> TenderNed vult de datasets elk halfjaar aan. De pagina loopt van <span class="van"></span> tot <span class="tot"></span>; het jaartal is het jaar van publicatie in TenderNed. Inhuuraanvragen komen in partijen binnen, soms maanden na de aanvraag.</li>
           <li><b>Het platform.</b> Een aankondiging via Mercell of een inhuurplatform komt in TenderNed zonder gunningscriterium; bij inhuur ontbreekt ook vaak het aantal inschrijvingen. Welke velden gevuld zijn, zegt dus vooral welk platform de gemeente gebruikt.</li>
           <li><b>Een fout in deze bewerking.</b> Klopt een aankondiging of een aantal niet met wat je op TenderNed ziet, dan kan de fout hier zitten. Meld het hieronder.</li>
@@ -208,7 +209,7 @@ td.mist { color: var(--warn); font-size: .82rem; }
 
       <section class="blok" aria-labelledby="h-plat">
         <h2 id="h-plat">Via welk platform</h2>
-        <p class="small muted">Aankondigingen van een opdracht en van een gunning, naar de plek waar ze zijn geplaatst. Het laatste jaar is niet compleet. Inhuurplatforms leveren in partijen aan TenderNed, een paar keer per jaar; tussen mei 2025 en maart 2026 kwam er niets binnen en in april 2026 een grote partij. Het jaar van een inhuuraanvraag zegt dus vooral wanneer die partij binnenkwam.</p>
+        <p class="small muted">Alle aankondigingen (start en gunning, ook inhuur), naar de plek waar ze zijn geplaatst. Het laatste jaar is niet compleet. Inhuurplatforms leveren in partijen aan TenderNed, een paar keer per jaar; tussen mei 2025 en maart 2026 kwam er niets binnen en in april 2026 een grote partij. Het jaar van een inhuuraanvraag zegt dus vooral wanneer die partij binnenkwam.</p>
         <div class="legenda" id="platLeg"></div>
         <div class="balken" id="platBalk"></div>
         <div class="scroll"><table id="platTab"></table></div>
@@ -232,7 +233,7 @@ td.mist { color: var(--warn); font-size: .82rem; }
       <section class="blok" aria-labelledby="h-lijst">
         <h2 id="h-lijst">De aankondigingen</h2>
         <div class="filters">
-          <span class="seg" id="soortSeg" role="group" aria-label="Soort aankondiging"><button type="button" data-f="a" aria-pressed="true">Alle</button><button type="button" data-f="0" aria-pressed="false">Opdracht</button><button type="button" data-f="1" aria-pressed="false">Gunning</button></span>
+          <span class="seg" id="soortSeg" role="group" aria-label="Soort aankondiging"><button type="button" data-f="a" aria-pressed="true">Alle</button><button type="button" data-f="0" aria-pressed="false">Start</button><button type="button" data-f="1" aria-pressed="false">Gunning</button></span>
           <span class="seg" id="platSeg" role="group" aria-label="Platform"><button type="button" data-f="a" aria-pressed="true">Elk platform</button><button type="button" data-f="0" aria-pressed="false">TenderNed</button><button type="button" data-f="x" aria-pressed="false">Ander platform</button></span>
           <button class="btn linkish" type="button" id="lijstCsv">Download de lijst (CSV)</button>
         </div>
@@ -298,7 +299,7 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.1.1';
+  const VERSIE = '0.2';
   const PRODUCT = 'Aanbestedingen in TenderNed';
   const MIN = 20, MAXRIJ = 300;
   const $ = s => document.querySelector(s);
@@ -322,12 +323,12 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
   const link = id => `https://www.tenderned.nl/tenderned-tap/aankondigingen/${id}`;
 
   function samenvat(rows) {
-    const s = { n: rows.length, opd: 0, gun: 0, jaar: {}, inh: 0, eig: nul(), imp: nul(), lees: { bl: 0, sg: 0, bs: 0, crit: 0, lp: 0 } };
+    const s = { n: rows.length, opd: 0, gun: 0, start: 0, gegund: 0, jaar: {}, inh: 0, eig: nul(), imp: nul(), lees: { bl: 0, sg: 0, bs: 0, crit: 0, lp: 0 } };
     function nul() { return { n: 0, crit: 0, gun: 0, lots: 0, lotsB: 0, aw: 0, av: 0, ae: 0, sup: 0, sme: 0, pc: 0, wis: 0 }; }
     rows.forEach(r => {
       const [d, ty, pl, inh, crit, lots, bl, sg, bs, rq, aw, av, ae, sup, sme, pc, wis] = r;
       const y = d.slice(0, 4); const j = (s.jaar[y] = s.jaar[y] || [0, 0, 0, 0]); j[pl]++;
-      if (ty) s.gun++; else s.opd++; if (inh) s.inh++;
+      if (ty) s.gun++; else s.opd++; if (inh) s.inh++; else if (ty) s.gegund++; else s.start++;
       const v = pl ? s.imp : s.eig; v.n++; if (crit) v.crit++;
       if (ty) { v.gun++; v.lots += lots; v.lotsB += Math.min(lots, bl + rq); v.aw += aw; v.av += av; v.ae += ae; v.sup += sup; v.sme += sme; v.pc += pc; v.wis += wis; }
       const L = s.lees; if (ty && !inh) { L.bl += bl; L.sg += sg; L.bs += bs; } if (!pl && crit) { L.crit++; if (crit >= 2) L.lp++; }
@@ -373,12 +374,13 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
       $('#leadBig').textContent = `${g.n}: geen aankondigingen onder eigen naam`;
       $('#leadSub').textContent = `sinds ${datum(DATA.van)}`;
     } else {
-      $('#leadBig').textContent = `${g.n}: ${fmt(s.n)} aankondigingen sinds ${new Date(DATA.van).getFullYear()}`;
-      $('#leadSub').textContent = `${fmt(s.opd)} van een opdracht · ${fmt(s.gun)} van een gunning · ${fmt(s.inh)} daarvan inhuur`;
+      const vbe = (g.ov && g.ov.VBE) || 0;
+      $('#leadBig').textContent = `${g.n}: ${fmt(s.start)} aanbestedingen gestart, ${fmt(s.gegund)} gegund`;
+      $('#leadSub').textContent = `sinds ${datum(DATA.van)} in TenderNed${s.inh ? ` · daarnaast ${fmt(s.inh)} ${s.inh === 1 ? 'inhuuraanvraag' : 'inhuuraanvragen'}` : ''}${vbe ? ` · ${fmt(vbe)} vroegtijdig beëindigd` : ''}`;
     }
     const e = s.eig, i = s.imp, ne = NL.eig, ni = NL.imp;
     const k = [
-      ['Op TenderNed zelf geplaatst', pctM(e.n, s.n), `van ${fmt(s.n)} aankondigingen · alle gemeenten ${pct(ne.n, NL.n)}`],
+      ['Op TenderNed zelf geplaatst', pctM(e.n, s.n), `van ${fmt(s.n)} aankondigingen (start en gunning) · alle gemeenten ${pct(ne.n, NL.n)}`],
       ['Gunningscriterium bekend', pctM(e.crit + i.crit, s.n), `alle gemeenten ${pct(ne.crit + ni.crit, NL.n)}`],
       ['Gunningswaarde leeg of € 1', pctM(e.aw + i.aw - (e.av + i.av) + e.ae + i.ae, e.aw + i.aw), `van ${fmt(e.aw + i.aw)} gunningen · alle gemeenten ${pct(ne.aw + ni.aw - (ne.av + ni.av) + ne.ae + ni.ae, ne.aw + ni.aw)}`],
       ['Winnaars met wisselend mkb-kenmerk', pctM(e.wis + i.wis, e.sup + i.sup), `van ${fmt(e.sup + i.sup)} winnaars · alle gemeenten ${pct(ne.wis + ni.wis, ne.sup + ni.sup)}`]
@@ -439,6 +441,7 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
       `<tr><td>Gegund op laagste prijs of laagste kosten</td><td class="r">${pctM(L.lp, L.crit)}</td><td class="r">${fmt(L.crit)} aankondigingen</td><td class="r">${pct(NLl.lp, NLl.crit)}</td></tr></tbody>`;
 
     ['#h-plat', '#h-veld', '#h-lees', '#h-lijst'].forEach(x => { $(x).closest('section').hidden = !s.n; });
+    $('#telUitleg').hidden = !s.n;
     renderLijst();
   }
 
@@ -460,7 +463,7 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
     $('#lijstTel').textContent = n ? (n > MAXRIJ ? `De nieuwste ${MAXRIJ} van ${fmt(n)} aankondigingen; de CSV bevat alles.` : `${fmt(n)} ${n === 1 ? 'aankondiging' : 'aankondigingen'}, de nieuwste bovenaan.`) : 'Geen aankondigingen bij deze keuze.';
     $('#lijstCsv').hidden = !n;
     $('#lijstWrap').innerHTML = n ? `<table><thead><tr><th>Datum</th><th>Soort</th><th>Titel</th><th>Platform</th><th class="r">Inschr.</th><th>Ontbreekt</th></tr></thead><tbody>` +
-      l.slice(0, MAXRIJ).map(r => `<tr><td style="white-space:nowrap">${esc(r[0])}</td><td>${r[1] ? 'Gunning' : 'Opdracht'}${r[3] ? ' <span class="muted small">inhuur</span>' : ''}</td><td class="titel"><a href="${link(r[20])}" target="_blank" rel="noopener">${esc(r[19]) || '(zonder titel)'}</a></td><td>${esc(PLAT[r[2]][0])}</td><td class="r">${r[6] ? (r[8] / r[6]).toLocaleString('nl-NL', { maximumFractionDigits: 1 }) : ''}</td><td class="mist">${esc(mist(r).join(', '))}</td></tr>`).join('') + '</tbody></table>' : '';
+      l.slice(0, MAXRIJ).map(r => `<tr><td style="white-space:nowrap">${esc(r[0])}</td><td>${r[1] ? 'Gunning' : 'Start'}${r[3] ? ' <span class="muted small">inhuur</span>' : ''}</td><td class="titel"><a href="${link(r[20])}" target="_blank" rel="noopener">${esc(r[19]) || '(zonder titel)'}</a></td><td>${esc(PLAT[r[2]][0])}</td><td class="r">${r[6] ? (r[8] / r[6]).toLocaleString('nl-NL', { maximumFractionDigits: 1 }) : ''}</td><td class="mist">${esc(mist(r).join(', '))}</td></tr>`).join('') + '</tbody></table>' : '';
   }
   $('#soortSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.soort = b.dataset.f; renderLijst(); });
   $('#platSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.plat = b.dataset.f; renderLijst(); });
@@ -476,13 +479,13 @@ const DATA = {"stand":{"2024":"2026-07-24","2025":"2026-07-24","2026":"2026-10-0
   }
   $('#lijstCsv').addEventListener('click', () => {
     const r = [['datum', 'soort', 'titel', 'platform', 'inhuur', 'gunningscriterium', 'percelen', 'percelen_met_inschrijvingen', 'inschrijvingen', 'gunningen', 'gunningen_met_waarde', 'waarde_1_euro', 'winnaars', 'winnaars_als_mkb', 'winnaars_mkb_wisselt', 'ontbreekt', 'tenderned', 'bron']];
-    lijst().forEach(x => r.push([x[0], x[1] ? 'gunning' : 'opdracht', x[19], PLAT[x[2]][0], x[3] ? 'ja' : '', CRIT[x[4]], x[5], x[6], x[8], x[10], x[11], x[12], x[13], x[14], x[16], mist(x).join(', '), link(x[20]), bron()]));
+    lijst().forEach(x => r.push([x[0], x[1] ? 'gunning' : 'start', x[19], PLAT[x[2]][0], x[3] ? 'ja' : '', CRIT[x[4]], x[5], x[6], x[8], x[10], x[11], x[12], x[13], x[14], x[16], mist(x).join(', '), link(x[20]), bron()]));
     download(r.map(x => x.map(cel).join(';')).join('\n'), `open-data-atelier-tenderned-${naam()}.csv`);
   });
   $('#kernCsv').addEventListener('click', () => {
     const s = S.s, r = [['onderdeel', 'maat', 'gemeente', 'alle_gemeenten', 'bron']];
     const add = (o, m, a, b) => r.push([o, m, a, b, bron()]);
-    add('aankondigingen', 'totaal', s.n, NL.n); add('aankondigingen', 'van een opdracht', s.opd, NL.opd); add('aankondigingen', 'van een gunning', s.gun, NL.gun); add('aankondigingen', 'inhuur', s.inh, NL.inh);
+    add('aankondigingen', 'totaal', s.n, NL.n); add('aankondigingen', 'start (aankondiging opdracht)', s.opd, NL.opd); add('aankondigingen', 'gunning', s.gun, NL.gun); add('aanbestedingen zonder inhuur', 'gestart', s.start, NL.start); add('aanbestedingen zonder inhuur', 'gegund', s.gegund, NL.gegund); add('aankondigingen', 'inhuur', s.inh, NL.inh);
     Object.keys(NL.jaar).sort().forEach(y => PLAT.forEach((p, x) => add('platform ' + y, p[0], (s.jaar[y] || [0, 0, 0, 0])[x], NL.jaar[y][x])));
     [['eig', 'TenderNed zelf'], ['imp', 'ander platform']].forEach(([k, t]) => Object.keys(s[k]).forEach(m => add('velden ' + t, m, s[k][m], NL[k][m])));
     Object.keys(s.lees).forEach(m => add('TenderNed zelf, alle jaren', m, s.lees[m], NL.lees[m]));
