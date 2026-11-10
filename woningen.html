@@ -368,6 +368,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>Per buurt geen leegstand</b>: het CBS levert per buurt alleen het aandeel woningen zonder ingeschreven bewoners. Dat is leegstand én ander gebruik samen. Op gemeenteniveau zie je hierboven hoe die twee zich verhouden.</li>
             <li><b>Twee tellingen</b>: de voorraad op 1 januari (bewoning en eigendom) en de jaarlijkse mutaties komen uit twee CBS-tabellen. Ze kunnen enkele tientallen woningen verschillen.</li>
             <li><b>Grenzen</b>: de buurtindeling verschilt per jaar. Een gemeente die na 2021 is gefuseerd kan een kortere reeks hebben.</li>
+            <li><b>Buurtcijfers 2025</b>: de kaart van PDOK heeft voor 2025 alleen grenzen, inwoners en huishoudens. De woningcijfers en de WOZ-waarde per buurt komen daarom uit de CBS-tabel Kerncijfers wijken en buurten 2025 (86165NED), gekoppeld op buurtcode. Het zijn dezelfde cijfers als PDOK eerder meeleverde; de WOZ per gemeente is gelijk aan die in de reeks hierboven.</li>
           </ul>
         </div>
       </div>
@@ -377,7 +378,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> CBS: Voorraad woningen naar eigendom en bewoning (86286NED, stand 1 januari, 2021 tot nu) Levensloop van woningen en niet-woningen (86098NED, per maand vanaf 2015) en Gemiddelde WOZ-waarde van woningen (85036NED, per jaar vanaf 2019); buurtcijfers en grenzen uit de Kerncijfers wijken en buurten via PDOK. Alles live opgehaald bij de gemeentekeuze. Het tijdstip van ophalen staat onder de cijfers.</p>
+    <p><b>Bron en peildatum.</b> CBS: Voorraad woningen naar eigendom en bewoning (86286NED, stand 1 januari, 2021 tot nu) Levensloop van woningen en niet-woningen (86098NED, per maand vanaf 2015) en Gemiddelde WOZ-waarde van woningen (85036NED, per jaar vanaf 2019); buurtcijfers en grenzen uit de Kerncijfers wijken en buurten via PDOK; vanaf 2025, nu PDOK de woningvelden leeg laat, de woningcijfers en de WOZ per buurt uit de CBS-tabel van hetzelfde jaar (86165NED voor 2025). Alles live opgehaald bij de gemeentekeuze. Het tijdstip van ophalen staat onder de cijfers.</p>
     <p><b>Licentie.</b> CBS: CC BY 4.0. Wijk- en buurtgrenzen (CBS) en achtergrondkaart (BRT, Kadaster) via PDOK: CC BY 4.0.</p>
     <p><b>Methode.</b> Aandelen leeg en ander gebruik rekent deze pagina zelf uit de CBS-aantallen; particuliere verhuur is de som van verhuur door personen, BV's en overige rechtspersonen. Aantallen per buurt zijn percentage maal woningen, dus bij benadering. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen telling van werkelijk leegstaande woningen ter plaatse en geen langdurige leegstand. Geen woningbehoefte en geen planning. Geen ranglijst en geen oordeel over een gemeente of eigenaar; Nederland staat er alleen als referentiepunt.</p>
@@ -409,7 +410,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.7';
+  const VERSIE = '1.8';
   const PRODUCT = 'Woningvoorraad en leegstand';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_VOOR = '86286NED';   // voorraad; eigendom, type eigenaar, status van bewoning, regio
@@ -823,15 +824,43 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
 
   // ---------- buurtcijfers (CBS Kerncijfers wijken en buurten via PDOK) ----------
+  // Sinds de kaart van 2025 laat PDOK de woningvelden leeg. Voor die jaren komen de woningcijfers live uit de
+  // CBS-tabel Kerncijfers wijken en buurten van hetzelfde jaar; PDOK levert dan alleen grenzen, inwoners en huishoudens.
+  const KWB_CBS = { 2025: '86165NED' };
+  const KWB_VELD = {
+    woningvoorraad: 'Woningvoorraad_35', aantal_nieuwbouw_woningen: 'NieuwbouwWoningen_36', gemiddelde_woningwaarde: 'GemiddeldeWOZWaardeVanWoningen_39',
+    percentage_eengezinswoning: 'PercentageEengezinswoning_40', percentage_meergezinswoning: 'PercentageMeergezinswoning_45', percentage_onbewoond: 'OnbewoondeWoningen_46',
+    percentage_koopwoningen: 'Koopwoningen_47', percentage_huurwoningen: 'HuurwoningenTotaal_48', perc_huurwoningen_in_bezit_woningcorporaties: 'InBezitWoningcorporatie_49',
+    perc_huurwoningen_in_bezit_overige_verhuurders: 'InBezitOverigeVerhuurders_50', perc_bouwjaar_afgelopen_10_jaar: 'BouwjaarAfgelopenTienJaar_52'
+  };
+  const kwbCbsUrl = (t, c, alleenGm) => CBS + t + '/TypedDataSet?$filter=' + encodeURIComponent(alleenGm ? `startswith(WijkenEnBuurten,'GM${c}')` : `startswith(WijkenEnBuurten,'GM${c}') or startswith(WijkenEnBuurten,'WK${c}') or startswith(WijkenEnBuurten,'BU${c}')`) +
+    '&$select=WijkenEnBuurten,' + Object.values(KWB_VELD).join(',');
+  const pdokHeeftWoningen = gj => (gj.features || []).some(f => num(f.properties.woningvoorraad) && num(f.properties.percentage_koopwoningen) != null);
   async function zoekJaren(c) {
     const kand = []; for (let j = new Date().getFullYear(); j >= EERSTE_KWB; j--) kand.push(j);
     const ok = await Promise.all(kand.map(async j => {
       try {
         const gj = await getJSON(wbUrl(j, 'buurten', c, 20), 1).then(wbOud);
-        return (gj.features || []).some(f => num(f.properties.woningvoorraad) && num(f.properties.percentage_koopwoningen) != null) ? j : null;
+        if (pdokHeeftWoningen(gj)) return j;
+        if (!KWB_CBS[j] || !(gj.features || []).length) return null;
+        const cb = await getJSON(kwbCbsUrl(KWB_CBS[j], c, true), 1);
+        return (cb.value || []).some(r => num(r.Woningvoorraad_35)) ? j : null;
       } catch (e) { return null; }
     }));
     return ok.filter(Boolean);
+  }
+  // Vult de lege woningvelden van de PDOK-kaart aan uit de CBS-tabel van hetzelfde jaar, op wijk- en buurtcode.
+  async function vulUitCbs(j, c, lagen) {
+    const t = KWB_CBS[j];
+    if (!t || lagen.some(pdokHeeftWoningen)) return null;
+    const cb = await getJSON(kwbCbsUrl(t, c, false));
+    const per = new Map((cb.value || []).map(r => [tr(r.WijkenEnBuurten), r]));
+    lagen.forEach(gj => (gj.features || []).forEach(f => {
+      const p = f.properties, code = p.buurtcode || p.wijkcode || p.gemeentecode;
+      const r = per.get(tr(code)); if (!r) return;
+      for (const k in KWB_VELD) if (p[k] == null) p[k] = r[KWB_VELD[k]];
+    }));
+    return t;
   }
   function renderJaren() {
     $('#jaren').innerHTML = S.jaren.length > 1 ? '<span class="muted small">Peildatum 1 januari</span>' + S.jaren.map(j => `<button class="btn linkish" type="button" data-j="${j}" aria-pressed="false">${j}</button>`).join('') : '';
@@ -868,6 +897,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         getJSON(wbUrl(j, 'gemeenten', g.c, 10)).then(wbOud)
       ]);
       if (S.g !== g || S.jaar !== j) return;
+      const cbsTabel = await vulUitCbs(j, g.c, [bu, wk, gm]);
+      if (S.g !== g || S.jaar !== j) return;
       const land = f => f.properties.water !== 'JA';
       const buurten = bu.features.filter(land).map(f => obj(f.properties, 'buurt'));
       const wijken = wk.features.filter(land).map(f => obj(f.properties, 'wijk'));
@@ -875,7 +906,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       const gmo = gmf ? obj(gmf.properties, 'gemeente') : null;
       if (gmo) { gmo.naam = g.n; gmo.code = 'GM' + g.c; }
       RECENT_LBL = bu.features.some(f => num(f.properties.perc_bouwjaar_afgelopen_10_jaar) != null) ? 'Gebouwd in de laatste 10 jaar' : 'Gebouwd in 2000 of later';
-      S.b = { jaar: j, buurten, wijken, gm: gmo, geo: { type: 'FeatureCollection', features: bu.features.filter(land) } };
+      S.b = { jaar: j, cbs: cbsTabel, buurten, wijken, gm: gmo, geo: { type: 'FeatureCollection', features: bu.features.filter(land) } };
     } catch (e) {
       if (S.g !== g) return;
       S.b = null; fouten.add('buurtcijfers (PDOK)');
@@ -1150,7 +1181,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const vs = S.voor, ms = S.mut;
     const j = S.b ? S.b.jaar : (S.jaren[0] || '');
-    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Bewoning en eigendom: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_VOOR}/table">Voorraad woningen; eigendom, type eigenaar, status van bewoning</a> (${T_VOOR}${vs ? `, ${vs[0].j}–${vs[vs.length - 1].j}` : ''}, peildatum 1 januari). WOZ-waarde: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_WOZ}/table">Gemiddelde WOZ-waarde van woningen</a> (${T_WOZ}${S.woz ? `, ${S.woz[0].j}–${S.woz[S.woz.length - 1].j}` : ''}). Erbij en eraf: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_MUT}/table">Levensloop van woningen en niet-woningen</a> (${T_MUT}${ms ? `, ${ms[0].j}–${S.ytd ? S.ytd.j + ' t/m ' + MAAND[S.ytd.tm - 1] : ms[ms.length - 1].j}` : ''}, uit de BAG). Buurten en wijken: Kerncijfers wijken en buurten ${j}, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a> (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Woningvoorraad en leegstand · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: CBS (CC-BY 4.0). Bewoning en eigendom: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_VOOR}/table">Voorraad woningen; eigendom, type eigenaar, status van bewoning</a> (${T_VOOR}${vs ? `, ${vs[0].j}–${vs[vs.length - 1].j}` : ''}, peildatum 1 januari). WOZ-waarde: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_WOZ}/table">Gemiddelde WOZ-waarde van woningen</a> (${T_WOZ}${S.woz ? `, ${S.woz[0].j}–${S.woz[S.woz.length - 1].j}` : ''}). Erbij en eraf: <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${T_MUT}/table">Levensloop van woningen en niet-woningen</a> (${T_MUT}${ms ? `, ${ms[0].j}–${S.ytd ? S.ytd.j + ' t/m ' + MAAND[S.ytd.tm - 1] : ms[ms.length - 1].j}` : ''}, uit de BAG). Buurten en wijken: Kerncijfers wijken en buurten ${j}${S.b && S.b.cbs ? `, woningcijfers uit <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${S.b.cbs}/table">CBS-tabel ${S.b.cbs}</a>, grenzen, inwoners en huishoudens via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a>` : `, met grenzen, via <a href="https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1">PDOK</a>`} (peildatum 1 januari ${j}). Achtergrondkaart: PDOK BRT. Opgehaald ${t}.<br>Josephine Linders · Woningvoorraad en leegstand · versie ${VERSIE}`;
   }
 
   // ---------- opnieuw proberen ----------
