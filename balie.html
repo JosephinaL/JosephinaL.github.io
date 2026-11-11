@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Reisdocumenten en rijbewijzen per gemeente · Open Data Atelier</title>
+<title>Burgerzaken per gemeente · Open Data Atelier</title>
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Wat er aan de balie aankomt: de reisdocumentenpiek volgens het NVVB-rekenmodel, met eigen aantallen door te rekenen, en een schatting van rijbewijsverlengingen en eerste rijbewijzen voor elke Nederlandse gemeente uit CBS-open data.">
+<meta name="description" content="Wat er aan de balie aankomt: de reisdocumentenpiek volgens het NVVB-rekenmodel, met eigen aantallen door te rekenen, een schatting van rijbewijsverlengingen en eerste rijbewijzen, en de geboorteaangiftes uit de verloskamers in de gemeente, voor elke Nederlandse gemeente uit open data.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 .focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
@@ -230,8 +230,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     <div class="brand">
       <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
       <span class="eyebrow">Publieke dienstverlening · open data</span>
-      <h1 id="title">Reisdocumenten en rijbewijzen per gemeente</h1>
-      <span class="byline"><a href="./">Josephine Linders</a> · Wat er aan de balie aankomt</span>
+      <h1 id="title">Burgerzaken per gemeente</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · Reisdocumenten, rijbewijzen en geboorteaangiftes: wat er aan de balie aankomt</span>
     </div>
     <form class="picker" id="pickForm">
       <div class="field">
@@ -374,8 +374,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
-  const PRODUCT = 'Reisdocumenten en rijbewijzen per gemeente';
+  const VERSIE = '1.2';
+  const PRODUCT = 'Burgerzaken per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const J0 = 2014;
 
@@ -557,7 +557,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   async function kies(g) {
     $('#intro').hidden = true; $('#result').hidden = false;
     $('#gmInput').value = g.n;
-    document.title = 'Reisdocumenten en rijbewijzen ' + g.n + ' · Open Data Atelier';
+    document.title = 'Burgerzaken ' + g.n + ' · Open Data Atelier';
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
     const rb = RB.get(g.c);
     S = { g, rb, m: null, mNl: null, bev: null, bevNl: null, geb: null, opgehaald: null };
