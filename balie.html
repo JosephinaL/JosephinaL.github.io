@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reisdocumenten en rijbewijzen per gemeente · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Wat er aan de balie aankomt: de reisdocumentenpiek volgens het NVVB-rekenmodel, met eigen aantallen door te rekenen, en een schatting van rijbewijsverlengingen en eerste rijbewijzen voor elke Nederlandse gemeente uit CBS-open data.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart .noot { font-size: .82rem; margin: 0; }
+#chOpbouw svg { max-width: 560px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.leeg { background: transparent; border: 2px solid var(--muted); }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 300px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 540px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.hbar { display: grid; grid-template-columns: 64px minmax(0, 1fr) 40px; gap: 2px 8px; align-items: center; font-size: .82rem; }
+.hbar .t { height: 10px; background: var(--sunk); border-radius: 0 3px 3px 0; overflow: hidden; }
+.hbar .t i { display: block; height: 100%; border-radius: 0 3px 3px 0; }
+.hbar .v { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 140px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+.cel-sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+.vlag { display: inline-block; font-size: .72rem; padding: 0 6px; border-radius: 3px; background: color-mix(in srgb, var(--accent) 18%, transparent); color: var(--fg); white-space: nowrap; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
+th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td .rijknop { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+:root { --st-geb: #0f5c66; --st-ovl: #eda100; --st-bin: #2a78d6; --st-bui: #1baf7a; --st-verw: #5a6b6e; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --st-geb: #5fb7c2; --st-ovl: #c98500; --st-bin: #3987e5; --st-bui: #199e70; --st-verw: #93a6a9; } }
+:root[data-theme="dark"] { --st-geb: #5fb7c2; --st-ovl: #c98500; --st-bin: #3987e5; --st-bui: #199e70; --st-verw: #93a6a9; }
+.zin { max-width: 80ch; margin: 0; }
+.opvallend { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; display: grid; gap: 6px; }
+.opvallend ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.duo .chart svg { max-width: 560px; }
+.sterftezin { font-size: 1rem; margin: 0; max-width: 80ch; }
+.sterftezin b { font-variant-numeric: tabular-nums; }
+.dit-jaar table td.r, .dit-jaar table th.r { white-space: nowrap; }
+.invoer { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px 12px; }
+.invoer label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); }
+.invoer input { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: 100%; font-variant-numeric: tabular-nums; }
+#rekenTabel { max-height: none; }
+#rekenTabel th { cursor: default; }
+.tools { padding: 0; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Publieke dienstverlening · open data</span>
+      <h1 id="title">Reisdocumenten en rijbewijzen per gemeente</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · Wat er aan de balie aankomt</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Hoeveel paspoorten, identiteitskaarten en rijbewijzen komen er de komende jaren aan de balie? Sinds 2014 zijn paspoort en identiteitskaart voor volwassenen tien jaar geldig in plaats van vijf. Daardoor kwam er eerst een dal en nu een piek, tot en met 2028. Bij rijbewijzen is er geen golf, maar een gestage groei: er zijn steeds meer oudere rijbewijshouders, en hun rijbewijs is korter geldig. Kies een gemeente.</p>
+    <p class="muted small">Een verwachtingsmodel uit open data, geen telling van de gemeente. De cijfers komen live van het CBS op het moment dat je een gemeente kiest.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <p class="zin" id="kopZin"></p>
+      <div class="top4" id="top4"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit is een verwachting, geen telling. De gemeente telt aanvragen en uitreikingen in haar eigen administratie. Die bevat ook vervangingen bij verlies of diefstal, spoedaanvragen, uitbreidingen met een categorie, omwisselingen van buitenlandse rijbewijzen en documenten voor wie niet in de gemeente woont. Die zitten niet in deze schatting.</li>
+          <li><b>Een andere peildatum of indeling.</b> Het rijbewijsbezit per gemeente is van 1 januari 2026, gedeeld door het aantal 18-plussers op 1 januari 2025 (zo publiceert het CBS het). De bevolking per leeftijd is van 1 januari van elk jaar. De NVVB-index is een raming uit 2021.</li>
+          <li><b>Registratie bij de bron.</b> Het rijbewijsbezit komt uit het rijbewijzenregister van de RDW, gekoppeld aan het woonadres in de BRP. Wie verhuist of uit de BRP verdwijnt, verschuift tussen gemeenten.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van de CBS-tabel zelf (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table" target="_blank" rel="noopener">83488NED</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table" target="_blank" rel="noopener">03759ned</a>), dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="status small muted">Een bewerking door Josephine Linders, op eigen titel. Geen officiële cijfers van een gemeente, het CBS, de RvIG, de RDW of de NVVB.</p>
+        <div class="meld"><span class="small">Melden, met gemeente en versie al ingevuld:</span><a class="btn primary" id="herkenMail" href="#">Mail een melding</a><a class="btn" id="herkenGh" href="#" target="_blank" rel="noopener">Meld op GitHub</a></div>
+      </details>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Paspoort en identiteitskaart</span><h2>De reisdocumentenpiek: wanneer, en hoe groot</h2></div>
+        <p class="small muted">Landelijk rekenmodel van de NVVB: 2014 = 100. 2014 tot en met 2020 is werkelijk, vanaf 2021 een raming.</p>
+      </div>
+      <div class="duo">
+        <div class="chart" id="chIndex"></div>
+        <div class="card" id="reken">
+          <h3>Reken met je eigen aantallen</h3>
+          <p class="small" style="margin:0">De NVVB rekent zo: het aantal aanvragen in 2014 in je eigen gemeente, gedeeld door 100, maal de index van het jaar. Dat aantal staat niet in open data. Vul het in als je het hebt. Het blijft in je browser: de pagina stuurt en bewaart niets.</p>
+          <div class="invoer">
+            <label>Paspoorten aangevraagd in 2014 <input id="in2014p" type="number" min="0" step="1" inputmode="numeric"></label>
+            <label>Identiteitskaarten aangevraagd in 2014 <input id="in2014i" type="number" min="0" step="1" inputmode="numeric"></label>
+          </div>
+          <p class="small muted" id="groeiFactor" style="margin:0"></p>
+          <div class="scroll" id="rekenTabel" tabindex="0" role="region" aria-label="Verwachte aanvragen per jaar"></div>
+        </div>
+      </div>
+      <p class="zin small" id="minderZin"></p>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Rijbewijs</span><h2>Rijbewijzen: geen golf, maar groei door vergrijzing</h2></div>
+        <p class="small muted">Schatting: de bevolking per leeftijd van de gemeente, maal het rijbewijsbezit per leeftijd in de provincie, afgestemd op het rijbewijsbezit van de gemeente zelf.</p>
+      </div>
+      <div class="trio">
+        <div class="chart" id="chRbAantal"></div>
+        <div class="chart" id="chRbIndex"></div>
+        <div class="chart" id="chRbLeeftijd"></div>
+      </div>
+      <p class="zin small" id="darZin"></p>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><b>Geboorteaangiftes.</b> Het CBS telt geboorten in de woongemeente van de moeder. De akte, en dus het werk aan de balie, ligt in de gemeente waar het kind geboren wordt, vaak een gemeente met een ziekenhuis. Open data meten die baliedruk niet. Geboorten per woongemeente staan in <a id="linkBevolking" href="bevolking.html">Bevolkingsontwikkeling per gemeente</a>. Waarom aktes naar plaats van gebeurtenis alleen in de eigen registratie staan, staat op <a href="indicatoren.html#domein=publiek">Indicatoren belicht, Publieke dienstverlening</a>.</li>
+            <li><b>Bevolking en het gemeentefonds.</b> Inwoners en leeftijdsgroepen zijn maatstaven in de algemene uitkering. Wat ze je gemeente opleveren, staat in <a id="linkRijksverdeling" href="rijksverdeling.html">Rijksverdeling per gemeente</a>.</li>
+            <li><b>Wat de balie zelf meet.</b> Wachttijd, afspraken, contacten per kanaal: zie de kaarten van <a href="indicatoren.html#domein=publiek">Publieke dienstverlening</a> op Indicatoren belicht.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Reisdocumenten</b>: de NVVB-index (rekenmodel uit 2021, gemaakt met het ministerie van BZK) per jaar, 2014 = 100, apart voor paspoort en Nederlandse identiteitskaart. Met eigen aantallen: aantal in 2014 ÷ 100 × index.</li>
+            <li><b>Eigen groei</b>: de groei van het aantal 18-plussers in de gemeente sinds 1 januari 2014, gedeeld door die van Nederland. De NVVB-index rekent met de landelijke groei. Groeit je gemeente sneller, dan verwacht je meer aanvragen dan de index zegt. Ook wie na 2014 is komen wonen, verlengt in je gemeente.</li>
+            <li><b>Rijbewijshouders per leeftijd</b>: het aantal inwoners per leeftijdsgroep in de gemeente, maal het aandeel met een rijbewijs in die groep in de eigen provincie (83488NED: houders gedeeld door inwoners, 03759ned). Daarna afgestemd op het rijbewijsbezit van de gemeente zelf (CBS, 1 januari 2026), met één factor voor alle leeftijden en jaren. Zonder die stap zat de schatting er tot 14 procentpunt naast: grote steden lager, plattelandsgemeenten hoger dan de provincie.</li>
+            <li><b>Elk rijbewijs</b>: gerekend met de categorie bromfiets (AM), want elk autorijbewijs omvat AM. Zo tellen ook houders van alleen een bromfiets- of motorrijbewijs mee.</li>
+            <li><b>Verlengingen per jaar</b>: houders gedeeld door de geldigheid. Onder de 65 jaar is dat 10 jaar. Van 65 tot 70 jaar geldt het rijbewijs tot de 75e verjaardag (gerekend als 7,5 jaar). Vanaf 70 jaar is het 5 jaar geldig (RDW). Houders van een vrachtautorijbewijs (C) onder de 65 jaar verlengen elke vijf jaar: zij tellen één keer extra mee.</li>
+            <li><b>Eerste rijbewijzen per jaar</b>: één leeftijdsjaar (de helft van de 18- en 19-jarigen) maal het aandeel met een rijbewijs bij 25 tot 30 jaar, dus het deel van een jaargang dat er uiteindelijk een haalt.</li>
+            <li><b>Toets voor Nederland</b>: op deze manier komt Nederland in 2026 op ongeveer 1,4 miljoen verlengingen en 160.000 eerste rijbewijzen. Dat is een orde van grootte, geen telling.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Een raming uit 2021</b>: de NVVB-index is niet bijgewerkt met de werkelijke aanvragen van 2021 tot nu. Die staan niet in open data.</li>
+            <li><b>Een gemiddelde gemeente</b>: de index heeft overal dezelfde vorm. Een gemeente die in 2014 en de jaren erna veel nieuwe inwoners kreeg, of met veel minderjarigen, wijkt af.</li>
+            <li><b>Een stabiel ritme</b>: de rijbewijsschatting gaat ervan uit dat elk jaar evenveel houders verlengen. Golven uit het verleden (een druk jaar tien jaar geleden) zijn niet te zien, omdat de uitgifte per jaar per gemeente niet open is.</li>
+            <li><b>Geen seizoen</b>: per maand is er geen open data. Het jaartotaal zegt niets over de drukte in het voorjaar of voor de zomervakantie.</li>
+            <li><b>Online verlengen</b>: een rijbewijs kun je ook digitaal verlengen bij de RDW. Ophalen blijft aan de balie.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="tools"><button class="btn" id="csvBtn" type="button">CSV met de cijfers</button></div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> NVVB, Rekenmodel reisdocumentenpiek vanaf 2024 (2021, met het ministerie van BZK): de jaarindex 2014–2034 voor paspoort en identiteitskaart, overgenomen in de pagina. CBS: Personen met een rijbewijs naar categorie, leeftijd en provincie op 1 januari, 2014–2026 (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table">83488NED</a>, live); Bevolking naar leeftijd op 1 januari, 2014–2026 (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a>, live). Het rijbewijsbezit per gemeente komt uit het CBS-nieuwsbericht <a href="https://www.cbs.nl/nl-nl/nieuws/2026/07/rijbewijs-en-autobezit-stijgt">Rijbewijs- en autobezit stijgt</a> (13 februari 2026, peildatum 1 januari 2026, overgenomen in de pagina). Geldigheid van het rijbewijs: <a href="https://www.rdw.nl/het-rijbewijs/over-het-rijbewijs/geldigheid-rijbewijs">RDW</a>. Digitale aanvragen 2025: memorie van antwoord bij wetsvoorstel 36937 (Eerste Kamer, september 2026).</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0. Bij het NVVB-rekenmodel staat geen licentie. De pagina neemt alleen de 21 indexcijfers per document over, met bronvermelding.</p>
+    <p><b>Methode.</b> Reisdocumenten: de landelijke index, eventueel met de eigen aantallen uit 2014, en een correctie voor de eigen groei van de volwassen bevolking. Rijbewijzen: houders per leeftijd geschat uit de provincie en afgestemd op de gemeente, gedeeld door de geldigheid. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen telling van aanvragen of uitreikingen, geen prognose per maand, geen planning voor de balie en geen oordeel over de dienstverlening. Geen cijfers uit de BRP of de reisdocumentenadministratie van een gemeente.</p>
+    <p><b>Bekende beperkingen.</b> De NVVB-index is een landelijke raming uit 2021. Het rijbewijsbezit per gemeente is één peildatum. De verdeling over leeftijden komt uit de provincie. Vervangingen, spoed, omwisselingen en uitbreidingen zitten er niet in.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const PRODUCT = 'Reisdocumenten en rijbewijzen per gemeente';
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const J0 = 2014;
+
+  // NVVB, Rekenmodel reisdocumentenpiek vanaf 2024 (2021): index 2014 = 100; 2014–2020 realisatie, vanaf 2021 raming
+  const NVVB_JAREN = [2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025, 2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033, 2034];
+  const NVVB_P = [100, 95, 100, 115, 101, 40, 21, 32, 43, 38, 91, 91, 99, 113, 100, 51, 27, 47, 53, 47, 85];
+  const NVVB_I = [100, 121, 135, 129, 100, 52, 41, 61, 69, 55, 94, 110, 129, 109, 99, 59, 52, 79, 77, 62, 92];
+  const nvvb = (arr, j) => { const i = NVVB_JAREN.indexOf(j); return i < 0 ? null : arr[i]; };
+
+  // CBS, nieuwsbericht 13 feb 2026: autorijbewijsbezit 18-plussers per gemeente op 1 januari 2026 (%), met de provincie (86247NED, Code_28)
+  const RBRAW = "0014:20:70.3|0034:24:76.7|0037:20:81.2|0047:20:82.5|0050:24:84.9|0059:21:87.0|0060:21:81.1|0072:21:78.5|0074:21:83.7|0080:21:76.3|0085:21:85.7|0086:21:87.4|0088:21:67.9|0090:21:81.1|0093:21:81.6|0096:21:68.7|0098:21:85.4|0106:22:80.4|0109:22:86.7|0114:22:83.1|0118:22:82.8|0119:22:82.8|0141:23:78.9|0147:23:87.5|0148:23:90.1|0150:23:80.6|0153:23:75.3|0158:23:88.3|0160:23:87.7|0163:23:88.7|0164:23:82.2|0166:23:83.4|0168:23:86.8|0171:24:81.9|0173:23:85.6|0175:23:87.3|0177:23:87.9|0180:23:92.5|0183:23:93.0|0184:24:87.3|0189:23:91.3|0193:23:80.3|0197:25:87.5|0200:25:82.2|0202:25:73.3|0203:25:88.4|0209:25:87.3|0213:25:86.7|0214:25:89.6|0216:25:83.0|0221:25:81.7|0222:25:84.2|0225:25:86.1|0226:25:86.6|0228:25:84.0|0230:25:87.6|0232:25:86.3|0233:25:82.4|0243:25:83.9|0244:25:87.2|0246:25:87.2|0252:25:87.0|0262:25:88.0|0263:25:84.9|0267:25:87.2|0268:25:76.5|0269:25:88.8|0273:25:88.6|0274:25:81.4|0275:25:79.2|0277:25:91.4|0279:25:88.9|0281:25:79.5|0285:25:88.0|0289:25:68.9|0293:25:84.1|0294:25:82.8|0296:25:86.5|0297:25:85.1|0299:25:85.0|0301:25:80.2|0302:25:87.0|0303:24:84.1|0307:26:82.4|0308:26:80.3|0310:26:83.2|0312:26:85.9|0313:26:87.2|0317:26:88.9|0321:26:86.3|0327:26:87.5|0331:26:88.8|0335:26:88.5|0339:26:91.5|0340:26:86.2|0342:26:85.1|0344:26:74.7|0345:26:83.3|0351:26:87.5|0352:26:87.7|0353:26:83.4|0355:26:79.2|0356:26:79.8|0358:27:82.6|0361:27:79.4|0362:27:74.1|0363:27:62.4|0373:27:82.6|0375:27:78.3|0376:27:86.5|0377:27:84.6|0383:27:85.9|0384:27:67.9|0385:27:85.0|0388:27:77.5|0392:27:74.6|0394:27:82.5|0396:27:82.0|0397:27:83.3|0399:27:84.7|0400:27:76.7|0402:27:76.5|0405:27:79.5|0406:27:84.4|0415:27:84.4|0417:27:84.2|0420:27:84.8|0431:27:86.3|0432:27:87.1|0437:27:78.2|0439:27:78.5|0441:27:85.6|0448:27:81.1|0450:27:87.8|0451:27:81.2|0453:27:80.4|0473:27:76.8|0479:27:76.3|0482:28:81.9|0484:28:82.6|0489:28:85.9|0498:27:86.4|0502:28:76.0|0503:28:67.4|0505:28:76.4|0512:28:79.6|0513:28:76.3|0518:28:64.6|0523:28:85.9|0531:28:87.0|0532:27:81.0|0534:28:82.4|0537:28:81.0|0542:28:80.4|0546:28:69.3|0547:28:81.2|0553:28:84.7|0556:28:79.6|0569:28:87.0|0575:28:81.5|0579:28:81.1|0589:26:86.6|0590:28:84.0|0597:28:80.1|0599:28:65.9|0603:28:74.3|0606:28:69.6|0610:28:79.2|0613:28:85.2|0622:28:73.0|0626:28:81.9|0627:28:85.6|0629:28:78.0|0632:26:84.0|0637:28:79.5|0638:28:83.8|0642:28:80.2|0654:29:89.3|0664:29:81.0|0668:25:89.4|0677:29:83.4|0678:29:89.2|0687:29:78.9|0703:29:84.6|0715:29:80.0|0716:29:86.9|0717:29:88.4|0718:29:75.2|0736:26:87.1|0737:21:85.8|0743:30:86.4|0744:30:85.1|0748:30:81.2|0753:30:85.8|0755:30:88.5|0757:30:82.3|0758:30:80.5|0762:30:85.5|0765:20:81.2|0766:30:85.0|0770:30:87.8|0772:30:73.0|0777:30:84.4|0779:30:85.1|0784:30:80.9|0785:30:87.5|0794:30:79.7|0796:30:81.8|0797:30:87.3|0798:30:90.4|0809:30:86.6|0820:30:89.3|0823:30:89.3|0824:30:85.2|0826:30:84.2|0828:30:83.0|0840:30:88.4|0845:30:89.3|0847:30:88.0|0848:30:87.7|0851:30:84.9|0852:27:82.1|0855:30:75.4|0858:30:84.7|0861:30:84.2|0865:30:83.5|0866:30:86.8|0867:30:81.6|0873:30:83.7|0879:30:85.8|0880:27:84.5|0882:31:81.5|0888:31:83.7|0889:31:82.8|0893:31:87.1|0899:31:80.2|0907:31:81.0|0917:31:75.4|0928:31:74.9|0935:31:63.8|0938:31:84.8|0944:31:87.2|0946:31:86.6|0957:31:77.7|0965:31:84.8|0971:31:86.4|0981:31:65.6|0983:31:77.1|0984:31:81.8|0986:31:86.4|0988:31:80.9|0994:31:80.2|0995:24:75.7|1507:31:85.3|1509:25:86.9|1525:28:85.0|1581:26:84.0|1586:25:88.7|1598:27:88.2|1621:28:88.0|1640:31:86.2|1641:31:84.0|1652:30:86.7|1655:30:85.1|1658:30:87.4|1659:30:87.5|1667:30:90.1|1669:31:85.3|1674:30:80.3|1676:29:85.8|1680:22:87.9|1681:22:88.3|1690:22:90.7|1695:29:85.3|1696:27:88.4|1699:22:87.1|1700:23:89.5|1701:22:87.9|1705:25:87.3|1706:30:84.8|1708:23:85.8|1709:30:85.7|1711:31:83.7|1714:29:81.6|1719:30:86.1|1721:30:88.6|1723:30:90.4|1724:30:89.0|1728:30:87.5|1729:31:85.4|1730:22:86.7|1731:22:87.8|1734:25:87.5|1735:23:88.0|1740:25:87.7|1742:23:88.8|1771:30:84.5|1773:23:86.4|1774:23:90.7|1783:28:82.9|1842:28:87.2|1859:25:88.0|1876:25:90.2|1883:31:80.1|1884:28:87.0|1891:21:85.4|1892:28:86.1|1894:31:84.7|1895:20:81.4|1896:23:87.5|1900:21:84.4|1901:28:85.3|1903:31:86.8|1904:26:84.7|1911:27:85.1|1916:28:76.8|1924:28:86.0|1926:28:85.7|1930:28:79.0|1931:28:85.8|1940:21:87.0|1942:27:83.4|1945:25:82.3|1948:30:85.9|1949:21:84.6|1950:20:81.7|1952:20:81.3|1954:31:87.0|1955:25:86.0|1959:30:87.6|1960:25:88.2|1961:26:84.8|1963:28:86.9|1966:20:82.7|1969:20:87.3|1970:21:85.6|1978:28:88.6|1979:20:79.2|1980:27:84.3|1982:30:85.9|1991:30:85.7|1992:28:84.3";
+  const RB = new Map(RBRAW.split('|').map(x => { const [c, p, v] = x.split(':'); return [c, { pv: 'PV' + p, pct: +v }]; }));
+
+  // leeftijdsgroepen van 83488NED, met de geldigheid van het rijbewijs (jaren) bij verlenging op die leeftijd
+  const GROEP = [
+    { k: '53070', t: '16–17', lo: 16, hi: 18, geldig: null },
+    { k: '53090', t: '18–19', lo: 18, hi: 20, geldig: 10 },
+    { k: '70500', t: '20–24', lo: 20, hi: 25, geldig: 10 },
+    { k: '70600', t: '25–29', lo: 25, hi: 30, geldig: 10 },
+    { k: '60400', t: '30–39', lo: 30, hi: 40, geldig: 10 },
+    { k: '60500', t: '40–49', lo: 40, hi: 50, geldig: 10 },
+    { k: '60600', t: '50–59', lo: 50, hi: 60, geldig: 10 },
+    { k: '71300', t: '60–64', lo: 60, hi: 65, geldig: 10 },
+    { k: '71400', t: '65–69', lo: 65, hi: 70, geldig: 7.5 },
+    { k: '71500', t: '70–74', lo: 70, hi: 75, geldig: 5 },
+    { k: '21600', t: '75+', lo: 75, hi: 999, geldig: 5 }
+  ];
+  const CAT_ELK = 'A028206', CAT_AUTO = 'A028200', CAT_C = 'A028208';
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const nf1 = new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmt = v => v == null || !isFinite(v) ? '–' : nf.format(Math.round(v));
+  const rond = v => v == null ? null : v >= 1000 ? Math.round(v / 10) * 10 : Math.round(v);
+  const fmtR = v => fmt(rond(v));
+  const fP = v => v == null || !isFinite(v) ? '–' : nf1.format(v) + '%';
+  const fPs = v => v == null || !isFinite(v) ? '–' : (v > 0 ? '+' : v < 0 ? '−' : '') + nf1.format(Math.abs(v)) + '%';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tr = s => String(s == null ? '' : s).trim();
+
+  // ---------- gemeenten ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+    if (S && S.m) renderAlles();
+  });
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  function toonTip(e, html) {
+    tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+
+  // ---------- ophalen ----------
+  async function getJSON(u, pogingen = 3) {
+    let last;
+    for (let i = 0; i < pogingen; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; if (i < pogingen - 1) await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  const odata = (t, flt, sel) => getJSON(CBS + t + '/TypedDataSet?$filter=' + encodeURIComponent(flt) + (sel ? '&$select=' + sel : '')).then(j => j.value);
+
+  // leeftijdssleutel 03759ned → leeftijd in jaren (10010 = 0, 1aa00 = aa, 19901–19905 = 100–104, 22300 = 105+)
+  function leeftijd(k) {
+    if (k === '10010') return 0;
+    if (k === '22300') return 105;
+    if (/^1990[1-5]$/.test(k)) return 99 + +k[4];
+    if (/^1\d\d00$/.test(k) && k !== '10000') return +k.slice(1, 3);
+    return null;
+  }
+  // bevolking op 1 januari per jaar: groepen, totaal, 18+, 0–17
+  async function laadBev(regio) {
+    const rs = await odata('03759ned', `startswith(RegioS,'${regio}') and Geslacht eq 'T001038' and BurgerlijkeStaat eq 'T001019' and Perioden ge '${J0}JJ00'`, 'Leeftijd,Perioden,BevolkingOp1Januari_1');
+    const per = new Map();
+    rs.forEach(r => {
+      const j = +r.Perioden.slice(0, 4), v = r.BevolkingOp1Januari_1, k = tr(r.Leeftijd);
+      if (v == null) return;
+      if (!per.has(j)) per.set(j, { tot: 0, g18: 0, m18: 0, g: {} });
+      const o = per.get(j);
+      if (k === '10000') { o.totCbs = v; return; }
+      const a = leeftijd(k); if (a == null) return;
+      o.tot += v; if (a >= 18) o.g18 += v; else o.m18 += v;
+      const g = GROEP.find(x => a >= x.lo && a < x.hi); if (g) o.g[g.k] = (o.g[g.k] || 0) + v;
+    });
+    return per;
+  }
+  // rijbewijshouders per categorie, leeftijdsgroep en jaar
+  async function laadRb(regio) {
+    const rs = await odata('83488NED', `startswith(RegioS,'${regio}') and (Rijbewijscategorie eq '${CAT_ELK}' or Rijbewijscategorie eq '${CAT_AUTO}' or Rijbewijscategorie eq '${CAT_C}')`, 'Rijbewijscategorie,LeeftijdRijbewijshouder,Perioden,PersonenMetRijbewijs_1');
+    const m = new Map();
+    rs.forEach(r => m.set(tr(r.Rijbewijscategorie) + '|' + tr(r.LeeftijdRijbewijshouder) + '|' + r.Perioden.slice(0, 4), r.PersonenMetRijbewijs_1));
+    return m;
+  }
+
+  // ---------- model ----------
+  // per jaar: houders per groep (geschat), verlengingen, extra C, eerste rijbewijzen
+  function model(bev, rbRef, bevRef, k) {
+    const jaren = [...bev.keys()].filter(j => bevRef.has(j) && rbRef.has(CAT_ELK + '|10000|' + j)).sort((a, b) => a - b);
+    const uit = new Map();
+    jaren.forEach(j => {
+      const p = bev.get(j), pr = bevRef.get(j);
+      const kans = (c, g) => { const h = rbRef.get(c + '|' + g + '|' + j); return h == null || !pr.g[g] ? 0 : h / pr.g[g]; };
+      const groepen = GROEP.map(g => {
+        const n = p.g[g.k] || 0, houders = n * kans(CAT_ELK, g.k) * k;
+        const verl = g.geldig ? houders / g.geldig : 0;
+        const cx = g.hi <= 65 ? n * kans(CAT_C, g.k) * k / 10 : 0;
+        return { ...g, n, houders, verl, cx };
+      });
+      const verl = groepen.reduce((a, g) => a + g.verl, 0), cx = groepen.reduce((a, g) => a + g.cx, 0);
+      const eerste = (p.g['53090'] || 0) / 2 * kans(CAT_ELK, '70600') * k;
+      const v65 = groepen.filter(g => g.lo >= 65).reduce((a, g) => a + g.verl, 0);
+      uit.set(j, { j, groepen, verl, cx, eerste, totaal: verl + cx + eerste, v65 });
+    });
+    return uit;
+  }
+  // afstemfactor: rijbewijsbezit (auto, 18+) van de gemeente tegenover de schatting met de kansen van de provincie
+  function afstem(bev, rbPv, bevPv, pct) {
+    const j = Math.max(...[...bev.keys()].filter(x => bevPv.has(x) && rbPv.has(CAT_AUTO + '|10000|' + x)));
+    const p = bev.get(j), pr = bevPv.get(j);
+    let s = 0;
+    GROEP.filter(g => g.lo >= 18).forEach(g => { const h = rbPv.get(CAT_AUTO + '|' + g.k + '|' + j); if (h != null && pr.g[g.k]) s += (p.g[g.k] || 0) * h / pr.g[g.k]; });
+    const zonder = 100 * s / p.g18;
+    return { k: pct / zonder, j, zonder };
+  }
+
+  // ---------- staat ----------
+  let S = null;
+  const fouten = new Set();
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Om ${t} kwam er geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt wel.`;
+    $('#melding').hidden = false;
+  }
+
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = 'Reisdocumenten en rijbewijzen ' + g.n + ' · Open Data Atelier';
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    const rb = RB.get(g.c);
+    S = { g, rb, m: null, mNl: null, bev: null, bevNl: null, opgehaald: null };
+    fouten.clear(); toonMelding();
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen…'; $('#kopZin').textContent = '';
+    ['#top4', '#chIndex', '#chRbAantal', '#chRbIndex', '#chRbLeeftijd', '#rekenTabel', '#groeiFactor', '#minderZin', '#darZin', '#foot'].forEach(s => { $(s).innerHTML = ''; });
+    $('#linkBevolking').href = 'bevolking.html#gm=' + g.c; $('#linkRijksverdeling').href = 'rijksverdeling.html#gm=' + g.c;
+    history.replaceState(null, '', '#gm=' + g.c);
+    voortgang(0, 1, 'Cijfers ophalen bij het CBS…');
+    try {
+      const [bev, bevNl, bevPv, rbNl, rbPv] = await Promise.all([laadBev('GM' + g.c), laadBev('NL01'), rb ? laadBev(rb.pv) : null, laadRb('NL01'), rb ? laadRb(rb.pv) : null]);
+      if (S.g !== g) return;
+      S.bev = bev; S.bevNl = bevNl;
+      S.mNl = model(bevNl, rbNl, bevNl, 1);
+      if (rb && bevPv && rbPv && bev.size) {
+        S.af = afstem(bev, rbPv, bevPv, rb.pct);
+        S.m = model(bev, rbPv, bevPv, S.af.k);
+      }
+      const L = Math.max(...bevNl.keys());
+      const pNl = bevNl.get(L);
+      S.nlPct = 100 * [...GROEP].filter(x => x.lo >= 18).reduce((a, x) => a + (rbNl.get(CAT_AUTO + '|' + x.k + '|' + L) || 0), 0) / pNl.g18;
+    } catch (e) { fouten.add('bevolking en rijbewijzen (CBS)'); }
+    if (S.g !== g) return;
+    S.opgehaald = new Date();
+    renderAlles(); toonMelding(); voortgang(1, 1, '');
+  }
+  function renderAlles() { renderNvvb(); if (S.bev) { renderKern(); renderReken(); renderRb(); } renderVoet(); }
+
+  // ---------- kern ----------
+  function renderKern() {
+    const g = S.g, b = S.bev, bn = S.bevNl;
+    const L = Math.max(...b.keys()), p = b.get(L), p0 = b.get(J0), n = bn.get(L), n0 = bn.get(J0);
+    const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    const gr = p0 ? 100 * (p.g18 / p0.g18 - 1) : null, grN = 100 * (n.g18 / n0.g18 - 1);
+    const mi = 100 * p.m18 / p.tot, miN = 100 * n.m18 / n.tot;
+    $('#leadBig').textContent = `${g.n}: ${fmt(p.g18)} volwassenen en ${fmt(p.m18)} minderjarigen op 1 januari ${L}`;
+    $('#leadSub').textContent = '';
+    const m = S.m, mL = m && m.get(Math.max(...m.keys())), m0 = m && m.get(J0);
+    const nl = S.mNl, nL = nl.get(Math.max(...nl.keys())), nl0 = nl.get(J0);
+    $('#kopZin').innerHTML = `Landelijk ligt de piek bij identiteitskaarten in <b>2026</b> (index 129) en bij paspoorten in <b>2027</b> (113). In 2030 volgt het dal (27 en 52). ` +
+      (m ? `Rijbewijzen: naar schatting komen er in ${g.n} elk jaar <b>${fmtR(mL.totaal)}</b> aanvragen voor een verlenging of een eerste rijbewijs, ${fPs(100 * (mL.totaal / m0.totaal - 1))} sinds ${J0}.` : '');
+    let h = '';
+    h += unit('Volwassenen sinds ' + J0, fPs(gr), `18-plussers ${fmt(p0 && p0.g18)} → ${fmt(p.g18)}; Nederland ${fPs(grN)}. Hun paspoort of identiteitskaart is tien jaar geldig.`);
+    h += unit('Minderjarigen', fP(mi), `van de inwoners; Nederland ${fP(miN)}. Hun documenten zijn vijf jaar geldig: een vast ritme, buiten de piek.`);
+    h += unit('Rijbewijsbezit 18+', S.rb ? fP(S.rb.pct) : '–', `op 1 januari 2026 (CBS); Nederland ${fP(S.nlPct)} (houders gedeeld door 18-plussers).`);
+    h += unit('Rijbewijzen per jaar', m ? fmtR(mL.totaal) : '–', m ? `schatting ${mL.j}: ${fmtR(mL.verl + mL.cx)} verlengingen, ${fmtR(mL.eerste)} eerste. ${fP(100 * mL.v65 / mL.verl)} van de verlengingen is van 65-plussers (Nederland ${fP(100 * nL.v65 / nL.verl)}).` : 'geen rijbewijsbezit voor deze gemeente');
+    $('#top4').innerHTML = h;
+  }
+
+  // ---------- grafieken ----------
+  function nice(v) { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
+  const asLbl = v => Math.abs(v) >= 10000 ? nf.format(v / 1000) + 'k' : nf.format(v);
+  function lijnen(el, titel, noemer, jaren, series, opt = {}) {
+    const W = 420, H = 210, Lm = 48, R = 112, Tp = 12, B = 24;
+    const fv = opt.fv || fmt;
+    const pts = series.map(s => jaren.map(j => ({ j, v: s.w(j) })).filter(p => p.v != null));
+    const alle = pts.flat();
+    if (!alle.length) { el.innerHTML = `<h3>${esc(titel)}</h3><p class="small muted" style="margin:0">${esc(opt.leeg || 'Geen cijfers.')}</p>`; return; }
+    const j0 = Math.min(...alle.map(p => p.j)), j1 = Math.max(...alle.map(p => p.j));
+    const hi = Math.max(...alle.map(p => p.v)) * 1.12 || 1;
+    const lo = opt.lo != null ? opt.lo : 0;
+    const x = j => Lm + (W - Lm - R) * (j - j0) / Math.max(1, j1 - j0);
+    const y = v => Tp + (H - Tp - B) * (1 - (v - lo) / (hi - lo));
+    const stap = nice((hi - lo) / 4);
+    let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(titel)}, ${j0} tot en met ${j1}">`;
+    if (opt.vlak) s += `<rect x="${x(opt.vlak[0])}" y="${Tp}" width="${x(opt.vlak[1]) - x(opt.vlak[0])}" height="${H - Tp - B}" fill="var(--sunk)"/>`;
+    for (let t = Math.ceil(lo / stap) * stap; t <= hi; t += stap) s += `<line class="ax" x1="${Lm}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}"/><text class="lbl" x="${Lm - 6}" y="${y(t) + 4}" text-anchor="end">${asLbl(t)}</text>`;
+    if (opt.ref != null) s += `<line x1="${Lm}" x2="${W - R}" y1="${y(opt.ref)}" y2="${y(opt.ref)}" stroke="var(--muted)" stroke-dasharray="2 3"/>`;
+    const tick = j1 - j0 > 15 ? 4 : j1 - j0 > 6 ? 2 : 1;
+    for (let j = Math.ceil(j0 / tick) * tick; j <= j1; j += tick) s += `<text class="lbl" x="${x(j)}" y="${H - 6}" text-anchor="middle">${j}</text>`;
+    if (opt.nu != null && opt.nu >= j0 && opt.nu <= j1) s += `<line x1="${x(opt.nu)}" x2="${x(opt.nu)}" y1="${Tp}" y2="${H - B}" stroke="var(--fg)" stroke-width="1"/><text class="lbl" x="${x(opt.nu) + 4}" y="${Tp + 10}">nu</text>`;
+    pts.forEach((p, i) => {
+      if (p.length > 1) s += `<path d="${p.map((q, k) => (k ? 'L' : 'M') + x(q.j).toFixed(1) + ' ' + y(q.v).toFixed(1)).join(' ')}" fill="none" stroke="${series[i].kleur}" stroke-width="2" ${series[i].streep ? 'stroke-dasharray="5 4"' : ''} stroke-linejoin="round" stroke-linecap="round"/>`;
+    });
+    const ends = pts.map((p, i) => p.length ? { i, yy: y(p[p.length - 1].v), p: p[p.length - 1] } : null).filter(Boolean).sort((a, b) => a.yy - b.yy);
+    for (let k = 1; k < ends.length; k++) if (ends[k].yy - ends[k - 1].yy < 13) ends[k].yy = ends[k - 1].yy + 13;
+    ends.forEach(e => {
+      s += `<circle cx="${x(e.p.j)}" cy="${y(e.p.v)}" r="4" fill="${series[e.i].kleur}" stroke="var(--surface)" stroke-width="2"/>`;
+      s += `<text class="dl" x="${x(e.p.j) + 8}" y="${e.yy + 4}">${esc(series[e.i].kort || series[e.i].naam)} ${fv(e.p.v)}</text>`;
+    });
+    s += `<line class="hl" x1="0" x2="0" y1="${Tp}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>`;
+    s += `<rect class="hit" x="${Lm}" y="0" width="${W - Lm - R}" height="${H}" fill="transparent"/></svg>`;
+    el.innerHTML = `<div class="chart-kop"><h3>${esc(titel)}</h3></div><span class="noemer">${esc(noemer)}</span>${s}
+      <div class="legend">${series.map(se => `<span><i class="sw" style="background:${se.kleur}"></i>${esc(se.naam)}</span>`).join('')}${opt.vlak ? `<span><i class="sw" style="background:var(--sunk);border:1px solid var(--line)"></i>${esc(opt.vlakNaam || '')}</span>` : ''}</div>${opt.noot ? `<p class="noot muted">${opt.noot}</p>` : ''}`;
+    const svg = el.querySelector('svg'), hl = svg.querySelector('.hl');
+    const js = [...new Set(alle.map(p => p.j))].sort((a, b) => a - b);
+    const zet = e => {
+      const r = svg.getBoundingClientRect(); const px = (e.clientX - r.left) * W / r.width;
+      let bj = js[0], bd = 1e9; js.forEach(j => { const d = Math.abs(x(j) - px); if (d < bd) { bd = d; bj = j; } });
+      hl.setAttribute('x1', x(bj)); hl.setAttribute('x2', x(bj)); hl.setAttribute('visibility', 'visible');
+      toonTip(e, `<b>${bj}</b>` + series.map((se, i) => { const q = pts[i].find(p => p.j === bj); return `<br><i class="sw" style="background:${se.kleur}"></i>${esc(se.naam)}: <span class="num">${q ? fv(q.v) : '–'}</span>`; }).join('') + (opt.tipExtra ? opt.tipExtra(bj) : ''));
+    };
+    svg.addEventListener('pointermove', zet); svg.addEventListener('pointerdown', zet);
+    svg.addEventListener('pointerleave', () => { hl.setAttribute('visibility', 'hidden'); verbergTip(); });
+  }
+
+  function renderNvvb() {
+    lijnen($('#chIndex'), 'NVVB-index: aanvragen tegenover 2014', 'index, 2014 = 100 · grijs vlak = piekjaren 2024–2028 · na 2020 een raming', NVVB_JAREN,
+      [{ naam: 'Paspoort', kort: 'paspoort', kleur: 'var(--st-geb)', w: j => nvvb(NVVB_P, j) }, { naam: 'Identiteitskaart', kort: 'ID-kaart', kleur: 'var(--st-ovl)', w: j => nvvb(NVVB_I, j) }],
+      { fv: v => nf.format(v), vlak: [2024, 2028], vlakNaam: 'piekjaren', ref: 100, nu: new Date().getFullYear(),
+        tipExtra: j => j <= 2020 ? '<br><span class="muted">werkelijk</span>' : '<br><span class="muted">raming (2021)</span>' });
+  }
+
+  // ---------- eigen aantallen ----------
+  function groeiFactor() {
+    const b = S.bev, n = S.bevNl; if (!b || !n) return null;
+    const L = Math.max(...b.keys()); if (!b.get(J0)) return null;
+    return { f: (b.get(L).g18 / b.get(J0).g18) / (n.get(L).g18 / n.get(J0).g18), L };
+  }
+  function renderReken() {
+    const gf = groeiFactor();
+    const nauwk = gf ? new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(gf.f) : '';
+    if (gf) $('#groeiFactor').textContent = `Eigen groei: het aantal 18-plussers in ${S.g.n} groeide van ${J0} tot ${gf.L} ${Math.abs(gf.f - 1) < 0.005 ? 'even snel als' : gf.f > 1 ? 'sneller dan' : 'langzamer dan'} in Nederland (factor ${nauwk}).`;
+    const p = +$('#in2014p').value || 0, i = +$('#in2014i').value || 0;
+    const jaren = NVVB_JAREN.filter(j => j >= 2024);
+    if (!p && !i) { $('#rekenTabel').innerHTML = `<p class="small muted" style="margin:0">Vul een of beide aantallen in, dan verschijnt hier per jaar ${jaren[0]}–${jaren[jaren.length - 1]} de verwachting.</p>`; S.reken = null; return; }
+    const rij = j => { const a = p * nvvb(NVVB_P, j) / 100, b = i * nvvb(NVVB_I, j) / 100; return { j, a, b, t: a + b, c: gf ? (a + b) * gf.f : null }; };
+    const rs = jaren.map(rij); S.reken = { p, i, rs, f: gf && gf.f };
+    const piek = rs.reduce((m, r) => r.t > m.t ? r : m, rs[0]);
+    $('#rekenTabel').innerHTML = `<table><thead><tr><th>Jaar</th><th class="r">Paspoorten</th><th class="r">ID-kaarten</th><th class="r">Samen</th><th class="r">Met eigen groei</th></tr></thead><tbody>${rs.map(r => `<tr${r.j === piek.j ? ' class="sel"' : ''}><td>${r.j}</td><td class="r">${p ? fmt(r.a) : '–'}</td><td class="r">${i ? fmt(r.b) : '–'}</td><td class="r">${fmt(r.t)}</td><td class="r">${fmt(r.c)}</td></tr>`).join('')}</tbody></table>`;
+  }
+  ['#in2014p', '#in2014i'].forEach(s => $(s).addEventListener('input', () => { if (S && S.bev) renderReken(); }));
+
+  // ---------- rijbewijzen ----------
+  function renderRb() {
+    const m = S.m, nl = S.mNl, b = S.bev, bn = S.bevNl;
+    const L = Math.max(...b.keys()), p = b.get(L), n = bn.get(L);
+    const mi = 100 * p.m18 / p.tot, miN = 100 * n.m18 / n.tot;
+    $('#minderZin').innerHTML = `In ${esc(S.g.n)} is ${fP(mi)} van de inwoners jonger dan 18 (Nederland ${fP(miN)}). ${mi > miN + 1.5 ? 'Meer minderjarigen betekent een groter deel aanvragen in een vast vijfjaarsritme, dus een minder scherpe piek dan de index.' : mi < miN - 1.5 ? 'Minder minderjarigen betekent dat de piek van de volwassenen zwaarder telt dan landelijk.' : 'Dat scheelt weinig met het landelijke beeld waar de index op rust.'}`;
+    if (!m) { ['#chRbAantal', '#chRbIndex', '#chRbLeeftijd'].forEach(s => { $(s).innerHTML = '<h3>Rijbewijzen</h3><p class="small muted" style="margin:0">Geen rijbewijsbezit voor deze gemeente.</p>'; }); return; }
+    const jaren = [...m.keys()].sort((a, b) => a - b), mL = m.get(jaren[jaren.length - 1]);
+    lijnen($('#chRbAantal'), 'Rijbewijsaanvragen per jaar (schatting)', 'aantal per jaar, afgerond', jaren,
+      [{ naam: 'Verlengingen', kort: 'verlengen', kleur: 'var(--st-geb)', w: j => rond(m.get(j).verl + m.get(j).cx) },
+       { naam: 'Eerste rijbewijs', kort: 'eerste', kleur: 'var(--st-bui)', w: j => rond(m.get(j).eerste) }], { fv: fmt });
+    lijnen($('#chRbIndex'), `Groei sinds ${J0}: ${S.g.n} en Nederland`, `alle rijbewijsaanvragen, ${J0} = 100`, jaren,
+      [{ naam: S.g.n, kort: S.g.n.length > 12 ? 'gemeente' : S.g.n, kleur: 'var(--st-geb)', w: j => 100 * m.get(j).totaal / m.get(J0).totaal },
+       { naam: 'Nederland', kort: 'NL', kleur: 'var(--st-verw)', streep: true, w: j => nl.has(j) ? 100 * nl.get(j).totaal / nl.get(J0).totaal : null }],
+      { fv: v => nf.format(Math.round(v)), lo: 80, ref: 100 });
+    // per leeftijdsgroep
+    const gs = mL.groepen.filter(g => g.geldig), max = Math.max(...gs.map(g => g.verl));
+    const m0 = m.get(J0);
+    $('#chRbLeeftijd').innerHTML = `<div class="chart-kop"><h3>Verlengingen naar leeftijd, ${mL.j}</h3></div><span class="noemer">schatting per jaar · streep = ${J0}</span>
+      <div style="display:grid;gap:4px">${gs.map(g => { const g0 = m0.groepen.find(x => x.k === g.k); return `<div class="hbar"><span>${g.t}</span><span class="t" style="position:relative"><i style="width:${(100 * g.verl / max).toFixed(1)}%;background:${g.lo >= 65 ? 'var(--st-ovl)' : 'var(--st-geb)'}"></i>${g0 ? `<b style="position:absolute;top:-2px;bottom:-2px;left:${Math.min(100, 100 * g0.verl / max).toFixed(1)}%;width:2px;background:var(--fg)"></b>` : ''}</span><span class="v">${fmtR(g.verl)}</span></div>`; }).join('')}</div>
+      <div class="legend"><span><i class="sw" style="background:var(--st-geb)"></i>onder 65: elke 10 jaar</span><span><i class="sw" style="background:var(--st-ovl)"></i>65 en ouder: korter geldig</span></div>
+      <p class="noot muted">${fP(100 * mL.v65 / mL.verl)} van de verlengingen komt van 65-plussers; in ${J0} was dat ${fP(100 * m0.v65 / m0.verl)}.</p>`;
+    $('#darZin').innerHTML = `Beroepschauffeurs: naar schatting ${fmtR(mL.groepen.reduce((a, g) => a + g.cx, 0) * 10)} inwoners onder de 65 met een vrachtautorijbewijs. Zij verlengen elke vijf jaar. Online verlengen kan ook: in 2025 zijn landelijk 370.000 rijbewijzen digitaal aangevraagd bij de RDW. Het ophalen blijft aan de balie, dus de balie ziet ook die aanvragers terug, alleen korter.`;
+  }
+
+  // ---------- CSV ----------
+  function csvDownload(naam, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
+  const bronTekst = () => `${PRODUCT}, Open Data Atelier, ${location.origin}${location.pathname}, versie ${VERSIE}`;
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S) return;
+    const kop = ['jaar', 'gemeentecode', 'gemeente', 'nvvb_index_paspoort', 'nvvb_index_idkaart', 'inwoners_18plus_1jan', 'inwoners_0_17_1jan', 'rijbewijs_verlengingen_schatting', 'rijbewijs_eerste_schatting', 'eigen_paspoorten', 'eigen_idkaarten', 'eigen_met_groei', 'bron'];
+    const rk = new Map(((S.reken && S.reken.rs) || []).map(r => [r.j, r]));
+    const rows = NVVB_JAREN.map(j => {
+      const b = S.bev && S.bev.get(j), m = S.m && S.m.get(j), r = rk.get(j);
+      return [j, 'GM' + S.g.c, S.g.n, nvvb(NVVB_P, j), nvvb(NVVB_I, j), b ? b.g18 : '', b ? b.m18 : '', m ? rond(m.verl + m.cx) : '', m ? rond(m.eerste) : '', r && S.reken.p ? Math.round(r.a) : '', r && S.reken.i ? Math.round(r.b) : '', r && r.c != null ? Math.round(r.c) : '', bronTekst()];
+    });
+    csvDownload(`open-data-atelier-balie-${slug(S.g.n)}.csv`, kop, rows);
+  });
+
+  // ---------- herken en voet ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + location.href + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  function renderVoet() {
+    renderHerken();
+    const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+    const jr = S.bev ? `${Math.min(...S.bev.keys())}–${Math.max(...S.bev.keys())}` : '–';
+    $('#foot').innerHTML = `Bronnen: NVVB, Rekenmodel reisdocumentenpiek (2021). CBS (CC BY 4.0): rijbewijzen per provincie en leeftijd <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table">83488NED</a>, bevolking per leeftijd <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a> (${jr}), rijbewijsbezit per gemeente uit het nieuwsbericht van 13 februari 2026${S.af ? ` (afstemfactor ${S.af.k.toFixed(2).replace('.', ',')}; zonder afstemming ${fP(S.af.zonder)})` : ''}. Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  $('#retryBtn').addEventListener('click', () => { if (S) kies(S.g); });
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>
