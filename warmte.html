@@ -413,7 +413,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.1';
+  const VERSIE = '1.1.1';
   const PRODUCT = 'Warmte per buurt';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const CATALOGUS = "https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title&$filter=substringof('Kerncijfers wijken en buurten',Title)";
@@ -461,7 +461,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- tooltip ----------
   const tip = $('#tip');
   function toonTip(e, html) {
-    tip.innerHTML = html; tip.hidden = false;
+    tipBron = e.currentTarget || e.target; tip.innerHTML = html; tip.hidden = false;
     const r = tip.getBoundingClientRect();
     let x = e.clientX + 14, y = e.clientY + 14;
     if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
@@ -469,6 +469,10 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
   }
   const verbergTip = () => { tip.hidden = true; };
+  // Wordt het element onder de tooltip opnieuw getekend (andere gemeente, licht/donker), dan komt er geen pointerleave. Daarom: verbergen zodra de muis niet meer boven het element staat dat de tooltip toonde, en bij scrollen.
+  let tipBron = null;
+  document.addEventListener('pointermove', ev => { if (!tip.hidden && !(tipBron && tipBron.isConnected && tipBron.contains(ev.target))) verbergTip(); }, { passive: true });
+  addEventListener('scroll', verbergTip, { passive: true, capture: true });
   function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, i.dataset.tip)); i.addEventListener('pointerleave', verbergTip); }); }
 
   // ---------- ophalen ----------

@@ -293,7 +293,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0.1';
+  const VERSIE = '1.0.2';
   const PRODUCT = 'Inburgering per gemeente';
   const STAND = 'oktober 2026';
   const BIJGEWERKT = '9 november 2026';
@@ -390,7 +390,7 @@ main > * { min-width: 0; }
   // ---------- tooltip ----------
   const tip = $('#tip');
   function toonTip(e, html) {
-    tip.innerHTML = html; tip.hidden = false;
+    tipBron = e.currentTarget || e.target; tip.innerHTML = html; tip.hidden = false;
     const r = tip.getBoundingClientRect();
     let x = e.clientX + 14, y = e.clientY + 14;
     if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
@@ -398,6 +398,10 @@ main > * { min-width: 0; }
     tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
   }
   const verbergTip = () => { tip.hidden = true; };
+  // Wordt het element onder de tooltip opnieuw getekend (andere gemeente, licht/donker), dan komt er geen pointerleave. Daarom: verbergen zodra de muis niet meer boven het element staat dat de tooltip toonde, en bij scrollen.
+  let tipBron = null;
+  document.addEventListener('pointermove', ev => { if (!tip.hidden && !(tipBron && tipBron.isConnected && tipBron.contains(ev.target))) verbergTip(); }, { passive: true });
+  addEventListener('scroll', verbergTip, { passive: true, capture: true });
   function nice(v) { const e = Math.pow(10, Math.floor(Math.log10(v || 1))); const f = v / e; return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * e; }
 
   // ---------- staat ----------
