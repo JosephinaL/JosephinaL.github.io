@@ -371,7 +371,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <span class="muted small" id="rowCount"></span>
           <span style="flex:1"></span>
           <button class="btn" id="csvBtn" type="button">CSV buurten en wijken</button>
-          <button class="btn" id="csvPand" type="button">CSV utiliteitspanden</button>
+          <button class="btn" id="csvPand" type="button" title="Pand-ID, label, functie en buurt; zonder adres">CSV utiliteitspanden</button>
         </div>
         <div class="scroll" id="tblWrap" tabindex="0" role="region" aria-label="Tabel met cijfers; scroll met de pijltjestoetsen"></div>
       </div>
@@ -403,6 +403,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>De regels zijn niet af.</b> Alleen de label C-plicht voor kantoren geldt nu. De andere eisen zijn een ontwerpbesluit, een voorstel of een voornemen, en kunnen nog veranderen. Uitzonderingen die de pagina niet kan zien en dus meetelt: gemeentelijke en provinciale monumenten, woningen in een VvE waar de verhuurder afhankelijk is van eigenaar-bewoners, gebouwen die gesloopt worden of hoogstens twee jaar in gebruik zijn, gebedshuizen en defensiegebouwen.</li>
             <li><b>Het label verandert in 2030.</b> Vanaf dan wordt de labelletter anders bepaald. De eisen van 2030 en later staan hier tegenover het huidige label; dat is een benadering.</li>
             <li><b>Verlopen labels</b>: een label is tien jaar geldig. Een pand dat in 2022 een label had en nu niet meer, heeft meestal een verlopen label. De datum van een label staat niet in de open laag.</li>
+            <li><b>Utiliteitspanden per pand</b>: op de kaart en in de tabel met adres, zodat een toezichthouder het gebouw herkent. Het CSV-bestand bevat het pand-ID uit de BAG en het label, geen adres. Eigenaar van een pand op deze pagina, en klopt het niet of wil je het niet? Zie <a href="colofon.html#gebouwen">Gegevens over gebouwen</a>.</li>
             <li><b>Recreatiewoningen</b> staan in de BAG met een logiesfunctie en tellen hier als utiliteitspand, net als hotels. In gemeenten met veel vakantieparken is het aantal utiliteitspanden daardoor hoog.</li>
             <li><b>Kantoren</b> staan hier als utiliteitspand tussen de andere. De label C-plicht van 2023 heeft eigen regels (oppervlakte, aandeel kantoor); die zijn uitgewerkt in <a href="labelc.html" class="naarLabelC">Label C-kantoren</a>. De aantallen daar en hier zijn daarom niet gelijk.</li>
           </ul>
@@ -421,7 +422,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     <p><b>Bekende beperkingen.</b> Huur en koop zijn per woning niet te onderscheiden. Het label is per pand het meest voorkomende, niet het label per adres. Gemengde panden zijn niet ingedeeld. Gemeentelijke en provinciale monumenten, gebedshuizen en andere uitzonderingen zijn niet te herkennen en tellen mee. De labellaag heeft geen datum per label en loopt enkele weken achter op EP-Online. Vanaf 2030 verandert de labelmethode.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouders.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
-    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>. Eigenaar van een gebouw op deze pagina? Zie <a href="colofon.html#gebouwen">Gegevens over gebouwen: een fout melden of bezwaar maken</a>.</p>
     <p class="terug-onder"><a class="terug naarLabelC" href="labelc.html">De eis die nu al geldt, per kantoorpand uitgezocht. Label C-kantoren →</a></p>
     <p class="terug-onder"><a class="terug" href="warmte.html" id="naarWarmte">Dezelfde buurten: hoe de woningen nu verwarmd worden. Warmte per buurt →</a></p>
     <p class="terug-onder"><a class="terug" href="woningen.html" id="naarWoningen">Dezelfde woningen naar eigendom en bouwjaar. Woningvoorraad en leegstand →</a></p>
@@ -448,7 +449,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Energielabelkalender';
   // Per gemeente vooraf samengevat (BAG-maandstand, RIVM-labels nu en 1 juli 2022, rijksmonumenten, CBS-eigendom),
   // in de data van de BAG-werkbank. Recept: recepten/energielabelkalender/.
@@ -1020,8 +1021,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   $('#csvPand').addEventListener('click', () => {
     if (!S || !S.d) return;
     const bron = bronTxt();
-    const kop = ['gemeentecode', 'gemeente', 'pand_identificatie', 'adres', 'postcode', 'dominant_label', 'hoogste_label', 'laagste_label', 'aantal_labels', 'verblijfsobjecten_utiliteit', 'oppervlakte_m2', 'functies', 'bouwjaar', 'buurtcode', 'buurt', 'onder_grens_2030_label_d', 'onder_grens_2033_label_c', 'bron'];
-    csvDownload(`open-data-atelier-energielabelkalender-utiliteitspanden-${slug()}.csv`, kop, S.panden.map(p => ['GM' + S.g.c, S.g.n, p.id, p.adres, p.postcode, p.label, p.hoogste, p.laagste, p.labels, p.vbo, p.opp, p.functies.join(', '), p.bouwjaar, p.bu, p.buurtnaam, p.groep === 'efg' ? 'ja' : 'nee', 'ja', bron]));
+    // Zonder adres en postcode (besluit 11 nov 2026, toets "kijk als FG"): het pand-ID volstaat voor wie aan de BAG koppelt.
+    const kop = ['gemeentecode', 'gemeente', 'pand_identificatie', 'dominant_label', 'hoogste_label', 'laagste_label', 'aantal_labels', 'verblijfsobjecten_utiliteit', 'oppervlakte_m2', 'functies', 'bouwjaar', 'buurtcode', 'buurt', 'bron'];
+    csvDownload(`open-data-atelier-energielabelkalender-utiliteitspanden-${slug()}.csv`, kop, S.panden.map(p => ['GM' + S.g.c, S.g.n, p.id, p.label, p.hoogste, p.laagste, p.labels, p.vbo, p.opp, p.functies.join(', '), p.bouwjaar, p.bu, p.buurtnaam, bron]));
   });
 
   // ---------- herken je je gemeente niet? ----------
