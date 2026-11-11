@@ -242,6 +242,17 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 .dossier .eigtab { width: 100%; border-collapse: collapse; font-size: .84rem; font-variant-numeric: tabular-nums; }
 .dossier .eigtab th, .dossier .eigtab td { padding: 2px 4px; text-align: right; border-bottom: 1px solid var(--line); }
 .dossier .eigtab th:first-child, .dossier .eigtab td:first-child { text-align: left; }
+.telzin { display: grid; gap: 4px; max-width: 92ch; font-size: 1rem; }
+.telzin p { margin: 0; }
+.telzin b { font-variant-numeric: tabular-nums; }
+.rijkop { display: block; margin: 6px 0 -4px; }
+.eigen .ehh { margin: 0; font-variant-numeric: tabular-nums; }
+.eigen .ehh b { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 800; }
+.mb { grid-template-columns: 9.5em minmax(0, 1fr) 6.4em; }
+.mb .v .pc { font-weight: 400; color: var(--muted); font-size: .8rem; }
+.dossier .eigtab caption { text-align: left; font-size: .78rem; color: var(--muted); padding-bottom: 2px; }
+.seg { display: inline-flex; gap: 4px; }
+th.sep, td.sep { border-left: 1px solid var(--line); }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -294,7 +305,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       <p class="small muted focusinfo" id="focusInfo" role="status" hidden></p>
 
       <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="telzin" id="telZin"></div>
+      <span class="eyebrow rijkop" id="hKop"></span>
       <div class="top4" id="top4"></div>
+      <span class="eyebrow rijkop" id="wKop"></span>
+      <div class="top4" id="top4w"></div>
       <details class="herken" id="herken">
         <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
         <ol>
@@ -315,7 +330,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       <!-- eigendom -->
       <div class="sectiekop">
         <div><span class="eyebrow">Wie de woning bezit</span><h2 id="eigKop">Naar eigendom</h2></div>
-        <p class="small muted">Per soort eigendom: laag inkomen, woningen van lage energetische kwaliteit (schatting CBS) en energiearmoede. De streep is Nederland.</p>
+        <p class="small muted">Per soort eigendom het aantal huishoudens, en daarvan: laag inkomen, een woning van lage energetische kwaliteit (schatting CBS) en energiearmoede. Het getal is het aantal huishoudens; de balk is het aandeel, de streep is Nederland.</p>
       </div>
       <p class="eigenzin" id="eigZin"></p>
       <div class="eigen" id="eigen"></div>
@@ -350,6 +365,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <input id="search" type="search" placeholder="Zoek buurt of wijk…" aria-label="Zoek buurt of wijk">
           <span class="muted small" id="rowCount"></span>
           <span style="flex:1"></span>
+          <span class="seg" id="tabMaat" role="group" aria-label="Toon in de tabel"><button class="btn linkish primary" type="button" data-tm="n" aria-pressed="true">Aantallen</button><button class="btn linkish" type="button" data-tm="p" aria-pressed="false">Percentages</button></span>
           <button class="btn" id="csvBtn" type="button">CSV buurten en wijken</button>
         </div>
         <div class="scroll" id="tblWrap" tabindex="0" role="region" aria-label="Tabel met cijfers; scroll met de pijltjestoetsen"></div>
@@ -359,11 +375,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="card">
           <h2>Zo is gerekend</h2>
           <ul class="small">
-            <li><b>Energiearmoede</b>: het percentage huishoudens met een laag inkomen en hoge energiekosten en/of een woning van lage energetische kwaliteit (indicator "LIHE en/of LILEK" van het CBS). Overgenomen, niet zelf berekend. Het aantal is dat percentage maal de huishoudens, afgerond.</li>
+            <li><b>Energiearmoede</b>: het percentage huishoudens met een laag inkomen en hoge energiekosten en/of een woning van lage energetische kwaliteit (indicator "LIHE en/of LILEK" van het CBS). Overgenomen, niet zelf berekend.</li>
+            <li><b>Aantallen huishoudens</b>: het CBS publiceert per gebied het aantal huishoudens (afgerond op honderdtallen) en percentages. Het aantal met een laag inkomen, in energiearmoede of in een woning van lage energetische kwaliteit is dat percentage maal de huishoudens, afgerond (vanaf 1.000 op honderdtallen, vanaf 100 op tientallen, daaronder op vijftallen). De delen tellen daardoor niet altijd precies op tot het totaal.</li>
+            <li><b>Huishoudens in de monitor en alle huishoudens</b>: de monitor beoordeelt alleen huishoudens waarvan het CBS inkomen en energieverbruik kent, zonder woongroepen. Voor de hele gemeente staat ernaast het totaal aantal particuliere huishoudens op 1 januari van het laatste jaar (CBS, 70072ned). Het verschil verschilt per gemeente; in grote steden is het groter.</li>
             <li><b>Laag inkomen</b>: huishoudens met een inkomen tot 120% van de armoedegrens en weinig vermogen (CBS, armoedemethode van CBS, SCP en Nibud).</li>
-            <li><b>Lage energetische kwaliteit</b>: woningen waarvan de verwachte energiekosten bij standaard gebruik boven een vaste grens liggen. Een schatting van het CBS per woning, ook voor woningen zonder label.</li>
+            <li><b>Lage energetische kwaliteit</b>: huishoudens in een woning waarvan de verwachte energiekosten bij standaard gebruik boven een vaste grens liggen. Een schatting van het CBS per woning, ook voor woningen zonder label.</li>
             <li><b>Eigendom</b>: koop, huur van een corporatie, huur van een andere verhuurder, zoals het CBS de woning van het huishouden indeelt. Het aandeel per eigendom is het aandeel van de huishoudens.</li>
             <li><b>Label E, F of G</b>: van de woningen in panden met alleen woningen en met een geregistreerd label, het aandeel met label E, F of G (dominant label van het pand, RIVM). Pas vanaf 30 woningen met een label. Rijksmonumenten tellen mee: de vraag is hoe de woning presteert, niet of een eis geldt.</li>
+            <li><b>Woningen</b>: verblijfsobjecten met een woonfunctie in panden met alleen woningen (BAG), geteld per buurt; met label, label E, F of G en zonder label zijn aantallen woningen. Woningen en huishoudens komen uit verschillende bronnen en jaren en tellen niet tegen elkaar op.</li>
             <li><b>Met label</b>: het aandeel woningen in panden met alleen woningen dat een geregistreerd label heeft.</li>
             <li><b>Beide hoog</b>: een buurt met minstens anderhalf keer zoveel huishoudens met een laag inkomen als Nederland én minstens anderhalf keer zoveel woningen met E, F of G (onder de woningen met een label) als Nederland. Een vaste drempel om te tellen, geen oordeel.</li>
             <li><b>Wijken</b>: de cijfers van de monitor per wijk komen van het CBS; de labels per wijk zijn de buurten van de BAG-werkbank opgeteld.</li>
@@ -398,7 +417,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> Energiearmoede, laag inkomen en lage energetische kwaliteit, ook naar eigendom: CBS, <a href="https://www.cbs.nl/nl-nl/maatwerk/2026/30/monitor-energiearmoede-2019-2024" target="_blank" rel="noopener">Monitor Energiearmoede 2019-2024</a>, tabel 3 (verschenen 23 juli 2026; verslagjaar 2024, buurtindeling 2025). Energielabels: RIVM, laag <i>rvo_energielabels</i> (afgeleid uit EP-Online van RVO), per pand. Gebouwen: BAG (Kadaster, via PDOK), maandstand zoals in de BAG-werkbank. Wijk- en buurtgrenzen: CBS via PDOK. Vooraf samengevat per gemeente; de standen staan na de gemeentekeuze onder de cijfers.</p>
+    <p><b>Bron en peildatum.</b> Energiearmoede, laag inkomen en lage energetische kwaliteit, ook naar eigendom: CBS, <a href="https://www.cbs.nl/nl-nl/maatwerk/2026/30/monitor-energiearmoede-2019-2024" target="_blank" rel="noopener">Monitor Energiearmoede 2019-2024</a>, tabel 3 (verschenen 23 juli 2026; verslagjaar 2024, buurtindeling 2025). Totaal particuliere huishoudens per gemeente: CBS, Regionale kerncijfers Nederland (70072ned), peildatum 1 januari, live opgevraagd. Energielabels: RIVM, laag <i>rvo_energielabels</i> (afgeleid uit EP-Online van RVO), per pand. Gebouwen: BAG (Kadaster, via PDOK), maandstand zoals in de BAG-werkbank. Wijk- en buurtgrenzen: CBS via PDOK. Vooraf samengevat per gemeente; de standen staan na de gemeentekeuze onder de cijfers.</p>
     <p><b>Licentie.</b> CBS (ook de monitor, volgens de algemene voorwaarden van het CBS), wijk- en buurtgrenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0. Energielabels RIVM: Public Domain Mark 1.0. BAG: zonder gebruiksbeperkingen.</p>
     <p><b>Methode.</b> De cijfers van de monitor zijn overgenomen per gemeente, wijk en buurt, per soort eigendom. De labels zijn per buurt geteld uit de BAG-werkbank en gekoppeld op buurtcode. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen uitspraak over een huishouden, een buurt of een verhuurder; geen ranglijst tussen buurten of gemeenten; geen eigen meting van energiearmoede. Geen gegevens per woning of per adres.</p>
@@ -430,12 +449,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Energiearmoede per buurt';
   // Monitor Energiearmoede (CBS, tabel 3), per gemeente vooraf samengevat: recepten/energiearmoede/bouw_ea.py.
   // Labels per buurt: dezelfde bestanden als de Energielabelkalender (recepten/energielabelkalender/).
   const DATA_EA = '/bag-werkbank/ea/';
   const DATA_L = '/bag-werkbank/label/';
+  // Totaal particuliere huishoudens per gemeente (CBS, Regionale kerncijfers, peildatum 1 januari), live: het totaal naast de huishoudens die de monitor kan beoordelen.
+  const CBS_HH = c => `https://opendata.cbs.nl/ODataApi/OData/70072ned/TypedDataSet?$filter=startswith(RegioS,'GM${c}')&$select=Perioden,TotaalParticuliereHuishoudens_51`;
   const MIN_LAB = 30;   // aandeel E, F, G pas vanaf zoveel woningen met een label
   const FACTOR = 1.5;   // "beide hoog": anderhalf keer Nederland
 
@@ -445,9 +466,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   const fmt = v => v == null ? '–' : nf.format(Math.round(v));
   const fP0 = v => v == null ? '–' : nf.format(Math.round(v)) + '%';
   const fP1 = v => v == null ? '–' : nf1.format(v) + '%';
-  const rond = v => v == null ? null : (v >= 1000 ? Math.round(v / 100) * 100 : v >= 100 ? Math.round(v / 10) * 10 : Math.round(v));
+  const rond = v => v == null ? null : (v >= 1000 ? Math.round(v / 100) * 100 : v >= 100 ? Math.round(v / 10) * 10 : v >= 10 ? Math.round(v / 5) * 5 : Math.round(v));
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const pct = (a, b) => b ? 100 * a / b : null;
+  const aant = (hh, p) => hh && p != null ? hh * p / 100 : null;   // percentage van de monitor maal de huishoudens
+  const fN = v => v == null ? '–' : fmt(rond(v));                    // afgerond aantal
+  const fCa = v => v == null ? '–' : 'ca. ' + fmt(rond(v));
   const mv = (n, een, meer) => n === 1 ? een : meer;
 
   // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
@@ -537,10 +561,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const r = { hh: null, ea: null, li: null, lek: null, risico: null, eig: {} };
     if (!o || !o.T) return r;
     const t = o.T; r.hh = t[0]; r.ea = t[1]; r.li = t[2]; r.lek = t[3]; r.risico = t[5];
-    EIG.forEach(([k]) => { const v = o[k]; if (v) r.eig[k] = { hh: v[0], ea: v[1], li: v[2], lek: v[3] }; });
+    EIG.forEach(([k]) => { const v = o[k]; if (v) r.eig[k] = { hh: v[0], ea: v[1], li: v[2], lek: v[3], n_ea: aant(v[0], v[1]), n_li: aant(v[0], v[2]), n_lek: aant(v[0], v[3]) }; });
     const a = k => r.eig[k] && r.hh ? pct(r.eig[k].hh, r.hh) : null;
     r.pk = a('K'); r.pc = a('C'); r.po = a('O');
-    r.n_ea = r.ea != null && r.hh ? r.hh * r.ea / 100 : null;
+    r.hk = r.eig.K ? r.eig.K.hh : null; r.hc = r.eig.C ? r.eig.C.hh : null; r.ho = r.eig.O ? r.eig.O.hh : null;
+    r.n_ea = aant(r.hh, r.ea); r.n_li = aant(r.hh, r.li); r.n_lek = aant(r.hh, r.lek); r.n_risico = aant(r.hh, r.risico);
     return r;
   }
   // Labels: woningen in panden met alleen woningen (zelfde tellingen als de Energielabelkalender, rijksmonumenten inbegrepen)
@@ -551,6 +576,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     o.pefg = o.w_lab >= MIN_LAB ? pct(o.w_efg, o.w_lab) : null;
     o.plab = o.w_tot >= MIN_LAB ? pct(o.w_lab, o.w_tot) : null;
     o.heeftLab = !!t;
+    if (!t) ['w_ab', 'w_c', 'w_d', 'w_efg', 'w_geen', 'w_lab', 'w_tot'].forEach(k => { o[k] = null; });
     return o;
   }
   function som(ts) { const o = {}; ts.forEach(t => { if (t) for (const k in t) o[k] = (o[k] || 0) + t[k]; }); return o; }
@@ -564,10 +590,10 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#gmInput').value = g.n;
     document.title = `${PRODUCT} ${g.n} · Open Data Atelier`;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    S = { g, ea: null, l: null, geo: null };
+    S = { g, ea: null, l: null, geo: null, cbs: null };
     selCode = null; toonBeide = false; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo('');
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen…';
-    ['#top4', '#eigen', '#eigZin', '#spreid', '#telling', '#tblWrap', '#dossier', '#maten', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
+    ['#telZin', '#top4', '#top4w', '#eigen', '#eigZin', '#spreid', '#telling', '#tblWrap', '#dossier', '#maten', '#mapLegend'].forEach(s => { $(s).innerHTML = ''; });
     voortgang(0, 2, 'Samenvatting van de gemeente ophalen…');
     let ea = null, l = null, ie = null, il = null;
     const res = await Promise.allSettled([haalGz(DATA_EA + g.c + '.json.gz'), haalGz(DATA_L + g.c + '.json.gz'),
@@ -598,6 +624,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const km = (location.hash.match(/kaart=(\w+)/) || [])[1];
     if (km && MATEN.some(x => x.k === km)) maat = km;
     renderAlles(); toonMelding();
+    getJSON(CBS_HH(g.c)).then(r => {
+      if (S.g !== g) return;
+      const v = (r.value || []).filter(x => x.TotaalParticuliereHuishoudens_51 != null).sort((a, b) => a.Perioden.localeCompare(b.Perioden)).pop();
+      if (v) { S.cbs = { j: +v.Perioden.slice(0, 4), hh: v.TotaalParticuliereHuishoudens_51 }; renderKern(); renderVoet(); }
+    }).catch(() => { if (S.g === g) { fouten.add('het totaal aantal huishoudens (CBS)'); toonMelding(); } });
     voortgang(1, 2, 'Buurtgrenzen ophalen bij PDOK…');
     try {
       const bu = wbOud(await getJSON(wbUrl(ea.indeling, 'buurten', g.c, 1000)));
@@ -625,15 +656,36 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderKern() {
     const fo = huidig(), x = fo || S.gm;
     const isB = fo && /^BU/.test(fo.code);
+    const waar = fo ? x.naam : S.g.n;
     const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
     const ref = (k, f) => { const r = fo ? S.gm : NL; return r && r[k] != null ? ` ${esc(r.naam)}: ${f(r[k])}.` : ''; };
+    const nietGep = 'Niet gepubliceerd: te weinig huishoudens.';
     $('#leadBig').textContent = `${x.naam}: energiearmoede, inkomen en label`;
-    $('#leadSub').textContent = [fo ? `${isB ? 'buurt' : 'wijk'} in ${S.g.n}` : '', x.hh ? `${fmt(x.hh)} huishoudens in de monitor` : '', `verslagjaar ${S.ea.jaar}`].filter(Boolean).join(' · ');
+    $('#leadSub').textContent = [fo ? `${isB ? 'buurt' : 'wijk'} in ${S.g.n}` : '', `verslagjaar ${S.ea.jaar}`].filter(Boolean).join(' · ');
+    // de telling in woorden: eerst het totaal, dan de delen
+    let z = '';
+    if (x.hh) {
+      const d1 = [x.n_ea != null ? `zitten er ca. <b>${fN(x.n_ea)}</b> in energiearmoede` : '', x.n_li != null ? `hebben er ca. <b>${fN(x.n_li)}</b> een laag inkomen` : ''].filter(Boolean);
+      z = `Van de <b>${fmt(x.hh)}</b> huishoudens in ${esc(waar)} die de monitor telt, ${d1.length ? d1.join(' en ') + '.' : 'publiceert het CBS hier geen verdere cijfers: te weinig huishoudens.'}`;
+      if (x.n_lek != null) z += ` Ca. <b>${fN(x.n_lek)}</b> wonen in een woning van lage energetische kwaliteit.`;
+      if (!fo && S.cbs) z += `<br><span class="muted">De gemeente telde op 1 januari ${S.cbs.j} <b>${fmt(S.cbs.hh)}</b> particuliere huishoudens (CBS); de monitor kan er ${fmt(x.hh)} beoordelen, ${fP0(pct(x.hh, S.cbs.hh))}. Niet meegeteld worden huishoudens in woongroepen en huishoudens met een onbekend inkomen of energieverbruik; ook het jaar verschilt (monitor ${S.ea.jaar}).</span>`;
+    } else z = `Voor ${esc(waar)} publiceert het CBS geen aantal huishoudens.`;
+    let zw = '';
+    if (x.heeftLab && x.w_tot) zw = `In ${esc(waar)} staan <b>${fmt(x.w_tot)}</b> woningen in panden met alleen woningen. <b>${fmt(x.w_lab)}</b> daarvan hebben een geregistreerd energielabel, <b>${fmt(x.w_efg)}</b> label E, F of G; <b>${fmt(x.w_geen)}</b> hebben geen label.`;
+    else zw = 'Voor dit gebied zijn geen labels geteld (andere buurtindeling).';
+    $('#telZin').innerHTML = `<p>${z}</p><p>${zw}</p>`;
+    $('#hKop').textContent = `Huishoudens · CBS, verslagjaar ${S.ea.jaar}`;
+    $('#wKop').textContent = 'Woningen · BAG en energielabels, nu';
     $('#top4').innerHTML =
-      unit('Energiearmoede', fP1(x.ea), `${x.n_ea != null ? 'Ca. ' + fmt(rond(x.n_ea)) + ' huishoudens. ' : 'Niet gepubliceerd: te weinig huishoudens. '}Laag inkomen met hoge energiekosten of een slecht geïsoleerde woning (CBS).${ref('ea', fP1)}`) +
-      unit('Laag inkomen', fP1(x.li), `Huishoudens tot 120% van de armoedegrens, met weinig vermogen.${ref('li', fP1)}`) +
-      unit('Woningen met label E, F of G', fP0(x.pefg), `${x.pefg != null ? `${fmt(x.w_efg)} van de ${fmt(x.w_lab)} woningen met een label; ${fP0(x.plab)} van de woningen heeft er een.` : x.heeftLab ? `Minder dan ${MIN_LAB} woningen met een label.` : 'Geen labels voor dit gebied (andere buurtindeling).'}${ref('pefg', fP0)}`) +
-      unit('Lage energetische kwaliteit', fP1(x.lek), `Schatting van het CBS voor elke woning, ook zonder label.${ref('lek', fP1)}`);
+      unit('Huishoudens in de monitor', fmt(x.hh), `Het totaal waar de aantallen hiernaast een deel van zijn. Zonder woongroepen en huishoudens met een onbekend inkomen of verbruik.${!fo && S.cbs ? ` Alle particuliere huishoudens op 1 januari ${S.cbs.j}: ${fmt(S.cbs.hh)}.` : ''}`) +
+      unit('In energiearmoede', fCa(x.n_ea), x.n_ea != null ? `${fP1(x.ea)} van de huishoudens. Laag inkomen met hoge energiekosten of een woning van lage energetische kwaliteit (CBS).${ref('ea', fP1)}` : nietGep) +
+      unit('Met een laag inkomen', fCa(x.n_li), x.n_li != null ? `${fP1(x.li)} van de huishoudens. Tot 120% van de armoedegrens, met weinig vermogen.${ref('li', fP1)}` : nietGep) +
+      unit('In een woning van lage energetische kwaliteit', fCa(x.n_lek), x.n_lek != null ? `${fP1(x.lek)} van de huishoudens. Schatting van het CBS voor elke woning, ook zonder label.${ref('lek', fP1)}` : nietGep);
+    $('#top4w').innerHTML = !x.heeftLab ? `<p class="small muted" style="margin:0">Geen labels voor dit gebied (andere buurtindeling).</p>` :
+      unit('Woningen', fmt(x.w_tot), 'In panden met alleen woningen (BAG). Woningen en huishoudens zijn twee tellingen: ze tellen niet tegen elkaar op.') +
+      unit('Met een energielabel', fmt(x.w_lab), `${fP0(x.plab)} van de woningen.${ref('plab', fP0)}`) +
+      unit('Met label E, F of G', fmt(x.w_efg), x.pefg != null ? `${fP0(x.pefg)} van de woningen met een label.${ref('pefg', fP0)}` : `Minder dan ${MIN_LAB} woningen met een label: geen aandeel.`) +
+      unit('Zonder label', fmt(x.w_geen), x.plab != null ? `${fP0(100 - x.plab)} van de woningen. Van deze woningen is het label onbekend.` : 'Van deze woningen is het label onbekend.');
   }
   const datum = s => { const p = String(s || '').split('-'); return p.length === 3 ? new Date(+p[0], +p[1] - 1, +p[2]).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }) : (s || '–'); };
 
@@ -644,26 +696,22 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const mxLi = Math.max(40, ...EIG.map(([k]) => (x.eig[k] && x.eig[k].li) || 0), ...EIG.map(([k]) => (NL && NL.eig[k] && NL.eig[k].li) || 0));
     const mxLek = Math.max(50, ...EIG.map(([k]) => (x.eig[k] && x.eig[k].lek) || 0));
     const mxEa = Math.max(20, ...EIG.map(([k]) => (x.eig[k] && x.eig[k].ea) || 0));
-    const rij = (t, v, mx, nl, kleur) => `<span>${t}</span><span class="t"${v != null ? ` data-tip="<b>${esc(t)}</b><br>${esc(waar)}: ${fP1(v)}${nl != null ? '<br>Nederland: ' + fP1(nl) : ''}"` : ''}>${v != null ? `<i style="width:${Math.min(100, 100 * v / mx)}%;background:var(${kleur})"></i>` : ''}${nl != null ? `<b style="left:calc(${Math.min(100, 100 * nl / mx)}% - 1px)"></b>` : ''}</span><span class="v ${v == null ? 'leeg' : ''}">${v == null ? '–' : fP1(v)}</span>`;
+    const rij = (t, v, n, mx, nl, kleur) => `<span>${t}</span><span class="t"${v != null ? ` data-tip="<b>${esc(t)}</b><br>${esc(waar)}: ca. ${fN(n)} huishoudens, ${fP1(v)}${nl != null ? '<br>Nederland: ' + fP1(nl) : ''}"` : ''}>${v != null ? `<i style="width:${Math.min(100, 100 * v / mx)}%;background:var(${kleur})"></i>` : ''}${nl != null ? `<b style="left:calc(${Math.min(100, 100 * nl / mx)}% - 1px)"></b>` : ''}</span><span class="v ${v == null ? 'leeg' : ''}">${v == null ? '–' : `${fN(n)} <span class="pc">${fP0(v)}</span>`}</span>`;
     $('#eigKop').textContent = `Naar eigendom${fo ? ' · ' + x.naam : ''}`;
     $('#eigen').innerHTML = EIG.map(([k, t, kleur]) => {
       const e = x.eig[k], n = NL && NL.eig[k];
-      const n_ea = e && e.ea != null ? e.hh * e.ea / 100 : null;
       return `<div class="card"><h3><i class="sw" style="background:var(${kleur})"></i>${esc(t)}</h3>
-        <p class="small muted" style="margin:0">${e ? `${fmt(e.hh)} huishoudens · ${fP0(pct(e.hh, x.hh))} van alle huishoudens` : 'Niet gepubliceerd voor dit gebied.'}</p>
-        <div class="mb">${rij('Laag inkomen', e && e.li, mxLi, n && n.li, kleur)}${rij('Lage energetische kwaliteit', e && e.lek, mxLek, n && n.lek, kleur)}${rij('Energiearmoede', e && e.ea, mxEa, n && n.ea, kleur)}</div>
-        <p class="small muted" style="margin:0">${n_ea != null ? `Ca. ${fmt(rond(n_ea))} huishoudens in energiearmoede.` : ''}</p></div>`;
+        <p class="ehh">${e ? `<b>${fmt(e.hh)}</b> huishoudens <span class="muted small">${fP0(pct(e.hh, x.hh))} van de ${fmt(x.hh)}</span>` : '<span class="muted small">Niet gepubliceerd voor dit gebied.</span>'}</p>
+        <div class="mb"><span></span><span class="muted small">daarvan</span><span></span>${rij('Laag inkomen', e && e.li, e && e.n_li, mxLi, n && n.li, kleur)}${rij('Woning lage energetische kwaliteit', e && e.lek, e && e.n_lek, mxLek, n && n.lek, kleur)}${rij('Energiearmoede', e && e.ea, e && e.n_ea, mxEa, n && n.ea, kleur)}</div></div>`;
     }).join('');
     // zin: waar de energiearmoede zit
-    const delen = EIG.map(([k, t]) => { const e = x.eig[k]; return { k, t, n: e && e.ea != null ? e.hh * e.ea / 100 : null }; });
+    const delen = EIG.map(([k, t]) => { const e = x.eig[k]; return { k, t, n: e ? e.n_ea : null }; });
     const bekend = delen.filter(d => d.n != null);
     let zin = '';
     if (x.n_ea != null && bekend.length === 3) {
-      const tot = bekend.reduce((a, d) => a + d.n, 0);
-      const huur = (delen[1].n + delen[2].n) / tot;
       const ce = x.eig.C, oe = x.eig.O;
-      zin = `In ${esc(waar)} woont ${fP0(100 * huur)} van de huishoudens in energiearmoede in een huurwoning: ca. ${fmt(rond(delen[1].n))} bij een corporatie en ca. ${fmt(rond(delen[2].n))} bij een andere verhuurder; ca. ${fmt(rond(delen[0].n))} in een koopwoning.`;
-      if (ce && oe && ce.lek != null && oe.lek != null) zin += ` Van de corporatiewoningen is ${fP0(ce.lek)} van lage energetische kwaliteit, van de woningen van andere verhuurders ${fP0(oe.lek)}.`;
+      zin = `Van de ca. ${fN(x.n_ea)} huishoudens in energiearmoede in ${esc(waar)} wonen er ca. <b>${fN(delen[1].n)}</b> in een corporatiewoning, ca. <b>${fN(delen[2].n)}</b> bij een andere verhuurder en ca. <b>${fN(delen[0].n)}</b> in een koopwoning.`;
+      if (ce && oe && ce.n_lek != null && oe.n_lek != null) zin += ` Van de ${fmt(ce.hh)} huishoudens in een corporatiewoning wonen er ca. ${fN(ce.n_lek)} in een woning van lage energetische kwaliteit; bij andere verhuurders ca. ${fN(oe.n_lek)} van de ${fmt(oe.hh)}.`;
       zin += ' Voor huurwoningen geldt vanaf 2029 waarschijnlijk minimaal label D (ontwerpbesluit; zie de <a href="energielabelkalender.html" class="naarKal">Energielabelkalender</a>).';
     } else if (x.n_ea != null) zin = `Het CBS publiceert de verdeling naar eigendom hier niet voor alle drie de groepen: te weinig huishoudens.`;
     else zin = 'Voor dit gebied publiceert het CBS geen cijfer over energiearmoede: te weinig huishoudens.';
@@ -695,7 +743,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       const r = (3 + 9 * Math.sqrt((p.hh || 0) / mxH)) * Math.max(0.6, Math.min(1, W / 800)), dom = dominant(p);
       const sel = p.code === selCode || p.wijk === selCode;
       h += `<circle class="dot ${sel ? 'sel' : ''}" data-code="${esc(p.code)}" cx="${X(p.li).toFixed(1)}" cy="${Y(p.pefg).toFixed(1)}" r="${r.toFixed(1)}" fill="${dom ? css(kl[dom]) : css('--geen') || css('--muted')}" fill-opacity="${beide(p) ? 0.95 : 0.6}" stroke="${css('--surface')}" stroke-width="1"
-        data-tip="<b>${esc(p.naam)}</b><br>Laag inkomen ${fP1(p.li)} · E, F of G ${fP0(p.pefg)}<br>Energiearmoede ${fP1(p.ea)} · ${fmt(p.hh)} huishoudens${dom ? '<br>Meest: ' + esc(EIG.find(e => e[0] === dom)[1].toLowerCase()) : ''}"/>`;
+        data-tip="<b>${esc(p.naam)}</b><br>${fmt(p.hh)} huishoudens: ca. ${fN(p.n_li)} laag inkomen (${fP1(p.li)}), ca. ${fN(p.n_ea)} energiearmoede (${fP1(p.ea)})<br>${fmt(p.w_lab)} woningen met een label: ${fmt(p.w_efg)} E, F of G (${fP0(p.pefg)})${dom ? '<br>Meest: ' + esc(EIG.find(e => e[0] === dom)[1].toLowerCase()) : ''}"/>`;
     });
     $('#spreid').innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Spreidingsfiguur van ${pts.length} buurten: laag inkomen tegenover het aandeel woningen met label E, F of G">${h}</svg>
       <div class="legend">${EIG.map(([k, t, c]) => `<span><i class="sw" style="background:var(${c});border-radius:50%"></i>meest ${esc(t.toLowerCase())}</span>`).join('')}<span>Gestippeld: anderhalf keer Nederland (${fP0(d.li)} laag inkomen, ${fP0(d.efg)} E, F of G).</span><span>${pts.length} van de ${S.buurten.length} buurten met cijfers van de monitor hebben beide cijfers.</span></div>`;
@@ -719,12 +767,22 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     { k: 'ea', t: 'Energiearmoede', leg: '% huishoudens in energiearmoede (CBS)', f: fP1 },
     { k: 'li', t: 'Laag inkomen', leg: '% huishoudens met een laag inkomen (CBS)', f: fP1 },
     { k: 'pefg', t: 'Label E, F, G', leg: '% van de woningen met een label dat E, F of G is', f: fP0 },
-    { k: 'lek', t: 'Lage energetische kwaliteit', leg: '% woningen van lage energetische kwaliteit (schatting CBS)', f: fP1 },
+    { k: 'lek', t: 'Lage energetische kwaliteit', leg: '% huishoudens in een woning van lage energetische kwaliteit (schatting CBS)', f: fP1 },
     { k: 'plab', t: 'Met label', leg: '% woningen met een label', f: fP0 },
     { k: 'pc', t: 'Corporatie', leg: '% huishoudens in een corporatiewoning (CBS)', f: fP0 },
     { k: 'po', t: 'Overige verhuur', leg: '% huishoudens in een woning van een andere verhuurder (CBS)', f: fP0 },
     { k: 'beide', t: 'Beide hoog', leg: 'laag inkomen en label E, F of G minstens anderhalf keer Nederland', f: v => v ? 'ja' : 'nee' }
   ];
+  // het aantal achter een kaartmaat
+  function aantalBij(o, k) {
+    const hh = n => n == null ? '' : `ca. ${fN(n)} huishoudens`, w = n => n == null ? '' : `${fmt(n)} woningen`;
+    if (k === 'ea') return hh(o.n_ea); if (k === 'li') return hh(o.n_li); if (k === 'lek') return hh(o.n_lek);
+    if (k === 'pefg') return o.pefg != null ? `${fmt(o.w_efg)} van de ${fmt(o.w_lab)} woningen met een label` : '';
+    if (k === 'plab') return o.plab != null ? `${fmt(o.w_lab)} van de ${fmt(o.w_tot)} woningen` : '';
+    if (k === 'pc') return o.hc != null ? `${fmt(o.hc)} van de ${fmt(o.hh)} huishoudens` : '';
+    if (k === 'po') return o.ho != null ? `${fmt(o.ho)} van de ${fmt(o.hh)} huishoudens` : '';
+    return '';
+  }
   function renderMaten() {
     $('#maten').innerHTML = '<span class="muted small">Buurten gekleurd naar</span>' + MATEN.map(m => `<button class="btn linkish ${m.k === maat ? 'primary' : ''}" type="button" data-k="${m.k}" aria-pressed="${m.k === maat}">${esc(m.t)}</button>`).join('');
     $('#maten').querySelectorAll('button').forEach(b => b.addEventListener('click', () => { maat = b.dataset.k; toonBeide = maat === 'beide'; zetHash(); renderMaten(); renderKaart(); renderDossier(); renderSpreidKnop(); }));
@@ -774,7 +832,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           const o = byCode.get(f.properties.buurtcode);
           const v = o ? waarde(o, maat) : null;
           const val = v == null ? 'niet gepubliceerd of te weinig' : m.f(v);
-          ly.bindTooltip(`<b>${esc(o ? o.naam : f.properties.buurtnaam)}</b><br>${esc(m.t)}: ${val}${o && o.hh ? '<br>' + fmt(o.hh) + ' huishoudens in de monitor' : o ? '' : '<br>geen cijfers in de monitor'}`, { sticky: true });
+          const nb = o && v != null ? aantalBij(o, maat) : '';
+          ly.bindTooltip(`<b>${esc(o ? o.naam : f.properties.buurtnaam)}</b><br>${esc(m.t)}: ${val}${nb ? ' · ' + nb : ''}${o && o.hh ? '<br>' + fmt(o.hh) + ' huishoudens in de monitor' : o ? '' : '<br>geen cijfers in de monitor'}`, { sticky: true });
           ly.on('click', () => kiesBuurt(f.properties.buurtcode, false));
         }
       }).addTo(layer);
@@ -806,24 +865,27 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const m = MATEN.find(y => y.k === maat);
     const ref = o ? S.gm : NL;
     const v = waarde(x, maat), rv = ref ? waarde(ref, maat) : null;
-    const focus = `<div class="focus"><span class="fl">${esc(m.t)}</span><span class="fv">${v == null ? '–' : m.f(v)}</span>${rv != null && maat !== 'beide' ? `<span class="fc">${esc(ref.naam)}: ${m.f(rv)}</span>` : ''}</div>`;
+    const nb = v != null ? aantalBij(x, maat) : '';
+    const focus = `<div class="focus"><span class="fl">${esc(m.t)}</span><span class="fv">${v == null ? '–' : m.f(v)}</span>${nb ? `<span class="fc">${nb}</span>` : ''}${rv != null && maat !== 'beide' ? `<span class="fc">${esc(ref.naam)}: ${m.f(rv)}</span>` : ''}</div>`;
     const u = k => maat === k ? ' class="uit"' : '';
-    const eigRij = ([k, t]) => { const e = x.eig[k]; return `<tr><td>${esc(t)}</td><td>${e ? fmt(e.hh) : '–'}</td><td>${e ? fP1(e.li) : '–'}</td><td>${e ? fP1(e.lek) : '–'}</td><td>${e ? fP1(e.ea) : '–'}</td></tr>`; };
+    const eigRij = ([k, t]) => { const e = x.eig[k]; return `<tr><td>${esc(t)}</td><td>${e ? fmt(e.hh) : '–'}</td><td>${e ? fN(e.n_li) : '–'}</td><td>${e ? fN(e.n_lek) : '–'}</td><td>${e ? fN(e.n_ea) : '–'}</td></tr>`; };
+    const nP = (n, p, f) => n == null ? '–' : `ca. ${fN(n)} <span class="muted small">(${f(p)})</span>`;
     const wk = isBuurt ? o.wijk : (o ? o.code : '');
     $('#dossier').innerHTML = `<nav class="kruimel" aria-label="Niveau">${kr}</nav><h2>${esc(x.naam)}</h2>
       ${focus}
       <dl>
         <dt>Huishoudens in de monitor</dt><dd>${fmt(x.hh)}</dd>
-        <dt${u('ea')}>in energiearmoede</dt><dd${u('ea')}>${fP1(x.ea)}${x.n_ea != null ? ` <span class="muted small">(ca. ${fmt(rond(x.n_ea))})</span>` : ''}</dd>
-        <dt${u('li')}>met een laag inkomen</dt><dd${u('li')}>${fP1(x.li)}</dd>
-        <dt>risico (laag middeninkomen)</dt><dd>${fP1(x.risico)}</dd>
-        <dt${u('lek')}>woning van lage energetische kwaliteit</dt><dd${u('lek')}>${fP1(x.lek)}</dd>
-        <dt class="ctx">Woningen met een label</dt><dd class="ctx">${x.heeftLab ? `${fmt(x.w_lab)} <span class="muted small">(${fP0(x.plab)})</span>` : '–'}</dd>
+        <dt${u('ea')}>in energiearmoede</dt><dd${u('ea')}>${nP(x.n_ea, x.ea, fP1)}</dd>
+        <dt${u('li')}>met een laag inkomen</dt><dd${u('li')}>${nP(x.n_li, x.li, fP1)}</dd>
+        <dt>risico (laag middeninkomen)</dt><dd>${nP(x.n_risico, x.risico, fP1)}</dd>
+        <dt${u('lek')}>in een woning van lage energetische kwaliteit</dt><dd${u('lek')}>${nP(x.n_lek, x.lek, fP1)}</dd>
+        <dt class="ctx">Woningen (panden met alleen woningen)</dt><dd class="ctx">${x.heeftLab ? fmt(x.w_tot) : '–'}</dd>
+        <dt${u('plab')}>met een label</dt><dd${u('plab')}>${x.heeftLab ? `${fmt(x.w_lab)} <span class="muted small">(${fP0(x.plab)})</span>` : '–'}</dd>
         <dt${u('pefg')}>label E, F of G</dt><dd${u('pefg')}>${x.heeftLab ? `${fmt(x.w_efg)} <span class="muted small">(${fP0(x.pefg)})</span>` : '–'}</dd>
         <dt>label A of B</dt><dd>${x.heeftLab ? `${fmt(x.w_ab)} <span class="muted small">(${fP0(x.w_lab >= MIN_LAB ? pct(x.w_ab, x.w_lab) : null)})</span>` : '–'}</dd>
       </dl>
-      <table class="eigtab"><thead><tr><th>Eigendom</th><th>Huish.</th><th>Laag ink.</th><th>Lage kw.</th><th>En.arm.</th></tr></thead><tbody>${EIG.map(eigRij).join('')}</tbody></table>
-      <p class="small muted" style="margin:0">– = niet gepubliceerd door het CBS (te weinig huishoudens) of minder dan ${MIN_LAB} woningen met een label.${x.heeftLab ? '' : ' Deze buurt heeft geen labels: de buurtindeling van de BAG-werkbank is anders.'}</p>
+      <table class="eigtab"><caption>Aantallen huishoudens naar eigendom</caption><thead><tr><th>Eigendom</th><th>Totaal</th><th>Laag ink.</th><th>Lage kw.</th><th>En.arm.</th></tr></thead><tbody>${EIG.map(eigRij).join('')}</tbody></table>
+      <p class="small muted" style="margin:0">Aantallen huishoudens: percentage van het CBS maal de huishoudens, afgerond. – = niet gepubliceerd door het CBS (te weinig huishoudens) of minder dan ${MIN_LAB} woningen met een label.${x.heeftLab ? '' : ' Deze buurt heeft geen labels: de buurtindeling van de BAG-werkbank is anders.'}</p>
       ${o ? `<p class="small" style="margin:0"><span class="muted">${isBuurt ? 'De wijk van deze buurt' : 'Dezelfde wijk'} in:</span> <a href="schulden.html#gm=${S.g.c}&wijk=${wk}">Schulden per wijk</a> · <a href="werkeninkomen.html#gm=${S.g.c}&wijk=${wk}">Werk en inkomen</a> · <a href="energielabelkalender.html#gm=${S.g.c}&wijk=${wk}">Energielabelkalender</a></p>` : '<p class="small muted" style="margin:0">Klik een buurt op de kaart of in de figuur, of een rij in de tabel.</p>'}`;
     $('#dossier').querySelectorAll('[data-naar]').forEach(k => k.addEventListener('click', () => kiesBuurt(k.dataset.naar === 'gm' ? null : k.dataset.naar, true)));
   }
@@ -878,12 +940,23 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   $('#focusTerug').addEventListener('click', () => kiesBuurt(null, true));
 
   // ---------- tabel ----------
-  const COLS = [
-    { k: 'naam', t: 'Naam' }, { k: 'wijknaam', t: 'Wijk', alleenBuurt: 1 },
-    { k: 'hh', t: 'Huishoudens', r: 1, f: fmt }, { k: 'ea', t: '% energiearmoede', r: 1, f: fP1 }, { k: 'li', t: '% laag inkomen', r: 1, f: fP1 },
-    { k: 'lek', t: '% lage kwaliteit', r: 1, f: fP1 }, { k: 'plab', t: '% met label', r: 1, f: fP0 }, { k: 'pefg', t: '% E, F, G', r: 1, f: fP0 },
-    { k: 'pk', t: '% koop', r: 1, f: fP0 }, { k: 'pc', t: '% corporatie', r: 1, f: fP0 }, { k: 'po', t: '% overige verh.', r: 1, f: fP0 }
-  ];
+  const KOL0 = [{ k: 'naam', t: 'Naam' }, { k: 'wijknaam', t: 'Wijk', alleenBuurt: 1 }, { k: 'hh', t: 'Huishoudens', r: 1, f: fmt }];
+  const COLS_N = KOL0.concat([
+    { k: 'n_ea', t: 'Energiearmoede', r: 1, f: fN }, { k: 'n_li', t: 'Laag inkomen', r: 1, f: fN }, { k: 'n_lek', t: 'Woning lage kwaliteit', r: 1, f: fN },
+    { k: 'hk', t: 'Koop', r: 1, f: fmt }, { k: 'hc', t: 'Corporatie', r: 1, f: fmt }, { k: 'ho', t: 'Overige verh.', r: 1, f: fmt },
+    { k: 'w_tot', t: 'Woningen', r: 1, f: fmt, sep: 1 }, { k: 'w_lab', t: 'Met label', r: 1, f: fmt }, { k: 'w_efg', t: 'E, F, G', r: 1, f: fmt }, { k: 'w_geen', t: 'Zonder label', r: 1, f: fmt }
+  ]);
+  const COLS_P = KOL0.concat([
+    { k: 'ea', t: '% energiearmoede', r: 1, f: fP1 }, { k: 'li', t: '% laag inkomen', r: 1, f: fP1 }, { k: 'lek', t: '% woning lage kwaliteit', r: 1, f: fP1 },
+    { k: 'pk', t: '% koop', r: 1, f: fP0 }, { k: 'pc', t: '% corporatie', r: 1, f: fP0 }, { k: 'po', t: '% overige verh.', r: 1, f: fP0 },
+    { k: 'plab', t: '% woningen met label', r: 1, f: fP0, sep: 1 }, { k: 'pefg', t: '% E, F, G van gelabeld', r: 1, f: fP0 }
+  ]);
+  let tabMaat = 'n';
+  document.querySelectorAll('#tabMaat [data-tm]').forEach(b => b.addEventListener('click', () => {
+    tabMaat = b.dataset.tm; sortKey = null;
+    document.querySelectorAll('#tabMaat [data-tm]').forEach(x => { const a = x.dataset.tm === tabMaat; x.classList.toggle('primary', a); x.setAttribute('aria-pressed', a); });
+    renderTabel();
+  }));
   function zetView(v) {
     view = v; sortKey = null;
     document.querySelectorAll('.tab').forEach(x => x.setAttribute('aria-selected', x.dataset.view === v));
@@ -894,15 +967,15 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderTabel() {
     if (!S || !S.ea) { $('#tblWrap').innerHTML = ''; $('#rowCount').textContent = ''; return; }
     const q = $('#search').value.trim().toLowerCase();
-    const cols = COLS.filter(c => view === 'buurt' || !c.alleenBuurt);
+    const cols = (tabMaat === 'n' ? COLS_N : COLS_P).filter(c => view === 'buurt' || !c.alleenBuurt);
     let rest = (view === 'buurt' ? S.buurten : S.wijken).slice();
     if (q) rest = rest.filter(r => [r.naam, r.wijknaam, r.code].join(' ').toLowerCase().includes(q));
     if (sortKey) rest.sort((a, c) => { const x = a[sortKey], y = c[sortKey]; if (x == null || x === '') return 1; if (y == null || y === '') return -1; return (typeof x === 'string' ? x.localeCompare(y, 'nl', { numeric: true }) : x - y) * sortDir; });
     else rest.sort((a, c) => a.code.localeCompare(c.code));
     const rs = [{ ...S.gm, isGm: true }].concat(rest);
-    $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}><button type="button" class="kolomknop">${c.t}</button></th>`).join('')}</tr></thead>
-      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selCode ? 'sel' : ''}" data-code="${esc(r.code)}">${cols.map(c => `<td class="${c.r ? 'r' : ''}">${c.k === 'naam' && !r.isGm ? `<button type="button" class="rijknop">${esc(r.naam)}</button>` : c.f ? c.f(r[c.k]) : esc(r[c.k])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
-    $('#rowCount').textContent = `${rest.length} ${view === 'buurt' ? 'buurten' : 'wijken'} met cijfers van de monitor · – = niet gepubliceerd of te weinig`;
+    $('#tblWrap').innerHTML = `<table><thead><tr>${cols.map(c => `<th class="${c.r ? 'r' : ''}${c.sep ? ' sep' : ''}" data-k="${c.k}" ${c.k === sortKey ? `aria-sort="${sortDir > 0 ? 'ascending' : 'descending'}"` : ''}><button type="button" class="kolomknop">${c.t}</button></th>`).join('')}</tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selCode ? 'sel' : ''}" data-code="${esc(r.code)}">${cols.map(c => `<td class="${c.r ? 'r' : ''}${c.sep ? ' sep' : ''}">${c.k === 'naam' && !r.isGm ? `<button type="button" class="rijknop">${esc(r.naam)}</button>` : c.f ? c.f(r[c.k]) : esc(r[c.k])}</td>`).join('')}</tr>`).join('')}</tbody></table>`;
+    $('#rowCount').textContent = `${rest.length} ${view === 'buurt' ? 'buurten' : 'wijken'} met cijfers van de monitor · ${tabMaat === 'n' ? 'aantallen huishoudens (CBS, afgerond) en woningen (BAG, labels)' : 'percentages'} · – = niet gepubliceerd of te weinig`;
     $('#tblWrap').querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
       const k = th.dataset.k;
       if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = ['naam', 'wijknaam'].includes(k) ? 1 : -1; }
@@ -926,13 +999,13 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   $('#csvBtn').addEventListener('click', () => {
     if (!S || !S.ea) return;
     const bron = bronTxt();
-    const kop = ['gemeentecode', 'gemeente', 'niveau', 'code', 'naam', 'wijkcode', 'huishoudens_monitor', 'pct_energiearmoede', 'pct_laag_inkomen', 'pct_risico_laag_middeninkomen', 'pct_lage_energetische_kwaliteit',
+    const kop = ['gemeentecode', 'gemeente', 'niveau', 'code', 'naam', 'wijkcode', 'huishoudens_monitor', 'huishoudens_energiearmoede_afgerond', 'huishoudens_laag_inkomen_afgerond', 'huishoudens_lage_energetische_kwaliteit_afgerond', 'pct_energiearmoede', 'pct_laag_inkomen', 'pct_risico_laag_middeninkomen', 'pct_lage_energetische_kwaliteit',
       'huishoudens_koop', 'huishoudens_corporatie', 'huishoudens_overige_verhuur', 'pct_energiearmoede_koop', 'pct_energiearmoede_corporatie', 'pct_energiearmoede_overige_verhuur',
-      'pct_lage_kwaliteit_koop', 'pct_lage_kwaliteit_corporatie', 'pct_lage_kwaliteit_overige_verhuur', 'woningen_met_label', 'woningen_label_efg', 'woningen_zonder_label', 'pct_efg_van_gelabeld', 'beide_hoog', 'bron'];
+      'pct_lage_kwaliteit_koop', 'pct_lage_kwaliteit_corporatie', 'pct_lage_kwaliteit_overige_verhuur', 'woningen_in_woonpanden', 'woningen_met_label', 'woningen_label_efg', 'woningen_zonder_label', 'pct_efg_van_gelabeld', 'beide_hoog', 'bron'];
     const e = (o, k, i) => o.eig[k] ? o.eig[k][i] : '';
-    const rij = (niv, o) => ['GM' + S.g.c, S.g.n, niv, o.code, o.naam, niv === 'buurt' ? o.wijk : '', o.hh, o.ea, o.li, o.risico, o.lek,
+    const rij = (niv, o) => ['GM' + S.g.c, S.g.n, niv, o.code, o.naam, niv === 'buurt' ? o.wijk : '', o.hh, rond(o.n_ea), rond(o.n_li), rond(o.n_lek), o.ea, o.li, o.risico, o.lek,
       e(o, 'K', 'hh'), e(o, 'C', 'hh'), e(o, 'O', 'hh'), e(o, 'K', 'ea'), e(o, 'C', 'ea'), e(o, 'O', 'ea'), e(o, 'K', 'lek'), e(o, 'C', 'lek'), e(o, 'O', 'lek'),
-      o.heeftLab ? o.w_lab : '', o.heeftLab ? o.w_efg : '', o.heeftLab ? o.w_geen : '', r1(o.pefg), niv === 'buurt' ? (waarde(o, 'beide') == null ? '' : waarde(o, 'beide') ? 'ja' : 'nee') : '', bron];
+      o.heeftLab ? o.w_tot : '', o.heeftLab ? o.w_lab : '', o.heeftLab ? o.w_efg : '', o.heeftLab ? o.w_geen : '', r1(o.pefg), niv === 'buurt' ? (waarde(o, 'beide') == null ? '' : waarde(o, 'beide') ? 'ja' : 'nee') : '', bron];
     csvDownload(`open-data-atelier-energiearmoede-${slug()}.csv`, kop, [rij('gemeente', S.gm)].concat(S.wijken.map(o => rij('wijk', o))).concat(S.buurten.map(o => rij('buurt', o))));
   });
 
@@ -951,7 +1024,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderVoet() {
     renderHerken();
     const ea = S.ea, l = S.l;
-    $('#foot').innerHTML = ea ? `Bronnen: CBS, <a href="https://www.cbs.nl/nl-nl/maatwerk/2026/30/monitor-energiearmoede-2019-2024">Monitor Energiearmoede 2019-2024</a>, tabel 3, verslagjaar ${ea.jaar}, buurtindeling ${ea.indeling}.${l ? ` Energielabels: RIVM, laag rvo_energielabels (afgeleid uit EP-Online van RVO), opgehaald ${datum(l.opgehaald)}. Gebouwen: BAG (Kadaster, via PDOK), stand ${datum(l.peil_bag)}, buurtindeling ${esc(l.buurtjaar)}.` : ''} Buurtgrenzen ${ea.indeling}: CBS via PDOK. Achtergrondkaart: PDOK BRT.${S.zonderLab ? ` ${fmt(S.zonderLab)} ${mv(S.zonderLab, 'buurt', 'buurten')} uit de monitor ${mv(S.zonderLab, 'heeft', 'hebben')} geen labels (andere indeling).` : ''}<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
+    $('#foot').innerHTML = ea ? `Bronnen: CBS, <a href="https://www.cbs.nl/nl-nl/maatwerk/2026/30/monitor-energiearmoede-2019-2024">Monitor Energiearmoede 2019-2024</a>, tabel 3, verslagjaar ${ea.jaar}, buurtindeling ${ea.indeling}.${S.cbs ? ` Totaal huishoudens: CBS, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">Regionale kerncijfers (70072ned)</a>, 1 januari ${S.cbs.j}, live opgevraagd.` : ''}${l ? ` Energielabels: RIVM, laag rvo_energielabels (afgeleid uit EP-Online van RVO), opgehaald ${datum(l.opgehaald)}. Gebouwen: BAG (Kadaster, via PDOK), stand ${datum(l.peil_bag)}, buurtindeling ${esc(l.buurtjaar)}.` : ''} Buurtgrenzen ${ea.indeling}: CBS via PDOK. Achtergrondkaart: PDOK BRT.${S.zonderLab ? ` ${fmt(S.zonderLab)} ${mv(S.zonderLab, 'buurt', 'buurten')} uit de monitor ${mv(S.zonderLab, 'heeft', 'hebben')} geen labels (andere indeling).` : ''}<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
       : `Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
