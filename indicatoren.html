@@ -341,7 +341,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.15.3';
+  const VERSIE = '0.15.4';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1175,10 +1175,11 @@ main > * { min-width: 0; }
           def: 'Aandeel huishoudens met een laag inkomen en hoge energiekosten, of met een laag inkomen in een slecht geïsoleerde woning.',
           zegt: 'Waar armoede en de woning samen knellen; aanknopingspunt voor isolatie en energiehulp.',
           niet: 'Wie de rekening niet kan betalen. Het is een combinatie van inkomen, energiegebruik en woningkenmerken.',
-          niveau: 'Gemeente. Jaarlijks, 2019–2024, voorlopige schatting 2025.',
+          niveau: 'Gemeente, wijk en buurt, ook naar eigendom van de woning (koop, corporatie, andere verhuurder). Jaarlijks, 2019–2024; TNO schat het jaar erna.',
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
-          bron: () => 'TNO en CBS, Monitor Energiearmoede in Nederland 2025; interactieve kaart per gemeente op energiearmoede.tno.nl.',
-          herkomst: 'Landelijke monitor.' },
+          bron: () => 'CBS, Monitor Energiearmoede 2019-2024 (tabellenset, juli 2026), tabel 3 per gemeente, wijk en buurt; TNO, Energiearmoede in Nederland 2019-2025, met kaart op energiearmoede.tno.nl.',
+          herkomst: 'Landelijke monitor.',
+          inst: ['energiearmoede.html', 'Energiearmoede per buurt'] },
         { k: 'context', b: 'open', naam: 'Personen met bijstand',
           def: 'Aantal personen tot de AOW-leeftijd met een bijstandsuitkering, ook per 10.000 inwoners van 18 jaar en ouder.',
           zegt: 'Hoeveel inwoners op het sociaal minimum leven; een groep met een hoog risico op schulden.',
