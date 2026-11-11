@@ -95,6 +95,12 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 @media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
 @media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.zh { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.zh li { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; }
+.zh .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+.zh .n { grid-column: 1 / -1; }
 .chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
 .chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
 .chart .ax { stroke: var(--line); }
@@ -241,8 +247,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
-    <p>Hoeveel paspoorten, identiteitskaarten en rijbewijzen komen er de komende jaren aan de balie? Sinds 2014 zijn paspoort en identiteitskaart voor volwassenen tien jaar geldig in plaats van vijf. Daardoor kwam er eerst een dal en nu een piek, tot en met 2028. Bij rijbewijzen is er geen golf, maar een gestage groei: er zijn steeds meer oudere rijbewijshouders, en hun rijbewijs is korter geldig. Kies een gemeente.</p>
-    <p class="muted small">Een verwachtingsmodel uit open data, geen telling van de gemeente. De cijfers komen live van het CBS op het moment dat je een gemeente kiest.</p>
+    <p>Hoeveel paspoorten, identiteitskaarten en rijbewijzen komen er de komende jaren aan de balie? Sinds 2014 zijn paspoort en identiteitskaart voor volwassenen tien jaar geldig in plaats van vijf. Daardoor kwam er eerst een dal en nu een piek, tot en met 2028. Bij rijbewijzen is er geen golf, maar een gestage groei: er zijn steeds meer oudere rijbewijshouders, en hun rijbewijs is korter geldig. En geboorteaangiftes komen terecht in de gemeente waar de verloskamers staan. Kies een gemeente.</p>
+    <p class="muted small">Een verwachtingsmodel uit open data, geen telling van de gemeente. De cijfers komen live van het CBS op het moment dat je een gemeente kiest; de geboortes per ziekenhuis staan in de pagina.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
 
@@ -260,12 +266,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       <details class="herken" id="herken">
         <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
         <ol>
-          <li><b>Een ander begrip.</b> Dit is een verwachting, geen telling. De gemeente telt aanvragen en uitreikingen in haar eigen administratie. Die bevat ook vervangingen bij verlies of diefstal, spoedaanvragen, uitbreidingen met een categorie, omwisselingen van buitenlandse rijbewijzen en documenten voor wie niet in de gemeente woont. Die zitten niet in deze schatting.</li>
-          <li><b>Een andere peildatum of indeling.</b> Het rijbewijsbezit per gemeente is van 1 januari 2026, gedeeld door het aantal 18-plussers op 1 januari 2025 (zo publiceert het CBS het). De bevolking per leeftijd is van 1 januari van elk jaar. De NVVB-index is een raming uit 2021.</li>
-          <li><b>Registratie bij de bron.</b> Het rijbewijsbezit komt uit het rijbewijzenregister van de RDW, gekoppeld aan het woonadres in de BRP. Wie verhuist of uit de BRP verdwijnt, verschuift tussen gemeenten.</li>
+          <li><b>Een ander begrip.</b> Dit is een verwachting, geen telling. De gemeente telt aanvragen en uitreikingen in haar eigen administratie. Die bevat ook vervangingen bij verlies of diefstal, spoedaanvragen, uitbreidingen met een categorie, omwisselingen van buitenlandse rijbewijzen en documenten voor wie niet in de gemeente woont. Die zitten niet in deze schatting. Bij geboorteaangiftes telt de gemeente de aktes van geboorte, ook van levenloos geboren kinderen en van kinderen geboren buiten een VSV.</li>
+          <li><b>Een andere peildatum of indeling.</b> Het rijbewijsbezit per gemeente is van 1 januari 2026, gedeeld door het aantal 18-plussers op 1 januari 2025 (zo publiceert het CBS het). De bevolking per leeftijd is van 1 januari van elk jaar. De NVVB-index is een raming uit 2021. De geboortes per ziekenhuis gaan over een kalenderjaar, 2022–2025.</li>
+          <li><b>Registratie bij de bron.</b> Het rijbewijsbezit komt uit het rijbewijzenregister van de RDW, gekoppeld aan het woonadres in de BRP. Wie verhuist of uit de BRP verdwijnt, verschuift tussen gemeenten. De geboortes komen uit de registratie van Perined, aangeleverd per VSV; over 2022–2024 is die pas in 2026 nageleverd.</li>
           <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van de CBS-tabel zelf (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table" target="_blank" rel="noopener">83488NED</a>, <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table" target="_blank" rel="noopener">03759ned</a>), dan zit de fout hier. Meld het hieronder.</li>
         </ol>
-        <p class="status small muted">Een bewerking door Josephine Linders, op eigen titel. Geen officiële cijfers van een gemeente, het CBS, de RvIG, de RDW of de NVVB.</p>
+        <p class="status small muted">Een bewerking door Josephine Linders, op eigen titel. Geen officiële cijfers van een gemeente, het CBS, de RvIG, de RDW, de NVVB of het Zorginstituut.</p>
         <div class="meld"><span class="small">Melden, met gemeente en versie al ingevuld:</span><a class="btn primary" id="herkenMail" href="#">Mail een melding</a><a class="btn" id="herkenGh" href="#" target="_blank" rel="noopener">Meld op GitHub</a></div>
       </details>
 
@@ -299,11 +305,21 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       </div>
       <p class="zin small" id="darZin"></p>
 
+      <div class="sectiekop">
+        <div><span class="eyebrow">Geboorteaangifte</span><h2>Geboorteaangiftes: waar de kinderen geboren worden</h2></div>
+        <p class="small muted">Aangifte doe je in de gemeente waar het kind geboren is, niet waar de ouders wonen. Een gemeente met verloskamers krijgt de aangiftes van de hele regio; een gemeente zonder ziekenhuis vooral die van thuisbevallingen.</p>
+      </div>
+      <div class="duo">
+        <div class="chart" id="chGeb"></div>
+        <div class="card" id="gebKaart"></div>
+      </div>
+      <p class="zin small" id="gebZin"></p>
+
       <div class="cols">
         <div class="card">
           <h2>Naast deze pagina</h2>
           <ul class="small">
-            <li><b>Geboorteaangiftes.</b> Het CBS telt geboorten in de woongemeente van de moeder. De akte, en dus het werk aan de balie, ligt in de gemeente waar het kind geboren wordt, vaak een gemeente met een ziekenhuis. Open data meten die baliedruk niet. Geboorten per woongemeente staan in <a id="linkBevolking" href="bevolking.html">Bevolkingsontwikkeling per gemeente</a>. Waarom aktes naar plaats van gebeurtenis alleen in de eigen registratie staan, staat op <a href="indicatoren.html#domein=publiek">Indicatoren belicht, Publieke dienstverlening</a>.</li>
+            <li><b>Geboorten in de eigen gemeente.</b> Geboorte, sterfte en verhuizing per woongemeente, ook per wijk, staan in <a id="linkBevolking" href="bevolking.html">Bevolkingsontwikkeling per gemeente</a>. De echte telling van aktes naar plaats van gebeurtenis staat alleen in de eigen registratie: zie <a href="indicatoren.html#domein=publiek">Indicatoren belicht, Publieke dienstverlening</a>.</li>
             <li><b>Bevolking en het gemeentefonds.</b> Inwoners en leeftijdsgroepen zijn maatstaven in de algemene uitkering. Wat ze je gemeente opleveren, staat in <a id="linkRijksverdeling" href="rijksverdeling.html">Rijksverdeling per gemeente</a>.</li>
             <li><b>Wat de balie zelf meet.</b> Wachttijd, afspraken, contacten per kanaal: zie de kaarten van <a href="indicatoren.html#domein=publiek">Publieke dienstverlening</a> op Indicatoren belicht.</li>
           </ul>
@@ -318,6 +334,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>Verlengingen per jaar</b>: houders gedeeld door de geldigheid. Onder de 65 jaar is dat 10 jaar. Van 65 tot 70 jaar geldt het rijbewijs tot de 75e verjaardag (gerekend als 7,5 jaar). Vanaf 70 jaar is het 5 jaar geldig (RDW). Houders van een vrachtautorijbewijs (C) onder de 65 jaar verlengen elke vijf jaar: zij tellen één keer extra mee.</li>
             <li><b>Eerste rijbewijzen per jaar</b>: één leeftijdsjaar (de helft van de 18- en 19-jarigen) maal het aandeel met een rijbewijs bij 25 tot 30 jaar, dus het deel van een jaargang dat er uiteindelijk een haalt.</li>
             <li><b>Toets voor Nederland</b>: op deze manier komt Nederland in 2026 op ongeveer 1,4 miljoen verlengingen en 160.000 eerste rijbewijzen. Dat is een orde van grootte, geen telling.</li>
+            <li><b>Geboortes in het ziekenhuis</b>: per verloskundig samenwerkingsverband (VSV) het aantal kinderen dat er geboren is, verdeeld naar het aandeel bevallingen thuis, poliklinisch en klinisch (Openbaar databestand Integrale geboortezorg). Poliklinisch en klinisch samen is in het ziekenhuis. Het ziekenhuis is toegewezen aan de gemeente waar de verloskamers staan, niet aan het adres van het hoofdkantoor; voor elk ziekenhuis met meer locaties nagegaan.</li>
+            <li><b>Geboorteaangiftes</b>: de kinderen geboren in het ziekenhuis in de gemeente, plus de thuisbevallingen van inwoners: de geboren inwoners (CBS) maal het aandeel thuisbevallingen in het eigen VSV, of landelijk als er geen ziekenhuis in de gemeente staat. Een meerling telt per kind.</li>
           </ul>
         </div>
         <div class="card">
@@ -328,6 +346,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>Een stabiel ritme</b>: de rijbewijsschatting gaat ervan uit dat elk jaar evenveel houders verlengen. Golven uit het verleden (een druk jaar tien jaar geleden) zijn niet te zien, omdat de uitgifte per jaar per gemeente niet open is.</li>
             <li><b>Geen seizoen</b>: per maand is er geen open data. Het jaartotaal zegt niets over de drukte in het voorjaar of voor de zomervakantie.</li>
             <li><b>Online verlengen</b>: een rijbewijs kun je ook digitaal verlengen bij de RDW. Ophalen blijft aan de balie.</li>
+            <li><b>Geboortes per VSV, niet per locatie</b>: drie samenwerkingsverbanden hebben verloskamers in twee gemeenten (Haga in Den Haag en Zoetermeer, Franciscus in Rotterdam en Schiedam, Twente in Enschede en Almelo). Hoe hun geboortes over die gemeenten verdeeld zijn, staat niet in de data. Samen dekken de VSV's in de data 96 tot 97% van alle geboortes in Nederland.</li>
+            <li><b>Thuis is schatting</b>: hoeveel inwoners thuis bevallen, schat de pagina met het aandeel in het VSV. Bevallingen in een geboortehuis buiten het ziekenhuis tellen in de data als poliklinisch.</li>
           </ul>
         </div>
       </div>
@@ -338,11 +358,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> NVVB, Rekenmodel reisdocumentenpiek vanaf 2024 (2021, met het ministerie van BZK): de jaarindex 2014–2034 voor paspoort en identiteitskaart, overgenomen in de pagina. CBS: Personen met een rijbewijs naar categorie, leeftijd en provincie op 1 januari, 2014–2026 (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table">83488NED</a>, live); Bevolking naar leeftijd op 1 januari, 2014–2026 (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a>, live). Het rijbewijsbezit per gemeente komt uit het CBS-nieuwsbericht <a href="https://www.cbs.nl/nl-nl/nieuws/2026/07/rijbewijs-en-autobezit-stijgt">Rijbewijs- en autobezit stijgt</a> (13 februari 2026, peildatum 1 januari 2026, overgenomen in de pagina). Geldigheid van het rijbewijs: <a href="https://www.rdw.nl/het-rijbewijs/over-het-rijbewijs/geldigheid-rijbewijs">RDW</a>. Digitale aanvragen 2025: memorie van antwoord bij wetsvoorstel 36937 (Eerste Kamer, september 2026).</p>
-    <p><b>Licentie.</b> CBS: CC BY 4.0. Bij het NVVB-rekenmodel staat geen licentie. De pagina neemt alleen de 21 indexcijfers per document over, met bronvermelding.</p>
-    <p><b>Methode.</b> Reisdocumenten: de landelijke index, eventueel met de eigen aantallen uit 2014, en een correctie voor de eigen groei van de volwassen bevolking. Rijbewijzen: houders per leeftijd geschat uit de provincie en afgestemd op de gemeente, gedeeld door de geldigheid. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
-    <p><b>Wat dit niet is.</b> Geen telling van aanvragen of uitreikingen, geen prognose per maand, geen planning voor de balie en geen oordeel over de dienstverlening. Geen cijfers uit de BRP of de reisdocumentenadministratie van een gemeente.</p>
-    <p><b>Bekende beperkingen.</b> De NVVB-index is een landelijke raming uit 2021. Het rijbewijsbezit per gemeente is één peildatum. De verdeling over leeftijden komt uit de provincie. Vervangingen, spoed, omwisselingen en uitbreidingen zitten er niet in.</p>
+    <p><b>Bron en peildatum.</b> NVVB, Rekenmodel reisdocumentenpiek vanaf 2024 (2021, met het ministerie van BZK): de jaarindex 2014–2034 voor paspoort en identiteitskaart, overgenomen in de pagina. CBS: Personen met een rijbewijs naar categorie, leeftijd en provincie op 1 januari, 2014–2026 (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table">83488NED</a>, live); Bevolking naar leeftijd op 1 januari, 2014–2026 (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a>, live). Het rijbewijsbezit per gemeente komt uit het CBS-nieuwsbericht <a href="https://www.cbs.nl/nl-nl/nieuws/2026/07/rijbewijs-en-autobezit-stijgt">Rijbewijs- en autobezit stijgt</a> (13 februari 2026, peildatum 1 januari 2026, overgenomen in de pagina). Geldigheid van het rijbewijs: <a href="https://www.rdw.nl/het-rijbewijs/over-het-rijbewijs/geldigheid-rijbewijs">RDW</a>. Digitale aanvragen 2025: memorie van antwoord bij wetsvoorstel 36937 (Eerste Kamer, september 2026). Geboortes per ziekenhuis: Zorginstituut Nederland, Zorginzicht, <a href="https://www.zorginzicht.nl/algemeen/open-data-integrale-geboortezorg">Openbaar databestand Integrale geboortezorg</a>, verslagjaren 2022–2025 (bron Perined; 2025 gepubliceerd 26 mei 2026, 2022–2024 nageleverd 26 mei 2026, correcties 8 september 2026), overgenomen in de pagina. Geboren inwoners: CBS <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37259ned/table">37259ned</a>, live.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0. Bij het NVVB-rekenmodel en bij het databestand van Zorginzicht staat geen licentie; Zorginzicht noemt de bestanden openbaar. De pagina neemt alleen de 21 indexcijfers per document en per ziekenhuis vier aantallen per jaar over, met bronvermelding.</p>
+    <p><b>Methode.</b> Reisdocumenten: de landelijke index, eventueel met de eigen aantallen uit 2014, en een correctie voor de eigen groei van de volwassen bevolking. Rijbewijzen: houders per leeftijd geschat uit de provincie en afgestemd op de gemeente, gedeeld door de geldigheid. Geboorteaangiftes: kinderen geboren in de ziekenhuizen in de gemeente, plus een schatting van de thuisbevallingen van inwoners. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen telling van aanvragen of uitreikingen, geen prognose per maand, geen planning voor de balie en geen oordeel over de dienstverlening. Geen cijfers uit de BRP, de burgerlijke stand of de reisdocumentenadministratie van een gemeente. Geen oordeel over de kwaliteit van de geboortezorg: het databestand is gemaakt voor kwaliteitsindicatoren, de pagina gebruikt alleen de aantallen.</p>
+    <p><b>Bekende beperkingen.</b> De NVVB-index is een landelijke raming uit 2021. Het rijbewijsbezit per gemeente is één peildatum. De verdeling over leeftijden komt uit de provincie. Vervangingen, spoed, omwisselingen en uitbreidingen zitten er niet in. De geboortes zijn per VSV, niet per ziekenhuislocatie; bij drie VSV's met verloskamers in twee gemeenten is de verdeling onbekend.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -354,7 +374,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Reisdocumenten en rijbewijzen per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const J0 = 2014;
@@ -384,6 +404,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     { k: '21600', t: '75+', lo: 75, hi: 999, geldig: 5 }
   ];
   const CAT_ELK = 'A028206', CAT_AUTO = 'A028200', CAT_C = 'A028208';
+
+  // Zorginstituut Nederland, Zorginzicht: Openbaar databestand Integrale geboortezorg 2022–2025 (bron Perined).
+  // Per VSV: korte naam ~ plaats van de verloskamers ~ gemeentecode(s) ~ toelichting ~ per jaar 2022–2025: kinderen geboren in het ziekenhuis . kinderen thuis geboren
+  // (kinderen = noemer indicator 1, verdeeld naar de tellers van 7A thuis, 7B poliklinisch en 7C klinisch). Bouw: recepten/balie/bouw_geb.py
+  const GEB_JAREN = [2022, 2023, 2024, 2025];
+  const GEBRAW = "Admiraal de Ruyter Ziekenhuis~Goes~0664~~1523.304,1518.285,1524.295,1618.338|Albert Schweitzer ziekenhuis~Dordrecht~0505~~2381.322,2261.278,2328.322,2332.299|Amphia~Breda~0758~~3323.435,3305.399,3331.415,3382.423|Amsterdam UMC~Amsterdam~0363~~2650.251,2370.209,2282.192,2470.191|Antonius Ziekenhuis~Sneek~1900~~1298.357,1204.266,1187.233,1150.240|BovenIJ~Amsterdam~0363~~1343.209,1604.209,1600.174,1642.212|Bravis~Bergen op Zoom~0748~Moeder en Kind Centrum op de locatie Bergen op Zoom, niet in Roosendaal.~2161.213,2039.216,2103.230,2122.225|Deventer Ziekenhuis~Deventer~0150~~1574.360,1698.369,1816.313,1786.348|Diakonessenhuis~Utrecht~0344~~2589.473,2646.382,2736.432,2618.320|Elisabeth-TweeSteden Ziekenhuis~Tilburg~0855~~3401.286,3421.324,3386.304,3411.292|Elkerliek~Helmond~0794~~1452.145,1379.160,1477.153,1418.156|Erasmus MC~Rotterdam~0599~~1860.100,1831.72,1884.70,1836.87|Franciscus Gasthuis & Vlietland~Rotterdam en Schiedam~0599,0606~Verloskamers in Rotterdam (Gasthuis) en Schiedam (Vlietland), beide locaties samen.~3594.432,3298.316,3095.290,3023.271|Frisius MC~Heerenveen~0074~~1282.299,1278.278,1262.232,1354.246|Frisius MC~Leeuwarden~0080~~1683.362,1798.388,1709.341,1746.386|Groene Hart Ziekenhuis~Gouda~0513~~2004.521,2077.582,2082.631,1929.533|Haaglanden MC~Den Haag~0518~~2987.201,3116.217,3162.190,3247.213|HagaZiekenhuis~Den Haag en Zoetermeer~0518,0637~Verloskamers in Den Haag en Zoetermeer (beide locaties samen). Op de locatie Zoetermeer worden ongeveer 1.100 à 1.200 kinderen per jaar geboren (Kamervragen en berichtgeving, 2024).~4320.384,4089.365,3996.302,3925.289|Flevoziekenhuis~Almere~0034~~2335.212,2433.270,2386.211,2276.222|IJsselland Ziekenhuis~Capelle aan den IJssel~0502~~1694.209,1704.189,1729.180,1764.180|Ikazia en Maasstad (VSV Zuid)~Rotterdam~0599~Ikazia levert de cijfers van VSV Zuid; Maasstad Ziekenhuis staat niet apart in de data. Beide in Rotterdam.~4907.585,4874.525,4927.511,4958.494|Ziekenhuis Rivierenland~Tiel~0281~~1172.312,1223.294,1260.294,1190.320|Jeroen Bosch Ziekenhuis~'s-Hertogenbosch~0796~~3011.579,2808.566,2974.583,3068.487|LUMC en Alrijne (VSV Rijn & Bollen)~Leiden~0546~LUMC levert de cijfers van LUMC en Alrijne samen; de geboortezorg zit in Leiden.~4428.738,4374.782,4328.756,4405.779|Maastricht UMC+~Maastricht~0935~~1333.166,1162.139,1203.105,1097.98|Maasziekenhuis Pantein~Beugen~1982~~1089.168,1018.141,1066.148,1048.186|Máxima MC~Veldhoven~0861~~2549.200,2601.248,2641.196,2558.176|Meander Medisch Centrum~Amersfoort~0307~~2166.708,2365.768,2750.762,2779.692|MST en ZGT (VSV Twente)~Enschede en Almelo~0153,0141~Vermoedelijk de cijfers van VSV Twente: MST in Enschede en ZGT in Almelo, samen. ZGT staat niet apart in de data.~4270.679,4154.689,4262.594,4121.466|Noordwest Ziekenhuisgroep~Alkmaar~0361~Alleen VSV Alkmaar; Den Helder staat apart.~2070.430,2002.429,2179.433,2056.417|OLVG~Amsterdam~0363~~5345.886,5008.769,4570.690,4966.632|Ommelander Ziekenhuis~Scheemda~1895~~919.130,901.111,907.114,961.99|Radboudumc en CWZ~Nijmegen~0268~Radboudumc levert ook de cijfers van het Canisius Wilhelmina Ziekenhuis.~3383.494,3299.476,3409.477,3606.517|Reinier de Graaf~Delft~0503~~2853.486,3098.434,3192.427,3151.414|Beatrixziekenhuis~Gorinchem~0512~~1413.333,1411.355,1355.348,1388.301|Rode Kruis Ziekenhuis~Beverwijk~0375~~1244.210,1211.203,1158.175,1197.143|SJG Weert~Weert~0988~~837.126,812.106,815.113,815.119|Saxenburgh~Hardenberg~0160~~867.163,770.115,815.123,874.97|St. Antonius Ziekenhuis~Utrecht~0344~Bevallen kan sinds 2018 alleen op de locatie Utrecht, niet in Nieuwegein.~3301.466,3259.454,3336.456,3576.482|Spaarne Gasthuis~Haarlem~0392~Verloskunde sinds 2018 in Haarlem, niet in Hoofddorp.~3502.452,3414.454,3587.439,3201.446|Martini Ziekenhuis~Groningen~0014~~2047.446,2006.409,1905.319,1897.302|Catharina Ziekenhuis~Eindhoven~0772~~1662.195,1680.163,1876.164,1879.134|St Jansdal~Harderwijk~0243~~1926.370,1827.398,1988.367,1975.360|Dijklander Ziekenhuis~Hoorn~0405~Bevallen kan sinds 2019 alleen in Hoorn, niet in Purmerend.~2564.586,2440.605,2544.618,2358.533|Gelre~Apeldoorn~0200~Tot april 2023 ook verloskamers in Zutphen; die bevallingen zitten in 2022 en begin 2023 in dit cijfer.~2090.443,1591.368,1477.298,1445.281|Isala~Zwolle~0193~~3654.1177,3604.1159,3692.1148,3636.1056|Laurentius Ziekenhuis~Roermond~0957~~1057.96,1028.132,1014.98,996.68|Slingeland Ziekenhuis~Doetinchem~0222~~1188.134,1284.180,1288.155,1373.119|St. Anna Ziekenhuis~Geldrop~1771~~909.84,874.53,816.63,941.71|Van Weel-Bethesda Ziekenhuis~Dirksland~1924~~1001.130,916.131,885.113,975.140|SKB~Winterswijk~0294~~729.121,833.106,864.128,879.130|Tergooi MC~Hilversum~0402~~2113.318,2074.287,2136.195,2223.220|Treant~Emmen~0114~Bevallen kan sinds 2018 alleen in Emmen, niet in Hoogeveen of Stadskanaal.~1276.153,1264.162,1181.152,1232.125|UMCG~Groningen~0014~~1599.246,1544.279,1591.227,1624.181|UMC Utrecht~Utrecht~0344~~2634.279,2416.255,2252.239,2176.182|VieCuri~Venlo~0983~~1285.169,1312.210,1335.175,1355.184|Wilhelmina Ziekenhuis~Assen~0106~~970.229,1115.211,1122.206,1163.194|Zaans Medisch Centrum~Zaandam~0479~~1654.191,1704.174,1901.139,1703.156|Ziekenhuis Amstelland~Amstelveen~0362~~1501.198,1461.170,1521.148,1442.150|Bernhoven~Uden~1991~~1861.325,1861.279,1689.236,1889.259|Ziekenhuis Gelderse Vallei~Ede~0228~~2277.895,2293.854,2313.803,2463.776|Nij Smellinghe~Drachten~0090~~1047.310,1063.281,1074.300,1088.281|Rijnstate~Arnhem~0202~~2630.391,2743.418,2722.378,2686.332|ZorgSaam~Terneuzen~0715~~616.37,627.8,678.55,636.50|Zuyderland~Heerlen~0917~Het geboortecentrum zit op de locatie Heerlen.~2767.304,2907.331,2716.267,2668.277|Noordwest Ziekenhuisgroep~Den Helder~0400~Alleen het totaal aantal kinderen van VSV Den Helder staat in de data; de verdeling thuis en ziekenhuis is die van VSV Alkmaar.~650.135,681.146,676.134,739.150";
+  const GEB = GEBRAW.split('|').map(x => { const [kort, plaats, codes, noot, per] = x.split('~'); return { kort, plaats, codes: codes.split(','), noot, per: per.split(',').map(p => { const [z, t] = p.split('.'); return { z: +z, t: +t }; }) }; });
+  const GEB_NL = [[139822, 22346], [137980, 21602], [139065, 20379], [139506, 19545]].map(([z, t]) => ({ z, t }));
 
   const $ = s => document.querySelector(s);
   const nf = new Intl.NumberFormat('nl-NL');
@@ -474,6 +502,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return m;
   }
 
+  // levend geboren kinderen van inwoners per jaar (37259ned)
+  async function laadGeb(c) {
+    const rs = await odata('37259ned', `RegioS eq 'GM${c}' and Geslacht eq 'T001038' and Perioden ge '${GEB_JAREN[0]}JJ00'`, 'Perioden,LevendGeborenKinderen_3');
+    return new Map(rs.filter(r => r.LevendGeborenKinderen_3 != null).map(r => [+r.Perioden.slice(0, 4), r.LevendGeborenKinderen_3]));
+  }
+
   // ---------- model ----------
   // per jaar: houders per groep (geschat), verlengingen, extra C, eerste rijbewijzen
   function model(bev, rbRef, bevRef, k) {
@@ -526,16 +560,17 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     document.title = 'Reisdocumenten en rijbewijzen ' + g.n + ' · Open Data Atelier';
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
     const rb = RB.get(g.c);
-    S = { g, rb, m: null, mNl: null, bev: null, bevNl: null, opgehaald: null };
+    S = { g, rb, m: null, mNl: null, bev: null, bevNl: null, geb: null, opgehaald: null };
     fouten.clear(); toonMelding();
     $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen…'; $('#kopZin').textContent = '';
-    ['#top4', '#chIndex', '#chRbAantal', '#chRbIndex', '#chRbLeeftijd', '#rekenTabel', '#groeiFactor', '#minderZin', '#darZin', '#foot'].forEach(s => { $(s).innerHTML = ''; });
+    ['#top4', '#chIndex', '#chRbAantal', '#chRbIndex', '#chRbLeeftijd', '#rekenTabel', '#groeiFactor', '#minderZin', '#darZin', '#chGeb', '#gebKaart', '#gebZin', '#foot'].forEach(s => { $(s).innerHTML = ''; });
     $('#linkBevolking').href = 'bevolking.html#gm=' + g.c; $('#linkRijksverdeling').href = 'rijksverdeling.html#gm=' + g.c;
     history.replaceState(null, '', '#gm=' + g.c);
     voortgang(0, 1, 'Cijfers ophalen bij het CBS…');
     try {
-      const [bev, bevNl, bevPv, rbNl, rbPv] = await Promise.all([laadBev('GM' + g.c), laadBev('NL01'), rb ? laadBev(rb.pv) : null, laadRb('NL01'), rb ? laadRb(rb.pv) : null]);
+      const [bev, bevNl, bevPv, rbNl, rbPv, geb] = await Promise.all([laadBev('GM' + g.c), laadBev('NL01'), rb ? laadBev(rb.pv) : null, laadRb('NL01'), rb ? laadRb(rb.pv) : null, laadGeb(g.c).catch(() => { fouten.add('geboorten (CBS 37259ned)'); return null; })]);
       if (S.g !== g) return;
+      S.geb = geb;
       S.bev = bev; S.bevNl = bevNl;
       S.mNl = model(bevNl, rbNl, bevNl, 1);
       if (rb && bevPv && rbPv && bev.size) {
@@ -550,7 +585,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     S.opgehaald = new Date();
     renderAlles(); toonMelding(); voortgang(1, 1, '');
   }
-  function renderAlles() { renderNvvb(); if (S.bev) { renderKern(); renderReken(); renderRb(); } renderVoet(); }
+  function renderAlles() { renderNvvb(); if (S.bev) { renderKern(); renderReken(); renderRb(); } renderGeb(); renderVoet(); }
 
   // ---------- kern ----------
   function renderKern() {
@@ -672,6 +707,52 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#darZin').innerHTML = `Beroepschauffeurs: naar schatting ${fmtR(mL.groepen.reduce((a, g) => a + g.cx, 0) * 10)} inwoners onder de 65 met een vrachtautorijbewijs. Zij verlengen elke vijf jaar. Online verlengen kan ook: in 2025 zijn landelijk 370.000 rijbewijzen digitaal aangevraagd bij de RDW. Het ophalen blijft aan de balie, dus de balie ziet ook die aanvragers terug, alleen korter.`;
   }
 
+  // ---------- geboorteaangiftes ----------
+  function gebCijfers(c) {
+    const eig = GEB.filter(o => o.codes.includes(c));
+    const heel = eig.filter(o => o.codes.length === 1), deel = eig.filter(o => o.codes.length > 1);
+    return GEB_JAREN.map((j, i) => {
+      const zh = heel.reduce((a, o) => a + o.per[i].z, 0);
+      const zd = deel.reduce((a, o) => a + o.per[i].z, 0);
+      const vsv = eig.length ? eig.reduce((a, o) => a + o.per[i].t, 0) / eig.reduce((a, o) => a + o.per[i].t + o.per[i].z, 0) : GEB_NL[i].t / (GEB_NL[i].t + GEB_NL[i].z);
+      const inw = S.geb && S.geb.has(j) ? S.geb.get(j) : null;
+      const thuis = inw != null ? inw * vsv : null;
+      return { j, zh, zd, aandThuis: vsv, inw, thuis, aang: thuis != null ? zh + thuis : null };
+    });
+  }
+  function renderGeb() {
+    const g = S.g, eig = GEB.filter(o => o.codes.includes(g.c));
+    const heel = eig.filter(o => o.codes.length === 1), deel = eig.filter(o => o.codes.length > 1);
+    const rs = gebCijfers(g.c), L = rs[rs.length - 1], i = rs.length - 1;
+    S.gebRs = rs;
+    const series = [];
+    if (heel.length) series.push({ naam: 'Geboren in het ziekenhuis in ' + g.n, kort: 'ziekenhuis', kleur: 'var(--st-geb)', w: j => rs.find(r => r.j === j).zh || null });
+    if (deel.length) series.push({ naam: deel.map(o => o.kort).join(', ') + ', alle locaties samen', kort: heel.length ? 'twee locaties' : 'ziekenhuis', kleur: 'var(--st-ovl)', streep: true, w: j => rs.find(r => r.j === j).zd || null });
+    if (heel.length && !deel.length) series.push({ naam: 'Geboorteaangiftes, schatting (ziekenhuis plus thuis)', kort: 'aangiftes', kleur: 'var(--st-bui)', w: j => { const r = rs.find(x => x.j === j); return r.aang != null ? rond(r.aang) : null; } });
+    series.push({ naam: 'Geboren inwoners (CBS)', kort: 'inwoners', kleur: 'var(--st-verw)', streep: true, w: j => { const r = rs.find(x => x.j === j); return r.inw; } });
+    lijnen($('#chGeb'), `Geboortes in ${g.n} en geboren inwoners`, 'kinderen per jaar, 2022–2025', GEB_JAREN, series,
+      { fv: v => fmtR(v), leeg: 'Geen cijfers.', noot: eig.length ? 'Ziekenhuis: poliklinisch en klinisch samen. Inwoners: naar woonplaats, ongeacht waar het kind geboren is.' : 'Geen verloskamers in deze gemeente: alleen de geboren inwoners.' });
+    const lijst = eig.map(o => `<li><span><b>${esc(o.kort)}</b>, ${esc(o.plaats)}</span><span class="v">${fmtR(o.per[i].z)}</span>${o.noot ? `<span class="n small muted">${esc(o.noot)}</span>` : ''}</li>`).join('');
+    $('#gebKaart').innerHTML = eig.length
+      ? `<h3 style="margin:0">Verloskamers in ${esc(g.n)}</h3><p class="small muted" style="margin:0">Kinderen geboren in het ziekenhuis, ${L.j}, per verloskundig samenwerkingsverband</p><ul class="zh small">${lijst}</ul>`
+      : `<h3 style="margin:0">Geen verloskamers in ${esc(g.n)}</h3><p class="small" style="margin:0">Geen van de ${GEB.length} verloskundige samenwerkingsverbanden in het databestand heeft verloskamers in ${esc(g.n)}. Inwoners die in het ziekenhuis bevallen, doen aangifte in de gemeente van dat ziekenhuis.</p>`;
+    const fT = t => t < 10 ? 'minder dan 10' : fmtR(t);
+    const thuisZin = L.thuis != null ? `${fT(L.thuis)} thuisbevallingen van inwoners (${fP(100 * L.aandThuis)} van de bevallingen in ${eig.length ? 'het eigen VSV' : 'Nederland'})` : 'de thuisbevallingen van inwoners';
+    const inwZin = L.inw != null ? `${g.n} zelf kreeg in ${L.j} ${fmt(L.inw)} kinderen (CBS, naar woonplaats).` : '';
+    let z;
+    if (heel.length && !deel.length) {
+      z = `In ${L.j} werden in ${esc(g.n)} naar schatting <b>${fmtR(L.zh)}</b> kinderen in het ziekenhuis geboren. ${inwZin} Met ${thuisZin} komen er zo rond de <b>${fmtR(L.aang)}</b> geboorteaangiftes per jaar` + (L.inw ? `: ${nf1.format(L.aang / L.inw).replace(/,0$/, '')} keer zoveel als er inwoners geboren worden.` : '.');
+    } else if (deel.length) {
+      const nm = deel.map(o => o.kort).join(' en ');
+      const ander = [...new Set(deel.flatMap(o => o.codes).filter(c => c !== g.c))].map(c => (GM.find(x => x.c === c) || { n: c }).n).join(' en ');
+      z = `${esc(nm)} heeft verloskamers in ${esc(g.n)} en in ${esc(ander)}: samen ${fmtR(L.zd)} kinderen in ${L.j}. Hoe die over de twee gemeenten verdeeld zijn, staat niet in de data.` + (heel.length ? ` Daarnaast werden ${fmtR(L.zh)} kinderen geboren in de andere ziekenhuizen in ${esc(g.n)}.` : '') + ` ${inwZin} ` +
+        (heel.length ? `Met ${thuisZin} komen er minstens <b>${fmtR(L.zh + (L.thuis || 0))}</b> geboorteaangiftes per jaar, plus het deel van ${esc(nm)} dat in ${esc(g.n)} geboren wordt.` : `Aan de eigen balie komen ${thuisZin}, plus het deel van ${esc(nm)} dat in ${esc(g.n)} geboren wordt.`);
+    } else {
+      z = `${inwZin} Alleen de thuisbevallingen komen aan de eigen balie: naar schatting <b>${L.thuis != null ? fT(L.thuis) : '–'}</b> per jaar (${fP(100 * L.aandThuis)} van de bevallingen in Nederland). De andere aangiftes gaan naar de gemeente van het ziekenhuis.`;
+    }
+    $('#gebZin').innerHTML = z;
+  }
+
   // ---------- CSV ----------
   function csvDownload(naam, kop, rows) {
     const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
@@ -685,11 +766,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   const bronTekst = () => `${PRODUCT}, Open Data Atelier, ${location.origin}${location.pathname}, versie ${VERSIE}`;
   $('#csvBtn').addEventListener('click', () => {
     if (!S) return;
-    const kop = ['jaar', 'gemeentecode', 'gemeente', 'nvvb_index_paspoort', 'nvvb_index_idkaart', 'inwoners_18plus_1jan', 'inwoners_0_17_1jan', 'rijbewijs_verlengingen_schatting', 'rijbewijs_eerste_schatting', 'eigen_paspoorten', 'eigen_idkaarten', 'eigen_met_groei', 'bron'];
+    const kop = ['jaar', 'gemeentecode', 'gemeente', 'nvvb_index_paspoort', 'nvvb_index_idkaart', 'inwoners_18plus_1jan', 'inwoners_0_17_1jan', 'rijbewijs_verlengingen_schatting', 'rijbewijs_eerste_schatting', 'eigen_paspoorten', 'eigen_idkaarten', 'eigen_met_groei', 'geboren_inwoners_cbs', 'kinderen_geboren_ziekenhuis_in_gemeente', 'kinderen_geboren_ziekenhuis_twee_gemeenten', 'thuisbevallingen_inwoners_schatting', 'geboorteaangiftes_schatting', 'bron'];
     const rk = new Map(((S.reken && S.reken.rs) || []).map(r => [r.j, r]));
+    const gb = new Map((S.gebRs || []).map(r => [r.j, r]));
     const rows = NVVB_JAREN.map(j => {
       const b = S.bev && S.bev.get(j), m = S.m && S.m.get(j), r = rk.get(j);
-      return [j, 'GM' + S.g.c, S.g.n, nvvb(NVVB_P, j), nvvb(NVVB_I, j), b ? b.g18 : '', b ? b.m18 : '', m ? rond(m.verl + m.cx) : '', m ? rond(m.eerste) : '', r && S.reken.p ? Math.round(r.a) : '', r && S.reken.i ? Math.round(r.b) : '', r && r.c != null ? Math.round(r.c) : '', bronTekst()];
+      return [j, 'GM' + S.g.c, S.g.n, nvvb(NVVB_P, j), nvvb(NVVB_I, j), b ? b.g18 : '', b ? b.m18 : '', m ? rond(m.verl + m.cx) : '', m ? rond(m.eerste) : '', r && S.reken.p ? Math.round(r.a) : '', r && S.reken.i ? Math.round(r.b) : '', r && r.c != null ? Math.round(r.c) : '', ...(gb.has(j) ? (x => [x.inw != null ? x.inw : '', x.zh, x.zd || '', x.thuis != null ? Math.round(x.thuis) : '', x.aang != null && !x.zd ? Math.round(x.aang) : ''])(gb.get(j)) : ['', '', '', '', '']), bronTekst()];
     });
     csvDownload(`open-data-atelier-balie-${slug(S.g.n)}.csv`, kop, rows);
   });
@@ -708,7 +790,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     renderHerken();
     const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
     const jr = S.bev ? `${Math.min(...S.bev.keys())}–${Math.max(...S.bev.keys())}` : '–';
-    $('#foot').innerHTML = `Bronnen: NVVB, Rekenmodel reisdocumentenpiek (2021). CBS (CC BY 4.0): rijbewijzen per provincie en leeftijd <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table">83488NED</a>, bevolking per leeftijd <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a> (${jr}), rijbewijsbezit per gemeente uit het nieuwsbericht van 13 februari 2026${S.af ? ` (afstemfactor ${S.af.k.toFixed(2).replace('.', ',')}; zonder afstemming ${fP(S.af.zonder)})` : ''}. Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: NVVB, Rekenmodel reisdocumentenpiek (2021). CBS (CC BY 4.0): rijbewijzen per provincie en leeftijd <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83488NED/table">83488NED</a>, bevolking per leeftijd <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/03759ned/table">03759ned</a> (${jr}), geboren inwoners <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37259ned/table">37259ned</a>, rijbewijsbezit per gemeente uit het nieuwsbericht van 13 februari 2026${S.af ? ` (afstemfactor ${S.af.k.toFixed(2).replace('.', ',')}; zonder afstemming ${fP(S.af.zonder)})` : ''}. Zorginstituut Nederland, Zorginzicht: Openbaar databestand Integrale geboortezorg 2022–2025 (bron Perined). Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
   $('#retryBtn').addEventListener('click', () => { if (S) kies(S.g); });
