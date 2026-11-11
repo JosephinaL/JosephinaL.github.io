@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>De energielabelregistratie · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Welk deel van de woningen en andere gebouwen een energielabel heeft, per bouwperiode en functie, en waar de labelregistratie niet op de BAG past, per Nederlandse gemeente.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --tegen: #d2462c; --onderweg: #c98a12; --opval: #5b6fa8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --tegen: #ef6a4f; --onderweg: #e2ab3f; --opval: #93a5dc; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --tegen: #ef6a4f; --onderweg: #e2ab3f; --opval: #93a5dc; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; font-size: .9rem; }
+.info p { margin: 0; max-width: 90ch; }
+.info p + p { margin-top: 6px; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.groep { display: grid; gap: 10px; padding-top: 8px; }
+.groepkop { display: grid; gap: 2px; border-left: 4px solid var(--kleur); padding-left: 10px; }
+.groepkop p { margin: 0; max-width: 80ch; }
+.kaarten { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.ctl { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--kleur); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.ctl .getal { font-family: var(--f-display); font-stretch: 85%; font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.ctl .getal.nul { color: var(--muted); }
+.ctl p { margin: 0; font-size: .9rem; }
+.ctl .ref { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ctl .acties { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.ctl .acties a.btn { text-decoration: none; }
+.lijst { grid-column: 1 / -1; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.lijst .kop { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.scroll { overflow: auto; max-height: 520px; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; white-space: nowrap; z-index: 1; }
+td.id { font-family: var(--f-mono); font-size: .8rem; white-space: nowrap; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+/* De energielabelregistratie */
+.ondertitel { font-size: .95rem; color: var(--muted); max-width: 60ch; }
+.kaarten { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.kaarten.breed { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.ctl { --kleur: var(--accent); }
+.groepkop { --kleur: var(--onderweg); }
+#sig .ctl { --kleur: var(--onderweg); }
+.blok { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 12px; min-width: 0; }
+.blok > p { margin: 0; max-width: 84ch; }
+.leesregel { font-size: .88rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.blok .scroll { max-height: none; }
+td.mini { width: 34%; min-width: 120px; vertical-align: middle; }
+.mini-b { position: relative; height: 12px; background: var(--sunk); border-radius: 3px; }
+.mini-b i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.mini-b u { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--fg); }
+tr.sub td { border-top: 2px solid var(--line); }
+tr.tot td { font-weight: 600; }
+td.r { white-space: nowrap; }
+.acties { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+@media (max-width: 640px) { td.mini { min-width: 64px; width: 22%; } th, td { padding: 6px 6px; } .nlkol { display: none; } }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="registraties.html">← Open Data Atelier · Registraties belicht</a>
+      <span class="eyebrow">Adressen en gebouwen · open data</span>
+      <h1 id="title">De energielabelregistratie</h1>
+      <span class="ondertitel">Hoeveel gebouwen een energielabel hebben, en wat je daarmee kunt zeggen</span>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Welk deel van de woningen en andere gebouwen in je gemeente heeft een energielabel? En waar past de registratie van de labels niet op de registratie van adressen en gebouwen (de BAG)? Kies een gemeente. Je ziet het per bouwperiode en per soort gebouw, naast heel Nederland.</p>
+    <p class="muted small">Geen label is geen fout. Een energielabel is alleen verplicht bij verkoop, verhuur en oplevering. Deze pagina laat zien hoeveel de cijfers over energielabels kunnen dragen.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <div class="info" id="melding" role="status" hidden><p id="meldingTekst"></p></div>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="info"><p><b>Lees dit eerst.</b> Geen label is geen fout: een energielabel is alleen verplicht bij verkoop, verhuur en oplevering. Een laag aandeel zegt dus niets over de gemeente of over eigenaren. Het zegt wel iets over cijfers die op de labels steunen: die gaan alleen over de gebouwen mét een label. Huurwoningen van corporaties en nieuwbouw hebben vaker een label dan oudere koopwoningen; de gebouwen met een label zijn daardoor geen doorsnee van alle gebouwen.</p>
+        <p class="small muted" id="stand"></p></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een andere telling.</b> De pagina telt woningen in panden met alleen woningen, en andere gebouwen per pand. Woningen boven winkels en andere gemengde panden staan apart. Wie alle woningen bij elkaar telt, komt op een ander getal.</li>
+          <li><b>Een andere stand.</b> De labels zijn opgehaald op <span class="opgehaald"></span>, de BAG is van <span class="standdatum"></span>. De bron van de labels loopt enkele maanden achter op het register van de Rijksdienst voor Ondernemend Nederland (RVO).</li>
+          <li><b>Het label staat per pand.</b> De open gegevens geven per pand het aantal labels, niet welk adres welk label heeft. Bij een pand met meer woningen is het aantal woningen met een label daarom het kleinste van het aantal labels en het aantal woningen.</li>
+          <li><b>Een fout in deze bewerking.</b> Klopt een pand in een lijst niet met de BAG-viewer, of een getal niet met wat je zelf telt, dan kan de fout hier zitten. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data door Josephine Linders, op eigen titel. Het is geen officiële publicatie van een gemeente, het Kadaster, RVO of het RIVM. Voor het label van een gebouw geldt het register EP-Online van RVO.</p>
+        <div class="meld">
+          <span>Fout gezien, of een uitkomst die je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <div class="kaarten" id="kern"></div>
+
+      <section class="blok" aria-labelledby="h-won">
+        <h2 id="h-won">Woningen met een energielabel</h2>
+        <p class="small muted">Woningen in panden met alleen woningen. De balk is je gemeente, het streepje is Nederland.</p>
+        <div class="scroll"><table id="wonTab"></table></div>
+        <p class="leesregel" id="wonLees"></p>
+      </section>
+
+      <section class="blok" aria-labelledby="h-util">
+        <h2 id="h-util">Andere gebouwen met een energielabel</h2>
+        <p class="small muted">Panden zonder woningen, met een kantoor, winkel, school, zorg, bijeenkomst, logies, sport of cel, van 50 m² of meer. Geteld per pand. Onder de 30 panden geen percentage.</p>
+        <div class="scroll"><table id="utilTab"></table></div>
+        <p class="leesregel" id="utilLees"></p>
+      </section>
+
+      <section class="blok" aria-labelledby="h-rest">
+        <h2 id="h-rest">Wat buiten deze twee tellingen valt</h2>
+        <div class="scroll"><table id="restTab"></table></div>
+      </section>
+
+      <section class="groep" aria-labelledby="h-sig">
+        <div class="groepkop"><h2 id="h-sig">Waar label en BAG niet op elkaar passen</h2><p class="small muted">Twee signalen waar een BAG-beheerder iets mee kan. Een signaal is een vraag, geen fout. De labels zelf beheert RVO; een gemeente kan die niet aanpassen.</p></div>
+        <div class="kaarten breed" id="sig"></div>
+      </section>
+
+      <section class="blok" aria-labelledby="h-22">
+        <h2 id="h-22">Sinds 1 juli 2022</h2>
+        <p class="small muted">De stand van nu naast de stand van 1 juli 2022: hoeveel labels kwamen erbij, en hoeveel gebouwen hadden toen een label en nu niet meer?</p>
+        <div class="scroll"><table id="tab22"></table></div>
+        <p class="leesregel">Een label is tien jaar geldig. Dat een label verdween, komt waarschijnlijk doordat het verliep zonder dat er een nieuw kwam. Zeker is dat niet: de open gegevens hebben geen datum per label.</p>
+      </section>
+
+      <section class="blok" aria-labelledby="h-uit">
+        <h2 id="h-uit">Panden met uiteenlopende labels</h2>
+        <p id="uitTekst"></p>
+        <p class="leesregel">Waarom dit telt: bij zo'n pand zegt één label weinig over het hele gebouw. In <a href="labelc.html" class="lnkC">Label C-kantoren</a> krijgt een pand daarom de status "Onzeker: labels uiteen"; de <a href="energielabelkalender.html" class="lnkK">Energielabelkalender</a> rekent met het label dat in het pand het meest voorkomt.</p>
+      </section>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Labels</b>: per pand het aantal energielabels, uit de laag die het RIVM afleidt van EP-Online (RVO). <b>Gebouwen</b>: de BAG van het Kadaster.</li>
+            <li><b>Wat telt mee</b>: verblijfsobjecten die in gebruik, in verbouwing of buiten gebruik zijn. Een verblijfsobject is een woning, kantoor, winkel of andere ruimte met een eigen adres.</li>
+            <li><b>Woningen met een label</b>: per pand het kleinste van het aantal labels en het aantal woningen.</li>
+            <li><b>Bouwperiode</b>: het bouwjaar van het pand in de BAG.</li>
+            <li><b>Functie</b>: panden met één functie staan onder die functie, panden met meer functies onder "meer functies". Vakantiewoningen tellen in de BAG als logies.</li>
+            <li><b>Rijksmonumenten tellen mee</b>: de vraag is hier of er een label is, niet of een eis geldt.</li>
+            <li><b>Meer labels dan verblijfsobjecten</b>: het aantal labels is groter dan alle verblijfsobjecten in het pand samen.</li>
+            <li><b>Verdwenen</b>: het pand had op 1 juli 2022 een label en nu niet, en staat nog met een verblijfsobject in de BAG.</li>
+            <li><b>Nederland</b>: alles samen, geen gemiddelde van gemeenten.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Geen ranglijst</b>: de pagina zet je gemeente naast Nederland, niet naast andere gemeenten. Een gemeente met veel corporatiewoningen of nieuwbouw heeft vanzelf meer labels.</li>
+            <li><b>Geen oordeel over gebouwen</b>: de pagina toont nergens welk label een gebouw heeft. Dat staat in EP-Online.</li>
+            <li><b>Geen datum per label</b>: wanneer een label is afgegeven of verloopt, staat niet in de open gegevens.</li>
+            <li><b>Woningen boven winkels</b> en andere gemengde panden: het label per pand zegt niet bij welk deel het hoort. Daarom staan ze apart.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><a href="energielabelkalender.html" class="lnkK">Energielabelkalender</a>: welke eisen eraan komen en hoeveel gebouwen daar nu niet aan voldoen.</li>
+            <li><a href="labelc.html" class="lnkC">Label C-kantoren</a>: de plicht voor kantoren, per pand.</li>
+            <li><a href="bagkwaliteit.html" class="lnkQ">Kwaliteit van de BAG</a>: andere signalen over dezelfde registratie.</li>
+            <li><a href="levensloop.html" class="lnkL">Levensloop van de bouw</a>: hoe de BAG de stappen tot ingebruikname bijhoudt.</li>
+          </ul>
+          <div class="acties"><button class="btn linkish" type="button" id="kernCsv">Download de cijfers (CSV)</button></div>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Energielabels: RIVM, Atlas Leefomgeving, laag <a href="https://data.rivm.nl/geo/nl/wfs?service=WFS&amp;request=GetCapabilities">rvo_energielabels</a> (afgeleid van EP-Online van RVO), en de stand van 1 juli 2022 uit dezelfde dienst. Gebouwen: BAG (Kadaster) via PDOK. De datum waarop de labels zijn opgehaald en de stand van de BAG staan na de gemeentekeuze op de pagina. Vooraf geteld per gemeente; maandelijks ververst, pas gepubliceerd na controle.</p>
+    <p><b>Licentie.</b> BAG: CC0. Energielabels RIVM: Public Domain Mark 1.0. Deze pagina is een afgeleid bestand, geen authentieke BAG en geen labelregister.</p>
+    <p><b>Methode.</b> Per pand het aantal labels naast de verblijfsobjecten in de BAG. Daaruit: het aandeel met een label per bouwperiode en per functie, twee signalen waar label en BAG niet op elkaar passen, en het verschil met 1 juli 2022. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen overzicht van labels per gebouw en geen oordeel over de energieprestatie. Geen toets of een gebouw een label had moeten hebben. Geen ranglijst en geen oordeel over een gemeente.</p>
+    <p><b>Bekende beperkingen.</b> De labellaag loopt enkele maanden achter op EP-Online. Ze geeft per pand een aantal labels, geen label per adres en geen datum. De laag van 2022 bevat een deel van de panden meer dan eens met dezelfde inhoud; die tellen één keer. Labels op een pand-ID zonder verblijfsobject in de BAG zijn niet aan een gemeente toe te wijzen en staan alleen in het landelijke totaal.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de inleiding het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>. Eigenaar van een gebouw op deze pagina? Zie <a href="colofon.html#gebouwen">Gegevens over gebouwen: een fout melden of bezwaar maken</a>.</p>
+    <p class="terug-onder"><a class="terug" href="registraties.html">← Terug naar Registraties belicht</a></p>
+  </section>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '0.1';
+  const PRODUCT = 'De energielabelregistratie';
+  const DATA = '/bag-werkbank/label/';
+  const MIN = 30, MAXRIJ = 300;
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const nf1 = new Intl.NumberFormat('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 });
+  const fmt = v => v == null ? '–' : nf.format(v);
+  const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '–';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const datum = s => new Date(s + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  const viewer = id => `<a href="https://bagviewer.kadaster.nl/?objectId=${id}" target="_blank" rel="noopener">${id}</a>`;
+
+  const PERIODEN = [['p0', 'vóór 1945'], ['p1', '1945–1974'], ['p2', '1975–1991'], ['p3', '1992–2005'], ['p4', '2006–2014'], ['p5', '2015–2020'], ['p6', '2021 en later'], ['px', 'bouwjaar onbekend']];
+  const FUNCTIES = [['kantoor', 'Kantoor'], ['winkel', 'Winkel'], ['onderwijs', 'Onderwijs'], ['gezondheidszorg', 'Gezondheidszorg'], ['bijeenkomst', 'Bijeenkomst'], ['logies', 'Logies'], ['sport', 'Sport'], ['cel', 'Cel'], ['meer', 'Meer functies']];
+  const SOORT = { w: 'woningen', u: 'utiliteit', g: 'woningen en utiliteit', x: 'industrie of overig', k: 'utiliteit, kleiner dan 50 m²' };
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- ophalen ----------
+  async function haalGz(url) {
+    const r = await fetch(url, { cache: 'no-cache' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf[0] === 0x1f && buf[1] === 0x8b) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('deze browser kan het bestand niet uitpakken');
+      const st = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return JSON.parse(await new Response(st).text());
+    }
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
+  function meld(t) { $('#meldingTekst').textContent = t || ''; $('#melding').hidden = !t; }
+
+  // ---------- gemeenten ----------
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  let GM = [], byName = new Map(), INDEX = null, S = null, bezig = 0;
+  const klaar = haalGz(DATA + 'index.json').then(ix => {
+    INDEX = ix;
+    GM = Object.entries(ix.gm).map(([c, v]) => ({ c, n: v.n })).sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+    byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+    Object.entries(ALIAS).forEach(([a, c]) => { const g = GM.find(x => x.c === c); if (g) byName.set(a.toLowerCase(), g); });
+    $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+  }).catch(e => { meld('De gegevens konden niet worden opgehaald (' + e.message + '). Probeer het later opnieuw.'); });
+
+  async function kies(g) {
+    const mijn = ++bezig;
+    $('#gmInput').value = g.n; meld('Gegevens van ' + g.n + ' ophalen…');
+    let d;
+    try { d = await haalGz(DATA + g.c + '.json.gz'); }
+    catch (e) { if (mijn === bezig) meld('De gegevens van ' + g.n + ' konden niet worden opgehaald (' + e.message + '). Probeer het later opnieuw.'); return; }
+    if (mijn !== bezig) return;
+    if (!d.dek || !INDEX.dek) { meld('Voor deze pagina zijn nog geen gegevens gepubliceerd.'); return; }
+    meld('');
+    S = { g, d, D: d.dek, T: d.dek.t, NL: INDEX.dek, open: null };
+    $('#intro').hidden = true; $('#result').hidden = false;
+    document.title = PRODUCT + ' ' + g.n + ' · Open Data Atelier';
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    try { if (location.hash !== '#gm=' + g.c) history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
+    document.querySelectorAll('.lnkK').forEach(a => { a.href = 'energielabelkalender.html#gm=' + g.c; });
+    document.querySelectorAll('.lnkC').forEach(a => { a.href = 'labelc.html#gm=' + g.c; });
+    document.querySelectorAll('.lnkQ').forEach(a => { a.href = 'bagkwaliteit.html#gm=' + g.c; });
+    document.querySelectorAll('.lnkL').forEach(a => { a.href = 'levensloop.html#gm=' + g.c; });
+    render(); vulMeld(); renderVoet();
+  }
+
+  const v = (t, k) => t[k] || 0;
+  // rij met balk: naam, aantal, met label, % gemeente (onder MIN geen %), balk met streepje Nederland, % Nederland
+  function rij(naam, n, lab, nln, nllab, cls) {
+    const ok = n >= MIN, p = n ? lab / n : 0, pn = nln ? nllab / nln : null;
+    return `<tr${cls ? ` class="${cls}"` : ''}><td>${naam}</td><td class="r">${fmt(n)}</td><td class="r">${fmt(lab)}</td><td class="r">${ok ? pct(lab, n) : '–'}</td>` +
+      `<td class="mini">${ok ? `<div class="mini-b" aria-hidden="true"><i style="width:${100 * p}%"></i>${pn == null ? '' : `<u style="left:${100 * pn}%"></u>`}</div>` : ''}</td><td class="r nlkol">${pn == null ? '–' : pct(nllab, nln)}</td></tr>`;
+  }
+  const kop = (a, b) => `<thead><tr><th>${a}</th><th class="r">${b}</th><th class="r">Met label</th><th class="r">%</th><th>&nbsp;</th><th class="r nlkol">Nederland</th></tr></thead>`;
+
+  function render() {
+    const g = S.g, T = S.T, NL = S.NL, d = S.d;
+    $('#leadBig').textContent = `${g.n}: ${pct(v(T, 'w_lab'), v(T, 'w'))} van de woningen heeft een energielabel`;
+    $('#leadSub').textContent = `andere gebouwen ${v(T, 'u') >= MIN ? pct(v(T, 'u_lab'), v(T, 'u')) : fmt(v(T, 'u_lab')) + ' van ' + fmt(v(T, 'u'))} · Nederland ${pct(NL.w_lab, NL.w)} en ${pct(NL.u_lab, NL.u)}`;
+    $('#stand').textContent = `Labels opgehaald op ${datum(d.opgehaald)}. Stand van de BAG: ${datum(d.peil_bag)}.`;
+    document.querySelectorAll('.opgehaald').forEach(e => { e.textContent = datum(d.opgehaald); });
+    document.querySelectorAll('.standdatum').forEach(e => { e.textContent = datum(d.peil_bag); });
+
+    // kerncijfers
+    const sign = v(T, 'meer') + v(T, 'nog');
+    const k = [
+      ['Woningen met een label', pct(v(T, 'w_lab'), v(T, 'w')), `${fmt(v(T, 'w_lab'))} van ${fmt(v(T, 'w'))} · Nederland ${pct(NL.w_lab, NL.w)}`],
+      ['Andere gebouwen met een label', v(T, 'u') >= MIN ? pct(v(T, 'u_lab'), v(T, 'u')) : '–', `${fmt(v(T, 'u_lab'))} van ${fmt(v(T, 'u'))} panden · Nederland ${pct(NL.u_lab, NL.u)}`],
+      ['Label verdwenen sinds 2022', v(T, 'w22') >= MIN ? pct(v(T, 'w_weg'), v(T, 'w22')) : '–', `${fmt(v(T, 'w_weg'))} van ${fmt(v(T, 'w22'))} woningen met een label in 2022 · Nederland ${pct(NL.w_weg, NL.w22)}`],
+      ['Label en BAG passen niet', fmt(sign), `${sign === 1 ? 'pand' : 'panden'} om na te lopen · zie de lijsten hieronder`]
+    ];
+    $('#kern').innerHTML = k.map(([t, w, r]) => `<div class="ctl"><h3>${esc(t)}</h3><span class="getal">${esc(w)}</span><span class="ref">${esc(r)}</span></div>`).join('');
+
+    // woningen
+    $('#wonTab').innerHTML = kop('Bouwperiode', 'Woningen') + '<tbody>' +
+      PERIODEN.filter(([key]) => v(T, 'w_' + key) || (key !== 'px' && v(NL, 'w_' + key))).map(([key, naam]) => rij(esc(naam), v(T, 'w_' + key), v(T, 'w_' + key + '_lab'), v(NL, 'w_' + key), v(NL, 'w_' + key + '_lab'))).join('') +
+      rij('Eén woning per pand', v(T, 'w1'), v(T, 'w1_lab'), NL.w1, NL.w1_lab, 'sub') +
+      rij('Meer woningen per pand', v(T, 'wm'), v(T, 'wm_lab'), NL.wm, NL.wm_lab) +
+      rij('Alle woningen in deze telling', v(T, 'w'), v(T, 'w_lab'), NL.w, NL.w_lab, 'sub tot') + '</tbody>';
+    const per = PERIODEN.filter(([key]) => key !== 'px' && v(T, 'w_' + key) >= MIN).map(([key, naam]) => [naam, v(T, 'w_' + key + '_lab') / v(T, 'w_' + key)]).sort((a, b) => a[1] - b[1]);
+    $('#wonLees').textContent = per.length < 2 ? '' :
+      `In ${g.n} hebben woningen uit de periode ${per[0][0]} het minst vaak een label (${Math.round(100 * per[0][1])}%), en woningen uit ${per[per.length - 1][0]} het vaakst (${Math.round(100 * per[per.length - 1][1])}%). Een cijfer over labels van woningen in deze gemeente steunt op ${pct(v(T, 'w_lab'), v(T, 'w'))} van de woningen.`;
+
+    // utiliteit
+    $('#utilTab').innerHTML = kop('Functie', 'Panden') + '<tbody>' +
+      FUNCTIES.filter(([key]) => v(T, 'u_' + key)).map(([key, naam]) => rij(esc(naam), v(T, 'u_' + key), v(T, 'u_' + key + '_lab'), v(NL, 'u_' + key), v(NL, 'u_' + key + '_lab'))).join('') +
+      rij('Alle panden in deze telling', v(T, 'u'), v(T, 'u_lab'), NL.u, NL.u_lab, 'sub tot') + '</tbody>';
+    const kant = v(T, 'u_kantoor');
+    $('#utilLees').textContent = kant >= MIN ? `Van de ${fmt(kant)} panden met alleen kantoren heeft ${pct(v(T, 'u_kantoor_lab'), kant)} een label. Voor kantoren geldt sinds 2023 een labelplicht; Label C-kantoren laat per pand zien of die plicht geldt. Een kantoor kleiner dan 100 m² valt er bijvoorbeeld buiten.` : '';
+
+    // rest
+    const kl = v(T, 'p_k'), kllab = v(T, 'lab_u') - v(T, 'u_lab'), nlkl = NL.p_k, nlkllab = NL.lab_u - NL.u_lab;
+    $('#restTab').innerHTML = kop('Soort pand', 'Panden') + '<tbody>' +
+      rij('Woningen en andere functies in één pand <span class="small muted">(bijvoorbeeld woningen boven winkels)</span>', v(T, 'g'), v(T, 'g_lab'), NL.g, NL.g_lab) +
+      rij('Alleen industrie of overig <span class="small muted">(bedrijfshallen, schuren, garages; meestal geen label nodig)</span>', v(T, 'x'), v(T, 'x_lab'), NL.x, NL.x_lab) +
+      rij('Utiliteit kleiner dan 50 m²', kl, kllab, nlkl, nlkllab) + '</tbody>';
+
+    // signalen
+    const SIG = [
+      { k: 'meer', titel: 'Meer labels dan verblijfsobjecten', n: v(T, 'meer'), nl: NL.meer,
+        uitleg: 'In het pand zijn meer energielabels geregistreerd dan er verblijfsobjecten in de BAG staan. Dat kan een splitsing zijn die in de BAG ontbreekt, een samenvoeging die bij de labels niet is verwerkt, of labels op adressen die niet meer bestaan.',
+        extra: v(T, 'meer') ? `samen ${fmt(v(T, 'meer_n'))} labels meer dan verblijfsobjecten · ` : '' },
+      { k: 'nog', titel: 'Label afgegeven, in de BAG nog niet in gebruik', n: v(T, 'nog'), nl: NL.nog,
+        uitleg: 'Het pand heeft een energielabel, maar alle verblijfsobjecten staan in de BAG nog op "gevormd": nieuw, nog niet in gebruik. Een label komt meestal bij de oplevering. Is het pand opgeleverd en de ingebruikname nog niet verwerkt?',
+        extra: '' }
+    ];
+    $('#sig').innerHTML = SIG.map(s => `<div class="ctl" id="ctl-${s.k}"><h3>${esc(s.titel)}</h3>
+      <span class="getal${s.n ? '' : ' nul'}">${fmt(s.n)}</span>
+      <p>${esc(s.uitleg)}</p>
+      <span class="ref">${s.extra}${v(T, 'lab') ? nf1.format(10000 * s.n / v(T, 'lab')) : '–'} per 10.000 panden met een label · Nederland ${nf1.format(10000 * s.nl / NL.lab)}</span>
+      ${s.n ? `<div class="acties"><button class="btn linkish" type="button" data-lijst="${s.k}" aria-expanded="false">Toon de lijst</button><button class="btn linkish" type="button" data-csv="${s.k}">Download CSV</button></div>` : ''}</div>`).join('');
+    document.querySelectorAll('[data-lijst]').forEach(b => b.addEventListener('click', () => toonLijst(b)));
+    document.querySelectorAll('[data-csv]').forEach(b => b.addEventListener('click', () => csvLijst(b.dataset.csv)));
+
+    // sinds 2022
+    const r22 = (naam, eenheid, a22, weg, bij, n22, nweg) => `<tr><td>${naam}</td><td class="r">${fmt(a22)}</td><td class="r">${fmt(weg)}</td><td class="r">${a22 >= MIN ? pct(weg, a22) : '–'}</td><td class="r nlkol">${pct(nweg, n22)}</td><td class="r">${fmt(bij)}</td></tr>`;
+    $('#tab22').innerHTML = `<thead><tr><th>&nbsp;</th><th class="r">Met label in 2022</th><th class="r">Nu zonder</th><th class="r">%</th><th class="r nlkol">Nederland</th><th class="r">Nieuw met label</th></tr></thead><tbody>` +
+      r22('Woningen', 'woningen', v(T, 'w22'), v(T, 'w_weg'), v(T, 'w_bij'), NL.w22, NL.w_weg) +
+      r22('Andere gebouwen <span class="small muted">(panden)</span>', 'panden', v(T, 'u22'), v(T, 'u_weg'), v(T, 'u_bij'), NL.u22, NL.u_weg) + '</tbody>';
+
+    // uiteen
+    const mu = v(T, 'multi'), ui = v(T, 'uiteen');
+    $('#uitTekst').textContent = mu ? `${g.n} telt ${fmt(mu)} panden met meer dan één label. Bij ${fmt(ui)} daarvan${mu >= MIN ? ` (${pct(ui, mu)})` : ''} liggen het hoogste en het laagste label drie klassen of meer uit elkaar, bijvoorbeeld A en D. In Nederland is dat ${pct(NL.uiteen, NL.multi)}.` : `${g.n} heeft geen panden met meer dan één label.`;
+  }
+
+  // ---------- lijsten ----------
+  const KOL = {
+    meer: { kop: ['Pand', 'Een adres in het pand', 'Woonplaats', 'Labels', 'Verblijfsobjecten', 'Soort pand'], rij: r => [viewer(r[0]), esc(r[1]), esc(r[3]), { r: fmt(r[4]) }, { r: fmt(r[5]) }, esc(SOORT[r[6]] || r[6])] },
+    nog: { kop: ['Pand', 'Een adres in het pand', 'Woonplaats', 'Labels', 'Verblijfsobjecten gevormd', 'Status pand'], rij: r => [viewer(r[0]), esc(r[1]), esc(r[3]), { r: fmt(r[4]) }, { r: fmt(r[5]) }, esc(r[6])] }
+  };
+  const TITEL = { meer: 'Meer labels dan verblijfsobjecten', nog: 'Label afgegeven, in de BAG nog niet in gebruik' };
+  function toonLijst(b) {
+    const k = b.dataset.lijst, kaarten = b.closest('.kaarten');
+    const open = kaarten.querySelector('.lijst'); const was = open && open.dataset.k === k;
+    if (open) open.remove();
+    kaarten.querySelectorAll('[data-lijst]').forEach(x => { x.setAttribute('aria-expanded', 'false'); x.textContent = 'Toon de lijst'; });
+    if (was) return;
+    const l = S.D[k] || [], c = KOL[k];
+    const rijen = l.slice(0, MAXRIJ).map(r => '<tr>' + c.rij(r).map((w, i) => (w && typeof w === 'object') ? `<td class="r">${w.r}</td>` : `<td${i === 0 ? ' class="id"' : ''}>${w}</td>`).join('') + '</tr>').join('');
+    const div = document.createElement('div');
+    div.className = 'lijst'; div.dataset.k = k;
+    div.innerHTML = `<div class="kop"><h3>${esc(TITEL[k])} · ${esc(S.g.n)}</h3><span class="small muted">${l.length > MAXRIJ ? `De eerste ${MAXRIJ} van ${fmt(l.length)}; de CSV bevat alles. ` : ''}Een klik op een nummer opent de BAG-viewer met de actuele stand. De lijst toont niet welk label een pand heeft.</span></div>
+      <div class="scroll"><table><thead><tr>${c.kop.map(h => `<th${/^(Labels|Verblijfsobjecten)/.test(h) ? ' class="r"' : ''}>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rijen}</tbody></table></div>`;
+    kaarten.appendChild(div);
+    b.setAttribute('aria-expanded', 'true'); b.textContent = 'Verberg de lijst';
+  }
+
+  // ---------- export ----------
+  const naam = () => S.g.n.replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  const bron = () => `Open Data Atelier, Josephine Linders, ${PRODUCT} ${VERSIE}, ${location.origin + location.pathname}#gm=${S.g.c}; energielabels RIVM/RVO opgehaald ${S.d.opgehaald}; BAG (Kadaster) stand ${S.d.peil_bag}`;
+  const cel = s => { s = String(s == null ? '' : s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  function download(tekst, bestand) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + tekst], { type: 'text/csv;charset=utf-8' }));
+    a.download = bestand; document.body.appendChild(a); a.click(); a.remove();
+  }
+  function csvLijst(k) {
+    const l = S.D[k] || [];
+    const r = [['pand_id', 'adres_in_pand', 'postcode', 'woonplaats', 'aantal_labels', k === 'meer' ? 'verblijfsobjecten' : 'verblijfsobjecten_gevormd', k === 'meer' ? 'soort_pand' : 'status_pand', 'bagviewer', 'bron']];
+    l.forEach(x => r.push(['="' + x[0] + '"', x[1], x[2], x[3], x[4], x[5], k === 'meer' ? (SOORT[x[6]] || x[6]) : x[6], 'https://bagviewer.kadaster.nl/?objectId=' + x[0], bron()]));
+    download(r.map((x, i) => x.map((w, j) => i && j === 0 ? w : cel(w)).join(';')).join('\n'), `open-data-atelier-energielabelregistratie-${k === 'meer' ? 'meer-labels' : 'nog-niet-in-gebruik'}-${naam()}.csv`);
+  }
+  $('#kernCsv').addEventListener('click', () => {
+    const T = S.T, NL = S.NL, r = [['onderdeel', 'groep', 'maat', 'gemeente', 'nederland', 'bron']];
+    const add = (o, gr, m, a, b) => r.push([o, gr, m, a, b, bron()]);
+    PERIODEN.forEach(([key, n]) => { add('woningen', n, 'aantal', v(T, 'w_' + key), v(NL, 'w_' + key)); add('woningen', n, 'met label', v(T, 'w_' + key + '_lab'), v(NL, 'w_' + key + '_lab')); });
+    [['w1', 'een woning per pand'], ['wm', 'meer woningen per pand'], ['w', 'alle woningen in de telling']].forEach(([key, n]) => { add('woningen', n, 'aantal', v(T, key), v(NL, key)); add('woningen', n, 'met label', v(T, key + '_lab'), v(NL, key + '_lab')); });
+    FUNCTIES.forEach(([key, n]) => { add('andere gebouwen', n, 'panden', v(T, 'u_' + key), v(NL, 'u_' + key)); add('andere gebouwen', n, 'met label', v(T, 'u_' + key + '_lab'), v(NL, 'u_' + key + '_lab')); });
+    add('andere gebouwen', 'alle panden in de telling', 'panden', v(T, 'u'), NL.u); add('andere gebouwen', 'alle panden in de telling', 'met label', v(T, 'u_lab'), NL.u_lab);
+    add('buiten de tellingen', 'woningen en andere functies', 'panden', v(T, 'g'), NL.g); add('buiten de tellingen', 'woningen en andere functies', 'met label', v(T, 'g_lab'), NL.g_lab);
+    add('buiten de tellingen', 'industrie of overig', 'panden', v(T, 'x'), NL.x); add('buiten de tellingen', 'industrie of overig', 'met label', v(T, 'x_lab'), NL.x_lab);
+    add('buiten de tellingen', 'utiliteit kleiner dan 50 m2', 'panden', v(T, 'p_k'), NL.p_k); add('buiten de tellingen', 'utiliteit kleiner dan 50 m2', 'met label', v(T, 'lab_u') - v(T, 'u_lab'), NL.lab_u - NL.u_lab);
+    add('signalen', 'meer labels dan verblijfsobjecten', 'panden', v(T, 'meer'), NL.meer); add('signalen', 'label afgegeven, in de BAG nog niet in gebruik', 'panden', v(T, 'nog'), NL.nog);
+    add('signalen', 'panden met een label', 'panden', v(T, 'lab'), NL.lab);
+    add('sinds 1 juli 2022', 'woningen', 'met label in 2022', v(T, 'w22'), NL.w22); add('sinds 1 juli 2022', 'woningen', 'nu zonder label', v(T, 'w_weg'), NL.w_weg); add('sinds 1 juli 2022', 'woningen', 'nieuw met label', v(T, 'w_bij'), NL.w_bij);
+    add('sinds 1 juli 2022', 'andere gebouwen', 'met label in 2022', v(T, 'u22'), NL.u22); add('sinds 1 juli 2022', 'andere gebouwen', 'nu zonder label', v(T, 'u_weg'), NL.u_weg); add('sinds 1 juli 2022', 'andere gebouwen', 'nieuw met label', v(T, 'u_bij'), NL.u_bij);
+    add('uiteenlopende labels', 'panden met meer dan een label', 'panden', v(T, 'multi'), NL.multi); add('uiteenlopende labels', 'drie klassen of meer verschil', 'panden', v(T, 'uiteen'), NL.uiteen);
+    download(r.map(x => x.map(cel).join(';')).join('\n'), `open-data-atelier-energielabelregistratie-${naam()}.csv`);
+  });
+
+  // ---------- melden ----------
+  function vulMeld() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk pand:\n\nWat de pagina laat zien:\n\nWat je verwacht, of wat de BAG-viewer laat zien:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+  }
+
+  // ---------- voet ----------
+  function renderVoet() {
+    $('#foot').innerHTML = `Bron: energielabels per pand, RIVM (Atlas Leefomgeving, laag rvo_energielabels, afgeleid van EP-Online van RVO), opgehaald op ${datum(S.d.opgehaald)}, en de stand van 1 juli 2022; Basisregistratie Adressen en Gebouwen (BAG), Kadaster, via PDOK (CC0), stand ${datum(S.d.peil_bag)}. Afgeleid bestand, geen authentieke BAG en geen labelregister.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  vulMeld();
+  klaar.then(() => {
+    let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+    const h = (location.hash.match(/gm=(\d{4})/) || [])[1] || bewaard;
+    const g0 = h && GM.find(g => g.c === h);
+    if (g0) kies(g0);
+  });
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>

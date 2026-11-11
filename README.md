@@ -64,6 +64,8 @@ Derde uitwerking: [Levensloop van de bouw](https://josephinelinders.nl/levensloo
 
 Vierde uitwerking, op een eigen plank Aanbestedingen: [Aanbestedingen in TenderNed](https://josephinelinders.nl/tenderned.html), wat een gemeente in TenderNed aankondigt, via welk platform (TenderNed zelf, Mercell, een inhuurplatform), en welke velden daardoor gevuld zijn of ontbreken: gunningscriterium, aantal inschrijvingen, gunningswaarde, mkb-kenmerk. Met de lijst van aankondigingen en een link naar TenderNed. Op basis van de open datasets van TenderNed (CC0, data-eigenaar PIANOo), 2024 tot 1 oktober 2026, per gemeente naast alle gemeenten samen. Het gaat over de registratie, niet over de inkoop; namen van winnaars en contactpersonen staan niet op de pagina.
 
+Vijfde uitwerking, op de plank Adressen en gebouwen: [De energielabelregistratie](https://josephinelinders.nl/labelregistratie.html), hoeveel gebouwen een energielabel hebben en wat je daarmee kunt zeggen: per gemeente het aandeel woningen en andere gebouwen met een label, per bouwperiode en functie, naast Nederland; wat er sinds 1 juli 2022 bij kwam en verdween; panden met uiteenlopende labels; en twee signalen met een lijst en een link naar de BAG-viewer (meer labels dan verblijfsobjecten; label afgegeven terwijl het pand in de BAG nog niet in gebruik is). Op basis van de labels per pand van het RIVM (afgeleid van EP-Online, RVO) en de BAG, vooraf geteld in `bag-werkbank/label/`. Het gaat over de registratie, niet over de energieprestatie: de pagina toont nergens welk label een gebouw heeft.
+
 ## Werkwijze
 
 Vier lagen:

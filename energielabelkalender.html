@@ -406,6 +406,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>Utiliteitspanden per pand</b>: op de kaart en in de tabel met adres, zodat een toezichthouder het gebouw herkent. Het CSV-bestand bevat het pand-ID uit de BAG en het label, geen adres. Eigenaar van een pand op deze pagina, en klopt het niet of wil je het niet? Zie <a href="colofon.html#gebouwen">Gegevens over gebouwen</a>.</li>
             <li><b>Recreatiewoningen</b> staan in de BAG met een logiesfunctie en tellen hier als utiliteitspand, net als hotels. In gemeenten met veel vakantieparken is het aantal utiliteitspanden daardoor hoog.</li>
             <li><b>Kantoren</b> staan hier als utiliteitspand tussen de andere. De label C-plicht van 2023 heeft eigen regels (oppervlakte, aandeel kantoor); die zijn uitgewerkt in <a href="labelc.html" class="naarLabelC">Label C-kantoren</a>. De aantallen daar en hier zijn daarom niet gelijk.</li>
+            <li><b>Geen label</b> is geen fout: een label is alleen verplicht bij verkoop, verhuur en oplevering. Welk deel van de gebouwen een label heeft, per bouwperiode en functie, staat in <a href="labelregistratie.html" class="naarLabelReg">De energielabelregistratie</a>.</li>
           </ul>
         </div>
       </div>
@@ -449,7 +450,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const PRODUCT = 'Energielabelkalender';
   // Per gemeente vooraf samengevat (BAG-maandstand, RIVM-labels nu en 1 juli 2022, rijksmonumenten, CBS-eigendom),
   // in de data van de BAG-werkbank. Recept: recepten/energielabelkalender/.
@@ -908,6 +909,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     try { if (location.hash !== h) { history.replaceState(null, '', h); dispatchEvent(new HashChangeEvent('hashchange')); } } catch (e) {}
     const wk = selCode ? (/^WK/.test(selCode) ? selCode : 'WK' + selCode.slice(2, 8)) : '';
     document.querySelectorAll('.naarLabelC').forEach(a => { a.href = 'labelc.html#gm=' + S.g.c; });
+    document.querySelectorAll('.naarLabelReg').forEach(a => { a.href = 'labelregistratie.html#gm=' + S.g.c; });
     const nw = document.getElementById('naarWarmte'); if (nw) nw.href = 'warmte.html#gm=' + S.g.c + (wk ? '&wijk=' + wk : '');
     const nv = document.getElementById('naarWoningen'); if (nv) nv.href = 'woningen.html#gm=' + S.g.c + (wk ? '&wijk=' + wk : '');
   }

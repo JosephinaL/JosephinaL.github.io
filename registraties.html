@@ -236,6 +236,17 @@ main > * { min-width: 0; }
             </div><span class="small muted">Nederland, panden met vergunning vanaf 2016, BAG-stand 8 oktober 2026</span></div>
             <div class="tile-links"><a class="btn-start" id="levenLink" href="levensloop.html">Open de levensloop <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-leven">Meer weten</button></div>
           </article>
+          <article class="tile">
+            <span class="meta">Per pand · elke gemeente</span>
+            <h4>De energielabelregistratie</h4>
+            <p>Hoeveel gebouwen een energielabel hebben, en wat je daarmee kunt zeggen: per bouwperiode en soort gebouw. Met de panden waar de labels niet op de BAG passen.</p>
+            <div class="vis"><div class="strook">
+              <div style="--k:var(--accent)"><b>62%</b>woningen met label</div>
+              <div style="--k:var(--opval)"><b>45%</b>andere gebouwen</div>
+              <div style="--k:var(--onderweg)"><b>15.538</b>panden om na te lopen</div>
+            </div><span class="small muted">Nederland, labels opgehaald 11 november 2026, BAG-stand 1 november 2026</span></div>
+            <div class="tile-links"><a class="btn-start" id="labelregLink" href="labelregistratie.html">Open de registratie <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-labelreg">Meer weten</button></div>
+          </article>
         </div>
       </div>
       <div class="shelf smal">
@@ -318,6 +329,24 @@ main > * { min-width: 0; }
           </ol>
         </div>
       </article>
+      <article class="product" id="info-labelreg" hidden>
+        <div class="product-body">
+          <span class="eyebrow">Meer weten · De energielabelregistratie</span>
+          <h3>Hoeveel de cijfers over energielabels kunnen dragen</h3>
+          <p>Een energielabel is alleen verplicht bij verkoop, verhuur en oplevering. Veel gebouwen hebben er dus geen, en de gebouwen mét een label zijn geen doorsnee van alle gebouwen. Deze pagina laat per gemeente zien welk deel een label heeft, per bouwperiode en per soort gebouw, hoeveel labels sinds 2022 verdwenen, en waar de labels niet op de BAG passen. Het gaat over de registratie, niet over de energieprestatie: nergens staat welk label een gebouw heeft.</p>
+          <div class="facts"><div><b>3,5 mln</b><span>panden met een label</span></div><div><b>2</b><span>signalen met een lijst</span></div><div><b>342</b><span>gemeenten</span></div></div>
+          <button class="sluit" type="button" data-sluit>Sluiten</button>
+        </div>
+        <div class="product-aside">
+          <h3>Zo werkt het</h3>
+          <ol>
+            <li>Het RIVM publiceert per pand het aantal energielabels, afgeleid van het register van RVO.</li>
+            <li>De pagina legt dat naast de woningen en andere gebouwen in de BAG.</li>
+            <li>Meer labels dan verblijfsobjecten, of een label op een pand dat in de BAG nog niet in gebruik is: die panden komen op een lijst met link naar de BAG-viewer.</li>
+            <li>De stand van 1 juli 2022 laat zien wat erbij kwam en wat verdween.</li>
+          </ol>
+        </div>
+      </article>
       <article class="product" id="info-tn" hidden>
         <div class="product-body">
           <span class="eyebrow">Meer weten · Aanbestedingen in TenderNed</span>
@@ -354,7 +383,7 @@ main > * { min-width: 0; }
     </div>
   </section>
   <footer>
-    <p>Josephine Linders · Registraties belicht · versie 0.4</p>
+    <p>Josephine Linders · Registraties belicht · versie 0.5</p>
   </footer>
 
   <section class="verantwoording" aria-labelledby="vh">
@@ -381,7 +410,7 @@ main > * { min-width: 0; }
     try { localStorage.setItem('jl-theme', r.dataset.theme); } catch (e) {}
   });
   let gm = null; try { gm = localStorage.getItem('jl-gemeente'); } catch (e) {}
-  if (gm && /^\d{4}$/.test(gm)) { document.getElementById('bagLink').href = 'bagkwaliteit.html#gm=' + gm; document.getElementById('werkbankLink').href = 'bagwerkbank.html#gm=' + gm; document.getElementById('levenLink').href = 'levensloop.html#gm=' + gm; document.getElementById('tnLink').href = 'tenderned.html#gm=' + gm; }
+  if (gm && /^\d{4}$/.test(gm)) { document.getElementById('bagLink').href = 'bagkwaliteit.html#gm=' + gm; document.getElementById('werkbankLink').href = 'bagwerkbank.html#gm=' + gm; document.getElementById('levenLink').href = 'levensloop.html#gm=' + gm; document.getElementById('labelregLink').href = 'labelregistratie.html#gm=' + gm; document.getElementById('tnLink').href = 'tenderned.html#gm=' + gm; }
   document.querySelectorAll('.more').forEach(b => b.addEventListener('click', () => {
     const p = document.getElementById(b.getAttribute('aria-controls'));
     const open = b.getAttribute('aria-expanded') === 'true';
