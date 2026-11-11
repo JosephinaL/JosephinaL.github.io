@@ -253,6 +253,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 .dossier .eigtab caption { text-align: left; font-size: .78rem; color: var(--muted); padding-bottom: 2px; }
 .seg { display: inline-flex; gap: 4px; }
 th.sep, td.sep { border-left: 1px solid var(--line); }
+@media (min-width: 1100px) { .top4.vijf { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -315,7 +316,7 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
         <ol>
           <li><b>Een ander begrip.</b> Energiearmoede volgt de definitie van het CBS: een laag inkomen (tot 120% van de armoedegrens, met weinig vermogen) samen met hoge energiekosten en/of een woning van lage energetische kwaliteit. Die kwaliteit is een schatting van het CBS per woning, niet het energielabel. Gemeenten die zelf tellen (bijvoorbeeld aanvragen voor een energietoeslag of het energiefonds) meten iets anders.</li>
           <li><b>Een andere peildatum of indeling.</b> De monitor gaat over 2024 en gebruikt de buurtindeling van 2025. De labels zijn van nu, met de buurtindeling van de BAG-werkbank (2026). Een buurt die sindsdien anders is ingedeeld, mist een van de twee.</li>
-          <li><b>Onderdrukt bij de bron.</b> Het CBS publiceert geen cijfer waar te weinig huishoudens zijn. In kleine buurten, en bij eigendom per buurt, staat daarom vaak een streepje. Huishoudens in woongroepen, met een onbekend inkomen of zonder bekend energieverbruik tellen niet mee (landelijk ca. 11%).</li>
+          <li><b>Onderdrukt bij de bron.</b> Het CBS publiceert geen cijfer waar te weinig huishoudens zijn. In kleine buurten, en bij eigendom per buurt, staat daarom vaak een streepje. Studentenhuishoudens, huishoudens die een woning delen en huishoudens met een onbekend inkomen of zonder bekend energieverbruik tellen niet mee (landelijk ca. 11%; in studentensteden veel meer).</li>
           <li><b>Een fout in deze bewerking.</b> De cijfers van de monitor staan in de tabellenset van het CBS (tabel 3); het label van één pand in de <a href="https://www.atlasleefomgeving.nl/kaarten" target="_blank" rel="noopener">Atlas Leefomgeving</a>. Wijkt de pagina daarvan af zonder dat de peildatum het verklaart, dan zit de fout hier. Meld het hieronder.</li>
         </ol>
         <p class="small muted status">Deze pagina is een bewerking van open data van het CBS, het RIVM en het Kadaster door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente en geen uitspraak over een huishouden, een buurt of een verhuurder.</p>
@@ -377,7 +378,7 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
           <ul class="small">
             <li><b>Energiearmoede</b>: het percentage huishoudens met een laag inkomen en hoge energiekosten en/of een woning van lage energetische kwaliteit (indicator "LIHE en/of LILEK" van het CBS). Overgenomen, niet zelf berekend.</li>
             <li><b>Aantallen huishoudens</b>: het CBS publiceert per gebied het aantal huishoudens (afgerond op honderdtallen) en percentages. Het aantal met een laag inkomen, in energiearmoede of in een woning van lage energetische kwaliteit is dat percentage maal de huishoudens, afgerond (vanaf 1.000 op honderdtallen, vanaf 100 op tientallen, daaronder op vijftallen). De delen tellen daardoor niet altijd precies op tot het totaal.</li>
-            <li><b>Huishoudens in de monitor en alle huishoudens</b>: de monitor beoordeelt alleen huishoudens waarvan het CBS inkomen en energieverbruik kent, zonder woongroepen. Voor de hele gemeente staat ernaast het totaal aantal particuliere huishoudens op 1 januari van het laatste jaar (CBS, 70072ned). Het verschil verschilt per gemeente; in grote steden is het groter.</li>
+            <li><b>Alle huishoudens en de huishoudens in de monitor</b>: de monitor gaat uit van de particuliere huishoudens bij het begin van het verslagjaar en laat buiten beschouwing: studentenhuishoudens (inkomen van ouders wordt niet geregistreerd), huishoudens die een woning delen, en huishoudens in een woning met onbekend energieverbruik (CBS, methodedocument). Voor de hele gemeente staat het totaal ernaast: particuliere huishoudens op 1 januari van het verslagjaar (CBS, 70072ned). In gemeenten met veel studenten valt een groot deel buiten de meting.</li>
             <li><b>Laag inkomen</b>: huishoudens met een inkomen tot 120% van de armoedegrens en weinig vermogen (CBS, armoedemethode van CBS, SCP en Nibud).</li>
             <li><b>Lage energetische kwaliteit</b>: huishoudens in een woning waarvan de verwachte energiekosten bij standaard gebruik boven een vaste grens liggen. Een schatting van het CBS per woning, ook voor woningen zonder label.</li>
             <li><b>Eigendom</b>: koop, huur van een corporatie, huur van een andere verhuurder, zoals het CBS de woning van het huishouden indeelt. Het aandeel per eigendom is het aandeel van de huishoudens.</li>
@@ -449,7 +450,7 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
     return gj;
   }
 
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const PRODUCT = 'Energiearmoede per buurt';
   // Monitor Energiearmoede (CBS, tabel 3), per gemeente vooraf samengevat: recepten/energiearmoede/bouw_ea.py.
   // Labels per buurt: dezelfde bestanden als de Energielabelkalender (recepten/energielabelkalender/).
@@ -626,7 +627,9 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
     renderAlles(); toonMelding();
     getJSON(CBS_HH(g.c)).then(r => {
       if (S.g !== g) return;
-      const v = (r.value || []).filter(x => x.TotaalParticuliereHuishoudens_51 != null).sort((a, b) => a.Perioden.localeCompare(b.Perioden)).pop();
+      // De monitor gaat uit van de huishoudens bij aanvang van het verslagjaar: dus 1 januari van dat jaar; anders het laatste jaar.
+      const rs = (r.value || []).filter(x => x.TotaalParticuliereHuishoudens_51 != null);
+      const v = rs.find(x => +x.Perioden.slice(0, 4) === S.ea.jaar) || rs.sort((a, b) => a.Perioden.localeCompare(b.Perioden)).pop();
       if (v) { S.cbs = { j: +v.Perioden.slice(0, 4), hh: v.TotaalParticuliereHuishoudens_51 }; renderKern(); renderVoet(); }
     }).catch(() => { if (S.g === g) { fouten.add('het totaal aantal huishoudens (CBS)'); toonMelding(); } });
     voortgang(1, 2, 'Buurtgrenzen ophalen bij PDOK…');
@@ -664,11 +667,16 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
     $('#leadSub').textContent = [fo ? `${isB ? 'buurt' : 'wijk'} in ${S.g.n}` : '', `verslagjaar ${S.ea.jaar}`].filter(Boolean).join(' · ');
     // de telling in woorden: eerst het totaal, dan de delen
     let z = '';
-    if (x.hh) {
-      const d1 = [x.n_ea != null ? `zitten er ca. <b>${fN(x.n_ea)}</b> in energiearmoede` : '', x.n_li != null ? `hebben er ca. <b>${fN(x.n_li)}</b> een laag inkomen` : ''].filter(Boolean);
-      z = `Van de <b>${fmt(x.hh)}</b> huishoudens in ${esc(waar)} die de monitor telt, ${d1.length ? d1.join(' en ') + '.' : 'publiceert het CBS hier geen verdere cijfers: te weinig huishoudens.'}`;
-      if (x.n_lek != null) z += ` Ca. <b>${fN(x.n_lek)}</b> wonen in een woning van lage energetische kwaliteit.`;
-      if (!fo && S.cbs) z += `<br><span class="muted">De gemeente telde op 1 januari ${S.cbs.j} <b>${fmt(S.cbs.hh)}</b> particuliere huishoudens (CBS); de monitor kan er ${fmt(x.hh)} beoordelen, ${fP0(pct(x.hh, S.cbs.hh))}. Niet meegeteld worden huishoudens in woongroepen en huishoudens met een onbekend inkomen of energieverbruik; ook het jaar verschilt (monitor ${S.ea.jaar}).</span>`;
+    const delen = [x.n_li != null ? `hebben er ca. <b>${fN(x.n_li)}</b> een laag inkomen` : '', x.n_ea != null ? `zitten er ca. <b>${fN(x.n_ea)}</b> in energiearmoede` : ''].filter(Boolean);
+    const lek = x.n_lek != null ? ` Ca. <b>${fN(x.n_lek)}</b> wonen in een woning van lage energetische kwaliteit, met of zonder laag inkomen.` : '';
+    if (x.hh && !fo && S.cbs) {
+      const buiten = S.cbs.hh - x.hh;
+      z = `${esc(waar)} telde op 1 januari ${S.cbs.j} <b>${fmt(S.cbs.hh)}</b> particuliere huishoudens (CBS). De monitor kan er <b>${fmt(x.hh)}</b> beoordelen (${fP0(pct(x.hh, S.cbs.hh))})${buiten > 0 ? `; de andere ca. ${fN(buiten)} vallen buiten de meting: studenten, huishoudens die een woning delen en huishoudens met een onbekend inkomen of energieverbruik` : ''}.`;
+      z += delen.length ? ` Van die ${fmt(x.hh)} ${delen.join(', en daarvan ')}.` : '';
+      z += lek;
+    } else if (x.hh) {
+      z = `Van de <b>${fmt(x.hh)}</b> huishoudens in ${esc(waar)} die de monitor beoordeelt, ${delen.length ? delen.join(', en daarvan ') + '.' : 'publiceert het CBS hier geen verdere cijfers: te weinig huishoudens.'}${lek}`;
+      if (fo) z += ` <span class="muted">Studenten, huishoudens die een woning delen en huishoudens met een onbekend inkomen of verbruik telt de monitor niet mee; het totaal voor de hele gemeente staat bij "Hele gemeente".</span>`;
     } else z = `Voor ${esc(waar)} publiceert het CBS geen aantal huishoudens.`;
     let zw = '';
     if (x.heeftLab && x.w_tot) zw = `In ${esc(waar)} staan <b>${fmt(x.w_tot)}</b> woningen in panden met alleen woningen. <b>${fmt(x.w_lab)}</b> daarvan hebben een geregistreerd energielabel, <b>${fmt(x.w_efg)}</b> label E, F of G; <b>${fmt(x.w_geen)}</b> hebben geen label.`;
@@ -676,11 +684,15 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
     $('#telZin').innerHTML = `<p>${z}</p><p>${zw}</p>`;
     $('#hKop').textContent = `Huishoudens · CBS, verslagjaar ${S.ea.jaar}`;
     $('#wKop').textContent = 'Woningen · BAG en energielabels, nu';
+    const metTot = !fo && S.cbs && x.hh;
+    const vdh = metTot ? 'van de beoordeelde huishoudens' : 'van de huishoudens';
+    $('#top4').classList.toggle('vijf', !!metTot);
     $('#top4').innerHTML =
-      unit('Huishoudens in de monitor', fmt(x.hh), `Het totaal waar de aantallen hiernaast een deel van zijn. Zonder woongroepen en huishoudens met een onbekend inkomen of verbruik.${!fo && S.cbs ? ` Alle particuliere huishoudens op 1 januari ${S.cbs.j}: ${fmt(S.cbs.hh)}.` : ''}`) +
-      unit('In energiearmoede', fCa(x.n_ea), x.n_ea != null ? `${fP1(x.ea)} van de huishoudens. Laag inkomen met hoge energiekosten of een woning van lage energetische kwaliteit (CBS).${ref('ea', fP1)}` : nietGep) +
-      unit('Met een laag inkomen', fCa(x.n_li), x.n_li != null ? `${fP1(x.li)} van de huishoudens. Tot 120% van de armoedegrens, met weinig vermogen.${ref('li', fP1)}` : nietGep) +
-      unit('In een woning van lage energetische kwaliteit', fCa(x.n_lek), x.n_lek != null ? `${fP1(x.lek)} van de huishoudens. Schatting van het CBS voor elke woning, ook zonder label.${ref('lek', fP1)}` : nietGep);
+      (metTot ? unit('Alle huishoudens', fmt(S.cbs.hh), `Particuliere huishoudens op 1 januari ${S.cbs.j} (CBS), het begin van het verslagjaar van de monitor.`) : '') +
+      unit(metTot ? 'Beoordeeld door de monitor' : 'Huishoudens in de monitor', fmt(x.hh), metTot ? `${fP0(pct(x.hh, S.cbs.hh))} van alle huishoudens. Niet: studenten, huishoudens die een woning delen, onbekend inkomen of verbruik.` : 'Het totaal waar de aantallen hiernaast een deel van zijn. Niet: studenten, huishoudens die een woning delen, onbekend inkomen of verbruik.') +
+      unit('Met een laag inkomen', fCa(x.n_li), x.n_li != null ? `${fP1(x.li)} ${vdh}. Tot 120% van de armoedegrens, met weinig vermogen.${ref('li', fP1)}` : nietGep) +
+      unit('In energiearmoede', fCa(x.n_ea), x.n_ea != null ? `${fP1(x.ea)} ${vdh}. Een deel van de lage inkomens: met hoge energiekosten of een woning van lage energetische kwaliteit (CBS).${ref('ea', fP1)}` : nietGep) +
+      unit('In een woning van lage energetische kwaliteit', fCa(x.n_lek), x.n_lek != null ? `${fP1(x.lek)} ${vdh}. Schatting van het CBS voor elke woning, ook zonder label.${ref('lek', fP1)}` : nietGep);
     $('#top4w').innerHTML = !x.heeftLab ? `<p class="small muted" style="margin:0">Geen labels voor dit gebied (andere buurtindeling).</p>` :
       unit('Woningen', fmt(x.w_tot), 'In panden met alleen woningen (BAG). Woningen en huishoudens zijn twee tellingen: ze tellen niet tegen elkaar op.') +
       unit('Met een energielabel', fmt(x.w_lab), `${fP0(x.plab)} van de woningen.${ref('plab', fP0)}`) +
