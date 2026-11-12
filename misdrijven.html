@@ -1,0 +1,994 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Misdrijven en overlast per wijk · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Misdrijven en overlast per wijk: wat de politie registreert, per wijk het laatste jaar tegenover de drie jaren ervoor. Voor elke Nederlandse gemeente, live uit de open data van de politie. Geen ranglijst, geen buurten, geen cijfer per inwoner.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
+<script src="vendor/leaflet-1.9.4/leaflet.js"></script>
+<style>
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --dn-1: #b4492a; --dn-2: #de8b5c; --dn-3: #f0c4a3; --ov: #aab6b8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .ax0 { stroke: var(--muted); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart .noot { font-size: .82rem; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.streep { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; width: 16px; vertical-align: 3px; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 320px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.eig { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; font-size: .88rem; }
+.eig .t { position: relative; height: 14px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.eig .t i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.eig .t b { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px solid var(--fg); }
+.eig .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.eig .rij { display: contents; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 540px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.kruimel { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.kruimel .sep { color: var(--muted); font-size: .72rem; }
+.kruimel button.eyebrow { background: none; border: 0; padding: 0; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.kruimel button.eyebrow:hover { color: var(--fg); }
+.focus { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 1px; }
+.focus .fl { font-size: .82rem; color: var(--muted); }
+.focus .fv { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.focus .fc { font-size: .82rem; color: var(--muted); }
+.focus .fv small { font-size: 1rem; font-weight: 700; margin-left: 6px; }
+.dossier dl .uit { color: var(--fg); font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier dl dt.uit { box-shadow: -6px 0 0 color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier .legend span.uit { color: var(--fg); font-weight: 700; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+tbody tr.voorl td { color: var(--muted); }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 140px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
+th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td .rijknop { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+/* Misdrijven en overlast per wijk */
+:root { --min2: #2f64a8; --min1: #9cbbe2; --gelijk: #c9d1d3; --meer1: #f0b77a; --meer2: #c4651a; --oud: #b9c6c8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --min2: #7aa7e6; --min1: #3a5a85; --gelijk: #3c494c; --meer1: #8a5a2b; --meer2: #e39a52; --oud: #3f5054; } }
+:root[data-theme="dark"] { --min2: #7aa7e6; --min1: #3a5a85; --gelijk: #3c494c; --meer1: #8a5a2b; --meer2: #e39a52; --oud: #3f5054; }
+.ondertitel { margin: 0; font-family: var(--f-display); font-stretch: 85%; font-size: 1.05rem; font-weight: 600; color: var(--muted); }
+.leesregel { margin: 0; padding: 6px 12px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--r) var(--r) 0; font-size: .88rem; max-width: 92ch; }
+.telzin { display: grid; gap: 4px; max-width: 92ch; font-size: 1rem; }
+.telzin p { margin: 0; }
+.telzin b { font-variant-numeric: tabular-nums; }
+.cols2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .cols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.soorttab { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.soorttab th, .soorttab td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--line); }
+.soorttab th:first-child, .soorttab td:first-child { text-align: left; }
+.soorttab tr.tot td { font-weight: 700; }
+.soorttab th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+.ver { display: inline-flex; align-items: center; gap: 6px; justify-content: flex-end; }
+.ver i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.dossier .soorttab { font-size: .82rem; }
+.chart .staaf { fill: var(--seq-4); }
+.chart .staaf.basis { fill: var(--oud); }
+.chart .staaf.laatst { fill: var(--accent); }
+td.min5, .min5 { color: var(--muted); font-style: italic; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Veiligheid · open data</span>
+      <h1 id="title">Misdrijven en overlast per wijk</h1>
+      <p class="ondertitel">Wat de politie registreert, per wijk tegenover de jaren ervoor</p>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>De politie publiceert elk jaar hoeveel misdrijven en hoeveel meldingen van overlast ze per wijk registreert. Deze pagina zet het laatste jaar van elke wijk naast het gemiddelde van de drie jaren ervoor: gaat het omhoog of omlaag in de eigen wijk.</p>
+    <p>De kaart kleurt op die verandering, niet op het aantal. Een wijk met een station, een winkelcentrum of een uitgaansgebied heeft veel registraties zonder dat de bewoners onveiliger wonen. Daarom staat er geen ranglijst en geen cijfer per inwoner.</p>
+    <p class="muted small">Open data van de politie, via de dataset voor derden van het CBS (47018NED en 47024NED), live opgevraagd. Kleine aantallen staan als "minder dan 5".</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="focusbar" id="focusbar" hidden>
+        <label class="eyebrow" for="focusSel">Kijk naar</label>
+        <select id="focusSel"></select>
+        <span class="muted small" id="focusTxt"></span>
+        <button class="btn linkish" type="button" id="focusTerug" hidden>← Hele gemeente</button>
+      </div>
+      <p class="small muted focusinfo" id="focusInfo" role="status" hidden></p>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="telzin" id="telZin"></div>
+      <div class="top4" id="top4"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Dit zijn misdrijven en meldingen van overlast die de politie heeft geregistreerd, niet alles wat er gebeurt. Wie geen aangifte doet, telt niet mee; meer toezicht of een actie levert meer registraties op. Meldingen die bij de gemeente zelf binnenkomen (overlast, boa's, handhaving) staan hier niet in.</li>
+          <li><b>Een andere peildatum of indeling.</b> De politie telt per kalenderjaar, naar de plaats van het feit, in de wijkindeling van het CBS die de politie gebruikt. Een wijk die anders is ingedeeld dan in eigen gemeentelijke stukken, telt anders.</li>
+          <li><b>Registratie bij de bron.</b> De politie past cijfers van eerdere jaren soms aan. Een misdrijf zonder bekende plaats telt wel voor de gemeente, niet voor een wijk; bij overlast tellen de wijken daardoor niet altijd precies op tot de gemeente.</li>
+          <li><b>Een fout in deze bewerking.</b> De cijfers staan ook in de open data van de politie op <a href="https://data.politie.nl" target="_blank" rel="noopener">data.politie.nl</a>. Wijkt de pagina daarvan af zonder dat de ondergrens of de indeling het verklaart, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van de politie door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente en geen uitspraak over een wijk of de mensen die er wonen.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <!-- door de jaren -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2 id="jarenKop">Door de jaren</h2></div>
+        <p class="small muted">Het aantal per jaar. Misdrijven vanaf 2018 (toen veranderde de manier van tellen), overlast vanaf 2022 (sinds maart 2021 tellen meldingen via 0900-8844 mee). De lichte balken zijn de drie jaren waarmee het laatste jaar wordt vergeleken.</p>
+      </div>
+      <div class="cols2" id="jaren"></div>
+
+      <!-- naar soort -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Naar soort</span><h2 id="soortKop">Naar soort</h2></div>
+        <p class="small muted">Zes soorten misdrijven en acht soorten overlast. De soorten tellen niet op tot het totaal: het totaal bevat ook andere soorten.</p>
+      </div>
+      <div class="cols2" id="soorten"></div>
+
+      <!-- per wijk -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Per wijk</span><h2 id="wijkKop">Per wijk</h2></div>
+      </div>
+      <p class="leesregel">De kaart kleurt op de verandering in de eigen wijk, niet op het aantal. Een wijk met een centrum, station of bedrijventerrein heeft veel registraties door bezoekers. De kaart is geen ranglijst.</p>
+      <div class="maten" id="maten" role="group" aria-label="Kies wat de kaart toont"></div>
+      <div class="split">
+        <div class="mapwrap">
+          <div id="map" role="region" aria-label="Kaart van de wijken"></div>
+          <div class="maplegend" id="mapLegend"></div>
+        </div>
+        <aside class="dossier" id="dossier" aria-live="polite"></aside>
+      </div>
+      <div class="panel">
+        <div class="tools">
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvBtn" type="button">CSV gemeente en wijken</button>
+        </div>
+        <div class="scroll" id="tblWrap" tabindex="0" role="region" aria-label="Tabel met cijfers per wijk; scroll met de pijltjestoetsen"></div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Laatste jaar</b>: het laatste volledige jaar in de open data van de politie.</li>
+            <li><b>Gemiddelde</b>: het gemiddelde van de drie jaren voor het laatste jaar, afgerond. Het staat er alleen als geen van die drie jaren onder de ondergrens valt.</li>
+            <li><b>Verandering</b>: het laatste jaar tegenover dat gemiddelde, in procenten. Pas vanaf een gemiddelde van 20 per jaar; daaronder springt een percentage door toeval.</li>
+            <li><b>Kaartkleuren</b>: vijf vaste klassen: 25% of meer minder, 10 tot 25% minder, ongeveer gelijk (minder dan 10% verschil), 10 tot 25% meer, 25% of meer. Blauw is minder, oranje is meer. Grijs: een gemiddelde onder 20, of een aantal onder de ondergrens.</li>
+            <li><b>Ondergrens</b>: een aantal onder de 5 staat als "minder dan 5", voor elke soort, elk jaar en elk niveau. Valt in een jaar precies één wijk onder de 5, dan staat ook de kleinste andere wijk zo; anders is het verborgen aantal terug te rekenen uit het totaal van de gemeente.</li>
+            <li><b>Soorten</b>: woninginbraak (1.1.1), diefstal van of uit motorvoertuigen (1.2.1 en 1.2.2), diefstal van fietsen, brommers en snorfietsen (1.2.3), geweld (1.4.2 tot en met 1.4.7: moord en doodslag, openlijk geweld, bedreiging, mishandeling, straatroof, overval; zonder zedenmisdrijven), vernieling en zaakbeschadiging (2.2.1), winkeldiefstal (2.5.2). Overlast: de acht soorten van de politie.</li>
+            <li><b>Wijken</b>: de wijken van de politie (indeling van het CBS), met de grenzen van de CBS-wijkkaart 2025.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Registratie is geen criminaliteit.</b> Het aantal volgt ook de aangiftebereidheid, de inzet van de politie en acties. Een daling kan betekenen dat er minder gebeurt, of dat er minder gemeld of geregistreerd wordt.</li>
+            <li><b>Bezoekers tellen mee.</b> Misdrijven tellen waar ze gebeuren. Winkeldiefstal zit waar de winkels zijn, fietsdiefstal bij het station. Daarom staat er geen cijfer per inwoner.</li>
+            <li><b>Kleine aantallen schommelen.</b> Bij een gemiddelde onder 20 is er geen verandering berekend. Ook daarboven kan één incident of één actie een jaar laten verspringen.</li>
+            <li><b>Overlast is een melding.</b> Het gaat om meldingen bij de politie, ook als er niets strafbaars gebeurde. Sinds maart 2021 tellen meldingen via 0900-8844 mee; daarom begint de reeks hier in 2022.</li>
+            <li><b>Geen ranglijst en geen buurten.</b> Er staat geen lijst van wijken met de meeste of de minste registraties, en geen cijfers per buurt: daar worden de aantallen zo klein dat ze naar personen kunnen wijzen.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><a href="indicatoren.html#domein=veiligheid" id="naarInd">Indicatoren belicht, Veiligheid</a>: welke cijfers er over veiligheid zijn, per 1.000 inwoners voor de hele gemeente, en welke alleen de gemeente zelf heeft.</li>
+            <li><a href="https://data.politie.nl" target="_blank" rel="noopener">data.politie.nl</a>: de open data van de politie, ook per maand en met alle soorten.</li>
+            <li><a href="https://www.politie.nl/mijn-buurt/misdaad-in-kaart" target="_blank" rel="noopener">Misdaad in kaart</a> (politie): recente woninginbraken en andere misdrijven in de buurt.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Geregistreerde misdrijven: politie, tabel 47018NED (wijken en buurten, per jaar). Geregistreerde overlast: politie, tabel 47024NED (wijken en buurten, per maand en jaar; hier de jaarcijfers). Beide in de catalogus Politie van de dataset voor derden van het CBS, live opgevraagd. Wijkgrenzen: CBS-wijkkaart 2025 via PDOK. De standen staan na de gemeentekeuze onder de cijfers.</p>
+    <p><b>Licentie.</b> Open data van de politie: CC BY 4.0. Wijkgrenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+    <p><b>Methode.</b> Per wijk en per gemeente het laatste jaar tegenover het gemiddelde van de drie jaren ervoor, voor het totaal en voor zes soorten misdrijven en acht soorten overlast. Aantallen onder de 5 worden niet getoond. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen maat voor de veiligheid van een wijk of het gevoel van bewoners; geen ranglijst tussen wijken of gemeenten; geen cijfers per buurt, per adres of per persoon; geen cijfer per inwoner.</p>
+    <p><b>Bekende beperkingen.</b> Registraties volgen aangiftebereidheid en inzet. Een misdrijf zonder bekende plaats telt alleen voor de gemeente. Bij de overlast zit een breuk in maart 2021. Het gemiddelde van drie jaren per wijk is in een enkel geval terug te rekenen uit de gemeente en de andere wijken; het gaat dan om een som over drie jaren, niet om één jaar.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de politie.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. Over wat deze pagina toont en waar je bezwaar maakt: <a href="colofon.html#registraties">Cijfers per wijk uit registraties</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=veiligheid" id="naarInd2">Welke cijfers er over veiligheid zijn. Indicatoren belicht, Veiligheid →</a></p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+<script>
+(function () {
+  'use strict';
+  // Wijkkaart (PDOK): tot en met 2025 de velden gemeentecode, wijkcode en filteren op gemeentecode; vanaf 2026 gm_code, wk_code.
+  // De politie publiceert in de indeling van 2025; deze pagina vraagt daarom de wijken van 2025.
+  const WB_VELD = { gm_code: 'gemeentecode', gm_naam: 'gemeentenaam', wk_code: 'wijkcode', wk_naam: 'wijknaam', bu_code: 'buurtcode', bu_naam: 'buurtnaam' };
+  function wbUrl(j, laag, c, limit) {
+    const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/${laag}/items?f=json&limit=${limit}`;
+    if (j < 2026) return u + `&gemeentecode=GM${c}`;
+    return laag === 'buurten' ? u + '&filter=' + encodeURIComponent(`bu_code LIKE 'BU${c}%'`) : u + `&gm_code=GM${c}`;
+  }
+  function wbOud(gj) {
+    ((gj && gj.features) || []).forEach(f => { const p = f.properties || {}; for (const k in WB_VELD) if (p[k] != null && p[WB_VELD[k]] == null) p[WB_VELD[k]] = p[k]; });
+    return gj;
+  }
+
+  const VERSIE = '1.0';
+  const PRODUCT = 'Misdrijven en overlast per wijk';
+  // Open data van de politie in de dataset voor derden van het CBS (catalogus Politie), live.
+  const API = 'https://dataderden.cbs.nl/ODataApi/OData/';
+  const T_M = '47018NED', T_O = '47024NED';
+  const WIJKJAAR = 2025;         // indeling van de politietabellen en van de wijkkaart
+  const START_M = 2018;          // misdrijven: breuk in 2018 (samenloop van delicten)
+  const START_O = 2022;          // overlast: breuk in maart 2021 (meldingen via 0900-8844)
+  const ONDER = 5;               // een aantal onder de 5 wordt "minder dan 5"
+  const MIN_GEM = 20;            // verandering pas vanaf een gemiddelde van 20 per jaar
+  const BASIS = 3;               // het laatste jaar tegenover het gemiddelde van de drie jaren ervoor
+
+  // Getoonde reeksen. Codes zoals de politie ze gebruikt; een groep is de som van de codes.
+  const REEKS = {
+    m: { t: 'Misdrijven', tabel: T_M, dim: 'SoortMisdrijf', veld: 'GeregistreerdeMisdrijven_1', start: START_M, soorten: [
+      { k: 'tot', t: 'Alle misdrijven', c: ['0.0.0'] },
+      { k: 'won', t: 'Woninginbraak', c: ['1.1.1'] },
+      { k: 'voe', t: 'Diefstal van of uit motorvoertuigen', c: ['1.2.1', '1.2.2'] },
+      { k: 'fie', t: 'Diefstal van fietsen, brommers, snorfietsen', c: ['1.2.3'] },
+      { k: 'gew', t: 'Geweld (zonder zedenmisdrijven)', c: ['1.4.2', '1.4.3', '1.4.4', '1.4.5', '1.4.6', '1.4.7'] },
+      { k: 'vrn', t: 'Vernieling en zaakbeschadiging', c: ['2.2.1'] },
+      { k: 'win', t: 'Winkeldiefstal', c: ['2.5.2'] }] },
+    o: { t: 'Overlast', tabel: T_O, dim: 'Overlast', veld: 'GeregistreerdeOverlast_1', start: START_O, soorten: [
+      { k: 'tot', t: 'Alle overlast', c: ['0.0.0'] },
+      { k: 'E33', t: 'Verward persoon', c: ['E33'] },
+      { k: 'E35', t: 'Jeugd', c: ['E35'] },
+      { k: 'E38', t: 'Alcohol of drugs', c: ['E38'] },
+      { k: 'E41', t: 'Zwervers', c: ['E41'] },
+      { k: 'F010', t: 'Openbare dronkenschap', c: ['F010'] },
+      { k: 'M061', t: 'Geluidshinder horeca', c: ['M061'] },
+      { k: 'M062', t: 'Geluidshinder evenement', c: ['M062'] },
+      { k: 'M22', t: 'Geluidshinder overig', c: ['M22'] }] }
+  };
+  const KLASSEN = [
+    { k: 'min2', t: '25% of meer minder' }, { k: 'min1', t: '10 tot 25% minder' }, { k: 'gelijk', t: 'ongeveer gelijk' },
+    { k: 'meer1', t: '10 tot 25% meer' }, { k: 'meer2', t: '25% of meer meer' }];
+  const klasse = v => v == null ? null : v <= -25 ? 'min2' : v <= -10 ? 'min1' : v < 10 ? 'gelijk' : v < 25 ? 'meer1' : 'meer2';
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const fmt = v => v == null ? '–' : nf.format(Math.round(v));
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const MIN5 = 'minder dan 5';
+  const fVer = v => v == null ? '–' : (v > 0 ? '+' : v < 0 ? '−' : '') + nf.format(Math.abs(Math.round(v))) + '%';
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+    if (S && S.r) { renderKaart(); renderJaren(); }
+  });
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  let tipBron = null;
+  function toonTip(e, html) {
+    tipBron = e.currentTarget || e.target; tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+  // Wordt het element onder de tooltip opnieuw getekend, dan komt er geen pointerleave. Daarom: verbergen zodra de muis niet meer boven het element staat dat de tooltip toonde, en bij scrollen.
+  document.addEventListener('pointermove', ev => { if (!tip.hidden && !(tipBron && tipBron.isConnected && tipBron.contains(ev.target))) verbergTip(); }, { passive: true });
+  addEventListener('scroll', verbergTip, { passive: true, capture: true });
+  function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, i.dataset.tip)); i.addEventListener('pointerleave', verbergTip); }); }
+
+  // ---------- ophalen ----------
+  async function getJSON(u, pogingen = 3) {
+    let last;
+    for (let i = 0; i < pogingen; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 30000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; if (i < pogingen - 1) await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  // De sleutels in de tabellen van de politie zijn met spaties aangevuld ("0.0.0 ", "E33   ", "GM1783    ").
+  const sleutel = (dim, c) => `${dim} eq '${c.padEnd(6)}'`;
+  // Jaren met een volledig jaarcijfer: bij misdrijven elk JJ; bij overlast alleen als december er ook is.
+  async function jaren(tabel, start) {
+    const p = await getJSON(API + tabel + '/Perioden?$select=Key');
+    const keys = new Set(p.value.map(x => x.Key.trim()));
+    const heeftMaand = [...keys].some(k => /MM/.test(k));
+    return [...keys].filter(k => /^\d{4}JJ00$/.test(k)).map(k => +k.slice(0, 4))
+      .filter(j => j >= start && (!heeftMaand || keys.has(j + 'MM12'))).sort((a, b) => a - b);
+  }
+  // Per vraag hoogstens vier jaren: de dataset voor derden weigert vragen van 10.000 rijen of meer (Amsterdam).
+  async function haalReeks(id, c, js) {
+    const R = REEKS[id];
+    const codes = [...new Set(R.soorten.flatMap(s => s.c))];
+    const geo = `(startswith(WijkenEnBuurten,'WK${c}') or startswith(WijkenEnBuurten,'GM${c}'))`;
+    const rijen = [];
+    for (let i = 0; i < js.length; i += 4) {
+      const per = js.slice(i, i + 4).map(j => `Perioden eq '${j}JJ00'`).join(' or ');
+      const f = `${geo} and (${per}) and (${codes.map(k => sleutel(R.dim, k)).join(' or ')})`;
+      const r = await getJSON(`${API}${R.tabel}/TypedDataSet?$filter=${encodeURIComponent(f)}&$select=WijkenEnBuurten,Perioden,${R.dim},${R.veld}`);
+      rijen.push(...r.value);
+    }
+    return rijen;
+  }
+
+  // ---------- staat ----------
+  let S = null;
+  let maat = 'm-tot';
+  let selCode = null;
+  let map = null, layer = null, gjLayer = null;
+  const fouten = new Set();
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Om ${t} kwam er geen antwoord voor: ${[...fouten].join(', ')}. ${S && S.r ? 'De rest van de pagina werkt wel.' : ''}`;
+    $('#melding').hidden = false;
+  }
+
+  // ---------- rekenen ----------
+  // Ruwe aantallen: per gebied, per reeks (m, o), per soort, per jaar.
+  function bouw(rijenM, rijenO, namen, js) {
+    const gebieden = new Map();
+    const gebied = code => { if (!gebieden.has(code)) gebieden.set(code, { code, isGm: code.startsWith('GM'), naam: namen.get(code) || code, m: {}, o: {}, h: { m: {}, o: {} } }); return gebieden.get(code); };
+    [['m', rijenM], ['o', rijenO]].forEach(([id, rijen]) => {
+      const R = REEKS[id];
+      const naarSoort = new Map(); R.soorten.forEach(s => s.c.forEach(c => { if (!naarSoort.has(c)) naarSoort.set(c, []); naarSoort.get(c).push(s.k); }));
+      rijen.forEach(r => {
+        const g = gebied(r.WijkenEnBuurten.trim()), j = +r.Perioden.slice(0, 4), v = r[R.veld];
+        (naarSoort.get(r[R.dim].trim()) || []).forEach(k => {
+          if (!g[id][k]) g[id][k] = {};
+          g[id][k][j] = v == null ? (g[id][k][j] == null ? null : g[id][k][j]) : (g[id][k][j] || 0) + v;
+        });
+      });
+    });
+    const lijst = [...gebieden.values()];
+    const gm = lijst.find(x => x.isGm) || null;
+    const wijken = lijst.filter(x => !x.isGm).sort((a, b) => a.code.localeCompare(b.code));
+    // Ondergrens, ook voor het niveau erboven: valt in een jaar precies één wijk onder de 5, dan ook de kleinste andere wijk.
+    ['m', 'o'].forEach(id => REEKS[id].soorten.forEach(s => js[id].forEach(j => {
+      const waarde = g => g[id][s.k] ? g[id][s.k][j] : null;
+      lijst.forEach(g => { const v = waarde(g); if (!g.h[id][s.k]) g.h[id][s.k] = {}; g.h[id][s.k][j] = v != null && v < ONDER; });
+      const verb = wijken.filter(w => w.h[id][s.k][j]);
+      if (verb.length === 1 && wijken.length > 1) {
+        const rest = wijken.filter(w => !w.h[id][s.k][j] && waarde(w) != null).sort((a, b) => waarde(a) - waarde(b));
+        if (rest.length) rest[0].h[id][s.k][j] = true;
+      }
+    })));
+    return { gm, wijken };
+  }
+  // Wat er van een gebied getoond mag worden: het laatste jaar, het gemiddelde van de drie jaren ervoor, de verandering.
+  function cel(g, id, k) {
+    const Y = S.laatst[id], basis = [];
+    for (let j = Y - BASIS; j < Y; j++) basis.push(j);
+    const raw = j => g && g[id][k] ? g[id][k][j] : null;
+    const verb = j => !!(g && g.h[id][k] && g.h[id][k][j]);
+    const v = raw(Y), vh = verb(Y);
+    const basisOk = basis.every(j => raw(j) != null && !verb(j)) && basis.every(j => S.js[id].includes(j));
+    const gem = basisOk ? basis.reduce((a, j) => a + raw(j), 0) / BASIS : null;
+    const ver = gem != null && gem >= MIN_GEM && v != null && !vh ? 100 * (v - gem) / gem : null;
+    return { v: vh ? null : v, verb: vh, leeg: v == null && !vh, gem, ver, kl: klasse(ver), basis, Y, reden: ver != null ? '' : vh ? 'aantal onder de ondergrens' : gem == null ? (basis.some(verb) ? 'een van de drie jaren onder de ondergrens' : 'geen drie jaren ervoor') : gem < MIN_GEM ? `gemiddeld minder dan ${MIN_GEM} per jaar` : '' };
+  }
+  const tAant = c => c.verb ? MIN5 : c.leeg ? '–' : fmt(c.v);
+  const tGem = c => c.gem == null ? '–' : fmt(c.gem);
+  function reeksJaren(g, id, k) { return S.js[id].map(j => ({ j, v: g && g[id][k] ? g[id][k][j] : null, verb: !!(g && g.h[id][k] && g.h[id][k][j]) })); }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = `${PRODUCT} ${g.n} · Open Data Atelier`;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    S = { g, r: null, geo: null };
+    selCode = null; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo('');
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij de politie…';
+    ['#telZin', '#top4', '#jaren', '#soorten', '#tblWrap', '#dossier', '#maten', '#mapLegend', '#rowCount'].forEach(s => { $(s).innerHTML = ''; });
+    voortgang(0, 3, 'Jaren en wijken ophalen…');
+    let js, namen;
+    try {
+      const [jm, jo, wn] = await Promise.all([jaren(T_M, START_M), jaren(T_O, START_O),
+        getJSON(`${API}${T_M}/WijkenEnBuurten?$filter=${encodeURIComponent(`Municipality eq 'GM${g.c}' and startswith(Key,'WK')`)}&$select=Key,Title`)]);
+      js = { m: jm, o: jo };
+      namen = new Map(wn.value.map(x => [x.Key.trim(), x.Title.trim()]));
+      namen.set('GM' + g.c, g.n);
+      if (S.g !== g) return;
+      voortgang(1, 3, 'Misdrijven en overlast ophalen…');
+      const [rm, ro] = await Promise.all([haalReeks('m', g.c, js.m), haalReeks('o', g.c, js.o)]);
+      if (S.g !== g) return;
+      S.js = js;
+      S.laatst = { m: js.m[js.m.length - 1], o: js.o[js.o.length - 1] };
+      S.r = bouw(rm, ro, namen, js);
+      if (!S.r.gm) throw new Error('geen cijfers voor de gemeente');
+    } catch (e) {
+      if (S.g !== g) return;
+      fouten.add('de open data van de politie (dataset voor derden van het CBS)'); toonMelding();
+      $('#leadSub').textContent = 'de cijfers konden niet worden opgehaald'; renderVoet(); voortgang(3, 3, ''); return;
+    }
+    const hk = location.hash.match(/[#&]wijk=(WK\w+)/);
+    const wens = hk && hk[1].slice(2, 6) === g.c ? hk[1] : null;
+    if (wens && S.r.wijken.some(x => x.code === wens)) selCode = wens;
+    else if (wens) toonInfo(`Deze wijk staat niet in de cijfers van de politie (wijkindeling ${WIJKJAAR}). De pagina toont daarom de hele gemeente.`);
+    const km = (location.hash.match(/kaart=([\w-]+)/) || [])[1];
+    if (km && MATEN.some(x => x.k === km)) maat = km;
+    renderAlles(); toonMelding();
+    voortgang(2, 3, 'Wijkgrenzen ophalen bij PDOK…');
+    try {
+      const wk = wbOud(await getJSON(wbUrl(WIJKJAAR, 'wijken', g.c, 500)));
+      if (S.g !== g) return;
+      S.geo = { type: 'FeatureCollection', features: wk.features.filter(f => f.properties.water !== 'JA') };
+    } catch (e) { if (S.g !== g) return; fouten.add('wijkgrenzen (PDOK)'); toonMelding(); }
+    S.bounded = false; renderKaart();
+    voortgang(3, 3, '');
+  }
+  function renderAlles() {
+    zetHash(); renderFocus(); renderKern(); renderJaren(); renderSoorten();
+    renderMaten(); renderKaart(); renderDossier(); renderTabel(); renderVoet();
+  }
+  const huidig = () => (S && S.r && selCode) ? S.r.wijken.find(x => x.code === selCode) || null : null;
+
+  // ---------- kerncijfers ----------
+  function renderKern() {
+    const fo = huidig(), x = fo || S.r.gm;
+    const waar = x.naam;
+    const cm = cel(x, 'm', 'tot'), co = cel(x, 'o', 'tot');
+    const rm = fo ? cel(S.r.gm, 'm', 'tot') : null, ro = fo ? cel(S.r.gm, 'o', 'tot') : null;
+    const Ym = S.laatst.m, Yo = S.laatst.o;
+    const per = c => `${c.basis[0]}–${c.basis[c.basis.length - 1]}`;
+    $('#leadBig').textContent = `${waar}: misdrijven en overlast`;
+    $('#leadSub').textContent = [fo ? `wijk in ${S.g.n}` : `${S.r.wijken.length} ${S.r.wijken.length === 1 ? 'wijk' : 'wijken'}`, `geregistreerd door de politie`].join(' · ');
+    const aant = (c, woord) => c.verb ? `minder dan 5 ${woord}` : `<b>${tAant(c)}</b> ${woord}`;
+    let z = Ym === Yo ? `In ${esc(waar)} registreerde de politie in ${Ym} ${aant(cm, 'misdrijven')} en ${aant(co, 'meldingen van overlast')}.`
+      : `In ${esc(waar)} registreerde de politie in ${Ym} ${aant(cm, 'misdrijven')}, en in ${Yo} ${aant(co, 'meldingen van overlast')}.`;
+    if (cm.gem != null || co.gem != null) z += ` In de drie jaren ervoor waren dat er gemiddeld ${cm.gem != null ? fmt(cm.gem) : '–'} en ${co.gem != null ? fmt(co.gem) : '–'} per jaar.`;
+    let z2 = '';
+    if (!fo && S.r.wijken.length > 1) {
+      const tel = { min: 0, gelijk: 0, meer: 0, geen: 0 };
+      S.r.wijken.forEach(w => { const k = cel(w, 'm', 'tot').kl; if (!k) tel.geen++; else if (k.startsWith('min')) tel.min++; else if (k === 'gelijk') tel.gelijk++; else tel.meer++; });
+      z2 = `Misdrijven per wijk tegenover de eigen drie jaren ervoor: in ${tel.min} ${tel.min === 1 ? 'wijk' : 'wijken'} 10% of meer minder, in ${tel.gelijk} ongeveer gelijk, in ${tel.meer} 10% of meer meer${tel.geen ? `; bij ${tel.geen} te weinig om te zeggen` : ''}. Een telling, geen lijst.`;
+    }
+    $('#telZin').innerHTML = `<p>${z}</p>${z2 ? `<p>${z2}</p>` : ''}`;
+    const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    const verTxt = (c, r) => c.ver != null ? `Tegenover gemiddeld ${fmt(c.gem)} in ${per(c)}.${r && r.ver != null ? ` ${esc(S.g.n)}: ${fVer(r.ver)}.` : ''}` : `Geen verandering berekend: ${c.reden}.${r && r.ver != null ? ` ${esc(S.g.n)}: ${fVer(r.ver)}.` : ''}`;
+    $('#top4').innerHTML =
+      unit(`Misdrijven ${Ym}`, tAant(cm), `Gemiddeld ${tGem(cm)} per jaar in ${per(cm)}.`) +
+      unit('Verandering misdrijven', fVer(cm.ver), verTxt(cm, rm)) +
+      unit(`Overlast ${Yo}`, tAant(co), `Meldingen bij de politie. Gemiddeld ${tGem(co)} per jaar in ${per(co)}.`) +
+      unit('Verandering overlast', fVer(co.ver), verTxt(co, ro));
+  }
+
+  // ---------- door de jaren ----------
+  function staafjes(g, id) {
+    const R = REEKS[id], rij = reeksJaren(g, id, 'tot'), c = cel(g, id, 'tot');
+    const W = 520, H = 210, l0 = 48, r0 = 10, t0 = 14, b0 = 30;
+    const mx = Math.max(10, ...rij.map(x => x.verb || x.v == null ? 0 : x.v));
+    const st = mx > 2000 ? 1000 : mx > 1000 ? 500 : mx > 200 ? 100 : mx > 100 ? 50 : mx > 40 ? 20 : 10;
+    const top = Math.ceil(mx / st) * st;
+    const n = rij.length, bw = (W - l0 - r0) / n;
+    const Y = v => H - b0 - (H - t0 - b0) * v / top;
+    let h = '';
+    for (let v = 0; v <= top; v += st) h += `<line x1="${l0}" x2="${W - r0}" y1="${Y(v)}" y2="${Y(v)}" class="${v ? 'ax' : 'ax0'}"/><text x="${l0 - 6}" y="${Y(v) + 4}" text-anchor="end" class="lbl">${nf.format(v)}</text>`;
+    rij.forEach((x, i) => {
+      const cx = l0 + bw * i + bw / 2, w = Math.max(6, bw * 0.62);
+      const cls = x.j === c.Y ? 'laatst' : c.basis.includes(x.j) ? 'basis' : '';
+      const tipTxt = `<b>${esc(g.naam)}, ${x.j}</b><br>${R.t}: ${x.verb ? MIN5 : x.v == null ? 'geen cijfer' : fmt(x.v)}`;
+      if (!x.verb && x.v != null) h += `<rect class="staaf ${cls}" x="${(cx - w / 2).toFixed(1)}" y="${Y(x.v).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H - b0 - Y(x.v)).toFixed(1)}" data-tip="${tipTxt}"/>`;
+      else h += `<text x="${cx}" y="${H - b0 - 6}" text-anchor="middle" class="lbl" data-tip="${tipTxt}">&lt;5</text>`;
+      h += `<text x="${cx}" y="${H - b0 + 16}" text-anchor="middle" class="lbl">${n > 6 && bw < 44 ? "'" + String(x.j).slice(2) : x.j}</text>`;
+    });
+    if (c.gem != null) h += `<line x1="${l0 + bw * rij.findIndex(x => x.j === c.basis[0])}" x2="${l0 + bw * (rij.findIndex(x => x.j === c.Y) + 1)}" y1="${Y(c.gem)}" y2="${Y(c.gem)}" stroke="${css('--fg')}" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+    const kop = `<div class="chart-kop"><b>${R.t === 'Misdrijven' ? 'Geregistreerde misdrijven' : 'Meldingen van overlast'}</b><span class="noemer">${esc(g.naam)} · ${rij[0] ? rij[0].j : ''}–${c.Y}</span></div>`;
+    const leg = `<div class="legend"><span><i class="sw" style="background:var(--accent)"></i>${c.Y}</span><span><i class="sw" style="background:var(--oud)"></i>${c.basis[0]}–${c.basis[c.basis.length - 1]}</span>${c.gem != null ? `<span><i class="sw streep"></i>gemiddelde ${fmt(c.gem)}</span>` : ''}</div>`;
+    const noot = `<p class="noot">${c.ver != null ? `${c.Y}: <b>${fVer(c.ver)}</b> tegenover het gemiddelde.` : `Geen verandering berekend: ${c.reden}.`}</p>`;
+    return `<div class="chart">${kop}<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${R.t} per jaar in ${esc(g.naam)}">${h}</svg>${leg}${noot}</div>`;
+  }
+  function renderJaren() {
+    const x = huidig() || S.r.gm;
+    $('#jarenKop').textContent = `Door de jaren · ${x.naam}`;
+    $('#jaren').innerHTML = staafjes(x, 'm') + staafjes(x, 'o');
+    bindTips($('#jaren'));
+  }
+
+  // ---------- naar soort ----------
+  const sw = kl => kl ? `<i style="background:var(--${kl})"></i>` : '';
+  function soortTabel(x, id, compact) {
+    const R = REEKS[id], Y = S.laatst[id];
+    const c0 = cel(x, id, 'tot');
+    const rijen = R.soorten.map(s => {
+      const c = cel(x, id, s.k);
+      return `<tr class="${s.k === 'tot' ? 'tot' : ''}"><td>${esc(s.t)}</td><td class="${c.verb ? 'min5' : ''}">${tAant(c)}</td><td>${tGem(c)}</td><td><span class="ver" ${c.ver == null && c.reden ? `title="${esc(c.reden)}"` : ''}>${fVer(c.ver)}${sw(c.kl)}</span></td></tr>`;
+    }).join('');
+    return `<table class="soorttab"><thead><tr><th>${compact ? R.t : 'Soort'}</th><th>${Y}</th><th>gem. ${c0.basis[0]}–${String(c0.basis[c0.basis.length - 1]).slice(2)}</th><th>verandering</th></tr></thead><tbody>${rijen}</tbody></table>`;
+  }
+  function renderSoorten() {
+    const x = huidig() || S.r.gm;
+    $('#soortKop').textContent = `Naar soort · ${x.naam}`;
+    $('#soorten').innerHTML = ['m', 'o'].map(id => `<div class="card"><h3>${REEKS[id].t}</h3>${soortTabel(x, id)}</div>`).join('');
+  }
+
+  // ---------- kaart ----------
+  const MATEN = [].concat(...['m', 'o'].map(id => REEKS[id].soorten.map(s => ({ k: id + '-' + s.k, id, s: s.k, t: s.k === 'tot' ? REEKS[id].t : s.t, r: REEKS[id].t }))));
+  const maatInfo = () => MATEN.find(x => x.k === maat) || MATEN[0];
+  function renderMaten() {
+    $('#maten').innerHTML = '<span class="muted small">Wijken gekleurd naar de verandering van</span>' +
+      ['m-tot', 'o-tot'].map(k => { const x = MATEN.find(y => y.k === k); return `<button class="btn linkish ${k === maat ? 'primary' : ''}" type="button" data-k="${k}" aria-pressed="${k === maat}">${x.r === 'Misdrijven' ? 'alle misdrijven' : 'alle overlast'}</button>`; }).join('') +
+      `<label class="muted small" for="soortSel">of een soort</label><select id="soortSel"><option value="">kies een soort</option>${['m', 'o'].map(id => `<optgroup label="${REEKS[id].t}">${REEKS[id].soorten.filter(s => s.k !== 'tot').map(s => `<option value="${id}-${s.k}" ${maat === id + '-' + s.k ? 'selected' : ''}>${esc(s.t)}</option>`).join('')}</optgroup>`).join('')}</select>`;
+    $('#maten').querySelectorAll('button').forEach(b => b.addEventListener('click', () => zetMaat(b.dataset.k)));
+    $('#soortSel').addEventListener('change', e => { if (e.target.value) zetMaat(e.target.value); });
+  }
+  function zetMaat(k) { maat = k; zetHash(); renderMaten(); renderKaart(); renderDossier(); }
+  function renderKaart() {
+    if (typeof L === 'undefined') { $('#map').innerHTML = '<p class="small muted" style="padding:12px">De kaartbibliotheek kon niet laden. De tabel werkt wel.</p>'; return; }
+    if (!map) {
+      map = L.map('map', { scrollWheelZoom: false });
+      L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT · Wijkgrenzen: CBS' }).addTo(map);
+      map.on('focus', () => map.scrollWheelZoom.enable());
+      map.setView([52.1, 5.3], 7);
+    }
+    if (layer) layer.remove(); layer = null; gjLayer = null;
+    if (!S || !S.r) return;
+    const m = maatInfo();
+    const byCode = new Map(S.r.wijken.map(o => [o.code, o]));
+    const lijn = css('--surface') || '#fff';
+    layer = L.featureGroup().addTo(map);
+    if (S.geo) {
+      gjLayer = L.geoJSON(S.geo, {
+        style: f => {
+          const o = byCode.get(f.properties.wijkcode), sel = o && o.code === selCode;
+          const c = o ? cel(o, m.id, m.s) : null;
+          const fill = c && c.kl ? css('--' + c.kl) : css('--sunk');
+          return { color: sel ? css('--fg') : lijn, weight: sel ? 3 : 1.2, fillColor: fill, fillOpacity: 0.85, dashArray: c && c.kl ? null : '3 3' };
+        },
+        onEachFeature: (f, ly) => {
+          const o = byCode.get(f.properties.wijkcode);
+          const c = o ? cel(o, m.id, m.s) : null;
+          ly.bindTooltip(`<b>${esc(o ? o.naam : f.properties.wijknaam)}</b><br>${esc(m.t)}${c ? `<br>${c.Y}: ${tAant(c)} · gemiddeld ${tGem(c)}<br>verandering: ${c.ver != null ? fVer(c.ver) : 'niet berekend (' + esc(c.reden) + ')'}` : '<br>geen cijfers van de politie'}`, { sticky: true });
+          ly.on('click', () => kiesWijk(f.properties.wijkcode, false));
+        }
+      }).addTo(layer);
+      if (selCode) gjLayer.getLayers().forEach(l => { if (l.feature.properties.wijkcode === selCode) l.bringToFront(); });
+    }
+    let h = `<span>${esc(m.t)}, ${S.laatst[m.id]} tegenover de drie jaren ervoor:</span>` + KLASSEN.map(k => `<span><i class="sw" style="background:var(--${k.k})"></i>${k.t}</span>`).join('');
+    h += `<span><i class="sw" style="background:${css('--sunk')};border-style:dashed"></i>te weinig om te zeggen</span>`;
+    if (!S.geo) h += '<span>De wijkgrenzen zijn nog niet geladen.</span>';
+    $('#mapLegend').innerHTML = h;
+    const passen = !S.bounded && S.geo; if (S.geo) S.bounded = true;
+    setTimeout(() => { map.invalidateSize(); if (passen) { if (selCode && gjLayer) zoomSel(); else if (gjLayer && gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); } }, 60);
+  }
+
+  // ---------- dossier ----------
+  function renderDossier() {
+    const o = huidig(), x = o || S.r.gm;
+    const sep = '<span class="sep" aria-hidden="true">›</span>';
+    let kr = o ? '<button type="button" class="eyebrow" data-naar="gm">Hele gemeente</button>' + sep + '<span class="eyebrow">Wijk</span>' : '<span class="eyebrow">Hele gemeente</span>';
+    const m = maatInfo(), c = cel(x, m.id, m.s);
+    const ref = o ? cel(S.r.gm, m.id, m.s) : null;
+    const focus = `<div class="focus"><span class="fl">${esc(m.t)}, ${c.Y}</span><span class="fv">${tAant(c)}</span><span class="fc">gemiddeld ${tGem(c)} in ${c.basis[0]}–${c.basis[c.basis.length - 1]} · verandering ${c.ver != null ? fVer(c.ver) : 'niet berekend'}</span>${ref && ref.ver != null ? `<span class="fc">${esc(S.g.n)}: ${fVer(ref.ver)}</span>` : ''}</div>`;
+    $('#dossier').innerHTML = `<nav class="kruimel" aria-label="Niveau">${kr}</nav><h2>${esc(x.naam)}</h2>${focus}${soortTabel(x, m.id, true)}
+      <p class="small muted" style="margin:0">${o ? 'Cijfers voor de hele wijk; per buurt staan ze hier niet, omdat de aantallen daar zo klein worden dat ze naar personen kunnen wijzen.' : 'Klik een wijk op de kaart of een rij in de tabel.'}</p>`;
+    $('#dossier').querySelectorAll('[data-naar]').forEach(k => k.addEventListener('click', () => kiesWijk(null, true)));
+  }
+  function zetLinks() {
+    if (!S) return;
+    ['naarInd', 'naarInd2'].forEach(id => { const a = document.getElementById(id); if (a) a.href = 'indicatoren.html#domein=veiligheid&gm=' + S.g.c; });
+  }
+  function zetHash() {
+    if (!S) return;
+    const h = '#gm=' + S.g.c + (selCode ? '&wijk=' + selCode : '') + (maat !== 'm-tot' ? '&kaart=' + maat : '');
+    try { if (location.hash !== h) { history.replaceState(null, '', h); dispatchEvent(new HashChangeEvent('hashchange')); } } catch (e) {}
+    zetLinks();
+  }
+  function toonInfo(t) { $('#focusInfo').textContent = t; $('#focusInfo').hidden = !t; }
+  function renderFocus() {
+    const bar = $('#focusbar');
+    if (!S || !S.r || S.r.wijken.length < 2) { bar.hidden = true; return; }
+    bar.hidden = false;
+    const fo = huidig();
+    $('#focusSel').innerHTML = `<option value="">Hele gemeente: ${esc(S.g.n)}</option>` + S.r.wijken.map(o => `<option value="${esc(o.code)}">${esc(o.naam)}</option>`).join('');
+    $('#focusSel').value = fo ? fo.code : '';
+    $('#focusTerug').hidden = !fo;
+    $('#focusTxt').textContent = fo ? 'De pagina volgt deze wijk: kerncijfers, jaren en soorten.' : 'Kies een wijk hier, op de kaart of in de tabel. Kerncijfers, jaren en soorten volgen dan die keuze.';
+  }
+  function zoomSel() {
+    if (!gjLayer) return;
+    const ls = gjLayer.getLayers().filter(l => l.feature.properties.wijkcode === selCode);
+    if (ls.length) map.fitBounds(L.featureGroup(ls).getBounds(), { maxZoom: 15, padding: [24, 24] });
+  }
+  function kiesWijk(code, vanTabel) {
+    if (code && !S.r.wijken.some(w => w.code === code)) code = null;
+    selCode = code || null;
+    toonInfo(''); zetHash();
+    renderFocus(); renderKern(); renderJaren(); renderSoorten(); renderDossier();
+    if (gjLayer) {
+      gjLayer.setStyle(gjLayer.options.style);
+      gjLayer.getLayers().forEach(l => { if (selCode && l.feature.properties.wijkcode === selCode) l.bringToFront(); });
+      if (vanTabel) { if (code) zoomSel(); else if (gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); }
+    }
+    document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', !!code && tr.dataset.code === code));
+  }
+  $('#focusSel').addEventListener('change', e => kiesWijk(e.target.value || null, true));
+  $('#focusTerug').addEventListener('click', () => kiesWijk(null, true));
+
+  // ---------- tabel (in volgorde van wijkcode, niet te sorteren) ----------
+  function renderTabel() {
+    if (!S || !S.r) { $('#tblWrap').innerHTML = ''; $('#rowCount').textContent = ''; return; }
+    const Ym = S.laatst.m, Yo = S.laatst.o;
+    const td = (c, extra) => `<td class="r${c.verb ? ' min5' : ''}${extra || ''}">${tAant(c)}</td><td class="r">${tGem(c)}</td><td class="r"><span class="ver">${fVer(c.ver)}${sw(c.kl)}</span></td>`;
+    const rs = [S.r.gm].concat(S.r.wijken);
+    $('#tblWrap').innerHTML = `<table><thead><tr><th>Naam</th><th class="r">Misdrijven ${Ym}</th><th class="r">gemiddeld</th><th class="r">verandering</th><th class="r sep">Overlast ${Yo}</th><th class="r">gemiddeld</th><th class="r">verandering</th></tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selCode ? 'sel' : ''}" data-code="${esc(r.code)}"><td>${r.isGm ? esc(r.naam) : `<button type="button" class="rijknop">${esc(r.naam)}</button>`}</td>${td(cel(r, 'm', 'tot'))}${td(cel(r, 'o', 'tot'), ' sep')}</tr>`).join('')}</tbody></table>`;
+    $('#rowCount').textContent = `${S.r.wijken.length} ${S.r.wijken.length === 1 ? 'wijk' : 'wijken'}, in volgorde van wijkcode · gemiddeld = de drie jaren voor het laatste jaar · – = niet berekend`;
+    $('#tblWrap').querySelectorAll('tbody tr.klik').forEach(tr => tr.addEventListener('click', () => kiesWijk(tr.dataset.code, true)));
+  }
+
+  // ---------- CSV (gemeente en wijken, geen buurten) ----------
+  function csvDownload(naam, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const slug = () => S.g.n.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S || !S.r) return;
+    const bron = `${PRODUCT}, Open Data Atelier, ${location.href}, versie ${VERSIE}; politie, open data ${T_M} en ${T_O} via dataderden.cbs.nl (CC BY 4.0), opgehaald ${new Date().toLocaleDateString('nl-NL')}`;
+    const kol = [], waarde = [];
+    ['m', 'o'].forEach(id => REEKS[id].soorten.forEach(s => {
+      const n = (id === 'm' ? 'misdrijven_' : 'overlast_') + s.t.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+      kol.push(`${n}_${S.laatst[id]}`, `${n}_gemiddeld_${S.laatst[id] - BASIS}_${S.laatst[id] - 1}`, `${n}_verandering_pct`);
+      waarde.push(g => { const c = cel(g, id, s.k); return [c.verb ? MIN5 : c.v, c.gem == null ? '' : Math.round(c.gem * 10) / 10, c.ver == null ? '' : Math.round(c.ver)]; });
+    }));
+    const kop = ['gemeentecode', 'gemeente', 'niveau', 'code', 'naam'].concat(kol, ['bron']);
+    const rij = g => ['GM' + S.g.c, S.g.n, g.isGm ? 'gemeente' : 'wijk', g.code, g.naam].concat(...waarde.map(f => f(g)), [bron]);
+    csvDownload(`open-data-atelier-misdrijven-${slug()}.csv`, kop, [rij(S.r.gm)].concat(S.r.wijken.map(rij)));
+  });
+
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.href;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  // ---------- voet ----------
+  function renderVoet() {
+    renderHerken();
+    const nu = new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    $('#foot').innerHTML = S && S.r ? `Bronnen: politie, geregistreerde misdrijven per wijk en buurt (<a href="https://dataderden.cbs.nl/ODataApi/OData/${T_M}">${T_M}</a>, ${S.js.m[0]}–${S.laatst.m}) en geregistreerde overlast per wijk en buurt (<a href="https://dataderden.cbs.nl/ODataApi/OData/${T_O}">${T_O}</a>, jaarcijfers ${S.js.o[0]}–${S.laatst.o}), via de dataset voor derden van het CBS, opgevraagd ${nu}. Wijkgrenzen ${WIJKJAAR}: CBS via PDOK. Achtergrondkaart: PDOK BRT. Aantallen onder de ${ONDER} staan als "minder dan ${ONDER}".<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
+      : `Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', () => kies(S.g));
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+<script>
+/* Toegankelijkheid: tabel bedienbaar met toetsenbord, kaartvlakken geen tabstops (de tabel is de toetsenbordroute). */
+(function () {
+  var RIJ = 'tbody tr.klik';
+  var w = document.getElementById('tblWrap'), m = document.getElementById('map');
+  var laatst = null;
+  function verrijk() {
+    w.querySelectorAll('th').forEach(function (th) {
+      var s = th.getAttribute('style') || '';
+      if (th.querySelector('.kolomknop') || !(th.dataset.k || th.dataset.sort) || /cursor:\s*default/.test(s)) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'kolomknop';
+      while (th.firstChild) b.appendChild(th.firstChild);
+      th.appendChild(b);
+    });
+    w.querySelectorAll(RIJ).forEach(function (tr) {
+      if (tr.classList.contains('gm') || tr.querySelector('.rijknop')) return;
+      var td = Array.prototype.find.call(tr.cells, function (c) { return c.textContent.trim() && !c.querySelector('a,button,input,select'); });
+      if (!td) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'rijknop';
+      while (td.firstChild) b.appendChild(td.firstChild);
+      td.appendChild(b);
+    });
+    if (laatst && document.activeElement === document.body) {
+      if (laatst === 'rij') { var r = w.querySelector('.rijknop'); if (r) r.focus(); }
+      else { var d = w.querySelector(laatst); var k = d && d.querySelector('.kolomknop'); if (k) k.focus(); }
+    }
+    laatst = null;
+  }
+  if (w) {
+    w.addEventListener('focusin', function (e) {
+      var th = e.target.closest && e.target.closest('th');
+      laatst = th ? (th.dataset.k ? 'th[data-k="' + th.dataset.k + '"]' : 'th[data-sort="' + th.dataset.sort + '"]') : (e.target.classList.contains('rijknop') ? 'rij' : null);
+    });
+    new MutationObserver(verrijk).observe(w, { childList: true });
+    verrijk();
+  }
+  if (m) {
+    var uit = function () { m.querySelectorAll('path.leaflet-interactive').forEach(function (p) { if (p.getAttribute('tabindex') !== '-1') p.setAttribute('tabindex', '-1'); }); };
+    new MutationObserver(uit).observe(m, { childList: true, subtree: true, attributes: true, attributeFilter: ['tabindex'] });
+    uit();
+    if (m.getAttribute('aria-label')) m.setAttribute('aria-label', m.getAttribute('aria-label') + '; dezelfde gegevens staan in de tabel');
+  }
+})();
+</script>
+</body>
+</html>

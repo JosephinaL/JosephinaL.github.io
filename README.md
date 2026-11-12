@@ -25,6 +25,8 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | Woonlasten per gemeente | [woonlasten.html](https://josephinelinders.nl/woonlasten.html) | Wat vraagt de gemeente voor wonen aan OZB, riool en afval, en dempt de raad de WOZ-stijging? | CBS (heffingen per gemeente 83642NED, WOZ 85036NED, woningvoorraad 86286NED, kerncijfers wijken en buurten) |
 | Burgerzaken per gemeente | [balie.html](https://josephinelinders.nl/balie.html) | Wat komt er aan de balie aan: de reisdocumentenpiek, de rijbewijsverlengingen en de geboorteaangiftes per jaar? | NVVB (rekenmodel reisdocumentenpiek), CBS (rijbewijzen 83488NED, bevolking naar leeftijd 03759ned, rijbewijsbezit per gemeente, geboorten 37259ned), Zorginstituut (Openbaar databestand Integrale geboortezorg) |
 | Akkoordvolger per gemeente | [akkoordvolger.html](https://josephinelinders.nl/akkoordvolger.html) | Wat laat open data zien van de doelen in een coalitieakkoord: nulmeting, verandering sindsdien en wat er per jaar nodig is voor een zelf ingevuld doel? | CBS (woningvoorraad per maand 86098NED, heffingen 83642NED, WOZ 85036NED, eigendom 86286NED, consumentenprijsindex 86141NED, bevolking 37230ned, uitkeringen 80794ned, jeugdzorg 85099NED, zonnestroom 85005NED, kerncijfers wijken en buurten) |
+| **1 · Veiligheid** | | | |
+| Misdrijven en overlast per wijk | [misdrijven.html](https://josephinelinders.nl/misdrijven.html) | Wat registreert de politie per wijk aan misdrijven en overlast, en gaat het omhoog of omlaag tegenover de drie jaren ervoor? Geen ranglijst, geen buurten, geen cijfer per inwoner. | Politie (misdrijven per wijk 47018NED, overlast per wijk 47024NED, via de dataset voor derden van het CBS), PDOK |
 | **3 · Economie** | | | |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
 | **4 · Onderwijs** | | | |
@@ -119,6 +121,7 @@ Deze gebruiksregel geldt voor de pagina's zelf: opbouw, code, teksten en rekenwi
 - CBS (Statline, Kerncijfers wijken en buurten, Iv3): CC-BY 4.0; CBS Schuldenproblematiek in beeld (aanvullend statistisch onderzoek): overnemen met het CBS als bron
 - RIVM (energielabels, afgeleid uit EP-Online van RVO) en Rijksdienst voor het Cultureel Erfgoed
 - DUO: CC-BY; WI 2021-inburgeringsdata: door DUO vrij van auteursrechten verklaard, met DUO als bron vermeld
+- Politie (open data via data.politie.nl en de dataset voor derden van het CBS): CC BY 4.0
 - Gemeente Amsterdam (Gemeentelijk Vastgoed, alleen als voorbeeldlijst): openbaar
 
 ## Auteur
