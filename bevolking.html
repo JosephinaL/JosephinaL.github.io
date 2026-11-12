@@ -108,6 +108,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 #chOpbouw svg { max-width: 560px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
 .legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.lijn { width: 18px; height: 3px; border-radius: 0; vertical-align: 3px; }
 .legend .sw.leeg { background: transparent; border: 2px solid var(--muted); }
 
 #tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 300px; }
@@ -410,7 +411,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.1.2';
+  const VERSIE = '1.1.3';
   const PRODUCT = 'Bevolkingsontwikkeling per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const PDOK = 'https://api.pdok.nl/cbs/wijken-en-buurten-2025/ogc/v1/collections/';
@@ -781,7 +782,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     s += `<line class="hl" x1="0" x2="0" y1="${Tp}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>`;
     s += `<rect class="hit" x="${Lm}" y="0" width="${W - Lm - R}" height="${H}" fill="transparent"/></svg>`;
     el.innerHTML = `<div class="chart-kop"><h3>${esc(titel)}</h3></div><span class="noemer">${esc(noemer)}</span>${s}
-      <div class="legend">${series.map(se => `<span><i class="sw" style="background:${se.kleur}"></i>${esc(se.naam)}</span>`).join('')}${opt.band ? '<span><i class="sw" style="background:var(--sunk);border:1px solid var(--line)"></i>normale schommeling</span>' : ''}</div>${opt.noot ? `<p class="noot muted">${opt.noot}</p>` : ''}`;
+      <div class="legend">${series.map(se => `<span><i class="sw lijn" style="background:${se.streep ? `repeating-linear-gradient(90deg, ${se.kleur} 0 5px, transparent 5px 8px)` : se.kleur}"></i>${esc(se.naam)}</span>`).join('')}${opt.band ? '<span><i class="sw" style="background:var(--sunk);border:1px solid var(--line)"></i>normale schommeling</span>' : ''}</div>${opt.noot ? `<p class="noot muted">${opt.noot}</p>` : ''}`;
     const svg = el.querySelector('svg'), hl = svg.querySelector('.hl');
     const js = [...new Set(alle.map(p => p.j))].sort((a, b) => a - b);
     const zet = e => {
@@ -884,7 +885,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const genoeg = rs.filter(r => r.geb >= DREMPEL_GEB && r.kt != null);
     lijnen($('#chKind'), 'Kinderen per vrouw', 'gemiddeld kindertal, alle vrouwen van 15 tot 50 in dat jaar', jaren, [
       { naam: S.g.n, kort: 'Gemeente', kleur: 'var(--st-geb)', w: j => { const r = by.get(j); return r && r.geb >= DREMPEL_GEB ? r.kt : null; } },
-      { naam: 'Nederland', kleur: 'var(--st-verw)', streep: 1, w: j => { const r = nl.get(j); return r ? r.kt : null; } }
+      { naam: 'Nederland', kleur: 'var(--st-bin)', streep: 1, w: j => { const r = nl.get(j); return r ? r.kt : null; } }
     ], { fv: v => nf2.format(v), asf: v => nf1.format(v), vanNul: false,
       noot: genoeg.length < rs.length ? `Alleen jaren met minstens ${DREMPEL_GEB} geboorten; in ${rs.length - genoeg.length} ${rs.length - genoeg.length === 1 ? 'jaar' : 'jaren'} waren het er minder.` : '' });
     // leeftijd moeder: laatste jaar tegenover eerste jaar
