@@ -1,0 +1,921 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Akkoordvolger per gemeente · Open Data Atelier</title>
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Akkoordvolger per Nederlandse gemeente: wat open data laat zien van de doelen in een coalitieakkoord. Nulmeting op 1 januari 2026, de verandering sindsdien en een zelf ingevuld doel, live uit CBS-open data.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --grijs: #b9c4c5;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --grijs: #4a5b5e; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; font-size: .9rem; max-width: 100%; }
+.info p { margin: 0; max-width: 90ch; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+.jaren { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; align-content: start; min-width: 0; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .ax { stroke: var(--line); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .val { fill: var(--fg); font: 600 11px var(--f-mono); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart-kop .laatst { font-family: var(--f-mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .tick { display: inline-block; width: 0; height: 12px; border-left: 2px solid var(--fg); vertical-align: -1px; margin-right: 6px; }
+
+/* rijen met een balk en een streep voor Nederland */
+.rijen { display: grid; gap: 8px; }
+.rij { display: grid; grid-template-columns: minmax(120px, 13em) minmax(0, 1fr) 8.5em; gap: 4px 12px; align-items: center; font-size: .9rem; }
+.rij .naam { min-width: 0; }
+.rij .baan { position: relative; height: 16px; background: var(--sunk); border-radius: 3px; }
+.rij .baan i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--accent); border-radius: 3px; }
+.rij .baan b { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px solid var(--fg); }
+.rij .w { text-align: right; font-family: var(--f-mono); font-size: .82rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.rij .w .muted { font-family: var(--f-body); }
+@media (max-width: 520px) { .rij { grid-template-columns: minmax(0, 1fr) 7.5em; } .rij .baan { grid-column: 1 / -1; grid-row: 2; } }
+
+/* gestapelde balk gemeente tegen Nederland */
+.stapel { display: grid; grid-template-columns: 7em minmax(0, 1fr); gap: 6px 12px; align-items: center; font-size: .88rem; }
+.stapel .s { display: flex; height: 22px; border-radius: 3px; overflow: hidden; background: var(--sunk); }
+.stapel .s i { display: block; height: 100%; }
+.stapel .s i + i { border-left: 1px solid var(--surface); }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 0 14px 10px; }
+.scroll { overflow: auto; max-height: 520px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; white-space: nowrap; z-index: 1; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tr.grp td { font-weight: 600; background: var(--sunk); }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.hulp { font-size: .85rem; color: var(--muted); }
+
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+
+/* rekenvoorbeeld en legenda */
+.reken { display: grid; gap: 8px; }
+.reken label { font-size: .85rem; color: var(--muted); }
+.rekenrij { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.rekenrij input { width: min(180px, 60vw); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); font-family: var(--f-mono); }
+#reken th { position: static; }
+.legend .dash { display: inline-block; width: 18px; height: 0; border-top: 2px dashed var(--fg); vertical-align: 3px; margin-right: 6px; }
+
+/* Akkoordvolger */
+.meters { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .meters { grid-template-columns: repeat(2, minmax(0, 1fr)); } #kern.meters { grid-template-columns: minmax(0, 1fr); } }
+.meter { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+#kern .meter { grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { #kern .meter { grid-template-columns: minmax(0, 5fr) minmax(0, 4fr); column-gap: 24px; } #kern .meter > .m-kop, #kern .meter > .m-bron { grid-column: 1 / -1; } }
+.m-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.m-kop .laatst { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.m-feiten { margin: 0; display: grid; gap: 6px; font-size: .92rem; }
+.m-feiten div { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 2px 10px; }
+.m-feiten dt { color: var(--muted); }
+.m-feiten dd { margin: 0; font-variant-numeric: tabular-nums; }
+@media (max-width: 520px) { .m-feiten div { grid-template-columns: minmax(0, 1fr); } }
+.m-doel { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; padding: 10px 12px; background: var(--sunk); border-radius: var(--r); }
+.m-doel .field input, .m-doel .field select { padding: 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.m-doel input.w { width: 8.5em; font-family: var(--f-mono); }
+.m-doel input.j { width: 5.5em; font-family: var(--f-mono); }
+.m-uit { font-size: .92rem; display: grid; gap: 4px; }
+.m-uit p { margin: 0; }
+.m-uit .twee { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 2px 0; }
+.m-uit .twee > div { border: 1px solid var(--line); border-radius: var(--r); padding: 8px 10px; display: grid; gap: 2px; }
+.m-uit .twee b { font-family: var(--f-display); font-stretch: 85%; font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.m-bron { font-size: .8rem; color: var(--muted); margin: 0; overflow-wrap: anywhere; }
+.m-graf svg { width: 100%; height: auto; display: block; overflow: visible; }
+.m-graf .ax { stroke: var(--line); }
+.m-graf .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.m-graf .start { stroke: var(--muted); stroke-dasharray: 2 3; }
+.kies { border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); padding: 10px 14px; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.kies label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.deel { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; }
+.nietvolgt { max-width: 92ch; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 14px 18px; display: grid; gap: 8px; }
+.nietvolgt p { margin: 0; }
+.nietvolgt ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+#lasten .scroll { max-height: none; }
+#lasten td.r, #lasten th.r { white-space: nowrap; }
+#lasten th { position: static; }
+#lasten td:first-child { white-space: nowrap; }
+#lasten p { margin: 0; max-width: 90ch; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Bestuur · open data</span>
+      <h1 id="title">Akkoordvolger per gemeente</h1>
+      <span class="byline"><a href="./">Josephine Linders</a> · wat open data laat zien van de doelen in een akkoord</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Na de verkiezingen van maart 2026 heeft elke gemeente een nieuw coalitieakkoord, raadsakkoord of collegeprogramma. Er staan doelen in: zoveel woningen erbij, lasten niet harder omhoog dan de inflatie, minder mensen in de bijstand. Deze pagina laat per gemeente zien wat open data van zulke doelen kan volgen: waar de gemeente bij de start stond, wat er sindsdien veranderd is, en wanneer een bron het doeljaar laat zien.</p>
+    <p>De doelen vul je zelf in, uit het akkoord van je eigen gemeente. Ze blijven in je browser en in de link die je deelt. De pagina kent geen akkoorden, geeft geen oordeel en maakt geen ranglijst.</p>
+    <p class="snel" id="snel"><span class="muted">Begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="info"><p><b>Zo lees je een meter.</b> De <b>nulmeting</b> is de stand op 1 januari 2026, het begin van het jaar waarin het akkoord is gesloten. Vul je een doel in, dan rekent de pagina uit hoeveel er gemiddeld per jaar <b>nodig</b> is om het te halen, en zet daarnaast wat er <b>tot nu toe</b> per jaar bij kwam of af ging. De pagina trekt die lijn niet door en zegt niet of het doel gehaald wordt. Bij elke meter staat wanneer de bron het doeljaar kan laten zien.</p></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> Een akkoord telt vaak anders dan de bron. "Woningen erbij" kan in het akkoord opgeleverde nieuwbouw zijn, hier is het de verandering van de hele voorraad (nieuwbouw, splitsing en ombouw erbij, sloop eraf). "Sociale huur" is in het akkoord meestal een huurprijs, hier is het bezit van woningcorporaties, met studentenwoningen van corporaties erbij.</li>
+          <li><b>Een andere peildatum.</b> De nulmeting is 1 januari 2026. Een akkoord kan een ander startpunt gebruiken, bijvoorbeeld een woonvisie uit een eerder jaar. Cijfers van het laatste jaar zijn vaak voorlopig en worden later bijgesteld.</li>
+          <li><b>Registratie bij de bron.</b> De woningvoorraad volgt de BAG van de gemeente zelf; een achterstand of een correctie daar zie je hier terug als een sprong. Kleine aantallen rondt het CBS af op vijf- of tientallen.</li>
+          <li><b>Een fout in deze bewerking.</b> Wijkt een cijfer af van de CBS-tabel die bij de meter staat, meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het CBS door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente en geen officiële voortgangsrapportage van een akkoord. Het CBS is niet verantwoordelijk voor de bewerking.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Vaste kern</span><h2>Wat in veel akkoorden staat en te volgen is</h2></div>
+        <p class="small muted">Twee onderwerpen komen in veel akkoorden terug met een getal: het aantal woningen en de lokale lasten.</p>
+      </div>
+      <div class="meters" id="kern"></div>
+
+      <div class="chart" id="lasten"></div>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Zelf kiezen</span><h2>Meters uit het eigen akkoord</h2></div>
+        <p class="small muted">Akkoorden lopen sterk uiteen. Kies de meters die bij het akkoord van deze gemeente horen.</p>
+      </div>
+      <fieldset class="kies" id="kies"><legend class="small muted">Toon ook</legend></fieldset>
+      <div class="meters" id="keuze"></div>
+      <p class="small muted" id="keuzeLeeg">Nog geen meter gekozen.</p>
+
+      <div class="deel">
+        <button class="btn" id="linkBtn" type="button">Kopieer de link met deze doelen</button>
+        <button class="btn" id="csvBtn" type="button">Download de meters als CSV</button>
+        <button class="btn" id="wisBtn" type="button">Wis de doelen</button>
+        <span class="small muted" id="deelTxt">De doelen staan in de link, niet op een server. Wie de link opent, ziet dezelfde doelen.</span>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Nulmeting</b>: de stand op 1 januari 2026. Bij een maandcijfer is dat de stand van eind december 2025, bij een jaarcijfer het cijfer over of van eind 2025. Is dat cijfer er nog niet, dan zegt de meter dat en rekent hij nog niets uit.</li>
+            <li><b>Doel</b>: je kiest "erbij sinds de start" (bijvoorbeeld 5.000 woningen erbij) of "stand bereiken" (bijvoorbeeld 30%). Het doeljaar telt tot en met 31 december van dat jaar.</li>
+            <li><b>Nodig per jaar</b>: het verschil tussen het doel en de nulmeting, gedeeld door het aantal jaren van 1 januari 2026 tot en met het doeljaar. Een rechte lijn; een akkoord kan een ander pad bedoelen.</li>
+            <li><b>Tot nu toe per jaar</b>: het verschil tussen de laatste stand en de nulmeting, gedeeld door de verstreken tijd. Pas vanaf twaalf maanden na de start; daarvoor staat alleen de verandering zelf er.</li>
+            <li><b>De jaren ervoor</b>: de gemiddelde verandering per jaar in de vier jaar voor de start, of korter als de reeks korter is. Achtergrond, geen norm.</li>
+            <li><b>Lokale lasten</b>: dezelfde berekening als op Woonlasten per gemeente (opbrengst gedeeld door woningen; riool door alle adressen). De verandering per jaar staat naast de inflatie volgens de consumentenprijsindex van het CBS.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>De gemeente bepaalt niet alles.</b> Inwonertal, bijstand en woningbouw hangen ook af van de economie, de rente, het Rijk en de regio. Een meter laat de uitkomst zien, niet wie haar veroorzaakt.</li>
+            <li><b>Een akkoord geldt vier jaar, een doel vaak langer.</b> Veel doelen lopen tot 2030, 2040 of 2050. De pagina rekent tot het doeljaar dat je invult.</li>
+            <li><b>Voorlopige cijfers</b> worden later bijgesteld. Een kleine verandering sinds de start kan daardoor nog omslaan.</li>
+            <li><b>Hele gemeente.</b> Een doel voor één gebiedsontwikkeling of één wijk is hier niet te volgen; de meters tellen de hele gemeente.</li>
+            <li><b>Inflatie.</b> Een akkoord dat "niet boven de inflatie" zegt, bedoelt meestal het percentage waarmee de gemeente in haar begroting rekent. Dat is een raming vooraf. Hier staat de inflatie die het CBS achteraf heeft gemeten.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="nietvolgt" aria-labelledby="nvh">
+    <span class="eyebrow">De grens</span>
+    <h2 id="nvh">Wat open data van een akkoord niet volgt</h2>
+    <p>Voor dit instrument zijn coalitieakkoorden van grote en kleine gemeenten gelezen. Een deel van wat er met een getal in staat, is met open data niet te volgen. Dat hoort erbij te staan.</p>
+    <ul>
+      <li><b>De verdeling van nieuwbouw naar prijs.</b> Veel akkoorden beloven een verdeling zoals 30% sociale huur, 40% middelduur en 30% duur, of "twee derde betaalbaar". De BAG kent van een nieuwe woning het adres, de oppervlakte en het bouwjaar, niet de huur of de koopprijs. Het aandeel corporatiewoningen in de hele voorraad is een zwakke benadering.</li>
+      <li><b>Doelgroepen die de BAG niet kent.</b> Studentenwoningen, seniorenwoningen, flexwoningen en woonwagenstandplaatsen zijn in open data geen eigen soort.</li>
+      <li><b>Wat alleen in de eigen administratie staat.</b> Doorlooptijden van schuldhulp, wachttijden, meldingen van overlast, het aantal mensen dat duurzaam schuldenvrij uitstroomt: dat weet alleen de gemeente of haar uitvoerder.</li>
+      <li><b>Doelen per gebied.</b> "Minimaal 10% werkfuncties in elke gebiedsontwikkeling" of "350 woningen bij het station" gaat over een plangebied. Open data telt per buurt, wijk of gemeente.</li>
+      <li><b>Plannen, middelen en voorzieningen.</b> Een warmteprogramma vóór 2028, een fonds van een miljoen, een extra sporthal, meer handhavers: of dat er komt, staat in raadsstukken en de begroting, niet in een statistiek.</li>
+      <li><b>Dakloosheid</b> is alleen per centrumregio bekend, niet per gemeente.</li>
+    </ul>
+    <p class="small muted">Welke indicatoren een gemeente per beleidsdomein zelf kan bijhouden, en uit welke bron, staat op <a href="indicatoren.html">Indicatoren belicht</a>.</p>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS, live opgehaald bij de gemeentekeuze: woningvoorraad per maand (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86098NED/table">86098NED</a>), gemeentelijke heffingen (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83642NED/table">83642NED</a>), WOZ-waarde (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85036NED/table">85036NED</a>), woningen naar eigendom (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86286NED/table">86286NED</a>), consumentenprijsindex (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86141NED/table">86141NED</a>), bevolking per maand (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/37230ned/table">37230ned</a>), personen met een uitkering (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/80794ned/table">80794ned</a>), jeugdzorg (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85099NED/table">85099NED</a>), zonnestroom (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85005NED/table">85005NED</a>) en de Kerncijfers wijken en buurten. De periode van elk cijfer staat bij de meter, het tijdstip van ophalen onder de cijfers.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0.</p>
+    <p><b>Methode.</b> Per meter de stand op 1 januari 2026, de laatste stand en de verandering daartussen. Bij een zelf ingevuld doel het gemiddelde dat per jaar nodig is, als rechte lijn van de nulmeting naar het doel. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen voortgangsrapportage van een college en geen oordeel over een akkoord. Geen voorspelling: de pagina trekt geen lijn door naar het doeljaar. Geen vergelijking tussen gemeenten en geen ranglijst. De pagina bevat geen akkoorden; de doelen komen van de gebruiker.</p>
+    <p><b>Bekende beperkingen.</b> Alleen wat open data per gemeente volgt; zie "Wat open data van een akkoord niet volgt". Begrippen in een akkoord wijken vaak af van die van de bron. Cijfers van het laatste jaar zijn voorlopig. De vaste meters zijn gekozen op een eigen lezing van veertien akkoorden, geen volledige telling.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de uitleg het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '0.1';
+  const PRODUCT = 'Akkoordvolger per gemeente';
+  const START = 2026;            // jaar waarin het akkoord is gesloten; nulmeting = 1 januari van dit jaar
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const CAT = 'https://opendata.cbs.nl/ODataCatalog/Tables?$format=json&$select=Identifier,Title&$filter=';
+  const T_HEF = '83642NED', T_WOZ = '85036NED', T_VOOR = '86286NED', T_CPI = '86141NED';
+  const KWB = { 2024: '85984NED', 2025: '86165NED', 2026: '86358NED' };
+  const H = { ozb: 'A047000', riool: 'A047006', afval: 'A047007' };
+  const EERSTE = 2021;
+
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const tr = s => String(s == null ? '' : s).trim();
+  const num = v => (v == null || typeof v !== 'number' || v < 0) ? null : v;
+  const nfs = {};
+  const fmt = (v, d = 0) => { if (v == null || !isFinite(v)) return '–'; const f = nfs[d] || (nfs[d] = new Intl.NumberFormat('nl-NL', { minimumFractionDigits: d, maximumFractionDigits: d })); return f.format(v); };
+  const sg = (v, d = 0) => { if (v == null || !isFinite(v)) return '–'; const r = +v.toFixed(d); return (r > 0 ? '+' : r < 0 ? '−' : '') + fmt(Math.abs(r), d); };
+  const MAAND = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- ophalen ----------
+  async function getJSON(u) {
+    let last;
+    for (let i = 0; i < 3; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 45000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  const odata = async (t, q) => (await getJSON(CBS + t + '/' + q.replace(/ /g, '%20'))).value;
+  const jr = p => +String(p).slice(0, 4);
+  const statusCache = {};
+  async function voorlopigVan(t) {
+    if (!statusCache[t]) statusCache[t] = odata(t, 'Perioden?$select=Key,Status').then(v => new Set(v.filter(p => /voorlopig/i.test(p.Status || '')).map(p => tr(p.Key)))).catch(() => new Set());
+    return statusCache[t];
+  }
+
+  // ---------- reeksen: elke waarneming krijgt een tijdstip t (decimaal jaar) ----------
+  // maandcijfer, stand aan het eind van de maand: december 2025 is t = 2026,0
+  async function maandReeks(tabel, filter, veld) {
+    const [rows, vl] = await Promise.all([odata(tabel, `TypedDataSet?$filter=${filter}&$select=Perioden,${veld}`), voorlopigVan(tabel)]);
+    return rows.filter(r => /^\d{4}MM\d\d$/.test(tr(r.Perioden)) && num(r[veld]) != null).map(r => {
+      const p = tr(r.Perioden), j = +p.slice(0, 4), m = +p.slice(6);
+      return { t: j + m / 12, v: r[veld], vl: vl.has(p), lab: m === 12 ? `1 januari ${j + 1}` : `eind ${MAAND[m - 1]} ${j}` };
+    }).sort((a, b) => a.t - b.t);
+  }
+  // jaarcijfer; soort 'begin' = stand 1 januari, 'eind' = stand eind van het jaar, 'over' = over het hele jaar
+  async function jaarReeks(tabel, filter, velden, soort, waarde) {
+    const [rows, vl] = await Promise.all([odata(tabel, `TypedDataSet?$filter=${filter}&$select=Perioden,${velden}`), voorlopigVan(tabel)]);
+    return rows.filter(r => /^\d{4}JJ00$/.test(tr(r.Perioden))).map(r => {
+      const p = tr(r.Perioden), j = +p.slice(0, 4), w = waarde(r);
+      if (w == null || w.v == null || !isFinite(w.v)) return null;
+      return Object.assign({ t: soort === 'begin' ? j : j + 1, vl: vl.has(p), lab: soort === 'begin' ? `1 januari ${j}` : soort === 'eind' ? `eind ${j}` : `over ${j}` }, w);
+    }).filter(Boolean).sort((a, b) => a.t - b.t);
+  }
+  // Kerncijfers wijken en buurten: per jaar een eigen tabel; nieuwere jaren uit de catalogus
+  let kwbTabellen = null;
+  async function kwbLijst() {
+    if (kwbTabellen) return kwbTabellen;
+    const m = Object.assign({}, KWB);
+    try {
+      const v = (await getJSON(CAT + encodeURIComponent("substringof('Kerncijfers wijken en buurten 20',Title)"))).value;
+      v.forEach(x => { const y = /^Kerncijfers wijken en buurten (\d{4})\s*$/.exec(tr(x.Title)); if (y && +y[1] >= 2024) m[+y[1]] = tr(x.Identifier); });
+    } catch (e) {}
+    return (kwbTabellen = m);
+  }
+  const kwbVeld = {};
+  async function kwbVelden(t) {
+    if (!kwbVeld[t]) {
+      const p = await odata(t, 'DataProperties?$select=Key');
+      const k = re => (p.find(x => re.test(x.Key || '')) || {}).Key;
+      kwbVeld[t] = { nw: k(/^NietWoningvoorraad_/), won: k(/^Woningvoorraad_/), agv: k(/^AardgasvrijeWoningen_/) };
+    }
+    return kwbVeld[t];
+  }
+  async function aardgasvrij(c) {
+    const lijst = await kwbLijst(), uit = [];
+    await Promise.all(Object.entries(lijst).map(async ([j, t]) => {
+      try {
+        const f = await kwbVelden(t); if (!f.agv || !f.won) return;
+        const r = (await odata(t, `TypedDataSet?$filter=startswith(WijkenEnBuurten,'GM${c}')&$select=${f.agv},${f.won}`))[0];
+        if (!r || num(r[f.agv]) == null) return;
+        const won = num(r[f.won]);
+        uit.push({ t: +j, v: r[f.agv], n: won ? Math.round(r[f.agv] / 100 * won / 100) * 100 : null, vl: false, lab: `Kerncijfers ${j}` });
+      } catch (e) {}
+    }));
+    return uit.sort((a, b) => a.t - b.t);
+  }
+
+  // ---------- de meters ----------
+  const gmF = c => `startswith(RegioS,'GM${c}')`;
+  const lnk = (id, t) => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table">${t || id}</a>`;
+  const METERS = [
+    { id: 'won', kern: true, naam: 'Woningen', eenheid: 'woningen', d: 0, std: 'e',
+      wat: 'Alle woningen in de gemeente volgens de BAG. De verandering is nieuwbouw, splitsing en ombouw naar wonen, min sloop en onttrekking.',
+      laad: c => maandReeks('86098NED', `${gmF(c)} and Gebruiksfunctie eq 'A045364' and Perioden ge '${EERSTE}MM12'`, 'EindstandVoorraad_22'),
+      meetbaar: j => `De stand van eind ${j} staat naar verwachting in februari ${j + 1} bij het CBS, eerst als voorlopig cijfer.`,
+      ritme: 'Elke maand een nieuw cijfer, ongeveer een maand na afloop; het lopende jaar is voorlopig.',
+      bron: `CBS, Levensloop van woningen en niet-woningen ${lnk('86098NED')}, gebruiksfunctie woning, eindstand van de maand.`,
+      ook: [['woningen.html', 'Woningvoorraad en leegstand'], ['bouwstroom.html', 'Bouwstroom: wat eraan komt, per pand']] },
+    { id: 'inw', naam: 'Inwoners', eenheid: 'inwoners', d: 0, std: 's',
+      wat: 'Het aantal inwoners. In een akkoord meestal een verwachting waar voorzieningen op worden gepland, zelden een doel.',
+      laad: c => maandReeks('37230ned', `${gmF(c)} and Perioden ge '${EERSTE}MM12'`, 'BevolkingAanHetEindeVanDePeriode_15'),
+      meetbaar: j => `De stand van eind ${j} staat naar verwachting in februari ${j + 1} bij het CBS, eerst als voorlopig cijfer.`,
+      ritme: 'Elke maand een nieuw cijfer, ongeveer een maand na afloop.',
+      bron: `CBS, Bevolkingsontwikkeling; regio per maand ${lnk('37230ned')}, bevolking aan het einde van de maand.`,
+      ook: [['bevolking.html', 'Bevolkingsontwikkeling per gemeente']] },
+    { id: 'corp', naam: 'Corporatiewoningen', eenheid: '%', d: 1, std: 's', pp: true,
+      wat: 'Het aandeel woningen in bezit van een woningcorporatie, in de hele voorraad. Een benadering van "sociale huur": studentenwoningen van corporaties tellen mee, sociale huur van andere verhuurders niet. Een norm voor nieuwbouw (zoals 30% sociaal) is hiermee niet te volgen.',
+      laad: c => jaarReeks(T_VOOR, `${gmF(c)} and startswith(StatusVanBewoning,'T001742')`, 'TotaleWoningvoorraad_1,EigendomWoningcorporaties_5', 'begin',
+        r => { const tot = num(r.TotaleWoningvoorraad_1), co = num(r.EigendomWoningcorporaties_5); return tot && co != null ? { v: 100 * co / tot, n: co } : null; }),
+      nTxt: 'woningen',
+      meetbaar: j => `De stand van 1 januari ${j + 1} (eind ${j}) staat naar verwachting in het najaar van ${j + 1} bij het CBS.`,
+      ritme: 'Een cijfer per jaar, stand 1 januari, gepubliceerd in het najaar van hetzelfde jaar.',
+      bron: `CBS, Voorraad woningen; eigendom ${lnk(T_VOOR)}, eigendom woningcorporaties gedeeld door de totale voorraad, 1 januari.`,
+      ook: [['woningen.html', 'Woningvoorraad en leegstand']] },
+    { id: 'agv', naam: 'Aardgasvrije woningen', eenheid: '%', d: 0, std: 's', pp: true,
+      wat: 'Het aandeel woningen zonder aardgasaansluiting. Het CBS geeft hele procenten; het aantal woningen is daaruit afgeleid en dus grof (een half procentpunt is in een grote stad al duizend woningen).',
+      laad: c => aardgasvrij(c),
+      nTxt: 'woningen (afgeleid)',
+      meetbaar: j => `Het cijfer van ${j} stond de vorige keer pas in de tabel van het jaar erna. Reken voor eind ${j} op eind ${j + 1} of ${j + 2}.`,
+      ritme: 'Een cijfer per jaar in de Kerncijfers wijken en buurten; de energiecijfers komen ruim een jaar na het tabeljaar.',
+      bron: 'CBS, Kerncijfers wijken en buurten (per jaar een eigen tabel), aardgasvrije woningen in procenten van de woningvoorraad.',
+      ook: [['warmte.html', 'Warmte per buurt: hoe elke buurt nu verwarmt']] },
+    { id: 'zon', naam: 'Zonnestroom', eenheid: 'MW', d: 1, std: 's',
+      wat: 'Het opgestelde vermogen van zonnepanelen in de gemeente, op daken en op veld samen. De opbrengst in GWh en het aandeel daken met panelen geeft het CBS per gemeente niet.',
+      laad: c => jaarReeks('85005NED', `${gmF(c)} and SectorEnVermogensklasse eq 'E007161'`, 'OpgesteldVermogenVanZonnepanelen_2', 'eind',
+        r => { const v = num(r.OpgesteldVermogenVanZonnepanelen_2); return v == null ? null : { v: v / 1000 }; }),
+      meetbaar: j => `Het cijfer van eind ${j} staat naar verwachting in juni ${j + 1} bij het CBS, eerst als voorlopig cijfer.`,
+      ritme: 'Een cijfer per jaar, stand eind van het jaar, gepubliceerd rond juni en bijgesteld in december.',
+      bron: `CBS, Zonnestroom; vermogen, regio ${lnk('85005NED')}, opgesteld vermogen van zonnepanelen, alle sectoren en woningen.`,
+      ook: [['zonnestroom.html', 'Zonnestroom per gemeente']] },
+    { id: 'bij', naam: 'Bijstand', eenheid: 'personen', d: 0, std: 's',
+      wat: 'Personen met een bijstandsuitkering tot de AOW-leeftijd. Het CBS rondt af op tientallen.',
+      laad: c => maandReeks('80794ned', `${gmF(c)} and Perioden ge '${EERSTE}MM12'`, 'BijstandTotDeAOWLeeftijd_7'),
+      meetbaar: j => `De stand van eind ${j} staat naar verwachting in het voorjaar van ${j + 1} bij het CBS.`,
+      ritme: 'Elke maand een nieuw cijfer, ongeveer vijf maanden na afloop.',
+      bron: `CBS, Personen met een uitkering ${lnk('80794ned')}, bijstand tot de AOW-leeftijd, eind van de maand.`,
+      ook: [['werkeninkomen.html', 'Werk en inkomen per wijk']] },
+    { id: 'jgd', naam: 'Jeugdhulp met verblijf', eenheid: 'jongeren', d: 0, std: 's',
+      wat: 'Jongeren die in een jaar jeugdhulp met verblijf kregen: pleegzorg, gezinsgericht, gesloten of ander verblijf bij een aanbieder. Het dichtst bij wat akkoorden "uithuisplaatsingen" noemen; het is niet hetzelfde begrip.',
+      laad: c => jaarReeks('85099NED', `${gmF(c)} and VormenVanJeugdzorg eq 'A027918'`, 'JongerenMetJeugdzorg_1', 'over',
+        r => ({ v: num(r.JongerenMetJeugdzorg_1) })),
+      meetbaar: j => `Het cijfer over ${j} staat naar verwachting in het voorjaar van ${j + 1} bij het CBS, eerst als voorlopig cijfer.`,
+      ritme: 'Een cijfer per jaar over het hele jaar, gepubliceerd in het voorjaar erna en later bijgesteld.',
+      bron: `CBS, Kerncijfers over jeugdzorg ${lnk('85099NED')}, totaal jeugdhulp met verblijf, jongeren per jaar.`,
+      ook: [['jeugdzorg.html', 'Jeugdzorg per wijk']] }
+  ];
+  const meterVan = id => METERS.find(m => m.id === id);
+  const KIESBAAR = METERS.filter(m => !m.kern);
+
+  // ---------- rekenregels ----------
+  function analyse(obs, doel) {
+    const A = { nul: null, wacht: false, laatste: null };
+    if (!obs || !obs.length) return A;
+    A.laatste = obs[obs.length - 1];
+    A.nul = obs.find(o => Math.abs(o.t - START) < 0.02) || null;
+    if (!A.nul) { A.wacht = true; const voor = obs.filter(o => o.t < START); A.nul = voor.length ? voor[voor.length - 1] : obs[0]; }
+    const eerder = obs.find(o => o.t >= A.nul.t - 4 - 0.02 && o.t < A.nul.t - 0.9);
+    if (eerder) { A.voor = eerder; A.voorJaren = A.nul.t - eerder.t; A.tempoVoor = (A.nul.v - eerder.v) / A.voorJaren; }
+    if (!A.wacht && A.laatste.t > A.nul.t + 0.02) {
+      A.sinds = A.laatste.v - A.nul.v;
+      A.maanden = Math.round((A.laatste.t - A.nul.t) * 12);
+      if (A.maanden >= 12) A.tempoNu = A.sinds / (A.laatste.t - A.nul.t);
+    }
+    if (doel && !A.wacht) {
+      A.doelJaren = doel.j + 1 - START;
+      A.doelStand = doel.s === 'e' ? A.nul.v + doel.w : doel.w;
+      if (A.doelJaren > 0) A.nodig = (A.doelStand - A.nul.v) / A.doelJaren;
+    }
+    return A;
+  }
+  // woonlasten: zelfde rekenregels als Woonlasten per gemeente
+  const nwVoor = (m, j) => {
+    if (!m) return null;
+    const js = Object.keys(m).map(Number).sort((a, b) => a - b);
+    if (!js.length) return null;
+    const kl = js.filter(x => x <= j); return m[kl.length ? kl[kl.length - 1] : js[0]];
+  };
+  async function laadLasten(c) {
+    const lijst = await kwbLijst();
+    const nw = {};
+    const [hef, woz, voor, cpi, vl] = await Promise.all([
+      odata(T_HEF, `TypedDataSet?$filter=${gmF(c)} and (GemeentelijkeHeffingenVanaf2017 eq '${H.ozb}' or GemeentelijkeHeffingenVanaf2017 eq '${H.riool}' or GemeentelijkeHeffingenVanaf2017 eq '${H.afval}')&$select=GemeentelijkeHeffingenVanaf2017,Perioden,GemeentelijkeHeffingenIn1000Euro_1`),
+      odata(T_WOZ, `TypedDataSet?$filter=${gmF(c)} and Eigendom eq 'T001132'&$select=Perioden,GemiddeldeWOZWaardeVanWoningen_1`),
+      odata(T_VOOR, `TypedDataSet?$filter=${gmF(c)} and startswith(StatusVanBewoning,'T001742')&$select=Perioden,TotaleWoningvoorraad_1`),
+      odata(T_CPI, `TypedDataSet?$filter=Bestedingscategorieen eq 'T001112  ' and substringof('JJ',Perioden)&$select=Perioden,JaarmutatieCPI_5`),
+      voorlopigVan(T_HEF),
+      Promise.all(Object.entries(lijst).map(async ([j, t]) => {
+        try {
+          const f = await kwbVelden(t); if (!f.nw) return;
+          const r = (await odata(t, `TypedDataSet?$filter=startswith(WijkenEnBuurten,'GM${c}')&$select=${f.nw}`))[0];
+          if (r && num(r[f.nw]) != null) nw[+j] = r[f.nw];
+        } catch (e) {}
+      }))
+    ]);
+    const som = {}, wz = {}, won = {}, inf = {};
+    hef.forEach(r => { const j = jr(r.Perioden), k = Object.keys(H).find(x => H[x] === tr(r.GemeentelijkeHeffingenVanaf2017)); const v = r.GemeentelijkeHeffingenIn1000Euro_1; (som[j] = som[j] || {})[k] = v == null ? null : v * 1000; });
+    woz.forEach(r => { const v = num(r.GemiddeldeWOZWaardeVanWoningen_1); if (v != null) wz[jr(r.Perioden)] = v * 1000; });
+    voor.forEach(r => { const v = num(r.TotaleWoningvoorraad_1); if (v != null) won[jr(r.Perioden)] = v; });
+    cpi.forEach(r => { if (r.JaarmutatieCPI_5 != null) inf[jr(r.Perioden)] = r.JaarmutatieCPI_5; });
+    const R = [];
+    Object.keys(won).map(Number).filter(j => j >= EERSTE).sort((a, b) => a - b).forEach(j => {
+      const s = som[j] || {}, w = won[j], z = wz[j], n = nwVoor(nw, j);
+      if (!w || s.ozb == null) return;
+      const ozb = s.ozb / w, riool = s.riool == null ? null : s.riool / (w + (n || 0)), afval = s.afval == null ? null : s.afval / w;
+      R.push({ j, ozbTot: s.ozb, ozb, tarief: z ? 100 * s.ozb / (z * w) : null, riool, afval, totaal: ozb + (riool || 0) + (afval || 0), vl: vl.has(j + 'JJ00') });
+    });
+    return { R, inf };
+  }
+
+  // ---------- staat: gemeente, gekozen meters, doelen ----------
+  let S = null;
+  const fouten = new Set();
+  const leesGetal = s => {
+    s = tr(s).replace(/\s/g, ''); if (!s) return null;
+    if (s.includes(',')) s = s.replace(/\./g, '').replace(',', '.');
+    else if (/^[+-]?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+    const v = parseFloat(s); return isFinite(v) ? v : null;
+  };
+  function uitHash() {
+    const h = location.hash.slice(1), uit = { m: null, doel: null, l: null };
+    const par = k => { const x = new RegExp('(?:^|&)' + k + '=([^&]*)').exec(h); return x ? decodeURIComponent(x[1]) : null; };
+    const m = par('m'); if (m != null) uit.m = m.split(',').filter(id => meterVan(id) && !meterVan(id).kern);
+    const d = par('doel');
+    if (d != null) { uit.doel = {}; d.split(',').forEach(x => { const [id, s, w, j] = x.split('~'); if (meterVan(id) && (s === 'e' || s === 's') && isFinite(+w) && +j >= START && +j <= 2100) uit.doel[id] = { s, w: +w, j: +j }; }); }
+    const l = par('l'); if (l != null && isFinite(+l)) uit.l = +l;
+    return (uit.m || uit.doel || uit.l != null) ? uit : null;
+  }
+  function hashTekst() {
+    let h = 'gm=' + S.g.c;
+    if (S.m.length) h += '&m=' + S.m.join(',');
+    const d = Object.entries(S.doel).map(([id, x]) => [id, x.s, x.w, x.j].join('~'));
+    if (d.length) h += '&doel=' + d.join(',');
+    if (S.l != null) h += '&l=' + S.l;
+    return '#' + h;
+  }
+  function bewaar() {
+    try { localStorage.setItem('jl-akkoord-' + S.g.c, JSON.stringify({ m: S.m, doel: S.doel, l: S.l })); } catch (e) {}
+    try { history.replaceState(null, '', hashTekst()); } catch (e) {}
+    vulMeld();
+  }
+
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Het CBS gaf om ${t} geen antwoord voor: ${[...fouten].join(', ')}. De rest van de pagina werkt waar dat kan.`;
+    $('#melding').hidden = false;
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g, uitLink) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = 'Akkoordvolger ' + g.n + ' · Open Data Atelier';
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    let st = uitLink || null;
+    if (!st) { try { st = JSON.parse(localStorage.getItem('jl-akkoord-' + g.c) || 'null'); } catch (e) {} }
+    S = { g, m: (st && st.m) || [], doel: (st && st.doel) || {}, l: st && st.l != null ? st.l : null, obs: {}, lasten: null, opgehaald: null };
+    S.m = S.m.filter(id => meterVan(id) && !meterVan(id).kern);
+    bewaar();
+    fouten.clear(); toonMelding();
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'cijfers ophalen bij het CBS…';
+    ['#kern', '#keuze', '#lasten', '#foot'].forEach(s => { $(s).innerHTML = ''; });
+    renderKies();
+    const te = METERS.filter(m => m.kern || S.m.includes(m.id));
+    let klaar = 0; const tot = te.length + 1;
+    voortgang(0, tot, 'Cijfers ophalen…');
+    const stap = () => { if (S.g === g) voortgang(++klaar, tot, 'Cijfers ophalen…'); };
+    await Promise.all(te.map(m => laadMeter(m, g).then(stap)).concat([
+      laadLasten(g.c).then(x => { if (S.g === g) S.lasten = x; }).catch(() => { fouten.add('lokale lasten'); }).then(stap)
+    ]));
+    if (S.g !== g) return;
+    S.opgehaald = new Date();
+    toonMelding(); render();
+    voortgang(tot, tot, '');
+  }
+  async function laadMeter(m, g) {
+    try { const o = await m.laad(g.c); if (S.g === g) S.obs[m.id] = o; }
+    catch (e) { if (S.g === g) { S.obs[m.id] = null; fouten.add(m.naam.toLowerCase()); } }
+  }
+
+  // ---------- tekenen ----------
+  function render() {
+    const g = S.g;
+    const w = S.obs.won, aw = analyse(w, null);
+    $('#leadBig').textContent = g.n;
+    $('#leadSub').textContent = aw.nul ? `akkoordperiode ${START}–${START + 4} · nulmeting 1 januari ${START}` : 'Voor deze gemeente zijn geen cijfers gevonden.';
+    $('#kern').innerHTML = METERS.filter(m => m.kern).map(meterHTML).join('');
+    $('#keuze').innerHTML = S.m.map(id => meterHTML(meterVan(id))).join('');
+    $('#keuzeLeeg').hidden = S.m.length > 0;
+    renderLasten(); renderVoet(); vulMeld();
+  }
+  const waarde = (m, v) => m.eenheid === '%' ? fmt(v, m.d) + '%' : fmt(v, m.d) + ' ' + m.eenheid;
+  const verschil = (m, v) => m.pp ? sg(v, Math.max(1, m.d)) + ' procentpunt' : sg(v, m.d) + (m.eenheid === 'MW' ? ' MW' : '');
+  const perJaar = (m, v) => m.pp ? sg(v, 1) + ' procentpunt' : sg(v, m.d) + (m.eenheid === 'MW' ? ' MW' : '');
+
+  function meterHTML(m) {
+    const obs = S.obs[m.id], doel = S.doel[m.id] || null;
+    const kop = l => `<div class="m-kop"><h3>${esc(m.naam)}</h3><span class="laatst">${l}</span></div>`;
+    if (obs === undefined) return `<article class="meter" data-m="${m.id}">${kop('…')}<p class="small muted">Cijfers ophalen…</p></article>`;
+    if (!obs || !obs.length) return `<article class="meter" data-m="${m.id}">${kop('–')}<p class="small muted">${obs ? 'Het CBS heeft voor deze gemeente geen cijfer.' : 'Het CBS gaf geen antwoord. Probeer het opnieuw.'}</p><p class="m-bron">${m.bron}</p></article>`;
+    const A = analyse(obs, doel), L = A.laatste, N = A.nul;
+    const extra = o => o.n != null && m.nTxt ? ` <span class="muted">(${fmt(o.n)} ${m.nTxt})</span>` : '';
+    let f = '';
+    if (A.wacht) f += `<div><dt>Nulmeting</dt><dd>Nog niet gepubliceerd. Laatste stand ervoor: <b>${waarde(m, N.v)}</b>${extra(N)} <span class="muted">(${N.lab})</span></dd></div>`;
+    else f += `<div><dt>Nulmeting</dt><dd><b>${waarde(m, N.v)}</b>${extra(N)} <span class="muted">(${N.lab}${N.vl ? ', voorlopig' : ''})</span></dd></div>`;
+    if (!A.wacht && A.sinds != null) f += `<div><dt>Laatste stand</dt><dd><b>${waarde(m, L.v)}</b>${extra(L)} <span class="muted">(${L.lab}${L.vl ? ', voorlopig' : ''})</span></dd></div>
+      <div><dt>Sinds de start</dt><dd><b>${verschil(m, A.sinds)}</b> in ${A.maanden} ${A.maanden === 1 ? 'maand' : 'maanden'}${A.tempoNu != null ? `, dat is ${perJaar(m, A.tempoNu)} per jaar` : ''}</dd></div>`;
+    else if (!A.wacht) f += `<div><dt>Sinds de start</dt><dd>Nog geen cijfer van na 1 januari ${START}.</dd></div>`;
+    if (A.tempoVoor != null) f += `<div><dt>De jaren ervoor</dt><dd>${perJaar(m, A.tempoVoor)} per jaar <span class="muted">(gemiddeld, ${A.voor.lab} tot ${N.lab})</span></dd></div>`;
+    f += `<div><dt>Ritme van de bron</dt><dd>${m.ritme}</dd></div>`;
+
+    const dsel = doel ? doel.s : m.std;
+    const doelForm = `<form class="m-doel" data-m="${m.id}" novalidate>
+      <div class="field"><label for="ds-${m.id}">Doel uit het akkoord</label>
+        <select id="ds-${m.id}" name="s"><option value="e"${dsel === 'e' ? ' selected' : ''}>erbij sinds de start</option><option value="s"${dsel === 's' ? ' selected' : ''}>stand bereiken</option></select></div>
+      <div class="field"><label for="dw-${m.id}">${m.eenheid === '%' ? 'Procent of procentpunt' : m.eenheid === 'MW' ? 'MW' : 'Aantal ' + m.eenheid}</label>
+        <input class="w" id="dw-${m.id}" name="w" inputmode="decimal" autocomplete="off" value="${doel ? esc(fmt(doel.w, Number.isInteger(doel.w) ? 0 : 1)) : ''}"></div>
+      <div class="field"><label for="dj-${m.id}">Doeljaar</label>
+        <input class="j" id="dj-${m.id}" name="j" inputmode="numeric" autocomplete="off" placeholder="${START + 4}" value="${doel ? doel.j : ''}"></div>
+      <button class="btn primary" type="submit">Reken</button>${doel ? '<button class="btn" type="button" data-wis="1">Wis</button>' : ''}
+    </form>`;
+
+    let uit = '';
+    if (doel && A.wacht) uit = `<p>Doel: ${doel.s === 'e' ? verschil(m, doel.w) + ' sinds de start' : waarde(m, doel.w)}, uiterlijk eind ${doel.j}. De nulmeting is er nog niet; het benodigde tempo staat hier zodra het CBS die publiceert.</p><p class="muted">${m.meetbaar(doel.j)}</p>`;
+    else if (doel && A.doelJaren <= 0) uit = `<p>Het doeljaar ligt niet na de start.</p>`;
+    else if (doel) {
+      uit = `<p>Doel, door jou ingevuld: <b>${waarde(m, A.doelStand)}</b> uiterlijk eind ${doel.j}${doel.s === 'e' ? ` (${verschil(m, doel.w)} sinds de start)` : ` (${verschil(m, A.doelStand - N.v)} tegenover de nulmeting)`}.</p>
+        <div class="twee"><div><span class="eyebrow">Nodig per jaar</span><b>${perJaar(m, A.nodig)}</b><span class="small muted">gemiddeld, ${A.doelJaren} jaar lang</span></div>
+        <div><span class="eyebrow">Tot nu toe per jaar</span><b>${A.tempoNu != null ? perJaar(m, A.tempoNu) : '–'}</b><span class="small muted">${A.tempoNu != null ? `over ${A.maanden} maanden` : A.sinds != null ? `nog geen vol jaar gemeten; ${verschil(m, A.sinds)} in ${A.maanden} ${A.maanden === 1 ? 'maand' : 'maanden'}` : 'nog geen cijfer van na de start'}</span></div></div>
+        <p class="muted"><b>Wanneer weet je het?</b> ${m.meetbaar(doel.j)}</p>`;
+    }
+    const ook = (m.ook || []).map(([h, t]) => `<a href="${h}#gm=${S.g.c}">${esc(t)}</a>`).join(' · ');
+    return `<article class="meter" data-m="${m.id}">
+      ${kop(waarde(m, L.v))}
+      <div class="m-links"><p class="small muted" style="margin:0 0 8px">${m.wat}</p><dl class="m-feiten">${f}</dl></div>
+      <div class="m-rechts" style="display:grid;gap:10px;align-content:start"><div class="m-graf">${grafiek(m, obs, A, doel)}</div>${doelForm}<div class="m-uit">${uit}</div></div>
+      <p class="m-bron">Bron: ${m.bron}${ook ? ' Meer op: ' + ook + '.' : ''}</p>
+    </article>`;
+  }
+
+  function grafiek(m, obs, A, doel) {
+    const W = 520, Hh = 170, L = 52, Rr = 14, Tp = 12, B = 24;
+    const pts = obs.filter(o => o.t >= START - 4.05);
+    const heeftDoel = doel && A.nodig != null;
+    const t0 = Math.min(pts[0].t, START - 1), t1 = Math.max(A.laatste.t, START + 1, heeftDoel ? doel.j + 1 : 0);
+    const vs = pts.map(o => o.v).concat(heeftDoel ? [A.doelStand] : []);
+    let lo = Math.min(...vs), hi = Math.max(...vs);
+    if (hi === lo) { hi += 1; lo -= 1; }
+    const pad = (hi - lo) * .12; lo -= pad; hi += pad; if (lo < 0 && Math.min(...vs) >= 0) lo = 0;
+    const x = t => L + (W - L - Rr) * (t - t0) / (t1 - t0), y = v => Tp + (Hh - Tp - B) * (1 - (v - lo) / (hi - lo));
+    let svg = '';
+    [lo + (hi - lo) * .1, (lo + hi) / 2, hi - (hi - lo) * .1].forEach(v => { svg += `<line class="ax" x1="${L}" x2="${W - Rr}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/><text class="lbl" x="${L - 6}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end">${fmt(v, m.d || (hi - lo < 5 ? 1 : 0))}</text>`; });
+    const span = t1 - t0, stapJ = span > 16 ? 5 : span > 8 ? 2 : 1;
+    for (let j = Math.ceil(t0); j <= t1; j++) if ((j - START) % stapJ === 0) svg += `<text class="lbl" x="${x(j).toFixed(1)}" y="${Hh - 6}" text-anchor="middle">${j}</text>`;
+    svg += `<line class="start" x1="${x(START).toFixed(1)}" x2="${x(START).toFixed(1)}" y1="${Tp}" y2="${Hh - B}"/><text class="lbl" x="${(x(START) + 4).toFixed(1)}" y="${Tp + 8}">start</text>`;
+    if (heeftDoel) {
+      svg += `<line x1="${x(START).toFixed(1)}" y1="${y(A.nul.v).toFixed(1)}" x2="${x(doel.j + 1).toFixed(1)}" y2="${y(A.doelStand).toFixed(1)}" stroke="var(--fg)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+      svg += `<circle cx="${x(doel.j + 1).toFixed(1)}" cy="${y(A.doelStand).toFixed(1)}" r="4" fill="var(--surface)" stroke="var(--fg)" stroke-width="1.5"><title>Doel eind ${doel.j}: ${waarde(m, A.doelStand)}</title></circle>`;
+    }
+    svg += `<polyline points="${pts.map(o => x(o.t).toFixed(1) + ',' + y(o.v).toFixed(1)).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+    if (pts.length <= 12) pts.forEach(o => { svg += `<circle cx="${x(o.t).toFixed(1)}" cy="${y(o.v).toFixed(1)}" r="3" fill="var(--accent)"><title>${o.lab}: ${waarde(m, o.v)}</title></circle>`; });
+    if (!A.wacht) svg += `<circle cx="${x(A.nul.t).toFixed(1)}" cy="${y(A.nul.v).toFixed(1)}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5"><title>Nulmeting ${A.nul.lab}: ${waarde(m, A.nul.v)}</title></circle>`;
+    const leg = `<span><span class="sw" style="background:var(--accent)"></span>Gemeten</span>` + (heeftDoel ? '<span><span class="dash"></span>Rechte lijn van nulmeting naar doel</span>' : '');
+    return `<svg viewBox="0 0 ${W} ${Hh}" role="img" aria-label="${esc(m.naam)} door de tijd${heeftDoel ? ', met de rechte lijn van de nulmeting naar het ingevulde doel' : ''}">${svg}</svg><div class="legend">${leg}</div>`;
+  }
+
+  // ---------- lokale lasten ----------
+  function renderLasten() {
+    const X = S.lasten, el = $('#lasten');
+    if (!X || !X.R.length) { el.innerHTML = '<h3>Lokale lasten tegenover de inflatie</h3><p class="small muted">Voor deze gemeente zijn geen cijfers over heffingen gevonden.</p>'; return; }
+    const R = X.R, inf = X.inf, laatste = R[R.length - 1];
+    const d = (a, b) => a != null && b != null && b !== 0 ? 100 * (a / b - 1) : null;
+    const p1 = v => v == null ? '–' : sg(v, 1) + '%';
+    let rows = '', groep = '';
+    for (let i = 1; i < R.length; i++) {
+      const r = R[i], v = R[i - 1]; if (r.j !== v.j + 1) continue;
+      const gnu = r.j > START ? `Akkoordperiode (begroting vanaf ${START + 1})` : `Voor het akkoord (begroting tot en met ${START})`;
+      if (gnu !== groep) { groep = gnu; rows += `<tr class="grp"><td colspan="${S.l != null ? 7 : 6}">${groep}</td></tr>`; }
+      rows += `<tr><td>${v.j} → ${r.j}${r.vl ? '*' : ''}</td><td class="r">${p1(d(r.tarief, v.tarief))}</td><td class="r">${p1(d(r.ozbTot, v.ozbTot))}</td><td class="r">${p1(d(r.ozb, v.ozb))}</td><td class="r">${p1(d(r.totaal, v.totaal))}</td><td class="r">${inf[v.j] != null ? sg(inf[v.j], 1) + '%' : '–'}</td>${S.l != null ? `<td class="r">${sg(S.l, 1)}%</td>` : ''}</tr>`;
+    }
+    if (laatste.j <= START) rows += `<tr class="grp"><td colspan="${S.l != null ? 7 : 6}">Akkoordperiode (begroting vanaf ${START + 1})</td></tr><tr><td colspan="${S.l != null ? 7 : 6}" class="muted">De begroting ${START + 1} is de eerste van na de verkiezingen. Het CBS publiceert de heffingen daaruit naar verwachting in februari ${START + 1}; dan staat hier de eerste regel.</td></tr>`;
+    const zonderAfval = !laatste.afval;
+    el.innerHTML = `<div class="chart-kop"><h3>Lokale lasten tegenover de inflatie</h3><span class="laatst">${laatste.j}: € ${fmt(laatste.totaal)} per woning</span></div>
+      <p class="small muted">Akkoorden spreken de lasten op drie manieren af: het <b>tarief</b> (wat de raad vaststelt), de <b>opbrengst</b> (wat de gemeente ophaalt) of de <b>woonlasten</b> (wat een woning gemiddeld betaalt aan OZB, riool en afval). Dat zijn drie verschillende maten; kijk welke het akkoord noemt. De inflatie is die van het jaar waarin de begroting is gemaakt.</p>
+      <form class="m-doel" id="lForm" novalidate><div class="field"><label for="lIn">Afspraak uit het akkoord, als die een vast percentage noemt</label><input class="w" id="lIn" inputmode="decimal" autocomplete="off" placeholder="bijv. 2" value="${S.l != null ? esc(fmt(S.l, Number.isInteger(S.l) ? 0 : 1)) : ''}"></div><span style="padding-bottom:7px">% per jaar</span><button class="btn primary" type="submit">Toon</button>${S.l != null ? '<button class="btn" type="button" id="lWis">Wis</button>' : ''}</form>
+      <div class="scroll"><table><thead><tr><th>Begroting</th><th class="r">OZB-tarief<br>woningen</th><th class="r">OZB-opbrengst<br>woningen</th><th class="r">OZB<br>per woning</th><th class="r">Woonlasten<br>per woning</th><th class="r">Inflatie (CPI)<br>in het eerste jaar</th>${S.l != null ? '<th class="r">Afspraak<br>(ingevuld)</th>' : ''}</tr></thead><tbody>${rows}</tbody></table></div>
+      <p class="small muted">Verandering in procenten tegenover het jaar ervoor. Tarief: afgeleid uit opbrengst, WOZ-waarde en woningen, niet overgenomen uit de verordening. De opbrengst stijgt ook als er woningen bij komen of de WOZ-waarde stijgt bij een gelijk tarief. ${zonderAfval ? 'Deze gemeente heeft geen afvalstoffenheffing in de begroting (meestal heft een gemeenschappelijke regeling); de woonlasten zijn hier zonder afval. ' : ''}${R.some(r => r.vl) ? '* Voorlopig cijfer. ' : ''}Bron: CBS ${lnk(T_HEF)}, ${lnk(T_WOZ)}, ${lnk(T_VOOR)} en ${lnk(T_CPI)} (jaarmutatie consumentenprijsindex, alle bestedingen). Bedragen, de WOZ-waarde en een rekenvoorbeeld: <a href="woonlasten.html#gm=${S.g.c}">Woonlasten per gemeente</a>.</p>`;
+  }
+
+  // ---------- meters kiezen ----------
+  function renderKies() {
+    $('#kies').innerHTML = '<legend class="small muted">Toon ook</legend>' + KIESBAAR.map(m => `<label><input type="checkbox" value="${m.id}"${S.m.includes(m.id) ? ' checked' : ''}> ${esc(m.naam)}</label>`).join('') +
+      `<span class="small muted" style="flex-basis:100%">Energielabels hebben een eigen pagina met een eigen tempo: <a href="energielabelkalender.html#gm=${S.g.c}">Energielabelkalender</a>.</span>`;
+  }
+  $('#kies').addEventListener('change', async e => {
+    const cb = e.target; if (!cb.matches('input[type=checkbox]') || !S) return;
+    const m = meterVan(cb.value), g = S.g;
+    if (cb.checked) { if (!S.m.includes(m.id)) S.m = KIESBAAR.map(x => x.id).filter(id => S.m.includes(id) || id === m.id); }
+    else { S.m = S.m.filter(id => id !== m.id); }
+    bewaar();
+    if (cb.checked && S.obs[m.id] === undefined) { render(); await laadMeter(m, g); if (S.g !== g) return; toonMelding(); }
+    render();
+  });
+
+  // ---------- doelen invullen ----------
+  document.addEventListener('submit', e => {
+    const f = e.target;
+    if (f.id === 'lForm') {
+      e.preventDefault(); const v = leesGetal($('#lIn').value);
+      S.l = v != null && Math.abs(v) <= 100 ? v : null; bewaar(); renderLasten(); return;
+    }
+    if (!f.matches('form.m-doel[data-m]')) return;
+    e.preventDefault();
+    const id = f.dataset.m, w = leesGetal(f.elements.w.value), j = parseInt(f.elements.j.value, 10);
+    f.elements.w.setCustomValidity(''); f.elements.j.setCustomValidity('');
+    if (w == null) { f.elements.w.setCustomValidity('Vul een getal in'); f.elements.w.reportValidity(); return; }
+    if (!(j >= START && j <= 2100)) { f.elements.j.setCustomValidity(`Vul een jaar in vanaf ${START}`); f.elements.j.reportValidity(); return; }
+    S.doel[id] = { s: f.elements.s.value, w, j }; bewaar(); herteken(id);
+  });
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-wis]');
+    if (b) { const id = b.closest('form').dataset.m; delete S.doel[id]; bewaar(); herteken(id); return; }
+    if (e.target.id === 'lWis') { S.l = null; bewaar(); renderLasten(); }
+  });
+  function herteken(id) {
+    const oud = document.querySelector(`.meter[data-m="${id}"]`); if (!oud) return render();
+    const t = document.createElement('template'); t.innerHTML = meterHTML(meterVan(id)).trim();
+    oud.replaceWith(t.content.firstChild);
+    const f = document.querySelector(`.meter[data-m="${id}"] form`); if (f) f.elements.w.focus({ preventScroll: true });
+  }
+  $('#wisBtn').addEventListener('click', () => { if (!S) return; S.doel = {}; S.l = null; bewaar(); render(); });
+  $('#linkBtn').addEventListener('click', () => {
+    const u = location.origin + location.pathname + hashTekst(), b = $('#linkBtn');
+    const ok = () => { b.textContent = 'Link gekopieerd'; setTimeout(() => { b.textContent = 'Kopieer de link met deze doelen'; }, 1800); };
+    try { if (navigator.clipboard) navigator.clipboard.writeText(u).then(ok, () => window.prompt('Kopieer de link:', u)); else window.prompt('Kopieer de link:', u); }
+    catch (err) { window.prompt('Kopieer de link:', u); }
+  });
+
+  // ---------- CSV ----------
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S) return;
+    const bron = `${PRODUCT}, Open Data Atelier, ${location.origin + location.pathname}#gm=${S.g.c}, versie ${VERSIE}; CBS`;
+    const kop = ['meter', 'eenheid', 'periode', 'waarde', 'aantal_afgeleid', 'voorlopig', 'nulmeting', 'doel_soort', 'doel_waarde', 'doeljaar', 'nodig_per_jaar', 'gemeentecode', 'gemeente', 'bron'];
+    const nl = (v, d) => v == null || !isFinite(v) ? '' : String(+v.toFixed(d)).replace('.', ',');
+    const regels = [kop];
+    METERS.filter(m => m.kern || S.m.includes(m.id)).forEach(m => {
+      const obs = S.obs[m.id]; if (!obs || !obs.length) return;
+      const doel = S.doel[m.id] || null, A = analyse(obs, doel);
+      obs.forEach(o => regels.push([m.naam, m.eenheid, o.lab, nl(o.v, Math.max(m.d, 1)), o.n == null ? '' : o.n, o.vl ? 'ja' : 'nee', !A.wacht && o === A.nul ? 'ja' : 'nee',
+        doel ? (doel.s === 'e' ? 'erbij sinds de start' : 'stand bereiken') : '', doel ? nl(doel.w, 2) : '', doel ? doel.j : '', doel && A.nodig != null ? nl(A.nodig, 2) : '', 'GM' + S.g.c, S.g.n, bron]));
+    });
+    const csv = '﻿' + regels.map(r => r.map(v => /[;"\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : v).join(';')).join('\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = `open-data-atelier-akkoordvolger-${S.g.n.replace(/[^\w-]+/g, '-').toLowerCase()}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+
+  // ---------- melden ----------
+  function vulMeld() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelke meter of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+  }
+
+  // ---------- voet ----------
+  function renderVoet() {
+    const t = S.opgehaald ? S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '–';
+    const namen = METERS.filter(m => m.kern || S.m.includes(m.id)).map(m => m.naam.toLowerCase()).join(', ');
+    $('#foot').innerHTML = `Bronnen: CBS (CC BY 4.0), per meter vermeld; getoond: ${namen} en lokale lasten. Opgehaald ${t}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', () => { if (S) { Object.keys(statusCache).forEach(k => delete statusCache[k]); kies(S.g); } });
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  vulMeld();
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const hgm = (location.hash.match(/gm=(\d{4})/) || [])[1];
+  const g0 = GM.find(g => g.c === (hgm || bewaard));
+  if (g0) kies(g0, hgm ? uitHash() : null);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>
