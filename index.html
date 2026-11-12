@@ -147,6 +147,9 @@ nav a:hover { color: var(--accent); }
 .spread i:last-child { border-right: 0; }
 .product-aside { background: var(--accent-soft); padding: 28px; display: grid; gap: 12px; align-content: start; }
 .product-aside ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: .95rem; }
+.film { margin: 6px 0 0; display: grid; gap: 6px; }
+.film video { width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; border: 1px solid var(--line); background: #f3f4f2; display: block; }
+.film figcaption { font-size: .82rem; color: var(--muted); }
 
 /* over */
 .about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 32px 56px; }
@@ -538,6 +541,12 @@ main > * { min-width: 0; }
           <li>De toets: meer dan 100 m² en minstens 50% kantoor.</li>
           <li>Wat alleen de gemeente weet, voeg je zelf toe: gemeentelijke monumenten, of welke panden zijn aangeschreven of in behandeling. Een extract uit een datawarehouse op het GGM, van gemeente of omgevingsdienst, wordt herkend aan de kolomnamen. Het blijft in je browser.</li>
         </ol>
+        <figure class="film">
+          <video controls preload="none" playsinline poster="film/labelc-poster.jpg" aria-label="Instructiefilm Label C-kantoren, 1 minuut 18, met ondertitels en zonder geluid">
+            <source src="film/labelc.mp4" type="video/mp4">
+          </video>
+          <figcaption>Zo werkt het, in beeld · 1:18 · ondertiteld, zonder geluid</figcaption>
+        </figure>
         <button class="close" type="button" hidden>Sluiten</button>
       </div>
     </article>

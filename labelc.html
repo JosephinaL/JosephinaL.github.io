@@ -819,6 +819,9 @@ details[open] > summary .dicht, details:not([open]) > summary .open { display: n
 .intro p { margin: 0; }
 .snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
 .snel .btn { font-size: .9rem; padding: 4px 12px; }
+.film { margin: 14px 0 0; max-width: 820px; }
+.film summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.film video { width: 100%; aspect-ratio: 16 / 9; margin-top: 10px; border-radius: 6px; border: 1px solid var(--line); background: #f3f4f2; display: block; }
 
 /* kaart + dossier */
 .split { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; }
@@ -909,6 +912,12 @@ footer { font-size: .8rem; color: var(--muted); }
   <section class="intro" id="intro">
     <p>Welke kantoren in je gemeente voldoen aan de energielabel C-plicht? Kies een gemeente. De pagina haalt dan elk kantoorpand op bij BAG, RCE en RIVM en deelt het in; dat duurt even. Wat open data niet weet, zoals gemeentelijke monumenten, voeg je daarna zelf toe. Die lijst blijft in je browser.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+    <details class="film">
+      <summary>Bekijk eerst hoe het werkt <span class="muted">· 1:18, ondertiteld, zonder geluid</span></summary>
+      <video controls preload="none" playsinline poster="film/labelc-poster.jpg" aria-label="Instructiefilm Label C-kantoren, 1 minuut 18, met ondertitels en zonder geluid">
+        <source src="film/labelc.mp4" type="video/mp4">
+      </video>
+    </details>
   </section>
 
   <section id="progress" hidden>
@@ -1854,7 +1863,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.7.3';
+  const VERSIE = '1.7.4';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
