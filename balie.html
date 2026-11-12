@@ -112,6 +112,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 #chOpbouw svg { max-width: 560px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
 .legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.lijn { width: 18px; height: 3px; border-radius: 0; vertical-align: 3px; }
 .legend .sw.leeg { background: transparent; border: 2px solid var(--muted); }
 
 #tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 300px; }
@@ -374,7 +375,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.2.1';
+  const VERSIE = '1.2.2';
   const PRODUCT = 'Burgerzaken per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const J0 = 2014;
@@ -646,7 +647,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     s += `<line class="hl" x1="0" x2="0" y1="${Tp}" y2="${H - B}" stroke="var(--muted)" stroke-width="1" visibility="hidden"/>`;
     s += `<rect class="hit" x="${Lm}" y="0" width="${W - Lm - R}" height="${H}" fill="transparent"/></svg>`;
     el.innerHTML = `<div class="chart-kop"><h3>${esc(titel)}</h3></div><span class="noemer">${esc(noemer)}</span>${s}
-      <div class="legend">${series.map(se => `<span><i class="sw" style="background:${se.kleur}"></i>${esc(se.naam)}</span>`).join('')}${opt.vlak ? `<span><i class="sw" style="background:var(--sunk);border:1px solid var(--line)"></i>${esc(opt.vlakNaam || '')}</span>` : ''}</div>${opt.noot ? `<p class="noot muted">${opt.noot}</p>` : ''}`;
+      <div class="legend">${series.map(se => `<span><i class="sw lijn" style="background:${se.streep ? `repeating-linear-gradient(90deg, ${se.kleur} 0 5px, transparent 5px 8px)` : se.kleur}"></i>${esc(se.naam)}</span>`).join('')}${opt.vlak ? `<span><i class="sw" style="background:var(--sunk);border:1px solid var(--line)"></i>${esc(opt.vlakNaam || '')}</span>` : ''}</div>${opt.noot ? `<p class="noot muted">${opt.noot}</p>` : ''}`;
     const svg = el.querySelector('svg'), hl = svg.querySelector('.hl');
     const js = [...new Set(alle.map(p => p.j))].sort((a, b) => a - b);
     const zet = e => {
@@ -699,7 +700,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
        { naam: 'Eerste rijbewijs', kort: 'eerste', kleur: 'var(--st-bui)', w: j => rond(m.get(j).eerste) }], { fv: fmt });
     lijnen($('#chRbIndex'), `Groei sinds ${J0}: ${S.g.n} en Nederland`, `alle rijbewijsaanvragen, ${J0} = 100`, jaren,
       [{ naam: S.g.n, kort: S.g.n.length > 12 ? 'gemeente' : S.g.n, kleur: 'var(--st-geb)', w: j => 100 * m.get(j).totaal / m.get(J0).totaal },
-       { naam: 'Nederland', kort: 'NL', kleur: 'var(--st-verw)', streep: true, w: j => nl.has(j) ? 100 * nl.get(j).totaal / nl.get(J0).totaal : null }],
+       { naam: 'Nederland', kort: 'NL', kleur: 'var(--st-bin)', streep: true, w: j => nl.has(j) ? 100 * nl.get(j).totaal / nl.get(J0).totaal : null }],
       { fv: v => nf.format(Math.round(v)), lo: 80, ref: 100 });
     // per leeftijdsgroep
     const gs = mL.groepen.filter(g => g.geldig), max = Math.max(...gs.map(g => g.verl));
@@ -733,7 +734,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     if (heel.length) series.push({ naam: 'Geboren in het ziekenhuis in ' + g.n, kort: 'ziekenhuis', kleur: 'var(--st-geb)', w: j => rs.find(r => r.j === j).zh || null });
     if (deel.length) series.push({ naam: deel.map(o => o.kort).join(', ') + ', alle locaties samen', kort: heel.length ? 'twee locaties' : 'ziekenhuis', kleur: 'var(--st-ovl)', streep: true, w: j => rs.find(r => r.j === j).zd || null });
     if (heel.length && !deel.length) series.push({ naam: 'Geboorteaangiftes, schatting (ziekenhuis plus thuis)', kort: 'aangiftes', kleur: 'var(--st-bui)', w: j => { const r = rs.find(x => x.j === j); return r.aang != null ? rond(r.aang) : null; } });
-    series.push({ naam: 'Geboren inwoners (CBS)', kort: 'inwoners', kleur: 'var(--st-verw)', streep: true, w: j => { const r = rs.find(x => x.j === j); return r.inw; } });
+    series.push({ naam: 'Geboren inwoners (CBS)', kort: 'inwoners', kleur: 'var(--st-bin)', streep: true, w: j => { const r = rs.find(x => x.j === j); return r.inw; } });
     lijnen($('#chGeb'), `Geboortes in ${g.n} en geboren inwoners`, 'kinderen per jaar, 2022–2025', GEB_JAREN, series,
       { fv: v => fmtR(v), leeg: 'Geen cijfers.', noot: eig.length ? 'Ziekenhuis: poliklinisch en klinisch samen. Inwoners: naar woonplaats, ongeacht waar het kind geboren is.' : 'Geen verloskamers in deze gemeente: alleen de geboren inwoners.' });
     const lijst = eig.map(o => `<li><span><b>${esc(o.kort)}</b>, ${esc(o.plaats)}</span><span class="v">${fmtR(o.per[i].z)}</span>${o.noot ? `<span class="n small muted">${esc(o.noot)}</span>` : ''}</li>`).join('');
