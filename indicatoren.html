@@ -343,7 +343,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.17';
+  const VERSIE = '0.17.1';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1601,7 +1601,7 @@ main > * { min-width: 0; }
           niveau: 'Gemeente, wijk.',
           norm: 'Eigen handhavingsbeleid.', vgl: 'Nee.',
           bron: () => 'Personeelsadministratie en roosters; registratie van de handhavers.',
-          ggm: '<code>boa</code> (alleen een sleutel, geen fte of uren); <code>vth_melding.verbalisant</code>, <code>.organisatieonderdeel</code>, <code>.taaktype</code>. Formatie en ingezette uren hebben geen eigen attribuut.',
+          ggm: '<code>boa</code> (alleen een sleutel, geen fte of uren); <code>vth_melding.verbalisant_boa_id</code>, <code>.organisatieonderdeel</code>, <code>.taaktype</code>. Formatie en ingezette uren hebben geen eigen attribuut.',
           herkomst: 'Voorstel atelier.' },
         { k: 'bereik', b: 'intern', akk: 1, naam: 'Meldingen van overlast bij de gemeente',
           def: 'Aantal meldingen van overlast en woonoverlast bij de gemeente, per soort, en de tijd tot afhandeling.',
@@ -1770,7 +1770,7 @@ main > * { min-width: 0; }
           niveau: 'Plan, kavel, gemeente.',
           norm: 'Eigen programma werklocaties; regionale afspraken.', vgl: 'Nee.',
           bron: () => 'Grondexploitatie en planregistratie van de gemeente.',
-          ggm: '<code>plan</code> met opleverdatums; voor niet-woningen in een plan en voor uitgegeven kavels is geen eigen entiteit gevonden.',
+          ggm: 'Geen entiteit gevonden in GGM v2.5.1 voor niet-woningen in een plan of voor uitgegeven kavels; <code>plan</code> heeft alleen opleverdatums en het domein Woningbouwprojecten alleen woningen.',
           herkomst: 'Voorstel atelier.' },
         { k: 'bereik', b: 'intern', naam: 'Doorlooptijd van vergunningen voor ondernemers',
           def: 'Tijd van aanvraag tot besluit bij vergunningen die ondernemers nodig hebben: omgevingsvergunning, exploitatie, terras, evenement, standplaats.',
