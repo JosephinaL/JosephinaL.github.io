@@ -208,6 +208,8 @@ dl.meta { display: grid; grid-template-columns: minmax(7.5em, max-content) minma
 dl.meta dt { color: var(--muted); }
 dl.meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
 @media (max-width: 460px) { dl.meta { grid-template-columns: minmax(0, 1fr); } dl.meta dd { margin-bottom: 4px; } }
+.kaart .akk { margin: 0; font-size: .9rem; color: var(--muted); }
+@media (min-width: 900px) { .kaartpaneel .akk { grid-column: 1 / -1; } }
 .kaart .acties { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; padding-top: 4px; border-top: 1px solid var(--line); }
 
 .uitvraag { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--intern); border-radius: var(--r); padding: 12px 16px; display: grid; gap: 8px; }
@@ -270,7 +272,7 @@ main > * { min-width: 0; }
   <section class="intro">
     <span class="eyebrow">Thema's per Iv3-domein</span>
     <h2 class="groot">Welke indicatoren horen bij een beleidsdomein, en waar staan ze?</h2>
-    <p class="lead">Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden. Bij Publieke dienstverlening, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen zie je met een gekozen gemeente ook de uitkomst, als die open beschikbaar is.</p>
+    <p class="lead">Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden. Bij Publieke dienstverlening, Veiligheid, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen zie je met een gekozen gemeente ook de uitkomst, als die open beschikbaar is.</p>
     <p class="gmregel" id="gmRegel"></p>
     <p class="legenda"><span><i class="open"></i>staat in open data</span><span><i class="keten"></i>ligt bij een ketenpartner</span><span><i class="intern"></i>intern opvragen</span></p>
   </section>
@@ -307,7 +309,7 @@ main > * { min-width: 0; }
         <li><b>Geen volledige lijst.</b> Per domein staan de indicatoren die het meest bijdragen aan een beleidsvraag, niet alles wat te meten is.</li>
         <li><b>Tabelnummers wijzigen.</b> Het CBS publiceert sommige reeksen elk jaar in een nieuwe tabel. Bij een kaart staat het nummer van de laatste stand; de reeks loopt vaak via voorgangers terug.</li>
         <li><b>Het GGM verschilt per domein.</b> Voor de Wmo, de jeugdtoegang en de publieke dienstverlening dekt het de interne indicatoren grotendeels; bij huiselijk geweld ontbreken attributen en voor urgente woningzoekenden is er geen entiteit. Waar iets ontbreekt, staat dat op de kaart.</li>
-        <li><b>Nog in opbouw.</b> Negen thema's zijn uitgewerkt: Publieke dienstverlening, Inkoop (MVOI), zes in het sociaal domein en Wonen. De andere domeinen volgen.</li>
+        <li><b>Nog in opbouw.</b> Tien thema's zijn uitgewerkt: Publieke dienstverlening, Inkoop (MVOI), Veiligheid, zes in het sociaal domein en Wonen. De andere domeinen volgen.</li>
       </ul>
     </div>
     <div class="card meldpunt">
@@ -325,11 +327,11 @@ main > * { min-width: 0; }
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, de Wet versterking regie volkshuisvesting, de Huisvestingswet 2014, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De pagina haalt zelf geen cijfers op. Voor Jeugd ook de Centrale Monitor van het Jeugdstelsel (CBS), de Jeugdmonitor, het Informatieprotocol Beleidsinformatie Jeugd en de open data van DUO over verzuim, voortijdig schoolverlaten en jongeren in een kwetsbare positie; stand 6 november 2026. Voor Publieke dienstverlening ook het domein Dienstverlening van het GGM, het register van toegankelijkheidsverklaringen (digitoegankelijk.nl), de Burgerpeiling (waarstaatjegemeente.nl) en de Algemene wet bestuursrecht; stand 6 november 2026. Voor Schulden en armoede ook Schuldenproblematiek in beeld (CBS), de armoedecijfers en Wsnp-tabellen van het CBS, de Monitor Energiearmoede (TNO en CBS) en de Wet gemeentelijke schuldhulpverlening; stand 6 november 2026. Voor Werk en inkomen ook de Statistiek Re-integratie door Gemeenten en Arbeidsdeelname per gemeente (CBS), de uitkeringen van UWV en de bijstand per maand (CBS), de Participatiewet, de Wet banenafspraak en de GGM-domeinen Inkomen en Werk; stand 7 november 2026. Voor Maatschappelijke opvang en beschermd wonen de Monitor Dakloosheid (CBS, april 2026, cijfers 2023 en 2024), de indeling in centrumregio's (CBS Gebieden in Nederland), de Wmo-cliënten beschermd wonen, de aandachtsgroepen volkshuisvesting, de landelijke schatting dakloze mensen (CBS), de ETHOS-telling (Hogeschool Utrecht en Kansfonds), het Nationaal Actieplan Dakloosheid en het GGM-domein Dak- en thuislozen; stand 7 november 2026. Voor Inkoop het Manifest MVOI 2022–2030 en de deelnemerslijst van PIANOo, de Agenda MVOI 2026–2030 (juli 2026), de Definitiekaart MVOI van KPMG en Significant Synergy (mei 2026), de Handreiking monitoring MVOI van CE Delft en Planet+Partners (mei 2025), de factsheet MVI-zelfevaluatie 2025 (PIANOo), het RIVM-briefrapport over de nationale monitor MVOI (2025-0154), de open aanbestedingsdata van TenderNed en het Iv3-informatievoorschrift; stand 11 november 2026.</p>
-    <p><b>Licentie.</b> CBS, Jeugdmonitor en RIVM: CC BY 4.0. TenderNed: CC0; er zijn geen cijfers overgenomen. Van de deelnemerslijst van PIANOo alleen twee aantallen, met bron. De cijfers uit de Monitor Dakloosheid (aanvullend statistisch onderzoek van het CBS) staan in de pagina, met het CBS als bron. Van DUO zijn geen cijfers overgenomen, alleen verwijzingen. GGM (Gemeente Delft): EUPL-1.2; alleen namen van entiteiten en attributen overgenomen. De teksten op de kaarten vallen onder de gebruiksregel hieronder.</p>
+    <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, de Wet versterking regie volkshuisvesting, de Huisvestingswet 2014, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De pagina haalt zelf geen cijfers op. Voor Jeugd ook de Centrale Monitor van het Jeugdstelsel (CBS), de Jeugdmonitor, het Informatieprotocol Beleidsinformatie Jeugd en de open data van DUO over verzuim, voortijdig schoolverlaten en jongeren in een kwetsbare positie; stand 6 november 2026. Voor Publieke dienstverlening ook het domein Dienstverlening van het GGM, het register van toegankelijkheidsverklaringen (digitoegankelijk.nl), de Burgerpeiling (waarstaatjegemeente.nl) en de Algemene wet bestuursrecht; stand 6 november 2026. Voor Schulden en armoede ook Schuldenproblematiek in beeld (CBS), de armoedecijfers en Wsnp-tabellen van het CBS, de Monitor Energiearmoede (TNO en CBS) en de Wet gemeentelijke schuldhulpverlening; stand 6 november 2026. Voor Werk en inkomen ook de Statistiek Re-integratie door Gemeenten en Arbeidsdeelname per gemeente (CBS), de uitkeringen van UWV en de bijstand per maand (CBS), de Participatiewet, de Wet banenafspraak en de GGM-domeinen Inkomen en Werk; stand 7 november 2026. Voor Maatschappelijke opvang en beschermd wonen de Monitor Dakloosheid (CBS, april 2026, cijfers 2023 en 2024), de indeling in centrumregio's (CBS Gebieden in Nederland), de Wmo-cliënten beschermd wonen, de aandachtsgroepen volkshuisvesting, de landelijke schatting dakloze mensen (CBS), de ETHOS-telling (Hogeschool Utrecht en Kansfonds), het Nationaal Actieplan Dakloosheid en het GGM-domein Dak- en thuislozen; stand 7 november 2026. Voor Inkoop het Manifest MVOI 2022–2030 en de deelnemerslijst van PIANOo, de Agenda MVOI 2026–2030 (juli 2026), de Definitiekaart MVOI van KPMG en Significant Synergy (mei 2026), de Handreiking monitoring MVOI van CE Delft en Planet+Partners (mei 2025), de factsheet MVI-zelfevaluatie 2025 (PIANOo), het RIVM-briefrapport over de nationale monitor MVOI (2025-0154), de open aanbestedingsdata van TenderNed en het Iv3-informatievoorschrift; stand 11 november 2026. Voor Veiligheid de geregistreerde criminaliteit en de Veiligheidsmonitor van het CBS, de open data van de politie over misdrijven en overlast (data.politie.nl), de Politiewet 2012, de Wet veiligheidsregio's en het GGM-domein Veiligheid en Vergunningen; stand 12 november 2026.</p>
+    <p><b>Licentie.</b> CBS, Jeugdmonitor, politie en RIVM: CC BY 4.0. TenderNed: CC0; er zijn geen cijfers overgenomen. Van de deelnemerslijst van PIANOo alleen twee aantallen, met bron. De cijfers uit de Monitor Dakloosheid (aanvullend statistisch onderzoek van het CBS) staan in de pagina, met het CBS als bron. Van DUO zijn geen cijfers overgenomen, alleen verwijzingen. GGM (Gemeente Delft): EUPL-1.2; alleen namen van entiteiten en attributen overgenomen. De teksten op de kaarten vallen onder de gebruiksregel hieronder.</p>
     <p><b>Methode.</b> Per thema de indicatoren in de volgorde van de beleidsketen. Elke kaart geeft definitie, wat de indicator wel en niet zegt, laagste niveau, bron (open, ketenpartner of intern), herkomst, norm en vergelijkbaarheid. Zie "Zo is deze pagina opgebouwd".</p>
-    <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen oordeel over een gemeente en geen ranglijst: bij Publieke dienstverlening, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen staat op een open indicator één regel uit de bron, verder cijferwerk hoort bij de instrumenten. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
-    <p><b>Bekende beperkingen.</b> Negen thema's zijn uitgewerkt (Publieke dienstverlening, Inkoop en maatschappelijk verantwoord opdrachtgeven, Wmo, Jeugd, huiselijk geweld en kindermishandeling, Schulden en armoede, Werk en inkomen, maatschappelijke opvang en beschermd wonen, Wonen). Bij maatschappelijke opvang en beschermd wonen is de uitkomstregel per centrumregio: die taken liggen bij de centrumgemeente. Bij Publieke dienstverlening zijn de meeste indicatoren intern; dat is een eigenschap van het domein, geen gat in de pagina. Bij Inkoop liggen de meeste bij de opdrachtnemer, die per contract rapporteert; de open kaarten uit TenderNed staan op naam van de aanbestedende dienst, niet op gemeentecode. De uitwerking van de Wet versterking regie volkshuisvesting was op 5 november 2026 nog niet definitief. Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
+    <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen oordeel over een gemeente en geen ranglijst: bij Publieke dienstverlening, Veiligheid, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen staat op een open indicator één regel uit de bron, verder cijferwerk hoort bij de instrumenten. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
+    <p><b>Bekende beperkingen.</b> Tien thema's zijn uitgewerkt (Publieke dienstverlening, Inkoop en maatschappelijk verantwoord opdrachtgeven, Veiligheid, Wmo, Jeugd, huiselijk geweld en kindermishandeling, Schulden en armoede, Werk en inkomen, maatschappelijke opvang en beschermd wonen, Wonen). Bij maatschappelijke opvang en beschermd wonen is de uitkomstregel per centrumregio: die taken liggen bij de centrumgemeente. Bij Publieke dienstverlening zijn de meeste indicatoren intern; dat is een eigenschap van het domein, geen gat in de pagina. Bij Inkoop liggen de meeste bij de opdrachtnemer, die per contract rapporteert; de open kaarten uit TenderNed staan op naam van de aanbestedende dienst, niet op gemeentecode. De uitwerking van de Wet versterking regie volkshuisvesting was op 5 november 2026 nog niet definitief. Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Geen officiële publicatie van een gemeente, de VNG of een bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bronnen. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Mis je een indicator of klopt er iets niet? Gebruik de knoppen bij "Mis je een indicator" hierboven, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -341,11 +343,12 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.15.4';
+  const VERSIE = '0.16';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const cbs = id => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${id}/table" target="_blank" rel="noopener">CBS ${id}</a>`;
+  const pol = id => `<a href="https://data.politie.nl/#/Politie/nl/dataset/${id}/table" target="_blank" rel="noopener">Politie ${id}</a>`;
   const jm = id => `<a href="https://jmopendata.cbs.nl/#/JM/nl/dataset/${id}/table" target="_blank" rel="noopener">Jeugdmonitor ${id}</a>`;
   const duoDash = '<a href="https://informatieproducten.duo.rijkscloud.nl/public/dashboardvsvopen/" target="_blank" rel="noopener">DUO, dashboard vsv, neet en jikp</a>';
 
@@ -472,7 +475,7 @@ main > * { min-width: 0; }
           bron: () => 'Eigen zaaksysteem en e-formulieren.',
           ggm: '<code>aanvraagofmelding.kanaal</code>, <code>.soort</code>, <code>.aanvraag_met__formuliersoort_id</code>; <code>formuliersoort.naam</code>; <code>productofdienst.naam</code>.',
           herkomst: 'Voorstel atelier.' },
-        { k: 'bereik', b: 'intern', naam: 'Wachttijd voor de balie',
+        { k: 'bereik', b: 'intern', akk: 1, naam: 'Wachttijd voor de balie',
           def: 'Dagen tussen het maken van een afspraak en de afspraak zelf, en minuten wachten op locatie.',
           zegt: 'Of een inwoner op tijd terechtkan, en of de planning op locatie klopt.',
           niet: 'De eerste vrije plek. Wie een latere datum kiest, telt mee als wachttijd; wie geen plek vond, telt niet mee.',
@@ -1206,7 +1209,7 @@ main > * { min-width: 0; }
           bron: () => 'Eigen registratie vroegsignalering; later landelijk via DDAS (CBS, Divosa, NVVK, VNG).',
           ggm: '<code>vroegsignaal.signaaldatum</code>, <code>.bedrag</code>, <code>.status_enum_id</code>, <code>.verzondendoor_signaalpartner_id</code>; <code>vroegsignaalzaak.datum_opgepakt</code>, <code>.resultaat_enum_id</code>; <code>contactpoging.bereikt</code>, <code>.soort_enum_id</code>.',
           herkomst: 'Wettelijke plicht (Wet gemeentelijke schuldhulpverlening, vroegsignalering sinds 1 januari 2021).' },
-        { k: 'bereik', b: 'intern', naam: 'Tijd tot het eerste gesprek',
+        { k: 'bereik', b: 'intern', akk: 1, naam: 'Tijd tot het eerste gesprek',
           def: 'Dagen tussen aanmelding voor schuldhulp en het eerste gesprek, apart voor dreigende situaties zoals huisuitzetting of afsluiting.',
           zegt: 'Of de gemeente de wettelijke termijnen haalt. Wachten maakt schulden groter.',
           niet: 'Wie na de aanmelding afhaakt.',
@@ -1242,7 +1245,7 @@ main > * { min-width: 0; }
           bron: () => 'Eigen belastingadministratie of die van de belastingsamenwerking.',
           ggm: 'Geen entiteit voor gemeentelijke belastingen of hun kwijtschelding gevonden in GGM v2.5.1. De entiteit <code>kwijtschelding</code> in het domein Inkomen gaat over terugvordering van bijstand, niet over belastingen. Dat is een bevinding voor de uitvraag.',
           herkomst: 'Voorstel atelier.' },
-        { k: 'uitkomst', b: 'intern', naam: 'Afgesloten trajecten: schuldenvrij of stabiel',
+        { k: 'uitkomst', b: 'intern', akk: 1, naam: 'Afgesloten trajecten: schuldenvrij of stabiel',
           def: 'Aandeel afgesloten schuldhulptrajecten dat eindigt met een schuldregeling, een betalingsregeling of een stabiele situatie, tegenover voortijdig gestopt.',
           zegt: 'Wat schuldhulp oplevert: het dichtst bij een uitkomst dat de gemeente zelf kan meten.',
           niet: 'Of het zo blijft. Zie de kaart over drie jaar op rij.',
@@ -1540,6 +1543,164 @@ main > * { min-width: 0; }
           herkomst: 'Voorstel atelier.' }
       ]
     },
+    veiligheid: {
+      tv: '1', kort: 'Veiligheid', naam: 'Veiligheid',
+      taakvelden: '1.1 crisisbeheersing en brandweer · 1.2 openbare orde en veiligheid',
+      scope: 'Openbare orde, overlast en criminaliteit in de gemeente, en wat de gemeente daar zelf aan doet: toezicht en handhaving, bestuurlijke maatregelen van de burgemeester, de bijdrage aan de veiligheidsregio. De raad stelt minstens eens per vier jaar de doelen voor het veiligheidsbeleid vast (Politiewet 2012, artikel 38b). Huiselijk geweld heeft een eigen thema in het sociaal domein; verkeersveiligheid hoort bij taakveld 2.',
+      lees: 'Bijna alles wat open is, komt uit de registratie van de politie. Die telt wat gemeld of gezien is, niet wat er gebeurt: meer aangiften of meer toezicht geeft hogere cijfers. De opsporing is van politie en Openbaar Ministerie; wat de gemeente zelf doet, staat alleen in de eigen administratie. Hoe veilig inwoners zich voelen is voor de meeste gemeenten alleen per politiegebied bekend.',
+      atelier: 'iv3spiegel.html', atelierNaam: 'Iv3-spiegel', tvkort: '1.1 · 1.2',
+      tegel: 'Veiligheid', oms: 'Misdrijven, overlast en veiligheidsgevoel, en wat de gemeente zelf doet aan toezicht en handhaving.',
+      kaarten: [
+        { k: 'context', b: 'open', naam: 'Geregistreerde misdrijven',
+          def: 'Aantal misdrijven dat de politie registreert, per 1.000 inwoners, naar de gemeente waar het gebeurde.',
+          zegt: 'Hoeveel criminaliteit bij de politie in beeld komt en hoe dat zich door de jaren ontwikkelt.',
+          niet: 'Hoeveel criminaliteit er is. Wie geen aangifte doet, telt niet mee; online oplichting en ondermijning blijven grotendeels buiten de registratie. Een gemeente met veel bezoekers, winkels of uitgaan scoort hoger per inwoner zonder onveiliger te zijn voor wie er woont.',
+          niveau: 'Gemeente, per jaar, vanaf 2010. Per maand en per wijk en buurt in de open data van de politie.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt (meldingsbereidheid, bezoekers en inzet van de politie verschillen per gemeente). De laatste twee jaren zijn voorlopig.',
+          bron: () => `${cbs('83648NED')}; per maand ${pol('47013NED')}, per wijk en buurt ${pol('47018NED')}.`,
+          herkomst: 'Voorstel atelier (uitgangspunt voor de andere kaarten).',
+          uit: { b: 'misd', w: x => x.GeregistreerdeMisdrijvenPer1000Inw_3, f: 'd1', l: 'misdrijven per 1.000 inwoners', vl: 1 } },
+        { k: 'context', b: 'open', naam: 'Overlast geregistreerd door de politie',
+          def: 'Aantal registraties van overlast bij de politie: verward gedrag, jeugd, alcohol en drugs, zwervers, openbare dronkenschap en geluidshinder.',
+          zegt: 'Waar de politie voor overlast wordt gebeld of zelf optreedt, en welk soort overlast dat is.',
+          niet: 'Hoeveel overlast inwoners ervaren, en ook niet wat bij de gemeente zelf of bij de woningcorporatie wordt gemeld. Sinds maart 2021 tellen meldingen via 0900-8844 mee; vooral bij verward gedrag komt de stijging daarvandaan.',
+          niveau: 'Gemeente, per maand en per jaar, vanaf 2012; ook per wijk en buurt.',
+          norm: 'Eigen gemeente door de jaren, vanaf 2021.', vgl: 'Beperkt (breuk in 2021; registratie hangt af van wie belt en van de inzet).',
+          bron: () => `${pol('47021NED')}; per wijk en buurt ${pol('47024NED')}.`,
+          herkomst: 'Voorstel atelier.',
+          uit: { b: 'overl', w: x => x.GeregistreerdeOverlast_1, f: 'n', geenNl: 1, l: 'registraties van overlast bij de politie' } },
+        { k: 'context', b: 'open', naam: 'Onveiligheidsgevoel en ervaren overlast',
+          def: 'Aandeel inwoners van 15 jaar en ouder dat zich weleens onveilig voelt, in het algemeen en in de eigen buurt, en het aandeel dat veel overlast ervaart.',
+          zegt: 'Hoe inwoners de veiligheid beleven, los van wat de politie registreert.',
+          niet: 'Iets over de eigen gemeente als die niet apart in de tabel staat. De Veiligheidsmonitor publiceert 59 gemeenten; voor de rest geldt het cijfer van het basisteam of district van de politie, dat meer gemeenten kan omvatten.',
+          niveau: '59 gemeenten; verder basisteam, district en regionale eenheid van de politie. Elke twee jaar: 2021, 2023, 2025.',
+          norm: 'Nederland; eigen gebied door de jaren.', vgl: 'Ja, binnen de marges van een enquête.',
+          bron: () => `${cbs('85146NED')} (Veiligheidsmonitor, kerncijfers); slachtofferschap in ${cbs('85322NED')} en online criminaliteit in ${cbs('85472NED')}. Een gemeente kan met een eigen steekproef meedoen.`,
+          herkomst: 'Landelijke monitor (Veiligheidsmonitor).' },
+        { k: 'context', b: 'keten', naam: 'Beeld van ondermijning',
+          def: 'Beschrijving van georganiseerde criminaliteit in de gemeente: drugs, witwassen, uitbuiting, kwetsbare branches en gebieden.',
+          zegt: 'Waar de onderwereld gebruikmaakt van panden, vergunningen en bedrijven in de gemeente.',
+          niet: 'Een telling. Het is een beeld uit signalen van partners, geen cijfer dat door de jaren te volgen is.',
+          niveau: 'Gemeente of regio, op verzoek opgesteld.',
+          norm: 'Geen.', vgl: 'Nee.',
+          bron: () => 'Regionaal Informatie- en Expertisecentrum (RIEC), samen met politie, Openbaar Ministerie en Belastingdienst.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'inspanning', b: 'open', naam: 'Lasten en baten veiligheid per inwoner',
+          def: 'Lasten en baten op taakveld 1.1 Crisisbeheersing en brandweer en 1.2 Openbare orde en veiligheid, per inwoner.',
+          zegt: 'Wat de gemeente aan veiligheid uitgeeft en hoe dat zich ontwikkelt. Op 1.1 staat vooral de bijdrage aan de veiligheidsregio.',
+          niet: 'Wat veiligheid in totaal kost. De politie betaalt het Rijk; jongerenwerk, zorg en toezicht in de openbare ruimte staan vaak op andere taakvelden.',
+          niveau: 'Gemeente. Begroting en jaarrekening, jaarlijks.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (wat op 1.2 wordt geboekt verschilt per gemeente).',
+          bron: () => 'CBS, onbewerkte Iv3-data gemeenten (<a href="https://dataderden.cbs.nl" target="_blank" rel="noopener">dataderden.cbs.nl</a>).',
+          herkomst: 'Voorstel atelier.',
+          inst: ['iv3spiegel.html', 'Iv3-spiegel'] },
+        { k: 'inspanning', b: 'intern', akk: 1, naam: 'Capaciteit toezicht en handhaving',
+          def: 'Aantal handhavers (boa\'s) in fte en het aantal uren dat zij op straat zijn, per wijk en per tijdvak.',
+          zegt: 'Hoeveel toezicht de gemeente feitelijk levert, en waar en wanneer.',
+          niet: 'Of het toezicht iets oplevert. Meer uren op straat geeft eerst meer waarnemingen en bekeuringen, niet minder overlast.',
+          niveau: 'Gemeente, wijk.',
+          norm: 'Eigen handhavingsbeleid.', vgl: 'Nee.',
+          bron: () => 'Personeelsadministratie en roosters; registratie van de handhavers.',
+          ggm: '<code>boa</code> (alleen een sleutel, geen fte of uren); <code>vth_melding.verbalisant</code>, <code>.organisatieonderdeel</code>, <code>.taaktype</code>. Formatie en ingezette uren hebben geen eigen attribuut.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'intern', akk: 1, naam: 'Meldingen van overlast bij de gemeente',
+          def: 'Aantal meldingen van overlast en woonoverlast bij de gemeente, per soort, en de tijd tot afhandeling.',
+          zegt: 'Waar inwoners de gemeente voor aanspreken en hoe snel er iets mee gebeurt.',
+          niet: 'Hoeveel overlast er is. Een makkelijker meldkanaal geeft meer meldingen; wie het melden heeft opgegeven, telt niet mee.',
+          niveau: 'Adres, buurt, gemeente.',
+          norm: 'Eigen servicenorm voor de afhandeling.', vgl: 'Nee (kanalen en categorieën verschillen per gemeente).',
+          bron: () => `Meldingensysteem van de gemeente. Naast ${pol('47024NED')} te leggen: overlast bij de politie per buurt.`,
+          ggm: '<code>aanvraagofmelding.datumaanmaak</code>, <code>.datumafhandeling</code>, <code>.hoofdcategorie</code>, <code>.kanaal</code>, <code>.status</code>; <code>woonoverlastaanvraagofmelding.locatie</code>; <code>moraanvraagofmelding</code> voor de openbare ruimte.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'intern', naam: 'Handhaving: waarnemingen, waarschuwingen en bekeuringen',
+          def: 'Aantal geconstateerde overtredingen door de handhavers, naar soort overtreding en naar afloop.',
+          zegt: 'Waar de handhaving op uitkomt: parkeren, afval, fietsen, overlast, horeca.',
+          niet: 'Hoeveel overtredingen er zijn. Het aantal volgt de inzet en de prioriteiten van dat jaar.',
+          niveau: 'Straat, wijk, gemeente.',
+          norm: 'Eigen handhavingsbeleid.', vgl: 'Nee.',
+          bron: () => 'Registratie van de handhavers.',
+          ggm: '<code>vth_melding.soortvthmelding</code>, <code>.overtredingsgroep</code>, <code>.overtredingscode</code>, <code>.resultaat</code>, <code>.geseponeerd</code>, <code>.straatnaam</code>.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'intern', naam: 'Bestuurlijke maatregelen van de burgemeester',
+          def: 'Aantal sluitingen van panden, gebiedsverboden, lasten onder dwangsom bij woonoverlast en Bibob-toetsen, per jaar.',
+          zegt: 'Hoe vaak de gemeente haar eigen bevoegdheden inzet tegen drugspanden, overlast en ondermijning.',
+          niet: 'Of het probleem daarmee weg is. Een sluiting kan handel verplaatsen; weinig maatregelen kan ook weinig zicht betekenen.',
+          niveau: 'Gemeente; pand of adres.',
+          norm: 'Eigen beleidsregels (Opiumwet artikel 13b, Gemeentewet, Wet Bibob).', vgl: 'Nee (beleidsregels verschillen per gemeente).',
+          bron: () => 'Zaaksysteem en besluitenregistratie van de gemeente.',
+          ggm: '<code>besluit.datumbesluit</code>, <code>.omschrijving</code> met <code>besluittype</code>; <code>vthzaak</code>. Het soort maatregel heeft geen eigen attribuut: leg vast welk besluittype een sluiting of gebiedsverbod is.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'keten', naam: 'Verwijzingen naar Halt',
+          def: 'Aantal verwijzingen naar Halt per 10.000 jongeren van 12 tot 18 jaar.',
+          zegt: 'Hoeveel jongeren na een licht strafbaar feit buiten het strafrecht om een interventie krijgen.',
+          niet: 'Hoeveel jeugdcriminaliteit er is. Het aantal volgt de keuzes van politie, Openbaar Ministerie en handhavers; sinds 1 juli 2024 gelden andere Halt-feiten en bestaat daarnaast de reprimande.',
+          niveau: 'Gemeente. Jaarlijks.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt (breuk in 2024; verwijsgedrag verschilt per gebied).',
+          bron: () => 'Halt, via <a href="https://www.waarstaatjegemeente.nl" target="_blank" rel="noopener">waarstaatjegemeente.nl</a> (BBV).',
+          herkomst: 'BBV-verplicht.' },
+        { k: 'bereik', b: 'keten', naam: 'Persoonsgerichte aanpak',
+          def: 'Aantal personen of gezinnen met een gezamenlijk plan van zorg, straf en gemeente, en hoeveel daarvan zijn afgesloten.',
+          zegt: 'Hoeveel complexe casussen de partners samen oppakken.',
+          niet: 'Of de aanpak werkt. Daarvoor is nodig dat bij afsluiting wordt vastgelegd wat er bereikt is.',
+          niveau: 'Gemeente, regio van het Zorg- en Veiligheidshuis.',
+          norm: 'Geen.', vgl: 'Nee.',
+          bron: () => 'Zorg- en Veiligheidshuis van de regio.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'keten', naam: 'Opkomsttijd van de brandweer',
+          def: 'Aandeel uitrukken waarbij de brandweer binnen de afgesproken tijd ter plaatse is.',
+          zegt: 'Of de brandweerzorg in de gemeente haalt wat in het dekkingsplan is afgesproken.',
+          niet: 'Hoe veilig de gemeente is voor brand. Preventie, rookmelders en de aard van de bebouwing tellen zwaarder.',
+          niveau: 'Gemeente of verzorgingsgebied van een kazerne. Jaarlijks.',
+          norm: 'Dekkingsplan van de veiligheidsregio, binnen het Besluit veiligheidsregio\'s.', vgl: 'Beperkt (elke regio stelt eigen tijden vast).',
+          bron: () => 'Veiligheidsregio (jaarverslag, dekkingsplan).',
+          herkomst: 'Wettelijke plicht (Wet veiligheidsregio\'s).' },
+        { k: 'bereik', b: 'open', naam: 'Opgehelderde misdrijven',
+          def: 'Aantal opgehelderde misdrijven als percentage van de geregistreerde misdrijven in hetzelfde jaar.',
+          zegt: 'Bij welk deel van de aangiften de politie een verdachte vindt.',
+          niet: 'Iets over de gemeente: de opsporing is van politie en Openbaar Ministerie. Het percentage verschilt sterk per soort misdrijf; een gemeente met veel fietsendiefstal scoort laag.',
+          niveau: 'Gemeente, per jaar, vanaf 2010.',
+          norm: 'Nederland.', vgl: 'Beperkt (hangt af van de mix van misdrijven).',
+          bron: () => `${cbs('83648NED')}.`,
+          herkomst: 'Voorstel atelier.',
+          uit: { b: 'misd', w: x => x.OpgehelderdeMisdrijvenRelatief_5, f: 'pct', l: 'van de geregistreerde misdrijven opgehelderd', vl: 1 } },
+        { k: 'uitkomst', b: 'open', naam: 'Gewelds- en seksuele misdrijven',
+          def: 'Aantal geregistreerde gewelds- en seksuele misdrijven per 1.000 inwoners: mishandeling, bedreiging, stalking, zedenmisdrijven, levensmisdrijven.',
+          zegt: 'Hoeveel geweld bij de politie in beeld komt.',
+          niet: 'Hoeveel geweld er is. Huiselijk en seksueel geweld wordt weinig aangegeven. De regeling noemt de indicator nog geweldsmisdrijven; het CBS telt de seksuele misdrijven erbij.',
+          niveau: 'Gemeente, per jaar, vanaf 2010.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt (aangiftebereidheid; uitgaansgebieden).',
+          bron: () => `${cbs('83648NED')}, soort misdrijf 3; ook op <a href="https://www.waarstaatjegemeente.nl" target="_blank" rel="noopener">waarstaatjegemeente.nl</a>.`,
+          herkomst: 'BBV-verplicht.',
+          uit: { b: 'gew', w: x => x.GeregistreerdeMisdrijvenPer1000Inw_3, f: 'd1', l: 'per 1.000 inwoners', vl: 1 } },
+        { k: 'uitkomst', b: 'open', naam: 'Diefstallen uit woning',
+          def: 'Aantal geregistreerde diefstallen en inbraken uit woningen per 1.000 inwoners, pogingen meegeteld.',
+          zegt: 'Hoe vaak er wordt ingebroken; een van de best geregistreerde misdrijven, omdat de verzekering een aangifte vraagt.',
+          niet: 'Het risico per woning: de noemer is inwoners, niet woningen.',
+          niveau: 'Gemeente, per jaar, vanaf 2010; per buurt in de open data van de politie.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `${cbs('83651NED')}; per wijk en buurt ${pol('47018NED')}.`,
+          herkomst: 'BBV-verplicht.',
+          uit: { b: 'inbr', w: x => x.GeregistreerdeDiefstallenPer1000Inw_3, f: 'd1', l: 'per 1.000 inwoners', vl: 1 } },
+        { k: 'uitkomst', b: 'open', naam: 'Winkeldiefstallen',
+          def: 'Aantal geregistreerde winkeldiefstallen per 1.000 inwoners.',
+          zegt: 'Hoeveel winkeldiefstal winkeliers aangeven.',
+          niet: 'Hoeveel er gestolen wordt. Het cijfer volgt het aantal winkels, de aangiftebereidheid van winkeliers en het toezicht in de winkel. Een gemeente met een groot winkelgebied scoort hoog per inwoner.',
+          niveau: 'Gemeente, per jaar, vanaf 2010.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (omvang van het winkelgebied).',
+          bron: () => `${cbs('83651NED')}.`,
+          herkomst: 'BBV-verplicht.',
+          uit: { b: 'wink', w: x => x.GeregistreerdeDiefstallenPer1000Inw_3, f: 'd1', l: 'per 1.000 inwoners', vl: 1 } },
+        { k: 'uitkomst', b: 'open', naam: 'Vernielingen en misdrijven tegen de openbare orde',
+          def: 'Aantal geregistreerde vernielingen, brandstichtingen en misdrijven tegen de openbare orde en het openbaar gezag per 1.000 inwoners.',
+          zegt: 'Hoeveel vernieling en ordeverstoring bij de politie in beeld komt.',
+          niet: 'Alleen vernieling in de openbare ruimte, zoals de naam in de regeling zegt. Ook schade aan auto\'s, huisvredebreuk en computervredebreuk tellen mee. Schade die de gemeente zelf herstelt zonder aangifte, telt niet.',
+          niveau: 'Gemeente, per jaar, vanaf 2010.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt (aangiftebereidheid).',
+          bron: () => `${cbs('83648NED')}, soort misdrijf 2.`,
+          herkomst: 'BBV-verplicht.',
+          uit: { b: 'vern', w: x => x.GeregistreerdeMisdrijvenPer1000Inw_3, f: 'd1', l: 'per 1.000 inwoners', vl: 1 } }
+      ]
+    },
     wonen: {
       tv: '8', kort: 'Wonen', naam: 'Wonen',
       taakvelden: '8.1 ruimtelijke ordening · 8.2 grondexploitatie · 8.3 wonen en bouwen',
@@ -1635,7 +1796,7 @@ main > * { min-width: 0; }
           norm: 'Eigen gemeente door de jaren; vergunde nieuwbouw uit de BAG als controle.', vgl: 'Beperkt (alleen wat gemeenten aan het CBS melden, zonder bijschatting; wijkt per gemeente sterk af van de BAG; bouwsom vanaf € 50.000).',
           bron: () => `${cbs('83671NED')}; ter controle ${cbs('86098NED')}.`,
           herkomst: 'Voorstel atelier.' },
-        { k: 'bereik', b: 'intern', naam: 'Betaalbare woningen in de nieuwbouw',
+        { k: 'bereik', b: 'intern', akk: 1, naam: 'Betaalbare woningen in de nieuwbouw',
           def: 'Aandeel nieuwe woningen in sociale huur, middenhuur en betaalbare koop.',
           zegt: 'Of de plannen bijdragen aan de betaalbaarheidsafspraak van de regio.',
           niet: 'Of het zo blijft. Dat hangt af van de borging in omgevingsplan en contracten.',
@@ -1644,6 +1805,15 @@ main > * { min-width: 0; }
           bron: () => `Eigen planregistratie. Ter vergelijking ${cbs('86084NED')}: nieuwbouw naar huur tot de liberalisatiegrens en koop tot de NHG-grens.`,
           ggm: '<code>huurwoningen.huurprijs</code>; <code>koopwoningen.koopprijs</code>; <code>studentenwoningen.huurprijs</code>; <code>gebouw.aantal</code>. De woningbouwcategorie heeft geen eigen attribuut: leid haar af uit de prijs.',
           herkomst: 'Wettelijke plicht (Wet versterking regie volkshuisvesting).' },
+        { k: 'bereik', b: 'intern', akk: 1, naam: 'Woningen voor studenten, ouderen en tijdelijke bewoning',
+          def: 'Aantal opgeleverde en geplande woningen dat voor een doelgroep is bestemd: studenten, ouderen (geclusterd of zorggeschikt), flex- en tijdelijke woningen, standplaatsen.',
+          zegt: 'Of de bouw aansluit op de groepen waarvoor het akkoord of het volkshuisvestingsprogramma een aantal noemt.',
+          niet: 'Wie er woont. Een studentenwoning is een afspraak over verhuur, geen kenmerk van het gebouw; na oplevering volgt alleen de verhuurder of de bestemming blijft.',
+          niveau: 'Plan, gemeente. De BAG kent deze soorten niet; open data telt ze niet per gemeente.',
+          norm: 'Eigen woningbouwprogramma; regionale afspraken (woondeal).', vgl: 'Nee (elke gemeente bakent de doelgroepen zelf af).',
+          bron: () => 'Eigen planregistratie en prestatieafspraken met corporaties en studentenhuisvesters.',
+          ggm: '<code>studentenwoningen.huurprijs</code>, <code>.zelfstandig</code>; <code>plan.eersteoplevering</code>, <code>.laatsteoplevering</code>; <code>standplaats</code>. Voor ouderen-, zorg- en flexwoningen is er geen eigen entiteit.',
+          herkomst: 'Wettelijke plicht (Wet versterking regie volkshuisvesting: aandachtsgroepen en ouderen in het volkshuisvestingsprogramma).' },
         { k: 'bereik', b: 'intern', naam: 'Woningen voor urgent woningzoekenden',
           def: 'Aantal toegewezen woningen aan urgent woningzoekenden, per urgentiecategorie.',
           zegt: 'Of de gemeente de groepen huisvest die de wet aanwijst, zoals mensen die uit opvang of beschermd wonen komen.',
@@ -1787,6 +1957,12 @@ main > * { min-width: 0; }
     re: { api: CBSAPI, t: '85588NED', geo: 'RegioS', per: 'MM12', extra: "TypeReIntegratieParticipatievoorz eq 'T001535' and StatusVoorziening eq 'A048171'" },
     agv: { api: CBSAPI, t: '85980NED', geo: 'RegioS', per: 'MM12', extra: "Kenmerken eq 'T001038' and AandachtsgroepVolkshuisvesting eq 'T001692'" },
     bwon: { api: CBSAPI, t: '85896NED', geo: 'RegioS', per: 'JJ', extra: "Geslacht eq 'T001038' and KenmerkenVanPersonen eq 'T009002' and TypeMaatwerkvoorziening eq 'A048196'" },
+    misd: { api: CBSAPI, t: '83648NED', geo: 'RegioS', per: 'JJ', extra: "SoortMisdrijf eq 'T001161'" },
+    gew: { api: CBSAPI, t: '83648NED', geo: 'RegioS', per: 'JJ', extra: "SoortMisdrijf eq 'CRI3000'" },
+    vern: { api: CBSAPI, t: '83648NED', geo: 'RegioS', per: 'JJ', extra: "SoortMisdrijf eq 'CRI2000'" },
+    inbr: { api: CBSAPI, t: '83651NED', geo: 'RegioS', per: 'JJ', extra: "GebruikVanGeweld eq 'T001540' and SoortDiefstal eq 'CRI1135'" },
+    wink: { api: CBSAPI, t: '83651NED', geo: 'RegioS', per: 'JJ', extra: "GebruikVanGeweld eq 'T001540' and SoortDiefstal eq 'CRI1137'" },
+    overl: { api: JMAPI, t: '47021NED', geo: 'RegioS', per: 'JJ', extra: "Overlast eq '0.0.0 '" },
     bw: { api: CBSAPI, t: '85588NED', geo: 'RegioS', per: 'MM12', extra: "TypeReIntegratieParticipatievoorz eq 'A047998' and StatusVoorziening eq 'A048171'" }
   };
   const UCACHE = {};
@@ -1809,7 +1985,7 @@ main > * { min-width: 0; }
       .catch(e => { delete UCACHE[k]; throw e; })
       .finally(() => clearTimeout(to)));
   }
-  const uFmt = (v, f) => v == null ? '–' : f === 'eur' ? '€ ' + Math.round(v).toLocaleString('nl-NL') : f === 'pct0' ? Math.round(v).toLocaleString('nl-NL') + '%' : f === 'pct' ? v.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%' : f === 'p2' ? v.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : Math.round(v).toLocaleString('nl-NL');
+  const uFmt = (v, f) => v == null ? '–' : f === 'eur' ? '€ ' + Math.round(v).toLocaleString('nl-NL') : f === 'pct0' ? Math.round(v).toLocaleString('nl-NL') + '%' : f === 'pct' ? v.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%' : f === 'd1' ? v.toLocaleString('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : f === 'p2' ? v.toLocaleString('nl-NL', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : Math.round(v).toLocaleString('nl-NL');
   // ---------- uitkomst per centrumregio (thema Opvang en beschermd wonen) ----------
   // CBS Monitor Dakloosheid, tabel 2 (april 2026): [personen, per 1.000 inwoners in de regio], sleutel = GM-code van de centrumgemeente
   const MON = {
@@ -1870,6 +2046,7 @@ main > * { min-width: 0; }
       const j = jaren[jaren.length - 1], v = c.uit.w(d.gm[j]), n = d.nl[j] && !c.uit.geenNl ? c.uit.w(d.nl[j]) : null;
       const lab = c.uit.sj ? `${j}/${String(j + 1).slice(2)}` : c.uit.dec ? `december ${j}` : j;
       const nu = Math.max(...Object.keys(d.gm).map(Number));
+      if (c.uit.vl && j < nu - 1) { el.className = 'uitkomst stil'; el.textContent = `Geen recent cijfer voor ${naam}: te klein aantal.`; return; } // geen oud jaar als laatste stand
       el.innerHTML = `<b>${esc(naam)} ${lab}${c.uit.vl && j === nu ? ' (voorlopig)' : ''}</b><span class="uw">${uFmt(v, c.uit.f)}</span> <span>${esc(c.uit.l)}</span>${n != null ? `<span class="un">Nederland ${uFmt(n, c.uit.f)}</span>` : ''}`;
     } catch (e) { el.remove(); } // stille terugval: de kaart blijft zonder cijfer
   }
@@ -1889,6 +2066,7 @@ main > * { min-width: 0; }
         ${rij('Gegevensobject', c.ggm || '')}
         ${rij('Herkomst', esc(c.herkomst))}
       </dl>
+      ${c.akk ? `<p class="akk">Staat vaak als doel in een coalitieakkoord. Dit cijfer komt uit de eigen administratie; welke doelen open data wel volgt, staat in de <a href="${esc(instLink('akkoordvolger.html'))}">Akkoordvolger per gemeente</a>.</p>` : ''}
       <div class="acties">${inst}<button type="button" class="btn klein" data-sluit>Sluiten</button></div>
     </article>`;
   }
@@ -1932,7 +2110,7 @@ main > * { min-width: 0; }
     $('#gmInput').value = S.gm ? byCode.get(S.gm).n : '';
     $('#gmRegel').textContent = S.gm
       ? `De indicatoren zijn voor elke gemeente gelijk. Bij Publieke dienstverlening, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen staat de uitkomst voor ${byCode.get(S.gm).n} erbij, en links openen op die gemeente.`
-      : 'Kies je hierboven een gemeente, dan openen de links op die gemeente en zie je bij Publieke dienstverlening, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen de uitkomst. De indicatoren zelf zijn voor elke gemeente gelijk.';
+      : 'Kies je hierboven een gemeente, dan openen de links op die gemeente en zie je bij Publieke dienstverlening, Veiligheid, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen de uitkomst. De indicatoren zelf zijn voor elke gemeente gelijk.';
     const d = S.d ? D[S.d] : null;
     $('#overzicht').hidden = !!d; $('#detail').hidden = !d; $('#kruimel').hidden = !d;
     renderMeld(d);
