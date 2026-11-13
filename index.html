@@ -7,6 +7,9 @@
 <meta name="description" content="Open Data Atelier van Josephine Linders: domeinoverstijgende informatieanalyse voor gemeenten. Open data, laag voor laag, tot een antwoord dat te gebruiken is.">
 <meta name="author" content="Josephine Linders">
 <link rel="stylesheet" href="fonts/fonts.css">
+<link rel="icon" type="image/svg+xml" href="beeldmerk/beeldmerk-stil.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
+<link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
 <style>
 /* Persoonlijke site: smalle leeskolom, één gelaagd beeld in de opening, producten als dossierkaarten. */
 :root {
@@ -59,6 +62,14 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outlin
 header.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; padding-block: 22px 18px; border-bottom: 1px solid var(--line); }
 .name { font-family: var(--f-display); font-weight: 750; font-size: 1.15rem; color: var(--accent); text-decoration: none; line-height: 1.15; }
 .name .sig { display: block; font-family: var(--f-body); font-weight: 400; font-size: .82rem; color: var(--muted); letter-spacing: .01em; }
+.name { display: inline-flex; align-items: center; gap: 12px; }
+.name .merk { width: 46px; height: 46px; flex: none; display: block; }
+.name .merk img { width: 100%; height: 100%; display: block; }
+.name .tekst { display: block; }
+.name .merk.beweegt { position: relative; }
+/* het bewegende merk: beginstand valt precies op het stilstaande merk, de beweging mag buiten het vak */
+.name .merk.beweegt img { position: absolute; left: -2.95px; top: 0; width: 52px; height: 61.2px; }
+@media (prefers-reduced-motion: reduce) { .name .merk.beweegt img { position: static; width: 100%; height: 100%; } }
 nav { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; font-size: .95rem; }
 nav a { color: var(--muted); text-decoration: none; }
 nav a:hover { color: var(--accent); }
@@ -207,7 +218,7 @@ main > * { min-width: 0; }
 <a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
 <div class="page">
   <header class="top">
-    <a class="name" href="./">Open Data Atelier<span class="sig">Josephine Linders</span></a>
+    <a class="name" href="./"><picture class="merk beweegt"><source srcset="beeldmerk/beeldmerk-stil.svg" media="(prefers-reduced-motion: reduce)"><img src="beeldmerk/beeldmerk.svg" alt="" width="46" height="46"></picture><span class="tekst">Open Data Atelier<span class="sig">Josephine Linders</span></span></a>
     <nav aria-label="Hoofdmenu">
       <a href="#producten">Instrumenten</a>
       <a href="indicatoren.html">Indicatoren belicht</a>
