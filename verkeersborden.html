@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>De verkeersbordenregistratie · Open Data Atelier</title>
+<link rel="icon" type="image/svg+xml" href="beeldmerk/beeldmerk-stil.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
+<link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Hoe actueel het landelijke bestand van verkeersborden is: wanneer de borden het laatst zijn gezien en hoeveel de wegbeheerder zelf heeft gecontroleerd, per Nederlandse gemeente.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --tegen: #d2462c; --onderweg: #c98a12; --opval: #5b6fa8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --tegen: #ef6a4f; --onderweg: #e2ab3f; --opval: #93a5dc; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --tegen: #ef6a4f; --onderweg: #e2ab3f; --opval: #93a5dc; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.info { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; font-size: .9rem; }
+.info p { margin: 0; max-width: 90ch; }
+.info p + p { margin-top: 6px; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.groep { display: grid; gap: 10px; padding-top: 8px; }
+.groepkop { display: grid; gap: 2px; border-left: 4px solid var(--kleur); padding-left: 10px; }
+.groepkop p { margin: 0; max-width: 80ch; }
+.kaarten { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.ctl { background: var(--surface); border: 1px solid var(--line); border-top: 3px solid var(--kleur); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.ctl .getal { font-family: var(--f-display); font-stretch: 85%; font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.ctl .getal.nul { color: var(--muted); }
+.ctl p { margin: 0; font-size: .9rem; }
+.ctl .ref { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.ctl .acties { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.ctl .acties a.btn { text-decoration: none; }
+.lijst { grid-column: 1 / -1; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+.lijst .kop { display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.scroll { overflow: auto; max-height: 520px; }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; white-space: nowrap; z-index: 1; }
+td.id { font-family: var(--f-mono); font-size: .8rem; white-space: nowrap; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+/* De verkeersbordenregistratie */
+.ondertitel { font-size: .95rem; color: var(--muted); max-width: 60ch; }
+.kaarten { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.kaarten.breed { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.ctl { --kleur: var(--accent); }
+.groepkop { --kleur: var(--onderweg); }
+#sig .ctl { --kleur: var(--onderweg); }
+.blok { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 12px; min-width: 0; }
+.blok > p { margin: 0; max-width: 84ch; }
+.leesregel { font-size: .88rem; color: var(--muted); border-left: 3px solid var(--line); padding-left: 10px; }
+.blok .scroll { max-height: none; }
+tr.sub td { border-top: 2px solid var(--line); }
+tr.nl td { color: var(--muted); }
+td.r { white-space: nowrap; }
+.stapel { display: flex; height: 14px; border-radius: 3px; overflow: hidden; background: var(--sunk); min-width: 120px; }
+.stapel i { display: block; height: 100%; }
+.stapel .s0 { background: var(--tegen); } .stapel .s1 { background: var(--onderweg); } .stapel .s2 { background: var(--accent); }
+.legenda { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .82rem; color: var(--muted); }
+.legenda span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; background: var(--k); }
+.acties { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+@media (max-width: 640px) { th, td { padding: 6px 6px; } .nlkol, .stapelkol { display: none; } }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="registraties.html">← Open Data Atelier · Registraties belicht</a>
+      <span class="eyebrow">Wegen en verkeer · open data</span>
+      <h1 id="title">De verkeersbordenregistratie</h1>
+      <span class="ondertitel">Hoe actueel het landelijke bestand van verkeersborden is, per gemeente</span>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Alle verkeersborden langs de Nederlandse wegen staan in één landelijk bestand, dat het Nationaal Dataportaal Wegverkeer (NDW) als open data publiceert. Hoe actueel is dat bestand voor je gemeente? Kies een gemeente. Je ziet wanneer de borden het laatst zijn gezien, en hoeveel de wegbeheerder zelf heeft gecontroleerd, naast heel Nederland.</p>
+    <p class="muted small">Een bord dat lang niet is gezien, kan er gewoon staan. Deze pagina zegt iets over het bestand, niet over de borden op straat.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <div class="info" id="melding" role="status" hidden><p id="meldingTekst"></p></div>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="info"><p><b>Lees dit eerst.</b> Het grootste deel van het bestand komt uit een landelijke inwinning met camerabeelden van alle wegen; daarbij zijn de meeste borden voor het laatst gezien in 2022. Sindsdien blijft een bord alleen actueel als de wegbeheerder het zelf bijhoudt, in de applicatie George van NDW, of als het opnieuw wordt ingewonnen. Wie de borden langs een weg bijhoudt, is de beheerder van die weg: de gemeente voor haar eigen wegen, de provincie, het waterschap of Rijkswaterstaat voor de hunne.</p>
+        <p class="small muted" id="stand"></p></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een andere afbakening.</b> De kerncijfers gaan over borden langs wegen die de gemeente beheert, volgens het Nationaal Wegenbestand (NWB). Borden langs wegen van de provincie, het waterschap of Rijkswaterstaat staan in de tabel apart.</li>
+          <li><b>Een andere stand.</b> Het bordenbestand is opgehaald op <span class="opgehaald"></span>; de wegbeheerders komen uit het NWB van <span class="nwbdatum"></span>. Een controle in George van na die datum staat er nog niet in.</li>
+          <li><b>Een bord aan een ander wegvak.</b> Een bord hangt aan het wegvak waar het bij is ingewonnen. Bestaat dat wegvak niet meer in het NWB, dan telt het bord bij de gemeente uit het bordenbestand, en niet bij een wegbeheerder.</li>
+          <li><b>Een fout in deze bewerking.</b> Klopt een getal niet met wat je in George ziet, dan kan de fout hier zitten. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data door Josephine Linders, op eigen titel. Het is geen officiële publicatie van een gemeente, NDW of Rijkswaterstaat. Voor het actuele beeld van de borden geldt George van NDW.</p>
+        <div class="meld">
+          <span>Fout gezien, of een uitkomst die je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <div class="kaarten" id="kern"></div>
+
+      <section class="blok" aria-labelledby="h-tab">
+        <h2 id="h-tab">Wanneer de borden het laatst zijn gezien</h2>
+        <div class="legenda"><span style="--k: var(--tegen)">2022 of eerder</span><span style="--k: var(--onderweg)">2023</span><span style="--k: var(--accent)">2024 of later</span></div>
+        <div class="scroll"><table id="tab"></table></div>
+        <p class="leesregel" id="lees"></p>
+      </section>
+
+      <section class="groep" aria-labelledby="h-sig">
+        <div class="groepkop"><h2 id="h-sig">Wat in het bestand opvalt</h2><p class="small muted">Signalen voor wie de borden bijhoudt. Een signaal is een vraag, geen fout.</p></div>
+        <div class="kaarten breed" id="sig"></div>
+      </section>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Borden</b>: alle borden met de status geplaatst in het bestand verkeersborden actueel beeld van NDW.</li>
+            <li><b>Gemeente</b>: de gemeente van het wegvak waar het bord bij hoort, volgens het NWB; staat het wegvak niet in het NWB, dan de gemeente uit het bordenbestand.</li>
+            <li><b>Langs wegen van de gemeente</b>: het wegvak heeft in het NWB de gemeente als wegbeheerder.</li>
+            <li><b>Laatst gezien</b>: het jaar van de laatste waarneming of controle van het bord.</li>
+            <li><b>Gecontroleerd</b>: de wegbeheerder heeft het bord in George als gecontroleerd gemarkeerd.</li>
+            <li><b>Nederland</b>: alles samen, geen gemiddelde van gemeenten.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Geen oordeel over de straat</b>: een bord dat sinds 2022 niet is gezien, kan er gewoon staan, en een verdwenen bord kan nog in het bestand staan.</li>
+            <li><b>Geen ranglijst</b>: de pagina zet je gemeente naast Nederland, niet naast andere gemeenten.</li>
+            <li><b>Geen lijst per bord</b>: die staat in George en op het open-dataportaal van NDW.</li>
+            <li><b>Niet elke gemeente werkt in George</b>: een gemeente kan haar borden ook in een eigen beheersysteem bijhouden zonder ze aan NDW te leveren.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><a href="indicatoren.html#domein=verkeer" class="lnkI">Indicatoren belicht, Wegen en verkeersveiligheid</a>: wat je over wegen per gemeente kunt meten, onder meer het aandeel 30 km/u uit dezelfde wegkenmerken.</li>
+            <li><a href="bagkwaliteit.html" class="lnkQ">Kwaliteit van de BAG</a>: signalen over een andere registratie die gemeenten zelf bijhouden.</li>
+            <li><a href="https://opendata.ndw.nu/" target="_blank" rel="noopener">Open-dataportaal van NDW</a>: het volledige bordenbestand, met een foto per bord.</li>
+          </ul>
+          <div class="acties"><button class="btn linkish" type="button" id="kernCsv">Download de cijfers (CSV)</button></div>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Verkeersborden: NDW, verkeersborden actueel beeld (<a href="https://opendata.ndw.nu/">opendata.ndw.nu</a>), dagelijks bijgewerkt. Wegbeheerder en gemeente per wegvak: het Nationaal Wegenbestand (NWB) in de dienst maximum_snelheden_wegen van Rijkswaterstaat. De datum van het bordenbestand en de versie van het NWB staan na de gemeentekeuze op de pagina. Vooraf geteld per gemeente; maandelijks ververst, pas gepubliceerd na controle.</p>
+    <p><b>Licentie.</b> NDW-open data: CC0 (gebruiksvoorwaarden open data van NDW). NWB en wegkenmerken: publiek domein. Deze pagina is een afgeleid bestand, geen bordenregister.</p>
+    <p><b>Methode.</b> Per bord het jaar van de laatste waarneming en of de wegbeheerder het heeft gecontroleerd, geteld per gemeente, voor borden langs wegen van de gemeente en voor alle borden binnen de gemeente. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen inventaris van de borden op straat en geen oordeel over het onderhoud van borden of wegen. Geen toets of een bord er hoort te staan. Geen ranglijst en geen oordeel over een gemeente.</p>
+    <p><b>Bekende beperkingen.</b> Een bord hangt aan het wegvak van de inwinning; een deel van die wegvakken staat niet meer in het huidige NWB. Borden zonder wegvak in het NWB die nog onder de code van een bij een herindeling opgeheven gemeente staan (<span id="oudN">enkele honderden</span>), tellen alleen mee in Nederland; borden zonder wegvak en zonder gemeentecode tellen niet mee. Of een gemeente haar borden buiten George bijhoudt, staat niet in de open data.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de bronhouder.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de inleiding het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="registraties.html">← Terug naar Registraties belicht</a></p>
+  </section>
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '0.1';
+  const PRODUCT = 'De verkeersbordenregistratie';
+  // NDW, verkeersborden actueel beeld, per gemeente (recept recepten/verkeersborden/):
+  // code: A = alle borden binnen de gemeente; G = langs wegen van de gemeente; per groep
+  // [aantal, laatst gezien t/m 2022, in 2023, in 2024 of later, gecontroleerd, RVV-code onbekend]; daarna [laatste controle jjjjmmdd, zonder wegvak in het NWB, onder een andere gemeentecode]
+  const VB = { opgehaald: '2026-11-15', nwb: '2026-08-01', d: "14:20341,16271,1661,2409,31,943;15776,11883,1582,2311,24,41;20250804,3275,0|34:17807,13995,517,3295,70,6;13618,10828,388,2402,65,0;20260923,2750,0|37:3721,3320,93,308,0,102;2723,2334,91,298,0,18;0,648,0|47:3428,3054,131,243,0,84;2624,2279,107,238,0,9;0,548,0|50:3510,3149,169,192,0,99;2167,1917,93,157,0,2;0,463,0|59:2669,2092,147,430,0,71;1873,1354,134,385,0,2;0,447,0|60:928,685,69,174,0,27;788,545,69,174,0,2;0,140,0|72:1618,1304,98,216,0,168;1191,883,93,215,0,9;0,243,0|74:5707,4749,273,685,0,206;4227,3398,245,584,0,4;0,886,0|80:12570,10000,715,1855,479,761;9903,7513,660,1730,397,135;20261104,1887,0|85:2689,2165,125,399,0,78;1673,1241,96,336,0,1;0,381,0|86:2921,2228,217,476,0,94;2106,1500,195,411,0,2;0,342,0|88:120,99,1,20,0,2;95,75,1,19,0,1;0,25,0|90:3972,3309,166,497,2,347;2817,2203,136,478,2,13;20261104,841,0|93:958,824,51,83,0,32;811,679,51,81,0,3;0,128,0|96:136,103,5,28,0,6;104,71,5,28,0,1;0,32,0|98:2579,1924,155,500,11,52;1905,1318,130,457,10,0;20260714,285,0|106:7129,6064,397,668,22,277;5848,4816,386,646,22,6;20251210,1099,0|109:5861,5073,334,454,4,109;4224,3530,271,423,4,14;20250507,663,0|114:11147,9624,300,1223,5,375;8770,7346,245,1179,5,10;20240605,1731,0|118:5838,5003,263,572,0,270;4544,3767,245,532,0,12;0,978,0|119:3770,3104,304,362,2,127;2689,2073,278,338,2,1;20250805,723,0|141:10865,9127,433,1305,9,660;8674,7020,389,1265,8,105;20260224,1863,0|147:2927,623,43,2261,103,89;2317,121,21,2175,103,2;20260826,189,0|148:3718,2888,190,640,214,11;2651,1908,167,576,201,1;20260729,397,0|150:8814,7309,542,963,0,351;6855,5444,528,883,0,3;0,1315,0|153:13422,11369,894,1159,6,893;10441,8485,859,1097,4,394;20260225,2451,0|158:3608,3101,180,327,0,107;2921,2429,171,321,0,22;0,428,0|160:7890,6817,325,748,0,192;5573,4616,259,698,0,14;0,1317,1|163:4751,3740,282,729,4,207;3825,2846,271,708,4,5;20250121,570,0|164:9229,7369,775,1085,0,571;7653,5866,749,1038,0,177;0,1201,0|166:4711,3767,483,461,16,171;3375,2530,435,410,15,5;20260205,697,0|168:3849,401,15,3433,3315,6;3149,0,0,3149,3149,0;20261113,24,0|171:7148,5593,306,1249,770,100;4250,2951,186,1113,728,6;20260916,797,0|173:4121,3543,252,326,2,191;3069,2551,224,294,2,21;20250207,608,0|175:3626,2984,216,426,0,104;2702,2098,192,412,0,17;0,484,0|177:4159,3413,187,559,0,140;3004,2315,168,521,0,9;0,600,0|180:2220,1844,115,261,1,57;1706,1368,101,237,1,6;20251027,168,0|183:3620,2858,294,468,0,79;2592,1879,280,433,0,9;0,419,0|184:1633,1380,118,135,3,36;1367,1117,117,133,3,5;20250430,199,0|189:3840,3192,254,394,0,92;2798,2245,211,342,0,7;0,489,0|193:13014,10992,585,1437,33,686;10214,8232,559,1423,33,15;20260316,2241,0|197:3719,3024,285,410,0,74;2796,2141,268,387,0,2;0,443,0|200:14987,12276,820,1891,838,574;10917,8413,773,1731,781,39;20261110,2144,0|202:14662,12124,1263,1275,0,522;11283,8848,1213,1222,0,13;0,2139,0|203:8698,7048,762,888,14,281;6506,5022,698,786,14,6;20261027,1089,0|209:2609,1924,134,551,89,53;1923,1304,125,494,75,0;20261112,236,0|213:2625,2110,152,363,0,59;1982,1501,133,348,0,25;0,306,0|214:3352,642,48,2662,0,5;2632,7,2,2623,0,0;0,14,0|216:3261,353,8,2900,13,106;2888,94,1,2793,13,18;20251016,117,0|221:1429,1148,90,191,0,55;1054,790,81,183,0,4;0,215,0|222:6189,5003,426,760,4,350;4856,3738,395,723,4,126;20260715,836,0|225:1724,1342,81,301,153,46;1404,1034,69,301,153,6;20260922,233,0|226:3296,2808,133,355,44,74;2545,2097,115,333,43,5;20250424,476,0|228:10758,8843,528,1387,0,421;7663,5932,450,1281,0,29;0,1614,0|230:3284,2594,339,351,11,50;2397,1752,318,327,11,4;20251008,355,0|232:4290,3399,429,462,1,113;3421,2582,407,432,1,6;20250129,477,0|233:3176,2614,173,389,1,145;2340,1809,158,373,1,20;20260108,534,0|243:4981,4031,326,624,1,269;3693,2822,306,565,1,24;20260909,834,0|244:1619,1303,126,190,1,89;1261,965,118,178,1,16;20260930,232,0|246:2531,2080,133,318,0,96;2004,1588,123,293,0,4;0,389,0|252:2204,1856,100,248,5,31;1460,1153,90,217,4,6;20260818,272,0|262:4340,3430,310,600,0,158;2957,2127,272,558,0,8;0,631,0|263:3515,2904,182,429,0,143;2515,1957,151,407,0,14;0,396,0|267:4711,3936,253,522,0,397;3241,2527,226,488,0,13;0,1013,0|268:13927,11397,1106,1424,2,571;11172,8713,1074,1385,2,33;20260415,2552,0|269:2992,2248,117,627,126,76;2284,1600,97,587,124,1;20250813,390,0|273:2992,2447,170,375,63,71;2171,1688,144,339,62,2;20260901,333,0|274:3860,3288,226,346,2,131;2753,2223,208,322,2,3;20261110,547,0|275:4842,3981,297,564,0,227;3546,2768,270,508,0,22;0,747,0|277:325,285,10,30,0,9;192,156,6,30,0,2;0,36,0|279:1138,973,49,116,0,31;847,685,49,113,0,4;0,181,0|281:5395,978,17,4400,263,193;4315,16,0,4299,246,0;20260904,775,0|285:3952,3213,204,535,0,104;2534,1884,172,478,0,3;0,348,0|289:5066,1794,50,3222,2,184;3774,725,35,3014,2,3;20250916,1069,0|293:1487,1228,59,200,5,53;1258,999,59,200,5,17;20250305,225,0|294:3825,3071,299,455,0,115;2700,2004,283,413,0,44;0,475,0|296:4389,1352,69,2968,2801,122;3615,759,39,2817,2692,13;20251118,337,0|297:3910,3130,221,559,91,54;3000,2272,200,528,91,5;20260824,419,0|299:5267,4328,270,669,95,160;3588,2782,236,570,80,9;20261113,705,0|301:5823,4943,425,455,0,192;4229,3424,393,412,0,27;0,945,0|302:3441,2823,235,383,0,126;2650,2083,220,347,0,10;0,491,0|303:5112,4512,312,288,0,172;3228,2727,239,262,0,6;0,711,0|307:15492,11984,1074,2434,1040,677;11674,8414,991,2269,988,41;20260618,2867,0|308:3250,2758,199,293,3,181;2256,1799,179,278,3,28;20260416,592,0|310:4408,3798,196,414,0,241;2981,2424,169,388,0,19;0,781,0|312:2365,1988,139,238,1,89;1483,1161,111,211,1,10;20260508,359,0|313:2085,216,16,1853,1822,14;1792,6,2,1784,1759,1;20261012,20,0|317:1504,1252,92,160,2,56;945,756,73,116,2,2;20260611,221,0|321:4787,4033,249,505,0,334;3697,2965,233,499,0,21;0,887,0|327:3463,2662,105,696,279,114;2670,1952,81,637,262,7;20261110,510,0|331:1291,1068,76,147,0,23;912,716,55,141,0,1;0,150,0|335:1669,1374,128,167,0,78;979,717,109,153,0,4;0,284,0|339:627,459,31,137,0,35;407,247,27,133,0,1;0,92,0|340:2380,1908,137,335,2,52;1552,1130,115,307,2,8;20251208,271,0|342:4067,3424,283,360,0,183;2762,2162,256,344,0,12;0,831,0|344:31236,24779,3466,2991,378,1585;23005,16965,3285,2755,344,149;20261109,6631,0|345:6141,4759,167,1215,6,212;4679,3403,150,1126,3,5;20260804,1288,0|351:1728,1487,98,143,0,46;1048,843,85,120,0,3;0,249,0|352:2902,2282,114,506,0,64;2310,1711,99,500,0,19;0,343,0|353:2934,2325,169,440,0,116;2330,1767,161,402,0,9;0,504,0|355:6509,5430,366,713,0,285;4659,3662,328,669,0,4;0,1309,0|356:7950,7048,303,599,0,287;5919,5053,282,584,0,15;0,1609,0|358:4476,3889,224,363,0,199;2884,2398,153,333,0,32;0,848,0|361:9504,7744,822,938,44,248;7066,5591,601,874,17,51;20260127,1329,0|362:9144,7450,655,1039,0,442;6446,4952,479,1015,0,53;0,2135,0|363:97220,26427,775,70018,57,9627;77542,7432,542,69568,57,263;20261112,14298,0|373:4949,4036,315,598,0,293;3730,2901,256,573,0,33;0,702,0|375:5428,535,35,4858,4707,158;4748,165,28,4555,4427,10;20261111,390,0|376:1503,1265,93,145,0,36;1174,956,82,136,0,11;0,222,0|377:3318,2854,215,249,7,124;2401,2006,163,232,7,54;20260901,392,0|383:3641,3060,242,339,0,145;2823,2284,201,338,0,23;0,453,0|384:3165,2594,180,391,1,223;2282,1732,162,388,1,12;20260326,566,0|385:3686,2771,331,584,30,252;2764,1915,272,577,30,34;20260417,525,1|388:2125,1593,217,315,11,93;3,0,0,3,2,0;20261027,2023,0|392:12912,9956,1077,1879,1,1413;10276,7346,1053,1877,1,129;20241106,2404,0|394:26814,21454,1627,3733,1434,1096;17599,13240,1084,3275,1352,30;20261112,4218,0|396:3204,2759,131,314,15,46;2578,2161,128,289,15,3;20260528,471,0|397:2678,1994,172,512,164,84;2304,1642,158,504,162,9;20261105,361,0|399:2521,2151,132,238,0,132;2096,1741,121,234,0,31;0,305,0|400:6150,5137,497,516,0,184;4941,3987,459,495,0,14;0,865,0|402:9096,7296,787,1013,0,503;7104,5377,749,978,0,21;0,1735,0|405:6614,5662,315,637,3,173;5463,4544,308,611,0,9;20240715,1062,0|406:4599,3896,220,483,0,168;3713,3031,206,476,0,18;0,788,0|415:949,621,86,242,64,9;843,550,85,208,61,0;20260812,94,0|417:1640,1329,200,111,0,74;1137,860,170,107,0,5;0,246,1|420:5649,3695,226,1728,256,28;4968,3144,197,1627,204,4;20260623,122,0|431:990,865,42,83,0,105;614,505,28,81,0,19;0,162,0|432:1276,1077,64,135,0,38;973,798,43,132,0,7;0,184,0|437:3045,2594,126,325,11,225;1993,1570,101,322,10,6;20241108,580,0|439:8550,1681,146,6723,68,0;6364,27,27,6310,0,0;20240627,773,0|441:6025,4915,292,818,8,257;4024,3061,209,754,8,71;20260729,894,0|448:3447,2810,247,390,0,204;2690,2095,215,380,0,46;0,588,0|450:1524,1314,102,108,0,80;1108,931,78,99,0,13;0,196,0|451:2777,2384,145,248,9,131;2130,1753,134,243,4,10;20250114,581,0|453:8191,7285,264,642,7,1325;5108,4327,206,575,5,189;20261109,1741,0|473:1795,1365,181,249,0,104;1404,1005,153,246,0,4;0,348,0|479:13267,10767,1105,1395,0,667;10035,7683,1002,1350,0,72;0,2354,0|482:2146,1734,225,187,0,231;1312,945,208,159,0,19;0,507,0|484:10099,8053,490,1556,118,656;6909,5080,423,1406,113,7;20261112,2320,0|489:6408,5681,359,368,0,406;4144,3536,302,306,0,27;0,1505,0|498:1810,1377,135,298,3,39;0,0,0,0,0,0;20240507,1588,0|501:145,145,0,0,0,45;0,0,0,0,0,0;0,145,0|502:7121,6201,267,653,1,213;5411,4567,257,587,1,26;20240614,1645,0|503:8108,6155,503,1450,51,400;6237,4420,466,1351,48,26;20241016,1385,0|505:12866,11007,766,1093,0,726;8952,7240,690,1022,0,42;0,3137,0|512:4062,3399,321,342,11,234;2570,2046,286,238,0,9;20260910,836,0|513:6851,5462,593,796,6,364;5250,3943,562,745,4,34;20260114,1279,0|518:41904,29700,4531,7673,277,2541;30378,19466,4139,6773,229,145;20260723,10921,0|523:1585,1243,95,247,139,88;986,692,85,209,119,4;20250131,370,0|530:268,268,0,0,0,83;0,0,0,0,0,0;0,268,0|531:3471,2851,102,518,0,201;2573,1993,91,489,0,3;0,590,0|532:1774,1548,66,160,0,59;0,0,0,0,0,0;0,1682,0|534:1911,1246,95,570,242,88;1476,845,87,544,230,3;20251008,347,0|537:5788,4651,576,561,2,483;4125,3056,543,526,2,18;20251022,1387,0|542:2242,1259,27,956,680,1;1799,935,23,841,610,1;20260727,376,0|546:10108,7283,731,2094,3,561;7876,5213,681,1982,3,26;20260311,1833,0|547:2723,2323,135,265,0,199;1764,1419,116,229,0,5;0,661,0|553:1889,1489,130,270,11,52;1257,910,112,235,10,14;20260416,383,0|556:3119,2702,112,305,17,288;2337,1938,108,291,14,42;20250519,782,0|569:3506,41,2,3463,3461,1;2852,18,2,2832,2830,0;20261103,110,0|575:5780,4606,397,777,1,275;4310,3225,367,718,1,29;20250814,1003,0|579:2644,2232,171,241,9,79;2111,1736,150,225,7,15;20250103,369,0|589:1323,1014,129,180,28,88;933,672,118,143,24,64;20260610,230,0|590:3136,2692,84,360,0,99;2336,1925,70,341,0,11;0,585,0|597:4681,3966,264,451,0,329;2863,2242,221,400,0,8;0,955,0|599:64043,50130,4413,9500,14,3807;46773,33338,4201,9234,13,159;20260720,13070,0|603:6319,5146,502,671,0,205;4382,3362,451,569,0,19;0,1790,0|606:7959,6850,470,639,4,1562;4674,3632,448,594,4,12;20261015,2047,0|610:2376,1936,230,210,3,118;1619,1216,214,189,3,3;20261015,542,0|613:3296,1138,41,2117,16,85;2359,319,14,2026,16,0;20250414,454,0|614:262,262,0,0,0,32;0,0,0,0,0,0;0,262,0|622:6617,5292,428,897,29,476;4821,3566,407,848,28,57;20260225,1623,0|626:2290,1425,144,721,141,60;1909,1105,141,663,133,4;20260114,343,0|627:3338,2745,251,342,0,216;2025,1552,199,274,0,29;0,691,0|629:5269,1531,64,3674,1,132;4134,669,49,3416,1,12;20260312,738,0|632:5489,4743,382,364,8,219;3575,2940,319,316,6,23;20260309,1164,0|637:16622,3592,44,12986,0,664;13356,1206,30,12120,0,17;0,2940,0|638:1346,1116,107,123,0,82;949,743,91,115,0,12;0,256,0|642:6618,1899,41,4678,4,408;4668,370,15,4283,4,9;20260209,1320,0|654:3592,2853,262,477,0,90;1026,744,78,204,0,3;0,408,0|664:5910,4832,448,630,0,210;3882,3036,346,500,0,2;0,932,1|668:1903,1497,185,221,0,56;1389,1009,163,217,0,13;0,246,0|677:5067,4137,255,675,0,131;2822,2319,168,335,0,15;0,476,0|678:1919,1617,151,151,0,84;771,619,62,90,0,0;0,286,0|687:5989,4573,535,881,391,236;4488,3203,483,802,388,18;20261030,765,5|703:3316,2721,167,428,0,175;1299,1018,54,227,0,32;0,551,0|715:11276,9299,634,1343,0,396;5804,4574,370,860,0,45;0,1404,0|716:3881,2992,347,542,0,152;1754,1282,151,321,0,2;0,428,0|717:4939,3906,403,630,0,144;2243,1619,214,410,0,8;0,576,0|718:5069,4139,495,435,1,167;3464,2643,456,365,0,15;20250710,848,0|736:4978,4134,235,609,3,385;3685,2899,200,586,3,107;20250605,814,0|737:3044,2481,191,372,0,75;2210,1705,153,352,0,1;0,380,0|743:2509,2117,134,258,0,89;2034,1668,125,241,0,10;0,314,0|744:1641,1114,92,435,251,47;1280,761,88,431,248,6;20260819,167,0|748:6541,5286,376,879,0,380;5278,4100,345,833,0,45;0,1007,0|753:4472,3792,263,417,0,263;3498,2850,251,397,0,13;0,696,0|755:1359,1158,65,136,0,30;1088,898,58,132,0,0;0,146,0|756:38,38,0,0,0,30;0,0,0,0,0,0;0,38,0|757:3824,3156,305,363,0,218;2896,2265,295,336,0,1;0,672,0|758:18547,16086,1134,1327,26,963;14231,11884,1090,1257,26,33;20260827,3397,0|762:4749,3969,323,457,0,134;4056,3301,316,439,0,21;0,505,0|765:1508,1296,46,166,0,36;1130,920,44,166,0,2;0,206,0|766:2426,1985,175,266,0,62;2046,1614,170,262,0,11;0,327,0|770:3317,2797,159,361,0,92;2796,2302,151,343,0,3;0,400,0|772:20484,17434,1507,1543,0,1038;15870,12904,1466,1500,0,94;0,3807,0|777:5964,5087,397,480,0,216;4766,3919,390,457,0,60;0,921,0|779:3036,2497,149,390,0,145;2405,1922,124,359,0,11;0,556,0|784:2974,2503,191,280,2,84;2128,1706,172,250,2,1;20250707,462,0|785:2670,2027,226,417,148,77;2316,1695,226,395,128,14;20260918,354,0|786:42,42,0,0,0,32;0,0,0,0,0,0;0,42,0|794:9391,8236,437,718,40,272;7959,6828,430,701,39,4;20260409,1296,0|796:15135,12735,848,1552,206,1412;11408,9164,778,1466,157,57;20260623,3007,0|797:4809,3746,355,708,41,272;4087,3088,338,661,40,109;20260928,535,0|798:1788,1466,127,195,0,36;1236,942,109,185,0,5;0,247,0|809:2780,2292,154,334,3,75;2282,1804,145,333,3,14;20260113,401,0|815:17,17,0,0,0,14;0,0,0,0,0,0;0,17,0|820:2787,2376,171,240,0,78;2421,2023,163,235,0,8;0,302,0|823:2856,2338,190,328,0,89;2080,1606,180,294,0,10;0,359,0|824:3661,3061,284,316,1,210;3005,2421,280,304,1,61;20240808,558,0|826:7799,6612,495,692,0,434;5619,4517,465,637,0,18;0,1566,1|828:10582,8893,527,1162,0,443;8514,6881,516,1117,0,32;0,1496,0|840:2925,2396,181,348,4,85;2454,1951,177,326,4,3;20240820,320,0|845:2584,2075,135,374,1,80;2148,1649,128,371,1,4;20240611,335,0|847:2535,2107,160,268,0,63;1987,1582,150,255,0,5;0,308,0|848:2042,1807,99,136,0,144;1464,1249,96,119,0,4;0,405,0|851:3639,3061,252,326,0,97;3028,2462,249,317,0,14;0,397,0|852:2226,1655,292,279,0,91;1085,742,141,202,0,11;0,326,0|855:25282,5689,178,19415,0,477;21768,2329,152,19287,0,46;0,3039,0|856:1,1,0,0,0,0;0,0,0,0,0,0;0,1,0|858:3879,3170,267,442,1,188;3122,2425,260,437,1,20;20251203,609,0|861:5529,4911,174,444,0,236;4421,3818,169,434,0,25;0,1017,0|865:4435,3681,365,389,12,295;3306,2576,353,377,12,60;20251001,713,0|866:1773,1478,92,203,0,74;1491,1203,91,197,0,21;0,215,0|867:6141,5222,277,642,24,340;4822,3953,249,620,24,52;20260903,1085,0|873:2542,2014,179,349,0,89;1958,1463,159,336,0,7;0,268,0|879:3274,2776,174,324,0,89;2623,2140,173,310,0,7;0,391,0|880:1575,1300,110,165,0,126;1136,887,87,162,0,13;0,236,0|882:4428,3727,247,454,77,169;3680,3053,246,381,10,8;20260911,681,0|888:2462,2120,139,203,1,131;1905,1591,131,183,1,4;20251121,430,0|889:1454,1176,126,152,0,30;1219,953,122,144,0,12;0,178,0|893:2130,464,20,1646,472,53;1454,253,20,1181,20,1;20260911,208,0|899:4241,3091,136,1014,347,39;3850,2822,135,893,241,22;20261111,288,0|907:2541,1822,150,569,318,74;1790,1409,146,235,0,10;20260911,387,0|917:11282,9382,610,1290,333,574;8441,6946,585,910,8,34;20261022,2318,2|928:5094,4429,143,522,73,313;4113,3520,143,450,1,60;20260911,907,0|935:12515,10971,306,1238,22,620;10176,8682,283,1211,0,40;20260911,1836,0|938:2899,2420,196,283,2,58;2581,2107,193,281,2,5;20260825,246,0|944:1243,875,82,286,185,24;952,768,82,102,1,2;20260911,102,0|946:2213,1644,205,364,81,58;1827,1336,203,288,8,2;20260911,321,0|957:8058,6634,536,888,214,430;5697,4528,516,653,0,6;20260911,1745,0|965:1875,1579,80,216,69,50;1616,1390,80,146,0,9;20260911,190,0|971:2590,2176,135,279,0,127;2082,1676,134,272,0,7;0,448,0|981:1814,358,19,1437,140,69;1449,145,19,1285,0,3;20260911,225,0|983:15012,12271,782,1959,720,822;10669,8770,722,1177,37,26;20260911,2950,0|984:5691,4018,236,1437,585,65;4168,3129,224,815,7,11;20260911,785,0|986:1705,1324,144,237,2,49;1418,1055,131,232,1,17;20250604,222,0|988:6316,5237,342,737,213,139;5141,4320,326,495,4,15;20260911,874,0|994:2453,1797,200,456,225,87;1859,1410,193,256,27,32;20260911,320,0|995:8499,7630,335,534,5,306;6291,5556,257,478,2,10;20261029,1267,0|1507:5449,4094,233,1122,447,171;4214,3327,224,663,15,35;20260911,733,0|1509:5144,4303,333,508,3,157;3738,2959,288,491,3,10;20251202,619,0|1525:3709,2912,307,490,19,184;2651,1938,270,443,17,11;20260915,544,0|1581:5466,4547,297,622,37,455;3293,2489,238,566,36,97;20261111,971,0|1586:4213,3442,263,508,12,154;3319,2570,257,492,12,8;20250710,545,0|1598:2716,2241,110,365,30,79;1851,1482,70,299,10,24;20240626,293,0|1621:7666,6339,372,955,27,355;5629,4430,319,880,27,94;20251010,1471,0|1640:6154,4304,366,1484,778,195;4389,3354,353,682,5,5;20261110,928,0|1641:3664,3026,203,435,28,139;3058,2465,195,398,4,11;20260911,489,0|1652:3947,3368,185,394,0,52;3208,2653,175,380,0,15;0,386,0|1655:3692,2955,272,465,0,149;2811,2109,255,447,0,10;0,509,0|1658:2462,2022,129,311,36,31;2008,1611,120,277,33,4;20250825,296,0|1659:2358,1945,178,235,0,106;1810,1408,173,229,0,8;0,322,0|1667:1517,1210,61,246,19,22;1145,852,51,242,17,1;20260422,182,0|1669:3124,2230,202,692,230,114;2338,1693,185,460,24,1;20260928,494,0|1674:9186,7742,535,909,1,391;7466,6111,504,851,1,43;20240820,1326,0|1676:7550,6030,468,1052,0,348;3971,2941,242,788,0,17;0,985,10|1680:4034,3318,178,538,0,114;2895,2242,123,530,0,3;0,492,0|1681:3823,3202,108,513,437,54;2954,2360,88,506,370,2;20261006,374,0|1684:107,107,0,0,0,55;0,0,0,0,0,0;0,107,0|1690:3197,2720,140,337,2,82;2671,2209,138,324,2,2;20261015,382,0|1695:2137,1706,151,280,0,65;692,515,50,127,0,5;0,224,0|1696:2881,2352,176,353,0,149;2066,1587,138,341,0,4;0,436,0|1699:3528,2856,175,497,6,121;2517,1926,132,459,6,35;20260615,473,0|1700:3086,2364,294,428,7,6;2514,1809,284,421,6,0;20260122,247,0|1701:3917,2538,242,1137,683,96;2817,1592,161,1064,638,2;20261112,440,0|1702:18,18,0,0,0,8;0,0,0,0,0,0;0,18,0|1705:5304,4462,263,579,0,91;4300,3488,244,568,0,8;0,631,0|1706:2939,2386,138,415,0,85;2528,2003,134,391,0,7;0,281,0|1708:5783,1902,3742,139,3,235;3929,218,3617,94,2,6;20260225,869,0|1709:7252,6187,419,646,2,482;5074,4149,371,554,2,133;20250624,1366,0|1711:6164,1652,93,4419,551,179;4500,798,56,3646,0,7;20260911,822,0|1714:6535,5381,393,761,0,246;2877,2262,215,400,0,13;0,855,0|1719:2506,1306,109,1091,766,51;2189,1027,96,1066,758,8;20261104,176,0|1721:3153,2584,184,385,0,55;2567,2035,169,363,0,10;0,417,0|1723:1767,1488,124,155,0,65;1228,962,117,149,0,1;0,226,0|1724:2365,1944,112,309,0,54;1991,1589,104,298,0,5;0,246,0|1728:2924,2292,92,540,27,161;2312,1712,78,522,27,7;20260413,384,0|1729:2472,1719,160,593,304,76;1911,1463,160,288,0,3;20260911,257,0|1730:4007,3290,151,566,0,110;2914,2256,119,539,0,3;0,471,0|1731:5497,4417,258,822,138,175;4083,3162,171,750,134,19;20261020,670,0|1734:6347,5343,331,673,96,288;4491,3562,306,623,94,39;20261112,768,0|1735:5029,3949,374,706,0,186;3435,2448,342,645,0,10;0,641,0|1740:2382,1705,105,572,119,21;1924,1328,89,507,118,0;20260605,156,0|1742:4928,4077,229,622,0,251;3515,2720,214,581,0,6;0,919,0|1771:4730,4124,192,414,0,113;3786,3216,175,395,0,0;0,806,0|1773:2247,1788,146,313,25,68;1717,1283,141,293,25,13;20261109,243,0|1774:4987,4008,367,612,1,113;3572,2679,324,569,1,6;20250901,539,0|1783:14379,12217,912,1250,1,726;9672,7777,760,1135,0,28;0,2910,0|1842:2898,2452,160,286,0,298;1688,1335,127,226,0,49;0,559,0|1859:6790,5487,493,810,0,141;4968,3766,456,746,0,9;0,728,0|1876:6229,4777,567,885,0,127;4222,2913,514,795,0,3;0,552,0|1883:13334,11036,819,1479,518,714;9660,8016,761,883,6,53;20260911,2628,12|1884:3114,2617,154,343,14,171;2164,1737,124,303,14,36;20260310,380,0|1891:1666,1323,85,258,0,34;1370,1046,75,249,0,1;0,156,0|1892:4533,3797,303,433,45,174;3055,2423,250,382,41,9;20260907,751,0|1894:5340,3596,243,1501,847,183;3533,2653,237,643,5,12;20260911,899,0|1895:4431,3709,233,489,0,117;3309,2647,206,456,0,11;0,615,0|1896:2753,468,16,2269,2247,96;2032,43,3,1986,1979,5;20261109,163,0|1900:9916,8192,480,1244,3,333;7293,5768,383,1142,3,13;20260430,1286,0|1901:3796,3054,208,534,0,185;2558,1890,184,484,0,26;0,550,0|1903:2989,2212,108,669,198,117;2378,1822,103,453,0,25;20260911,335,0|1904:6900,5311,365,1224,164,279;4836,3386,335,1115,161,26;20261029,1034,0|1911:6842,5608,389,845,1,245;4606,3585,242,779,1,19;20260209,803,0|1916:7173,5583,489,1101,22,690;5163,3666,459,1038,17,16;0,1538,0|1924:8494,6874,490,1130,13,469;4096,3084,298,714,9,20;20261020,1333,0|1926:5570,4412,298,860,42,321;4082,3034,284,764,36,27;20261014,1264,0|1930:8352,7335,255,762,0,346;5707,4892,175,640,0,4;0,1434,0|1931:5281,4256,386,639,0,246;2719,1987,270,462,0,21;0,818,0|1940:4882,3865,368,649,15,176;3238,2390,284,564,15,31;20261104,563,0|1942:7007,5773,626,608,0,348;5013,3860,573,580,0,25;0,1153,0|1945:4331,3577,280,474,0,125;3219,2504,255,460,0,12;0,631,0|1948:9725,7937,669,1119,0,371;7715,5995,638,1082,0,10;0,1502,0|1949:5115,4113,236,766,7,156;3883,2958,209,716,7,14;20260810,501,0|1950:4912,1282,28,3602,26,77;3888,337,10,3541,22,3;20251110,361,0|1952:7410,6272,361,777,0,172;5497,4488,298,711,0,17;0,991,0|1954:5676,2126,270,3280,3249,27;4785,1769,262,2754,2715,1;20261112,379,0|1955:4383,3521,275,587,26,128;3126,2337,229,560,26,3;20261022,513,0|1959:8302,1896,71,6335,9,248;6751,509,30,6212,1,61;20260910,822,0|1960:7117,5230,480,1407,2,104;4879,3321,379,1179,0,14;20260501,613,0|1961:6722,5520,351,851,10,539;3780,2911,264,605,6,64;20260825,1266,0|1963:15217,4052,261,10904,2950,564;9811,537,18,9256,2008,10;20251008,1335,0|1966:6563,5345,263,955,14,112;4559,3449,223,887,2,11;20240911,763,0|1969:6560,5263,230,1067,1,235;4262,3117,195,950,1,17;0,901,5|1970:6186,5004,372,810,0,106;4605,3515,335,755,0,5;0,597,0|1978:4986,3860,268,858,1,278;2027,1414,141,472,0,47;20251125,684,0|1979:6753,5657,335,761,0,148;5083,4063,289,731,0,6;0,855,0|1980:7338,5809,335,1194,599,196;5448,4120,215,1113,549,32;20261012,1143,0|1982:11928,10310,659,959,0,469;9393,7883,609,901,0,130;0,1548,0|1991:7882,6574,447,861,33,295;5925,4698,400,827,33,5;20260825,1250,0|1992:8929,7582,472,875,6,88;5302,4446,290,566,6,42;20250606,873,1" };
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const MIN = 30;
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const fmt = v => v == null ? '–' : nf.format(v);
+  const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '–';
+  const pct1 = (a, b) => { if (!b) return '–'; const p = 100 * a / b; return (p > 0 && p < 1 ? p.toLocaleString('nl-NL', { maximumFractionDigits: 1 }) : Math.round(p)) + '%'; };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const datum = s => new Date(s + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  const jdatum = n => { const s = String(n); return n ? datum(s.slice(0, 4) + '-' + s.slice(4, 6) + '-' + s.slice(6, 8)) : null; };
+
+  // ---------- data ----------
+  const D = {}, NL = { A: [0, 0, 0, 0, 0, 0], G: [0, 0, 0, 0, 0, 0], laatste: 0, zonder: 0, oud: 0 };
+  VB.d.split('|').forEach(x => {
+    if (!x) return;
+    const [c, v] = x.split(':'), [a, g, r] = v.split(';').map(s => s.split(',').map(Number));
+    const o = { A: a, G: g, laatste: r[0], zonder: r[1], oud: r[2] };
+    D[String(c).padStart(4, '0')] = o;
+    for (let i = 0; i < 6; i++) { NL.A[i] += a[i]; NL.G[i] += g[i]; }
+    NL.zonder += r[1]; NL.oud += r[2]; if (r[0] > NL.laatste) NL.laatste = r[0];
+  });
+  const OUD = () => Object.entries(D).filter(([c]) => !byCode.has(c)).reduce((s, [, o]) => s + o.A[0], 0);
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+  function meld(t) { $('#meldingTekst').textContent = t || ''; $('#melding').hidden = !t; }
+
+  // ---------- gemeenten ----------
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const [c, n] = x.split(':'); return { c, n }; }).sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  const byCode = new Map(GM.map(g => [g.c, g]));
+  NL.gecontroleerd = Object.entries(D).filter(([c, o]) => byCode.has(c) && o.laatste >= 20250101).length;
+  $('#oudN').textContent = nf.format(OUD()) + ' borden in deze stand';
+  Object.entries(ALIAS).forEach(([a, c]) => { const g = GM.find(x => x.c === c); if (g) byName.set(a.toLowerCase(), g); });
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+  let S = null;
+
+  function kies(g) {
+    $('#gmInput').value = g.n;
+    const o = D[g.c];
+    if (!o) { meld('Voor ' + g.n + ' staan geen borden in het bestand.'); return; }
+    meld('');
+    S = { g, o };
+    $('#intro').hidden = true; $('#result').hidden = false;
+    document.title = PRODUCT + ' ' + g.n + ' · Open Data Atelier';
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    try { if (location.hash !== '#gm=' + g.c) history.replaceState(null, '', '#gm=' + g.c); } catch (e) {}
+    document.querySelectorAll('.lnkI').forEach(a => { a.href = 'indicatoren.html#domein=verkeer&gm=' + g.c; });
+    document.querySelectorAll('.lnkQ').forEach(a => { a.href = 'bagkwaliteit.html#gm=' + g.c; });
+    render(); vulMeld(); renderVoet();
+  }
+
+  const stapel = t => t[0] ? `<div class="stapel" aria-hidden="true"><i class="s0" style="width:${100 * t[1] / t[0]}%"></i><i class="s1" style="width:${100 * t[2] / t[0]}%"></i><i class="s2" style="width:${100 * t[3] / t[0]}%"></i></div>` : '';
+  const rij = (naam, t, cls) => { const ok = t[0] >= MIN; return `<tr${cls ? ` class="${cls}"` : ''}><td>${naam}</td><td class="r">${fmt(t[0])}</td><td class="r">${ok ? pct(t[1], t[0]) : '–'}</td><td class="r">${ok ? pct(t[2], t[0]) : '–'}</td><td class="r">${ok ? pct(t[3], t[0]) : '–'}</td><td class="stapelkol">${ok ? stapel(t) : ''}</td><td class="r">${ok ? pct1(t[4], t[0]) : fmt(t[4])}</td></tr>`; };
+
+  function render() {
+    const g = S.g, o = S.o, G = o.G, A = o.A;
+    const basis = G[0] >= MIN ? G : A, opG = G[0] >= MIN;
+    $('#leadBig').textContent = `${g.n}: ${pct(basis[1], basis[0])} van de borden ${opG ? 'langs wegen van de gemeente ' : ''}is voor het laatst gezien in 2022 of eerder`;
+    $('#leadSub').textContent = `Nederland ${pct(opG ? NL.G[1] : NL.A[1], opG ? NL.G[0] : NL.A[0])}`;
+    $('#stand').textContent = `Bordenbestand opgehaald op ${datum(VB.opgehaald)}. Wegbeheerders volgens het NWB van ${datum(VB.nwb)}.`;
+    document.querySelectorAll('.opgehaald').forEach(e => { e.textContent = datum(VB.opgehaald); });
+    document.querySelectorAll('.nwbdatum').forEach(e => { e.textContent = datum(VB.nwb); });
+
+    const K = basis, nlK = opG ? NL.G : NL.A;
+    const k = [
+      [opG ? 'Borden langs wegen van de gemeente' : 'Borden binnen de gemeente', fmt(K[0]), opG ? `van ${fmt(A[0])} borden binnen de gemeente` : `waarvan ${fmt(G[0])} aan een wegvak van de gemeente in het NWB`],
+      ['Laatst gezien in 2024 of later', K[0] >= MIN ? pct(K[3], K[0]) : '–', `${fmt(K[3])} borden · Nederland ${pct(nlK[3], nlK[0])}`],
+      [opG ? 'Gecontroleerd door de gemeente' : 'Gecontroleerd door de wegbeheerder', K[0] >= MIN ? pct1(K[4], K[0]) : '–', `${fmt(K[4])} borden · Nederland ${pct1(nlK[4], nlK[0])}`],
+      ['Laatste controle', o.laatste ? jdatum(o.laatste) : 'geen', o.laatste ? 'door een wegbeheerder in de gemeente, in George' : `geen bord in de gemeente als gecontroleerd gemarkeerd · ${NL.gecontroleerd} gemeenten deden dat in 2025 of 2026`]
+    ];
+    $('#kern').innerHTML = k.map(([t, w, r]) => `<div class="ctl"><h3>${esc(t)}</h3><span class="getal${/^(0%|geen|–)$/.test(w) ? ' nul' : ''}">${esc(w)}</span><span class="ref">${esc(r)}</span></div>`).join('');
+
+    const R = [A[0] - G[0], A[1] - G[1], A[2] - G[2], A[3] - G[3], A[4] - G[4], A[5] - G[5]];
+    $('#tab').innerHTML = `<thead><tr><th>&nbsp;</th><th class="r">Borden</th><th class="r">2022 of eerder</th><th class="r">2023</th><th class="r">2024 of later</th><th class="stapelkol">&nbsp;</th><th class="r">Gecontroleerd</th></tr></thead><tbody>` +
+      rij('Langs wegen van de gemeente', G) +
+      rij('Langs andere wegen <span class="small muted">(provincie, waterschap, Rijkswaterstaat, overig, of wegvak niet in het NWB)</span>', R) +
+      rij('Alle borden binnen de gemeente', A, 'sub') +
+      rij('Nederland, langs wegen van gemeenten', NL.G, 'sub nl') +
+      rij('Nederland, alle borden', NL.A, 'nl') + '</tbody>';
+    const r0 = K[3] / K[0], nlr = nlK[3] / nlK[0];
+    $('#lees').textContent = (opG ? '' : `Bij ${g.n} staan ${fmt(o.zonder)} van de ${fmt(A[0])} borden aan een wegvak dat niet meer in het NWB staat; daarom gaan de cijfers hier over alle borden binnen de gemeente. `) +
+      (K[0] < MIN ? `${g.n} heeft minder dan ${MIN} borden in het bestand; daarom geen percentages.` :
+      `Van de borden ${opG ? 'langs wegen van ' + g.n : 'binnen ' + g.n} is ${pct(K[3], K[0])} in 2024 of later nog gezien of gecontroleerd; in Nederland ${pct(nlK[3], nlK[0])}. ` +
+      (r0 > nlr + 0.1 ? 'Het bestand is voor deze gemeente actueler dan gemiddeld: de borden zijn recent opnieuw ingewonnen of bijgehouden.' : r0 < nlr - 0.1 ? 'Het bestand leunt voor deze gemeente meer dan gemiddeld op de inwinning tot 2022.' : 'Dat ligt dicht bij Nederland.'));
+
+    const SIG = [
+      { titel: 'Bordcode onbekend', n: A[5], uitleg: 'Bij de inwinning is het bord gezien, maar niet herkend: het bestand zegt niet welk bord het is.', ref: `${pct1(A[5], A[0])} van de borden binnen de gemeente · Nederland ${pct1(NL.A[5], NL.A[0])}` },
+      { titel: 'Wegvak niet in het NWB', n: o.zonder, uitleg: 'Het wegvak waar het bord bij is ingewonnen, staat niet meer in het huidige NWB, bijvoorbeeld na een reconstructie. Daardoor is ook de wegbeheerder niet bekend.', ref: `${pct1(o.zonder, A[0])} van de borden binnen de gemeente · Nederland ${pct1(NL.zonder, NL.A[0])}` }
+    ];
+    $('#sig').innerHTML = SIG.map(s => `<div class="ctl"><h3>${esc(s.titel)}</h3><span class="getal${s.n ? '' : ' nul'}">${fmt(s.n)}</span><p>${esc(s.uitleg)}</p><span class="ref">${esc(s.ref)}</span></div>`).join('');
+  }
+
+  // ---------- export ----------
+  const naam = () => S.g.n.replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  const bron = () => `Open Data Atelier, Josephine Linders, ${PRODUCT} ${VERSIE}, ${location.origin + location.pathname}#gm=${S.g.c}; verkeersborden NDW opgehaald ${VB.opgehaald}; NWB ${VB.nwb}`;
+  const cel = s => { s = String(s == null ? '' : s); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  function download(tekst, bestand) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['﻿' + tekst], { type: 'text/csv;charset=utf-8' }));
+    a.download = bestand; document.body.appendChild(a); a.click(); a.remove();
+  }
+  $('#kernCsv').addEventListener('click', () => {
+    const o = S.o, r = [['groep', 'maat', 'gemeente', 'nederland', 'bron']];
+    const M = ['borden', 'laatst gezien 2022 of eerder', 'laatst gezien 2023', 'laatst gezien 2024 of later', 'gecontroleerd door de wegbeheerder', 'bordcode onbekend'];
+    [['langs wegen van de gemeente', 'G'], ['alle borden binnen de gemeente', 'A']].forEach(([gr, k]) => M.forEach((m, i) => r.push([gr, m, o[k][i], NL[k][i], bron()])));
+    r.push(['signalen', 'onder een andere gemeentecode', o.oud, NL.oud, bron()]);
+    r.push(['signalen', 'wegvak niet in het NWB', o.zonder, NL.zonder, bron()]);
+    r.push(['signalen', 'laatste controle (jjjjmmdd)', o.laatste || '', '', bron()]);
+    download(r.map(x => x.map(cel).join(';')).join('\n'), `open-data-atelier-verkeersbordenregistratie-${naam()}.csv`);
+  });
+
+  // ---------- melden ----------
+  function vulMeld() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.origin + location.pathname + (g ? '#gm=' + g.c : '');
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer:\n\nWat de pagina laat zien:\n\nWat je verwacht, of wat je in George ziet:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel) + '&body=' + encodeURIComponent(body);
+  }
+
+  // ---------- voet ----------
+  function renderVoet() {
+    $('#foot').innerHTML = `Bron: verkeersborden actueel beeld, NDW (CC0), opgehaald op ${datum(VB.opgehaald)}; wegbeheerder en gemeente per wegvak uit het Nationaal Wegenbestand van ${datum(VB.nwb)} (dienst maximum_snelheden_wegen, Rijkswaterstaat; publiek domein). Afgeleid bestand, geen bordenregister.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  vulMeld();
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=(\d{4})/) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+  window.addEventListener('hashchange', () => { const c = (location.hash.match(/gm=(\d{4})/) || [])[1], g = c && GM.find(x => x.c === c); if (g && (!S || S.g !== g)) kies(g); });
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>

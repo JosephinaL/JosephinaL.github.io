@@ -275,6 +275,22 @@ main > * { min-width: 0; }
           </article>
         </div>
       </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>Wegen en verkeer</h3><span>Het landelijke bestand van verkeersborden (NDW)</span></div>
+        <div class="rail">
+          <article class="tile">
+            <span class="meta">Per gemeente · elke gemeente</span>
+            <h4>De verkeersbordenregistratie</h4>
+            <p>Hoe actueel het landelijke bestand van verkeersborden is: wanneer de borden het laatst zijn gezien, en hoeveel de wegbeheerder zelf heeft gecontroleerd. Voor borden langs wegen van de gemeente en alle borden binnen de gemeente.</p>
+            <div class="vis"><div class="strook">
+              <div style="--k:var(--tegen)"><b>68%</b>laatst gezien in 2022 of eerder</div>
+              <div style="--k:var(--accent)"><b>2,4%</b>gecontroleerd</div>
+              <div style="--k:var(--opval)"><b>176</b>gemeenten controleerden in 2025–2026</div>
+            </div><span class="small muted">Nederland, borden langs wegen van gemeenten, stand 15 november 2026</span></div>
+            <div class="tile-links"><a class="btn-start" id="vbLink" href="verkeersborden.html">Open de registratie <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-vb">Meer weten</button></div>
+          </article>
+        </div>
+      </div>
     </div>
     <div class="infos">
       <article class="product" id="info-bag" hidden>
@@ -332,6 +348,24 @@ main > * { min-width: 0; }
           </ol>
         </div>
       </article>
+      <article class="product" id="info-vb" hidden>
+        <div class="product-body">
+          <span class="eyebrow">Meer weten · De verkeersbordenregistratie</span>
+          <h3>Hoe actueel het bestand van verkeersborden is</h3>
+          <p>NDW publiceert elke dag het landelijke bestand van verkeersborden. Het grootste deel komt uit een inwinning met camerabeelden van alle wegen, waarbij de meeste borden voor het laatst zijn gezien in 2022. Sindsdien blijft een bord alleen actueel als de wegbeheerder het zelf bijhoudt of als het opnieuw wordt ingewonnen. Deze pagina laat per gemeente zien hoe oud het beeld is en hoeveel de wegbeheerder heeft gecontroleerd. Het gaat over het bestand, niet over de borden op straat.</p>
+          <div class="facts"><div><b>1,97 mln</b><span>borden in het bestand</span></div><div><b>1,45 mln</b><span>langs wegen van gemeenten</span></div><div><b>342</b><span>gemeenten</span></div></div>
+          <button class="sluit" type="button" data-sluit>Sluiten</button>
+        </div>
+        <div class="product-aside">
+          <h3>Zo werkt het</h3>
+          <ol>
+            <li>NDW publiceert per bord de plek, het wegvak, wanneer het het laatst is gezien en of de wegbeheerder het heeft gecontroleerd.</li>
+            <li>Via het Nationaal Wegenbestand krijgt elk bord de beheerder van zijn weg: de gemeente, de provincie, het waterschap of Rijkswaterstaat.</li>
+            <li>De pagina telt per gemeente hoeveel borden in 2022 of eerder, in 2023 en in 2024 of later zijn gezien, naast Nederland.</li>
+            <li>Borden met een onbekende code of aan een wegvak dat niet meer bestaat, staan apart als signaal.</li>
+          </ol>
+        </div>
+      </article>
       <article class="product" id="info-labelreg" hidden>
         <div class="product-body">
           <span class="eyebrow">Meer weten · De energielabelregistratie</span>
@@ -386,13 +420,13 @@ main > * { min-width: 0; }
     </div>
   </section>
   <footer>
-    <p>Josephine Linders · Registraties belicht · versie 0.5</p>
+    <p>Josephine Linders · Registraties belicht · versie 0.6</p>
   </footer>
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> Dit is een overzicht; elke tegel opent een pagina met een eigen verantwoording. Kwaliteit van de BAG: BAG (Kadaster) via PDOK, landelijk bestand stand 1 november 2026, documentdatum van nieuwe verblijfsobjecten stand 3 november 2026. BAG-werkbank: zelfde landelijk bestand, stand 1 november 2026, met de CBS-wijk- en buurtindeling 2026. Levensloop van de bouw: BAG 2.0 Extract met historie, stand 8 oktober 2026, met de CBS-gemeentegrenzen 2026. Alle drie maandelijks ververst, pas gepubliceerd na controle. Aanbestedingen in TenderNed: de open datasets van TenderNed 2024, 2025 en 2026 tot 1 oktober 2026, halfjaarlijks ververst.</p>
-    <p><b>Licentie.</b> BAG: CC0. TenderNed: CC0 (data-eigenaar PIANOo). CBS-wijk- en buurtkaart: CC BY 4.0. De bewerking valt onder de gebruiksregel hieronder.</p>
+    <p><b>Bron en peildatum.</b> Dit is een overzicht; elke tegel opent een pagina met een eigen verantwoording. Kwaliteit van de BAG: BAG (Kadaster) via PDOK, landelijk bestand stand 1 november 2026, documentdatum van nieuwe verblijfsobjecten stand 3 november 2026. BAG-werkbank: zelfde landelijk bestand, stand 1 november 2026, met de CBS-wijk- en buurtindeling 2026. Levensloop van de bouw: BAG 2.0 Extract met historie, stand 8 oktober 2026, met de CBS-gemeentegrenzen 2026. Alle drie maandelijks ververst, pas gepubliceerd na controle. Aanbestedingen in TenderNed: de open datasets van TenderNed 2024, 2025 en 2026 tot 1 oktober 2026, halfjaarlijks ververst. De verkeersbordenregistratie: verkeersborden actueel beeld van NDW, opgehaald op 15 november 2026, met de wegbeheerders uit het Nationaal Wegenbestand van 1 augustus 2026; maandelijks ververst.</p>
+    <p><b>Licentie.</b> BAG: CC0. TenderNed: CC0 (data-eigenaar PIANOo). NDW (verkeersborden): CC0. Nationaal Wegenbestand: publiek domein. CBS-wijk- en buurtkaart: CC BY 4.0. De bewerking valt onder de gebruiksregel hieronder.</p>
     <p><b>Methode.</b> Per registratie een plank, per uitwerking een tegel. Een tegel laat zien welke signalen uit open data te halen zijn, voor elke gemeente; de uitleg per signaal staat op de pagina van de tegel.</p>
     <p><b>Wat dit niet is.</b> Geen oordeel over een gemeente of een bronhouder, en geen vervanging van de eigen kwaliteitscontroles van de bronhouder. Een signaal is een aanleiding om na te gaan; wie de registratie bijhoudt, weet vaak meteen waarom iets zo staat.</p>
     <p><b>Bekende beperkingen.</b> Open data ziet alleen wat geregistreerd is, als momentopname: mutaties die nog in verwerking zijn kunnen als signaal verschijnen. De plank "Binnenkort" toont uitwerkingen die nog niet gebouwd zijn.</p>
@@ -413,7 +447,7 @@ main > * { min-width: 0; }
     try { localStorage.setItem('jl-theme', r.dataset.theme); } catch (e) {}
   });
   let gm = null; try { gm = localStorage.getItem('jl-gemeente'); } catch (e) {}
-  if (gm && /^\d{4}$/.test(gm)) { document.getElementById('bagLink').href = 'bagkwaliteit.html#gm=' + gm; document.getElementById('werkbankLink').href = 'bagwerkbank.html#gm=' + gm; document.getElementById('levenLink').href = 'levensloop.html#gm=' + gm; document.getElementById('labelregLink').href = 'labelregistratie.html#gm=' + gm; document.getElementById('tnLink').href = 'tenderned.html#gm=' + gm; }
+  if (gm && /^\d{4}$/.test(gm)) { document.getElementById('bagLink').href = 'bagkwaliteit.html#gm=' + gm; document.getElementById('werkbankLink').href = 'bagwerkbank.html#gm=' + gm; document.getElementById('levenLink').href = 'levensloop.html#gm=' + gm; document.getElementById('labelregLink').href = 'labelregistratie.html#gm=' + gm; document.getElementById('tnLink').href = 'tenderned.html#gm=' + gm; document.getElementById('vbLink').href = 'verkeersborden.html#gm=' + gm; }
   document.querySelectorAll('.more').forEach(b => b.addEventListener('click', () => {
     const p = document.getElementById(b.getAttribute('aria-controls'));
     const open = b.getAttribute('aria-expanded') === 'true';

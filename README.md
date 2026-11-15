@@ -70,6 +70,8 @@ Vierde uitwerking, op een eigen plank Aanbestedingen: [Aanbestedingen in TenderN
 
 Vijfde uitwerking, op de plank Adressen en gebouwen: [De energielabelregistratie](https://josephinelinders.nl/labelregistratie.html), hoeveel gebouwen een energielabel hebben en wat je daarmee kunt zeggen: per gemeente het aandeel woningen en andere gebouwen met een label, per bouwperiode en functie, naast Nederland; wat er sinds 1 juli 2022 bij kwam en verdween; panden met uiteenlopende labels; en twee signalen met een lijst en een link naar de BAG-viewer (meer labels dan verblijfsobjecten; label afgegeven terwijl het pand in de BAG nog niet in gebruik is). Op basis van de labels per pand van het RIVM (afgeleid van EP-Online, RVO) en de BAG, vooraf geteld in `bag-werkbank/label/`. Het gaat over de registratie, niet over de energieprestatie: de pagina toont nergens welk label een gebouw heeft.
 
+Zesde uitwerking, op een eigen plank Wegen en verkeer: [De verkeersbordenregistratie](https://josephinelinders.nl/verkeersborden.html), hoe actueel het landelijke bestand van verkeersborden van NDW is: per gemeente wanneer de borden het laatst zijn gezien (2022 of eerder, 2023, 2024 of later) en hoeveel de wegbeheerder zelf heeft gecontroleerd, voor borden langs wegen van de gemeente (wegbeheerder volgens het Nationaal Wegenbestand) en alle borden binnen de gemeente, naast Nederland; met twee signalen (bordcode onbekend, wegvak niet meer in het NWB). Op basis van verkeersborden actueel beeld (NDW, CC0) en het NWB in de dienst maximum_snelheden_wegen van Rijkswaterstaat, vooraf geteld per gemeente. Het gaat over het bestand, niet over de borden op straat.
+
 ## Werkwijze
 
 Vier lagen:
