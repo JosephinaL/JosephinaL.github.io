@@ -93,7 +93,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
   .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
   .rail { grid-column: 1 / -1; grid-template-columns: subgrid; }
   .tile.breed { grid-column: 1 / -1; }
-  .shelf.smal:has(.tile.breed) { grid-column: span 1; }
+  .shelf.smal:has(.tile.breed) { grid-column: -2 / -1; }
 }
 .tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; min-width: 0; transition: border-color .15s ease, transform .15s ease; }
 .tile:not(.breed):hover { border-color: var(--accent); }
@@ -252,13 +252,6 @@ main > * { min-width: 0; }
           </article>
         </div>
       </div>
-      <div class="shelf smal">
-        <div class="shelf-head"><h3>Binnenkort</h3><span>Registraties die in de instrumenten al opvielen, nog niet uitgewerkt</span></div>
-        <div class="rail"><div class="tile breed"><ul class="binnenkort">
-          <li>Wmo: registratie per type maatwerkvoorziening</li>
-          <li>Veilig Thuis: registratieverschillen per regio</li>
-        </ul></div></div>
-      </div>
       <div class="shelf">
         <div class="shelf-head"><h3>Aanbestedingen</h3><span>TenderNed, de aankondigingen van overheidsopdrachten</span></div>
         <div class="rail">
@@ -290,6 +283,13 @@ main > * { min-width: 0; }
             <div class="tile-links"><a class="btn-start" id="vbLink" href="verkeersborden.html">Open de registratie <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-vb">Meer weten</button></div>
           </article>
         </div>
+      </div>
+      <div class="shelf smal">
+        <div class="shelf-head"><h3>Binnenkort</h3><span>Registraties die in de instrumenten al opvielen, nog niet uitgewerkt</span></div>
+        <div class="rail"><div class="tile breed"><ul class="binnenkort">
+          <li>Wmo: registratie per type maatwerkvoorziening</li>
+          <li>Veilig Thuis: registratieverschillen per regio</li>
+        </ul></div></div>
       </div>
     </div>
     <div class="infos">
@@ -420,7 +420,7 @@ main > * { min-width: 0; }
     </div>
   </section>
   <footer>
-    <p>Josephine Linders · Registraties belicht · versie 0.6</p>
+    <p>Josephine Linders · Registraties belicht · versie 0.6.1</p>
   </footer>
 
   <section class="verantwoording" aria-labelledby="vh">
