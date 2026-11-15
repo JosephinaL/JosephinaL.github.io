@@ -291,7 +291,7 @@ main > * { min-width: 0; }
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
     <p><b>Bron en peildatum.</b> Ministerie van Financiën, <a href="https://www.rijksfinancien.nl/open-data/financi%C3%ABle%20instrumenten">Financiële instrumenten 2025</a> (betalingen per ontvanger, gepubliceerd bij de Slotwet). Ministerie van SZW, <a href="https://www.rijksoverheid.nl/documenten/2025/09/30/budgetten-specificaties-en-toelichting">definitieve budgetten bijstand en LKS 2026</a>. CBS, onbewerkte Iv3-data gemeenten 2025 (<a href="https://dataderden.cbs.nl/ODataApi/OData/45071NED">45071NED</a>), live opgehaald; inwoners <a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/70072ned/table">70072ned</a>. Peildatum data op de pagina: 2 november 2026.</p>
-    <p><b>Licentie.</b> Rijksfinancien en rijksoverheid.nl: CC0. CBS: CC BY 4.0.</p>
+    <p><b>Licentie.</b> Ministerie van Financiën (Financiële instrumenten): publiek domein. Rijksoverheid.nl (budgetten SZW): CC0. CBS: CC BY 4.0.</p>
     <p><b>Methode.</b> Ontvangers zijn met vaste regels aan een gemeentecode gekoppeld (KvK-nummer uit het gemeentefonds, naam, handmatig vastgestelde uitzonderingen). De regels bij Sociale Zaken voor inburgering zijn weggelaten omdat ze landelijk op nul uitkomen. Iv3: baten op categorie Inkomensoverdrachten Rijk en Investeringsbijdragen Rijk, verdeeld over taakveld 0.7, taakveld 6.3 en de overige taakvelden, jaarrekening 2025.</p>
     <p><b>Wat dit niet is.</b> Geen volledig overzicht van rijksgeld voor een gebied, geen jaarrekening en geen oordeel over een gemeente. Geen vergelijking tussen gemeenten. Ook geen antwoord op de vraag of de verdeling eerlijk is. Het gemeentefonds wordt verdeeld met een model dat rekening houdt met verschillen tussen gemeenten; een hoger bedrag per inwoner kan dus samenhangen met andere omstandigheden.</p>
     <p><b>Bekende beperkingen.</b> Het gemeentefonds sluit aan op de Iv3: 317 van 340 gemeenten binnen 1%. Het bijstandsbudget sluit in de verdeling aan op taakveld 6.3 (getoetst met de nader voorlopige verdeling 2025: mediane afwijking 0,9%), maar gaat hier over een ander jaar. De overige betalingen zijn indicatief: mediane afwijking per gemeente 16% ten opzichte van de Iv3. Ontvangers staan soms onder een onjuiste naam in de bron.</p>
@@ -306,7 +306,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.2';
+  const VERSIE = '0.2.1';
   const PRODUCT = 'Rijksgeld per gemeente';
   const IV3 = 'https://dataderden.cbs.nl/ODataApi/OData/45071NED/';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
@@ -468,7 +468,7 @@ main > * { min-width: 0; }
   }
   function renderVoet() {
     const t = S.opgehaald.toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    $('#foot').innerHTML = `Bronnen: Ministerie van Financiën, Financiële instrumenten 2025 (CC0); Ministerie van SZW, definitieve budgetten 2026 (CC0); CBS, Iv3 45071NED en 70072ned (CC BY 4.0). Iv3 opgehaald ${t}. Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+    $('#foot').innerHTML = `Bronnen: Ministerie van Financiën, Financiële instrumenten 2025 (publiek domein); Ministerie van SZW, definitieve budgetten 2026 (CC0); CBS, Iv3 45071NED en 70072ned (CC BY 4.0). Iv3 opgehaald ${t}. Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
   $('#retryBtn').addEventListener('click', () => { if (S) kies(S.g); });
   $('#pickForm').addEventListener('submit', e => {
