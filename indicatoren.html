@@ -353,7 +353,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.26';
+  const VERSIE = '0.27';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1158,6 +1158,9 @@ main > * { min-width: 0; }
       scope: 'Geldzorgen van inwoners: wie arm is of problematische schulden heeft, hoe de gemeente die mensen bereikt met vroegsignalering, schuldhulpverlening en minimaregelingen, en hoe het afloopt. Bijstand staat er als context; de bijstand zelf, de re-integratie en beschut werk staan bij het thema Werk en inkomen.',
       lees: 'Arm en schulden zijn niet dezelfde groep. Wie onder de armoedegrens leeft, heeft niet altijd schulden, en wie problematische schulden heeft, is niet altijd arm. Over de hulp zelf is nog niets open: de resultaten van schuldhulpverlening en vroegsignalering staan alleen in de eigen registratie. Dat verandert pas als de landelijke uitwisseling (DDAS) cijfers per gemeente publiceert.',
       atelier: 'schulden.html', atelierNaam: 'Schulden per wijk', tvkort: '6.3',
+      naast: [['schulden.html', 'Schulden per wijk', 'hoeveel huishoudens problematische schulden hebben, bij welke schuldeisers en in welke wijken'],
+        ['energiearmoede.html', 'Energiearmoede per buurt', 'waar een slecht label en een laag inkomen samenkomen, en wie de woning bezit'],
+        ['minimaregelingen.html', 'Minimaregelingen per gemeente', 'welke regelingen voor lage inkomens de gemeente heeft, naast alle andere gemeenten']],
       tegel: 'Schulden en armoede', oms: 'Van armoede en problematische schulden via vroegsignalering en schuldhulp tot hoe het afloopt.',
       kaarten: [
         { k: 'context', b: 'open', naam: 'Huishoudens met problematische schulden',
@@ -1249,7 +1252,8 @@ main > * { min-width: 0; }
           norm: 'Eigen gemeente door de jaren.', vgl: 'Nee (regelingen verschillen per gemeente).',
           bron: () => 'Eigen registratie inkomensvoorzieningen; schatting van de doelgroep uit inkomensgegevens (CBS, op maat).',
           ggm: '<code>regeling.toekenningsdatum</code>, <code>.startdatum</code>, <code>.einddatum</code>, <code>.is_regelingsoort_regelingsoort_id</code>; <code>regelingsoort.naam</code>; <code>inkomensvoorziening.datumtoekenning</code>, <code>.eenmalig</code>, <code>.bedrag</code>.',
-          herkomst: 'Voorstel atelier.' },
+          herkomst: 'Voorstel atelier.',
+          inst: ['minimaregelingen.html', 'Minimaregelingen per gemeente'] },
         { k: 'bereik', b: 'intern', naam: 'Kwijtschelding gemeentelijke belastingen',
           def: 'Aantal toegekende verzoeken om kwijtschelding van afvalstoffenheffing, rioolheffing en OZB, en het bedrag.',
           zegt: 'Hoeveel huishoudens met een laag inkomen de gemeente ontlast, en een signaal van betalingsproblemen.',

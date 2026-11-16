@@ -1,0 +1,694 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Minimaregelingen per gemeente · Open Data Atelier</title>
+<link rel="icon" type="image/svg+xml" href="beeldmerk/beeldmerk-stil.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
+<link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Minimaregelingen per gemeente: welke regelingen voor lage inkomens een gemeente heeft volgens de lokale regelgeving, naast alle andere gemeenten. Wat veel gemeenten hebben en hier niet gevonden is, en wat weinig gemeenten hebben en deze wel. Geen ranglijst.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --dn-1: #b4492a; --dn-2: #de8b5c; --dn-3: #f0c4a3; --ov: #aab6b8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .ax0 { stroke: var(--muted); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart .noot { font-size: .82rem; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.streep { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; width: 16px; vertical-align: 3px; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 320px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.eig { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; font-size: .88rem; }
+.eig .t { position: relative; height: 14px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.eig .t i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.eig .t b { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px solid var(--fg); }
+.eig .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.eig .rij { display: contents; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 540px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.kruimel { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.kruimel .sep { color: var(--muted); font-size: .72rem; }
+.kruimel button.eyebrow { background: none; border: 0; padding: 0; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.kruimel button.eyebrow:hover { color: var(--fg); }
+.focus { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 1px; }
+.focus .fl { font-size: .82rem; color: var(--muted); }
+.focus .fv { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.focus .fc { font-size: .82rem; color: var(--muted); }
+.focus .fv small { font-size: 1rem; font-weight: 700; margin-left: 6px; }
+.dossier dl .uit { color: var(--fg); font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier dl dt.uit { box-shadow: -6px 0 0 color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier .legend span.uit { color: var(--fg); font-weight: 700; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+tbody tr.voorl td { color: var(--muted); }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 140px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
+th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td .rijknop { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+/* Minimaregelingen per gemeente */
+.ondertitel { margin: 0; font-family: var(--f-display); font-stretch: 85%; font-size: 1.05rem; font-weight: 600; color: var(--muted); }
+.grregel { margin: -8px 0 0; max-width: 92ch; }
+.duo2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lijst ul { list-style: none; padding: 0; gap: 6px; }
+.lijst li { border-left: 3px solid var(--accent); padding: 2px 0 2px 10px; }
+.lijst p { margin: 0; }
+table.soorten td { padding: 8px 10px; }
+table.soorten th { cursor: default; }
+table.soorten td:first-child { max-width: 42ch; }
+.mid { text-align: center; }
+.ja { color: var(--accent); font-weight: 800; font-size: 1.1rem; }
+.nee { color: var(--muted); }
+.land { display: grid; grid-template-columns: minmax(80px, 160px) auto; gap: 8px; align-items: center; white-space: nowrap; }
+.lbar { display: block; height: 12px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.lbar i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.land .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: .85rem; }
+#tblWrap { max-height: none; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Sociaal domein · open data</span>
+      <h1 id="title">Minimaregelingen per gemeente</h1>
+      <p class="ondertitel">Welke regelingen voor lage inkomens een gemeente heeft, naast alle andere gemeenten</p>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente" aria-label="Kies een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Elke gemeente heeft eigen regelingen voor inwoners met een laag inkomen: een inkomenstoeslag, een stadspas, een collectieve zorgverzekering, iets voor de kinderen. Welke dat zijn, verschilt per gemeente. Deze pagina zoekt ze op in de lokale regelgeving en zet ze naast alle andere gemeenten: wat veel gemeenten hebben en hier niet gevonden is, en wat weinig gemeenten hebben en deze gemeente wel.</p>
+    <p>Meer regelingen is niet beter. Eén ruime regeling kan meer opleveren dan vijf smalle. Daarom staat er geen ranglijst.</p>
+    <p class="muted small">Bron: Centrale Voorziening Decentrale Regelgeving (CVDR, lokaleregelgeving.overheid.nl). Alle gemeenten in één scan; de titels van de gevonden regelingen worden live opgevraagd.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <p class="small muted grregel" id="grRegel" hidden></p>
+      <div class="duo2" id="lijsten"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze regelingen? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> De pagina vindt regelingen die de gemeente als regelgeving publiceert: een verordening, beleidsregels of nadere regels. Een regeling die via een contract loopt (een collectieve zorgverzekering bij een verzekeraar), via een stichting (Leergeld, een jeugdfonds) of via een pas die een andere organisatie uitgeeft, staat daar vaak niet in. "Niet gevonden" betekent dus niet dat de gemeente de regeling niet heeft.</li>
+          <li><b>Een andere peildatum.</b> De scan van alle gemeenten heeft een vaste peildatum (onder de cijfers). Een regeling die daarna is vastgesteld of vervallen, telt nog niet mee. Een oude versie zonder einddatum kan nog als geldig meetellen.</li>
+          <li><b>Registratie bij de bron.</b> Voert een gemeenschappelijke regeling of een belastingsamenwerking de regeling uit, dan staat de regelgeving op naam van die organisatie. De pagina zoekt ook daar, voor de samenwerkingen waarvan de deelnemers in hun eigen regeling staan. Een samenwerking die daar niet bij hoort, wordt gemist. Ook publiceert niet elke gemeente elke beleidsregel in het CVDR.</li>
+          <li><b>Een fout in deze bewerking.</b> De pagina herkent een soort regeling aan woorden in de titel en de tekst. Een regeling met een ongebruikelijke naam kan gemist worden, en een tekst die een regeling alleen noemt, kan ten onrechte meetellen. Klik op de vindplaats om de tekst te lezen. Klopt het niet, meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data door Josephine Linders, op eigen titel. Het is geen officieel overzicht van een gemeente en geen oordeel over haar minimabeleid.</p>
+        <div class="meld">
+          <span>Een regeling gemist, of een die niet klopt?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Alle soorten</span><h2 id="soortKop">Negen soorten regelingen</h2></div>
+        <p class="small muted">Per soort: is hij gevonden in de lokale regelgeving van deze gemeente, waar, en bij hoeveel van alle gemeenten. De bijzondere bijstand staat er niet bij: die heeft elke gemeente op grond van de Participatiewet.</p>
+      </div>
+      <div class="panel">
+        <div class="tools">
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvBtn" type="button">CSV deze gemeente</button>
+          <button class="btn" id="csvAlleBtn" type="button">CSV alle gemeenten</button>
+        </div>
+        <div class="scroll" id="tblWrap" tabindex="0" role="region" aria-label="Tabel met de soorten regelingen; scroll met de pijltjestoetsen"></div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Zoeken</b>: per gemeente alle regelgeving in het CVDR waarin woorden staan als minima, bijzondere bijstand, inkomenstoeslag, kwijtschelding, stadspas, meedoen, kindpakket, zorgverzekering of armoede.</li>
+            <li><b>Samenwerkingen</b>: voert een gemeenschappelijke regeling (een intergemeentelijke sociale dienst, een werkbedrijf of een belastingsamenwerking) de regeling uit, dan telt de regelgeving van die organisatie mee voor elke deelnemer. Welke gemeenten deelnemen, staat in de tekst van de gemeenschappelijke regeling zelf; de lijst staat in de CSV van alle gemeenten.</li>
+            <li><b>Geldig</b>: per regeling de nieuwste versie, als die is ingegaan en niet is vervallen op de peildatum. Mandaatbesluiten, leidraden, handhaving, terugvordering, belastingverordeningen, re-integratie, Wmo en wonen vallen af.</li>
+            <li><b>Herkennen</b>: in de titel en de tekst van elke overgebleven regeling zoekt de pagina vaste woorden per soort (zoals "Ooievaarspas", "U-pas", "stadspas" of "meedoenregeling" voor een stadspas of meedoenregeling). Een woord in de titel telt drie keer.</li>
+            <li><b>Gevonden</b>: een soort telt als gevonden als de woorden er samen minstens twee keer staan. De vindplaats is de regeling waarin ze het vaakst staan.</li>
+            <li><b>Landelijk</b>: het aantal gemeenten waar de soort zo is gevonden, van alle 342.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Niet gevonden is niet afwezig.</b> Regelingen via een contract, stichting of fonds staan vaak niet in de lokale regelgeving. Het landelijke percentage is daardoor ook een ondergrens.</li>
+            <li><b>Gevonden zegt niets over de hoogte.</b> Een stadspas van € 50 en een van € 450 tellen even zwaar. De inkomensgrens (bijvoorbeeld 110, 120 of 130% van het sociaal minimum) staat in de tekst; volg de vindplaats.</li>
+            <li><b>Bundeling.</b> Grote gemeenten zetten vaak meer regelingen in één document. De vindplaats is dan voor meer soorten hetzelfde.</li>
+            <li><b>Geen gebruik.</b> Hoeveel inwoners een regeling gebruiken, staat niet in open data.</li>
+            <li><b>Geen ranglijst.</b> Meer soorten is niet beter of ruimhartiger.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><a href="indicatoren.html#domein=schulden" id="naarInd">Indicatoren belicht, Schulden en armoede</a>: welke cijfers er over armoede zijn, zoals personen en kinderen in armoede, en welke alleen de gemeente zelf heeft (zoals het gebruik van minimaregelingen).</li>
+            <li><a href="schulden.html" id="naarSchulden">Schulden per wijk</a>: hoeveel huishoudens problematische schulden hebben.</li>
+            <li><a href="energiearmoede.html" id="naarEa">Energiearmoede per buurt</a>: waar een laag inkomen en hoge energiekosten samenkomen.</li>
+            <li><a href="https://lokaleregelgeving.overheid.nl" target="_blank" rel="noopener">lokaleregelgeving.overheid.nl ↗</a>: alle regelgeving van de gemeente, ook wat deze pagina niet herkent.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Centrale Voorziening Decentrale Regelgeving (CVDR) van KOOP, via de zoekdienst van overheid.nl (SRU) en de teksten in de repository officiële overheidspublicaties. Alle 342 gemeenten zijn in één scan doorzocht; de peildatum staat na de gemeentekeuze onder de tabel. De titels van de gevonden regelingen worden bij elke keuze live opgevraagd.</p>
+    <p><b>Licentie.</b> CVDR: CC0 (vrij van auteursrecht en databankrecht).</p>
+    <p><b>Methode.</b> Per gemeente de geldende regelgeving over minima, ook die van de gemeenschappelijke regelingen waaraan de gemeente deelneemt, herkend in negen soorten aan vaste woorden in titel en tekst. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen volledig overzicht van het minimabeleid van een gemeente; geen oordeel over de hoogte, de inkomensgrens of het gebruik van een regeling; geen ranglijst tussen gemeenten; geen juridische vaststelling van wat geldt.</p>
+    <p><b>Bekende beperkingen.</b> Regelingen via een contract, stichting of fonds worden vaak niet gevonden, net als regelgeving van een samenwerking waarvan de deelnemers niet in de eigen regeling staan. Regelgeving van een samenwerking telt voor alle deelnemers, ook als een onderdeel maar voor een deel van hen geldt. Herkennen op woorden kan een regeling missen of ten onrechte meetellen. Oude versies zonder einddatum kunnen als geldig meetellen. Gemeenten met een toevoeging in hun naam worden ook zonder die toevoeging gezocht.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Een regeling gemist of verkeerd herkend? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=schulden" id="naarInd2">Welke cijfers er over schulden en armoede zijn. Indicatoren belicht, Schulden en armoede →</a></p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const PRODUCT = 'Minimaregelingen per gemeente';
+  const SRU = 'https://zoekservice.overheid.nl/sru/Search?x-connection=cvdr&operation=searchRetrieve&version=1.2&maximumRecords=50&startRecord=1&query=';
+  const VIEW = 'https://lokaleregelgeving.overheid.nl/';
+
+  // Scan van alle gemeenten: peildatum en per gemeente de gevonden soorten met de vindplaats (CVDR-versie).
+  // Vorm: "code|soort=werk_versie;soort=werk_versie|aantal geldende regelingen" (zie recepten/minimaregelingen/).
+  const PEIL = '2026-11-16';
+  const DATA = "0014|iit=367471_3;kwijt=747603_1;pas=740501_1;ziek=610839_16;pc=728908_1|26#0034|iit=749354_1;kwijt=696076_1;pas=768476_1;zorg=743688_1;ko=743688_1|57#0037|iit=340539_1;kwijt=717106_2;kind=479258_17|20#0047|iit=399522_1;kwijt=696701_1;zorg=639198_1|18#0050|iit=371019_1;kwijt=694201_1;kind=622428_1;zorg=760488_1;ziek=656232_6;pc=662814_1;ko=760488_1|25#0059|iit=761780_1;kwijt=698754_1;pas=672582_1;kind=672582_1;ziek=720909_1;ko=661549_1|32#0060|iit=718017_1|7#0072|iit=647990_1;kwijt=728327_1;kind=652002_1;ziek=672015_1;ko=651949_1|22#0074|iit=348311_1;kwijt=750795_1|24#0080|iit=755041_2;kwijt=731348_1;pas=322069_1;zorg=747809_1|19#0085|iit=349543_1;kwijt=689317_1;zorg=760903_1;ziek=756798_1;ko=713755_1|14#0086|iit=741576_1;kwijt=687635_1;zorg=732502_1|15#0088|iit=451305_1;kwijt=695424_1;zorg=726039_1;ko=726039_1|8#0090|iit=351105_1;kwijt=753921_1;zorg=717311_1|19#0093|iit=647010_1;kind=650051_1;ziek=673681_1;ko=649771_1|17#0096|iit=692810_1;kind=658870_1;ziek=671123_1;ko=658872_1|18#0098|iit=716687_1;kwijt=689221_1;zorg=741211_1;ko=741211_1|15#0106|iit=352955_1;kwijt=752805_1;kind=748268_1|22#0109|iit=371041_1;kind=655178_1;zorg=735849_1|13#0114|iit=350650_4;pas=712004_1;kind=248950_1;ko=727012_1|18#0118|iit=343762_3;kind=745889_1;zorg=651054_2;ko=600304_1|14#0119|iit=760319_1;kwijt=705635_1;pas=729419_1;kind=729419_1;zorg=754771_1;ziek=754771_1;pc=729419_1;ko=754771_1|19#0141|iit=624632_2;kwijt=750624_1;kind=678548_1;zorg=641316_4;ko=654991_2|26#0147|iit=671267_1;kwijt=747674_1;kind=611974_1;zorg=682082_2;ko=643423_1|19#0148|iit=429290_1;kwijt=728447_1;kind=746470_2;ko=746485_1|18#0150|iit=350836_1;kwijt=712167_1;zorg=725793_1;ko=163881_1|33#0153|iit=744533_1;kwijt=749442_1;kind=662759_1;zorg=691909_1|26#0158|iit=665243_1;kwijt=753064_1;kind=747113_1;zorg=392427_1;ziek=392427_1|23#0160|iit=340517_1;kwijt=691006_1;zorg=658392_2|60#0163|iit=736650_1;pas=716742_3;zorg=721648_2|15#0164|iit=670146_4;kwijt=747240_1;kind=661265_4;zorg=675059_5;ko=681149_1|39#0166|iit=714513_8;kwijt=736242_1;kind=714513_8;zorg=714513_8|17#0168|iit=352113_6;kwijt=750161_1;pas=757384_1;kind=674986_1;zorg=757384_1;ko=720590_1|13#0171|iit=474497_1;kwijt=747155_1;pas=722809_1;ko=759447_1|28#0173|iit=756234_1;kwijt=751801_1;kind=405870_1|23#0175|iit=623844_1;kwijt=753516_1;zorg=682366_1|21#0177|iit=645172_8;kwijt=692093_1;kind=645172_8;zorg=645172_8;pc=645172_8|17#0180|iit=346543_1;kwijt=748389_1;zorg=749729_1;ziek=749731_1;ko=700123_1|18#0183|iit=686263_1;kwijt=689730_1;kind=735101_1;zorg=757918_1;ko=701603_1|30#0184|iit=706625_2;kind=714065_2;ziek=706625_2|15#0189|iit=602939_1;kwijt=700059_1;pas=750937_1;kind=750934_1;zorg=696793_1|26#0193|iit=626245_1;kwijt=685756_1;kind=738329_1;zorg=738326_1;pc=613408_1;ko=724993_1|24#0197|iit=752054_1;kwijt=691893_1;pas=752054_1;kind=752054_1;zorg=679688_1|16#0200|iit=633645_17;kwijt=754161_1;kind=633645_17;ko=257625_1|15#0202|iit=352851_3;kwijt=647963_2|31#0203|iit=698876_1;kwijt=686681_1;zorg=761279_1|23#0209|iit=348057_1;kwijt=751534_1;kind=717667_1;zorg=610097_1|15#0213|iit=643073_1;kwijt=711385_2;pas=762219_1;kind=762219_1;zorg=340793_1;ko=723537_1|23#0214|iit=342511_1;kwijt=692799_1;ziek=342675_1|21#0216|iit=487001_1;kwijt=690288_1;zorg=665888_1|18#0221|iit=352234_2;kwijt=689823_1;ziek=661907_3|15#0222|iit=711009_1;kwijt=606924_1;zorg=636069_1;ziek=636069_1;ko=692592_1|16#0225|iit=697572_1;kwijt=697801_1;zorg=697572_1;ko=680040_1|16#0226|iit=609256_1;kwijt=750207_1;kind=652657_1;zorg=753346_1;ziek=753346_1;ko=612186_1|24#0228|iit=663873_1;kwijt=691775_1;kind=706627_1;zorg=707003_2|25#0230|iit=735341_1;kwijt=750839_1;kind=729933_1;zorg=729932_1;ziek=644487_1;ko=731448_3|13#0232|iit=708670_1;kwijt=614110_7;pas=750586_1;zorg=718658_1;ko=628907_1|18#0233|iit=658451_4;kwijt=268703_1;zorg=760478_1;ziek=664692_1;pc=664694_1;ko=760478_1|18#0243|iit=658999_5;kwijt=693728_1;zorg=761566_1;ziek=663579_1;pc=663579_1;ko=761566_1|18#0244|iit=28611_3;kwijt=686224_1;kind=758536_2;zorg=732430_1|15#0246|iit=707606_1;kwijt=751492_1;kind=707997_1;zorg=707997_1|15#0252|iit=346818_1;kwijt=695703_1;pas=661152_3;zorg=661155_1|20#0262|iit=756856_1;kwijt=686483_3;pas=756856_1;zorg=756856_1;ko=756856_1|9#0263|iit=763750_1;kwijt=689281_1;pas=650854_1;kind=650854_1;zorg=650854_1|17#0267|iit=624657_1;kwijt=704714_1|14#0268|iit=759045_1;pas=697226_1|26#0269|iit=701627_1;kwijt=751673_1;kind=95889_1;zorg=760951_1;ziek=760951_1|10#0273|iit=677856_1;kwijt=693601_1;kind=756998_1;ko=756998_1|11#0274|iit=130735_4;kwijt=141155_1;ko=605434_1|18#0275|iit=762401_1;kwijt=693102_1;kind=165448_2;ziek=745847_2;ko=606751_11|23#0277|iit=758308_1;kwijt=696669_1;kind=714235_1;ziek=757310_1;ko=754423_1|13#0279|iit=718225_1;kwijt=750468_1;kind=733445_1;zorg=733445_1;ko=61999_1|15#0281|iit=673939_1;kwijt=693090_1;ko=663614_1|19#0285|iit=728353_2;kwijt=731538_1;zorg=761020_1|9#0289|iit=768177_1;kwijt=695883_1;zorg=768178_1|30#0293|iit=661102_1;kwijt=752502_1;kind=351347_1;zorg=753345_1;ziek=753345_1;ko=612178_1|25#0294|iit=753705_1;kwijt=746480_1;pas=750570_1;kind=727134_1;zorg=754714_1|28#0296|iit=356525_1;kind=655021_3;zorg=697551_1;ko=680041_1|20#0297|iit=761825_1;zorg=763140_1|13#0299|iit=665564_1;kwijt=688915_1;kind=758964_1;zorg=758964_1;ziek=758964_1;ko=739721_1|26#0301|iit=603265_6;kwijt=728585_1;pas=603265_6;kind=615561_8;zorg=615561_8;ziek=640648_1|9#0302|iit=746870_1;kind=724056_1;zorg=755359_1|17#0303|iit=723330_1;kwijt=748706_1;zorg=711440_1|21#0307|iit=372393_1;kwijt=688803_1;kind=665438_1;zorg=676069_1;ko=609770_1|38#0308|iit=737825_1;kwijt=733001_1;pas=413741_2;kind=756263_1;zorg=756263_1;ko=756263_1|22#0310|iit=677090_2;kwijt=691270_1;zorg=749508_1|22#0312|iit=677090_2;kwijt=711132_1;pas=733597_1;zorg=749508_1|22#0313|iit=757524_1;kwijt=686520_1;kind=757524_1;zorg=756279_1;ziek=757524_1;ko=757524_1|17#0317|iit=755854_1;kwijt=733306_1;zorg=760316_1;pc=760316_1|19#0321|iit=748875_1;kwijt=686831_1;pas=751419_1;kind=404774_1;zorg=762758_1;ziek=717370_1;ko=635116_1|28#0327|iit=353626_1;kind=635439_1;ziek=421032_2;ov=756271_1|15#0331|iit=748413_1;kwijt=688621_1;kind=404774_1;zorg=763689_1;ziek=699315_1;ko=761130_1|23#0335|iit=660992_1;pas=734746_1;kind=758928_1;zorg=395171_5|32#0339|iit=684489_1;kind=663190_1;zorg=741951_1;ziek=741951_1|13#0340|iit=383142_1;kwijt=689561_1;kind=663387_2;zorg=743431_1;ziek=663387_2;pc=743431_1|33#0342|iit=741718_1;kwijt=747904_1;kind=756521_1;zorg=756521_1;ko=756521_1|30#0344|iit=642743_2;kwijt=689819_1;pas=724973_2|44#0345|iit=658178_1;kwijt=695666_1;kind=766772_1;zorg=657596_8;ziek=657596_8|20#0351|iit=753155_1;kwijt=701194_1;kind=695235_2;zorg=695235_2;ziek=753155_1;ov=755527_1;ko=145823_1|10#0352|iit=677090_2;kwijt=691564_1;zorg=749508_1;ov=760812_1|32#0353|iit=746680_1;kwijt=695102_1;pas=697048_1;kind=404774_1;zorg=767749_1;ziek=761130_1;ko=761130_1|21#0355|iit=677090_2;kwijt=687170_1;zorg=749508_1|25#0356|iit=753660_1;kwijt=694023_1;pas=622273_1;kind=354904_2;zorg=763767_1;ziek=761130_1;ko=636827_1|35#0358|iit=352258_1;kwijt=690684_1;pas=284675_2;kind=647071_7|26#0361|iit=752379_1;kwijt=659299_1;zorg=750288_2;ko=673129_2|41#0362|iit=356045_1;kwijt=687192_1;kind=719317_6;zorg=769106_1|31#0363|iit=460812_3;kwijt=757744_1;pas=443233_1;kind=768528_1;ov=656466_6|56#0373|iit=703561_1;kwijt=750481_1;zorg=750288_2;ko=750288_2|37#0375|iit=400932_1;kwijt=659299_1;kind=714265_1;zorg=714265_1;pc=714265_1|23#0376|iit=486633_1;kwijt=644756_1;zorg=760314_1;ko=660201_1|20#0377|iit=347117_1;kwijt=754736_1;kind=404463_1;zorg=609671_1;pc=736557_1;ko=126911_1|19#0383|iit=703554_1;kwijt=747834_1;zorg=750288_2;ko=750288_2|38#0384|iit=484067_1;kwijt=711263_1;kind=745494_1;ko=49447_1|26#0385|iit=466020_1;kwijt=690952_1;ko=729384_1|12#0388|iit=401787_1;kwijt=733193_1;kind=743620_1;zorg=752384_3;pc=752384_3|23#0392|iit=352453_4;kwijt=659299_1;kind=602711_2;ko=602376_1|31#0394|iit=754288_1;kwijt=749043_1;kind=754270_1;zorg=754288_1;pc=671384_1;ko=685975_1|45#0396|iit=471263_1;kwijt=701532_1;kind=763918_1;zorg=763918_1;ko=763918_1|23#0397|iit=350220_1;kwijt=752006_1;kind=385859_1;zorg=609107_2;pc=736284_1;ko=609107_2|17#0399|iit=703434_1;kwijt=746711_1;zorg=750288_2;ko=750288_2|39#0400|iit=644088_2;kwijt=691581_1;kind=610493_1;zorg=692394_1;ko=680695_1|31#0402|iit=443708_1;kwijt=691934_1;pas=393667_1;kind=635042_1;zorg=765159_1;ziek=765159_1;pc=393667_1|31#0405|iit=751152_1;kwijt=701678_1;pas=760639_1;kind=760639_1;zorg=760639_1|29#0406|iit=746917_1;kwijt=686883_1;zorg=759117_1;ko=659641_1|14#0415|iit=374261_1;kwijt=733595_1|14#0417|iit=383794_1;kwijt=698222_1;zorg=760306_1;ko=660218_1|21#0420|iit=459613_1;kwijt=749058_1;pas=714772_1;kind=714772_1;zorg=714772_1;ziek=714771_1;ko=656550_1|38#0431|iit=763209_1;kwijt=754314_1;pas=347300_1;kind=347300_1;zorg=441974_2;ko=315748_1|21#0432|iit=379459_1;kwijt=8935_1;zorg=644073_2;pc=644073_2|28#0437|iit=635648_1;kwijt=713144_1;zorg=746168_1;ko=705098_1|16#0439|iit=720456_1;kwijt=664623_2;kind=754605_1;zorg=754605_1;ko=671421_1|26#0441|iit=626315_2;kwijt=688513_1;pas=755077_1;kind=755077_1;zorg=626315_2;pc=626315_2;ko=626315_2|10#0448|iit=749212_1;kwijt=754836_1;kind=749212_1;zorg=749212_1;pc=677907_1|11#0450|iit=703659_1;kwijt=750508_1;zorg=750288_2;ko=750288_2|37#0451|iit=757465_1;kwijt=732319_2;pas=757466_1;kind=757463_1;zorg=752024_1;ko=702546_1|32#0453|iit=698398_1;kwijt=693081_1;kind=650790_5;zorg=650790_5;ko=370293_1|34#0473|iit=354516_3;kwijt=751893_1;kind=468513_2;ko=418280_1|21#0479|iit=677252_1;kwijt=692494_1;pas=697021_2;kind=697021_2;zorg=626298_10;ko=626298_10|33#0482|iit=760857_1;kwijt=752433_1;kind=756278_1;zorg=749792_1;ov=756278_1|18#0484|iit=752777_1;kwijt=702615_1;kind=752777_1;zorg=752777_1;ko=752777_1|35#0489|iit=690680_1;kwijt=753560_1;kind=652009_1;pc=652009_1|28#0498|iit=625543_1;kwijt=732671_1;kind=734283_1;zorg=752382_3;pc=668251_1|25#0502|iit=355319_1;kwijt=429274_1;kind=355319_1;zorg=636077_1;ko=220636_2|26#0503|iit=353706_2;kwijt=232930_4;zorg=660718_1;ko=737584_1|26#0505|iit=759974_2;kwijt=311057_6;pas=767723_1;zorg=749792_1;ov=767723_1|20#0512|iit=600079_4;pas=728676_1;zorg=728676_1;ov=762227_1;ko=630398_1|33#0513|iit=750298_1;pas=748428_2;kind=748428_2;zorg=741127_1;ov=756814_1;ko=626923_1|41#0518|iit=345341_2;kwijt=710599_1;pas=633373_1;kind=141846_2;zorg=633373_1;ziek=633373_1;ov=633373_1|41#0523|iit=691559_1;kwijt=753579_1;kind=756441_1;zorg=749792_1;ov=756441_1|17#0531|iit=690036_1;kwijt=749661_1;zorg=749792_1|15#0532|iit=399652_1;kwijt=733302_1;kind=668233_1;zorg=752385_3;pc=752385_3|26#0534|iit=686999_1;kwijt=659299_1;zorg=767470_1;ov=749235_2;ko=767470_1|21#0537|iit=699248_1;zorg=757193_1;ov=745080_1;ko=757193_1|18#0542|iit=347164_1;kwijt=687352_1;kind=347164_1;zorg=635246_1;ov=716114_1;ko=701648_1|25#0546|iit=634399_1;kwijt=733112_1;kind=747564_2;zorg=677687_1;ov=756767_1;ko=643160_1|31#0547|iit=363472_1;kwijt=687745_1;pas=457441_4;kind=457441_4;zorg=663811_1;ov=758229_1;ko=457441_4|29#0553|iit=695739_1;kwijt=752562_1;zorg=767470_1;ov=749232_2;ko=767470_1|19#0556|iit=754144_1;kwijt=697287_1;kind=754197_1;zorg=475252_1;ov=428149_1;ko=678145_1|34#0569|iit=397856_13;kwijt=754116_1;kind=397856_13;zorg=397856_13;ov=761451_1;ko=397856_13|15#0575|iit=694445_1;kwijt=752901_1;kind=660605_1;zorg=767470_1;pc=432773_1;ov=753256_1;ko=767470_1|25#0579|iit=350880_3;kwijt=687991_1;pas=675938_2;kind=754653_1;zorg=675938_2;ov=749252_1;ko=675938_2|23#0589|iit=660992_1;kwijt=692514_1;pas=733745_1;zorg=395171_5|31#0590|iit=686154_1;kwijt=707439_1;kind=761030_1;zorg=749792_1;ov=761030_1|17#0597|iit=690550_1;kwijt=750366_1;kind=679868_1;zorg=740341_1;ov=679868_1;ko=729137_1|33#0599|iit=741634_1;kwijt=747293_1;kind=700454_1;ko=484642_2|52#0603|iit=441627_1;kwijt=707715_1;pas=674606_2;kind=663584_1;zorg=663584_1;pc=663584_1;ko=35236_1|27#0606|iit=753546_1;kwijt=705099_1;kind=753547_1;zorg=478981_1|26#0610|iit=690439_1;kwijt=687708_1;kind=761671_1;zorg=749792_1;ov=761671_1|15#0613|iit=762014_1;kwijt=751912_1;pas=746386_1;kind=680192_1;zorg=746386_1;ov=767388_1|19#0622|iit=754876_1;kwijt=687336_1;kind=753719_1;zorg=702515_1|32#0626|iit=618473_2;kwijt=747592_1;pas=628647_3;zorg=628647_3;ov=759693_1|14#0627|iit=740449_1;kwijt=750072_1;pas=725616_1;kind=636185_1;zorg=740449_1;ko=740449_1|26#0629|iit=742973_1;kwijt=746796_1;pas=628524_3;zorg=628524_3|18#0632|iit=660992_1;kwijt=692150_1;pas=731926_1;zorg=395171_5|31#0637|iit=455899_1;kwijt=695523_1;kind=739094_1|26#0638|iit=391949_1;kwijt=728113_1;pas=633629_1;kind=754389_1;zorg=633629_1;pc=633629_1;ov=748673_1;ko=352631_1|25#0642|iit=685288_1;kwijt=729023_1;kind=759823_1;zorg=749792_1;ov=759823_1|24#0654|iit=679080_1;pas=704746_1;kind=679140_1;zorg=704746_1;pc=704746_1;ko=681242_1|21#0664|iit=744146_1;kwijt=753889_1;pas=625159_1;kind=625159_1;zorg=704746_1;pc=704746_1;ko=736600_1|28#0668|iit=460228_1;pas=707191_1;ko=680474_1|19#0677|iit=720357_2;kwijt=691998_1;kind=686388_3;zorg=686388_3|21#0678|iit=679080_1;kwijt=688569_1;pas=704746_1;kind=679140_1;zorg=704746_1;pc=704746_1|20#0687|iit=351665_1;kwijt=691734_1;zorg=746507_1;pc=746507_1;ov=746793_1|24#0703|iit=679080_1;kwijt=693122_1;pas=704746_1;kind=679140_1;zorg=704746_1;pc=704746_1;ko=681063_1|22#0715|iit=761321_1;kwijt=686799_1;pas=752748_1;kind=752748_1;zorg=752748_1;ko=752748_1|33#0716|iit=686084_1;kwijt=749098_1;kind=692935_2;zorg=692935_2|18#0717|iit=356181_1;kwijt=697709_2;kind=757062_1;zorg=693547_1;pc=693547_1;ov=757062_1;ko=757062_1|34#0718|iit=749457_1;kwijt=691898_1;pas=737110_1;kind=737110_1;zorg=737110_1;pc=735525_2|25#0736|iit=618115_1;kwijt=751695_1;kind=429475_1;zorg=617918_4;ko=663959_1|18#0737|iit=640509_1;kwijt=698756_1;pas=672585_1;kind=757831_1;zorg=757831_1;ziek=720776_1;ko=661547_1|29#0743|iit=705801_2;kwijt=698991_1;zorg=613543_1;ko=645544_1|24#0744|iit=417445_1;kwijt=690320_1;pas=722986_1;kind=162163_1;ko=722975_1|13#0748|iit=743613_1;kwijt=749482_1;pas=762117_1;kind=762117_1;zorg=757240_1;ko=671993_1|27#0753|iit=695746_1;kwijt=696237_1;pas=744817_1;kind=744817_1;zorg=744817_1;ziek=697225_1;ko=759319_1|19#0755|iit=764258_1;kwijt=697769_1;pas=27146_1;ko=713171_1|15#0757|iit=743827_2;kwijt=730775_1;zorg=743827_2;pc=680945_1;ko=694278_1|16#0758|iit=641841_1;kwijt=749631_1;zorg=641847_1|29#0762|iit=704213_2;kwijt=695884_1;zorg=612891_1;ko=644096_1|27#0765|iit=381432_1;kwijt=696876_1;zorg=690902_1;ko=690902_1|12#0766|iit=740104_1;kwijt=754798_1;pas=746979_1;ko=228420_1|16#0770|iit=347967_1;kwijt=685092_1;kind=696629_1;zorg=751970_2;ko=675570_1|20#0772|iit=687570_20;kwijt=705501_1;kind=693155_4;zorg=687570_20;ov=729173_1;ko=635446_3|43#0777|iit=728234_1;kwijt=748745_1;zorg=619210_1;ko=734644_1|29#0779|iit=641694_1;kwijt=749401_1;kind=475948_1;zorg=724868_1;ziek=468952_2;ko=741727_1|28#0784|iit=349658_1;kwijt=690325_1;pas=723021_1;kind=704759_1;ko=723020_1|15#0785|iit=601573_1;kwijt=753089_1;pas=651011_2;kind=755757_1;zorg=755757_1|11#0794|iit=757691_1;kwijt=691649_1;kind=240110_1;zorg=660999_1;ko=459606_1|34#0796|iit=696547_1;kwijt=686115_1;pas=755087_2;kind=748221_6;zorg=729140_2;ko=444772_1|31#0797|iit=699347_1;kwijt=649069_1;kind=603544_1;zorg=763623_1;pc=320682_1|19#0798|iit=422860_1;kwijt=747460_1;kind=724279_1;zorg=724279_1;pc=724279_1;ko=717295_1|17#0809|iit=699347_1;kwijt=687250_1;kind=488288_2;zorg=763623_1|28#0820|iit=652598_1;kwijt=428142_1;kind=720297_1;zorg=759607_1;ko=759607_1|22#0823|iit=740748_1;kwijt=692528_1;pas=740748_1;kind=740748_1;zorg=745512_2;ko=745512_2|30#0824|iit=682199_1;kwijt=752247_1;pas=688040_1;kind=682203_1;zorg=735988_2|23#0826|iit=352881_2;kwijt=750403_1;kind=227074_1;zorg=343764_1|30#0828|iit=366517_1;kwijt=699223_1|17#0840|iit=739830_1;kwijt=749760_1;ko=15468_1|15#0845|iit=744508_2;kwijt=731290_1;zorg=744508_2;pc=680948_1;ko=396846_1|16#0847|iit=708680_1;kwijt=698761_1;zorg=682814_3;ko=726832_1|26#0848|iit=672647_1;kwijt=431839_1;zorg=759273_1|17#0851|iit=738330_1;kwijt=692109_1;pas=764313_1;kind=764313_1;zorg=735859_1;ko=693977_2|32#0852|iit=382270_1;kwijt=687067_1;pas=417811_1;kind=747231_1;pc=747231_1|13#0855|iit=395114_1;kwijt=714977_1;pas=688807_1;kind=745881_1;zorg=745881_1|39#0858|iit=753359_1;zorg=724819_1|23#0861|iit=749824_1;kwijt=701694_1;zorg=749824_1;ko=738697_1|9#0865|iit=346696_4;kind=383045_3;zorg=763678_1;ko=646833_4|20#0866|iit=347772_1;kwijt=51900_1|8#0867|iit=699347_1;zorg=763623_1|26#0873|iit=739061_1;kwijt=751385_1;kind=740079_1;zorg=737692_1;ko=672020_1|22#0879|iit=735384_1;kwijt=749780_1;pas=768507_1;kind=685113_1;zorg=644186_1;ko=751097_1|26#0880|iit=759830_1;kwijt=754127_1;pas=447245_1;kind=447245_1;zorg=454000_1;ko=454000_1|21#0882|iit=688722_1;kwijt=752676_1;pas=652803_1;zorg=652799_1;ziek=627149_1|26#0888|iit=343014_4;kwijt=750108_1;pas=749293_1;zorg=672160_1;ko=713421_1|22#0889|iit=340028_1;kwijt=688939_1;ko=726519_1|14#0893|iit=738713_1;kwijt=752484_1;kind=686145_1;zorg=686145_1|20#0899|iit=688722_1;kwijt=751288_1;pas=751000_1;ziek=627149_1|33#0907|iit=412284_1;kwijt=750979_1;zorg=768185_1|16#0917|iit=371674_1;kwijt=746951_1;pas=661182_1;kind=759653_1;zorg=760743_1|28#0928|iit=684311_1;kwijt=753807_1;pas=738970_2;kind=660522_1;zorg=651463_1;ko=354956_1|23#0935|iit=352810_1;kwijt=748567_1;kind=601557_1;ko=603308_1|44#0938|iit=357262_1;kwijt=730464_1;pas=361652_1;kind=361652_1;zorg=361652_1;ko=449621_1|21#0944|iit=360233_1;kwijt=729039_1;kind=696562_1;zorg=696562_1|13#0946|iit=478664_1;kwijt=750127_1;pas=661353_1;kind=661353_1;zorg=718342_1;ko=180159_1|15#0957|iit=459550_1;kwijt=748143_1;ziek=638558_1|30#0965|iit=700030_1;kwijt=751571_1|14#0971|iit=647439_1;kwijt=754585_1;kind=717710_1;zorg=650639_1|14#0981|iit=387632_1;kwijt=753008_1|23#0983|iit=735150_1;kwijt=84540_2;pas=710390_1;zorg=756498_1|26#0984|iit=753414_1;kwijt=691844_1;pas=761664_1|13#0986|iit=688006_1;kwijt=752550_1|25#0988|iit=461958_1;kwijt=751639_1;zorg=485175_1|32#0994|iit=347736_1;kwijt=686294_1;kind=718411_1;ko=456102_1|23#0995|iit=650245_1;kwijt=702133_1;ko=650245_1|8#1507|iit=730889_1;kwijt=688700_1;pas=681286_2;zorg=681286_2|22#1509|iit=755160_1;zorg=760348_1|14#1525|iit=695753_1;kwijt=750988_1;zorg=767470_1;ov=749236_2;ko=767470_1|17#1581|iit=677090_2;kwijt=751453_1;pas=718625_1;kind=718625_1;zorg=749508_1|20#1586|iit=753705_1;kwijt=76940_1;pas=753049_1;zorg=673670_1|23#1598|iit=357007_1;zorg=686738_1|25#1621|iit=692055_8;kwijt=752307_1;kind=760531_2;zorg=692055_8|10#1640|iit=491096_1;kwijt=754724_1;pas=492086_2;kind=662311_2|14#1641|iit=695482_1;kwijt=751770_1;pas=692595_1;kind=634532_1;ziek=719770_1;ko=733682_1|27#1652|iit=714506_1;kwijt=695165_1;zorg=621379_1;ko=734628_1|15#1655|iit=730535_1;kwijt=750931_1;pas=695356_1;kind=689169_1;zorg=491896_1;ko=742471_1|17#1658|iit=753366_1;kwijt=492486_1;zorg=724980_1|16#1659|iit=705264_1;kwijt=696229_1;zorg=616232_1;ko=359757_1|20#1667|iit=747416_2;kwijt=693742_1;zorg=747416_2;ko=675657_1|13#1669|iit=617110_1;kwijt=747045_1;pas=656416_1;kind=760459_1;ziek=754943_1;ko=671608_1|22#1674|iit=731780_1;kwijt=752528_1;pas=741254_1;kind=610992_5;zorg=622353_1|70#1676|iit=634879_2;kwijt=692069_1;pas=301964_4;zorg=630600_3;ziek=630599_2;ov=740159_1|23#1680|iit=697163_2;kwijt=693669_1;pas=421274_2;kind=750358_1;ko=653736_1|12#1681|iit=372565_1;zorg=488775_1|28#1690|iit=50441_7;kind=630302_1;zorg=767018_1;ko=381997_1|12#1695|iit=679080_1;kwijt=752689_1;pas=704746_1;kind=679140_1;zorg=704746_1;pc=704746_1;ko=722544_1|19#1696|iit=653882_1;kwijt=708969_1;pas=734897_3;kind=734897_3;zorg=734897_3|10#1699|iit=726614_1;kwijt=690983_1;pas=418154_1;zorg=748280_1;ko=697840_1|17#1700|iit=734114_1;kwijt=751930_1;pas=60475_1;kind=701172_1;ko=648544_3|27#1701|iit=658093_1;kwijt=695573_1;pas=658099_1;kind=658103_1;zorg=716433_2;ziek=716434_1|18#1705|iit=763269_1;kwijt=750439_1;pas=763269_1;kind=763077_1;zorg=763269_1;ko=658029_1|35#1706|iit=753375_1;kwijt=621986_1;zorg=724787_1;ko=680554_1|19#1708|iit=361881_1;kwijt=688140_1;zorg=633272_1;ziek=719868_1|24#1709|iit=737218_1;kwijt=751448_1;zorg=615893_1;ko=741426_1|26#1711|iit=619222_1;kwijt=751194_1;pas=600124_1;kind=636530_1;ko=681787_1|23#1714|iit=755313_1;kwijt=690287_1;kind=755313_1;zorg=763551_1|19#1719|iit=352514_2;kwijt=753608_1;ko=754959_1|7#1721|iit=746605_1;kwijt=697833_1;pas=758533_1;kind=746605_1;zorg=746605_1;pc=746605_1|11#1723|iit=489855_1;kwijt=669676_1;pas=759041_1;ko=723014_1|18#1724|iit=733653_1;kwijt=733653_1;pas=733653_1;kind=733653_1;zorg=733653_1;ko=675366_1|22#1728|iit=734022_1;kwijt=734022_1;pas=734022_1;kind=734022_1;zorg=746056_3;ko=675919_1|16#1729|iit=714027_1;kwijt=752795_1;pas=655124_1;kind=655124_1;ko=22158_1|19#1730|iit=451469_1;kwijt=694711_1;pas=446913_1;kind=749680_1|15#1731|iit=366395_1;kwijt=754873_1;pas=754873_1;kind=641084_1;zorg=754873_1|19#1734|iit=737974_1;kwijt=751206_1;pas=766447_1;kind=766447_1;zorg=766447_1;ko=759859_1|15#1735|iit=733922_1;kwijt=686394_1;kind=733921_1;zorg=739100_1|25#1740|iit=711422_1;kwijt=708638_1;pas=711453_1;ziek=611698_1;ko=753708_2|27#1742|iit=718231_1;kwijt=684853_1;pas=744892_1;kind=744892_1;zorg=696053_1;pc=744892_1;ko=119699_1|23#1771|iit=361722_1;kwijt=435387_1;pas=704283_1;kind=759236_1|25#1773|iit=717610_2;kwijt=717610_2;zorg=717610_2;pc=717610_2;ko=717610_2|21#1774|iit=687460_1;kwijt=689884_1;pas=728642_1;kind=734963_1;zorg=756961_1;ko=701611_1|28#1783|iit=691750_1;kwijt=691885_1;kind=756742_1;zorg=767606_1;pc=767606_1;ko=757948_1|21#1842|iit=349212_1;kwijt=689014_1;kind=748782_1;zorg=444548_1;ziek=444548_1;pc=444548_1|24#1859|iit=753705_1;kwijt=692047_1;pas=749858_2;kind=760582_1;zorg=758762_1|41#1876|iit=758051_1;kwijt=747260_1;pas=715292_1;kind=715292_1;zorg=758051_1;ko=754706_1|38#1883|iit=345031_4;kwijt=748552_1;kind=762909_1;zorg=634666_1;ziek=391677_1|24#1884|iit=693366_8;kwijt=716838_1;kind=693366_8;zorg=693366_8;ziek=693366_8|12#1891|iit=472674_1;kwijt=693107_1;zorg=761173_1;ko=761173_1|12#1892|iit=367944_1;kwijt=752443_1;kind=367944_1;zorg=635562_1;ziek=768953_1;ov=762405_1;ko=699089_1|27#1894|iit=359399_1;kwijt=707285_1;kind=759376_1;zorg=759429_1|21#1895|iit=128599_3;kwijt=689979_1;ko=293131_1|27#1896|iit=635113_4;kwijt=686566_1;pas=750079_1;kind=635113_4;zorg=672143_2;ziek=736455_1;ko=397415_1|15#1900|iit=725260_1;kwijt=694035_1;kind=725575_1;zorg=702017_1;ko=629816_1|21#1901|iit=660992_1;pas=733035_1;zorg=395171_5;ov=764448_1|29#1903|iit=751729_1;kwijt=690306_1;kind=686586_1|13#1904|iit=347827_1;kwijt=732543_1;pas=745125_1;kind=746454_1;zorg=743067_1;ziek=638894_2;pc=371985_1|33#1911|iit=671700_1;kwijt=733563_1;pas=748206_1;kind=754666_1;zorg=748270_2;pc=748206_1;ko=748270_2|42#1916|iit=745250_1;kwijt=706288_1;pas=634156_6;zorg=634156_6;ko=195598_1|23#1924|iit=370946_1;kwijt=425552_2;kind=613620_6;zorg=626740_1;ko=677791_1|24#1926|iit=757048_1;kwijt=751466_1;kind=757109_1;ko=723156_1|17#1930|iit=697750_3;kind=718123_1|16#1931|iit=664431_3;kwijt=725884_1;pas=753967_1;kind=664431_3;zorg=753967_1;ov=664431_3;ko=658925_1|23#1940|iit=639712_1;kwijt=691996_1;pas=618214_1;kind=648398_1;zorg=709986_1;ziek=709986_1|32#1942|iit=753172_1;kwijt=748526_1|26#1945|iit=352368_1;kwijt=693941_1;ko=739084_1|20#1948|iit=741233_1;kwijt=690024_1;pas=756540_1;kind=741233_1;zorg=741233_1;pc=741233_1;ko=621244_1|23#1949|iit=647938_1;kwijt=752487_1;kind=649424_1;ziek=670172_1|22#1950|iit=607519_1;kind=677605_1;zorg=636357_1;ziek=611278_1|15#1952|iit=635409_1;kwijt=689531_1;pas=635695_1;kind=635695_1;zorg=673235_2|29#1954|iit=688331_1;kwijt=747897_1;kind=690719_1;zorg=690719_1;ko=755065_1|19#1955|iit=734407_1;kwijt=745117_1;pas=739008_1;zorg=739008_1;ko=721923_1|23#1959|iit=619924_1;kwijt=751184_1;kind=750084_1;zorg=750084_1;ko=750084_1|21#1960|iit=635563_1;kwijt=692036_1;kind=735453_4;zorg=630671_3;ko=630671_3|28#1961|iit=600079_4;kwijt=754631_1;pas=728676_1;kind=702386_1;zorg=728676_1|38#1963|iit=764064_1;kwijt=752880_1;pas=741694_1;kind=741694_1;zorg=741694_1;ov=682233_1;ko=743184_1|23#1966|iit=619807_1;kwijt=688692_1;kind=745817_1;zorg=745817_1;ziek=745817_1;ko=677794_3|17#1969|iit=624614_1;kind=674027_1;zorg=674029_1|16#1970|iit=689195_1;kwijt=692468_1;zorg=763527_1;ko=763527_1|15#1978|iit=600079_4;kwijt=687227_1;pas=728676_1;zorg=728676_1;ov=761967_1|24#1979|iit=697524_1;kwijt=666995_1;kind=691450_1|14#1980|iit=702240_1;kwijt=659299_1;zorg=750288_2;pc=757644_1;ko=750288_2|38#1982|iit=671562_1;kwijt=685907_1;pas=750404_1;zorg=691255_1;ko=695137_1|26#1991|iit=671822_1;kind=680027_2;zorg=680027_2|28#1992|iit=732154_1;kwijt=746967_1;kind=734802_1;zorg=734802_1;ko=703109_2|15";
+  // Samenwerkingen waarvan de regelgeving meetelt, met de deelnemers uit de tekst van de gemeenschappelijke regeling.
+  const GRS = [["Avres",["0512","1961","1978"]],["Bedrijfsvoeringsorganisatie West Betuwe",["1960"]],["Belastingsamenwerking West-Brabant",["0748","0758","0766","0777","0809","0826","0840","0873","0879","1655","1674","1709"]],["Cocensus",["0361","0373","0375","0383","0392","0394","0396","0399","0400","0415","0431","0450","0534","0880","1980"]],["Ferm Werk",["0335","0589","0632","1901"]],["Fijnder",["0294","1586","1859"]],["Gemeenschappelijke Regeling Belastingsamenwerking SaBeWa Zeeland",["0654","0664","0677","0678","0703","0715","1714"]],["Gemeenschappelijke Regeling Gemeentelijk Belastingkantoor Twente",["0141","0147","0153","0158","0164","0168","0173","1700","1859","1876"]],["ISD BOL",["0882","0899"]],["Intergemeentelijke Sociale Dienst (ISD) Bollenstreek",["0534","0553","0575","1525"]],["Kompas, Gemeentelijk collectief voor werk, inkomen & zorg",["0965","0986","1954"]],["Meerinzicht",["0050","0233","0243"]],["MijnGemeenteDichtbij",["0757","0845"]],["Modulaire gemeenschappelijke regeling sociaal domein centraal Gelderland",["0202","1705","1734","0221","0226","0274","0275","0277","0289","0293","0299"]],["Noaberkracht Dinkelland Tubbergen",["1774","0183"]],["OVER-gemeenten",["0431","0880"]],["Orionis Walcheren",["0687","0717","0718"]],["Peelgemeenten",["0743","0762","0847","1652","1659"]],["Regio Gooi en Vechtstreek",["0317","0376","0402","0406","0417","1696","1942"]],["Regionale Belasting Groep",["0503","0606","0622","1892","1931"]],["Regionale Dienst Werk en Inkomen Kromme Rijn Heuvelrug",["0310","0312","0352","0355","1581"]],["Samenwerking De Bevelanden",["1695","0664","0654","0678","0703"]],["Samenwerking Kempengemeenten",["0770","0823","1667","1724","1728"]],["Samenwerkingsorganisatie De Wolden Hoogeveen",["1690","0118"]],["Senzer",["0743","0762","0794","0847","1652","1659","1771"]],["Sociaal Domein Drechtsteden",["0505","0523","0531","0590","0482","0610","0642"]],["Stroomopwaarts MVS",["0556","0606","0622"]],["Uitvoeringsorganisatie Baanbrekers",["0797","0809","0867"]],["Uitvoeringsorganisatie Laborijn",["0197","0222","1955"]],["Werk en Inkomen Lekstroom",["0321","0331","0353","0356"]],["WerkSaam Westfriesland",["0388","0405","0420","0432","0498","0532","1598"]],["Werkzaak Rivierenland",["0214","0216","0263","0281","0297","0668","1740","1960"]],["Zaffier",["0361","0373","0383","0399","0450","1980"]]];
+  const grVan = c => GRS.filter(([, cs]) => cs.includes(c)).map(([n]) => n);
+
+  const SOORTEN = [
+    { k: 'iit', t: 'Individuele inkomenstoeslag', u: 'Een jaarlijks bedrag voor wie langdurig van een laag inkomen leeft. Elke gemeente moet er een verordening voor hebben (Participatiewet).' },
+    { k: 'kwijt', t: 'Kwijtschelding gemeentelijke belastingen', u: 'Geen of minder afvalstoffenheffing, rioolheffing of andere lokale lasten voor wie het niet kan betalen.' },
+    { k: 'pas', t: 'Stadspas of meedoenregeling', u: 'Een pas, budget of fonds om mee te doen aan sport, cultuur of activiteiten (zoals de Ooievaarspas of de U-pas).' },
+    { k: 'kind', t: 'Regeling voor kinderen', u: 'Een kindpakket, schoolkostenregeling, kindbudget of een regeling voor sociale participatie van kinderen.' },
+    { k: 'zorg', t: 'Collectieve zorgverzekering', u: 'Een aanvullende zorgverzekering die de gemeente met een verzekeraar regelt, vaak met een bijdrage in de premie.' },
+    { k: 'ziek', t: 'Tegemoetkoming chronisch zieken of meerkosten', u: 'Een bijdrage in de meerkosten van ziekte of een beperking, of in het eigen risico.' },
+    { k: 'pc', t: 'Computer of laptop', u: 'Een computer, laptop of tablet, meestal voor schoolgaande kinderen.' },
+    { k: 'ov', t: 'Openbaar vervoer', u: 'Gratis of goedkoper openbaar vervoer, bijvoorbeeld voor AOW-gerechtigden met een laag inkomen.' },
+    { k: 'ko', t: 'Kinderopvang op sociale indicatie', u: 'Een bijdrage in de kinderopvang als een ouder om sociale of medische redenen niet voor het kind kan zorgen.' }
+  ];
+  const VEEL = 0.5, WEINIG = 0.25;   // grenzen voor "veel gemeenten" en "weinig gemeenten"
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const kaal = s => String(s).replace(/\s*\(.*\)/, '').toLowerCase();
+  const pct = (a, b) => b ? Math.round(100 * a / b) : 0;
+  const datum = s => s ? new Date(s + 'T12:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+
+  // ---------- gemeenten ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- scan ----------
+  const SCAN = new Map();
+  DATA.split('#').forEach(r => {
+    const [c, s, n] = r.split('|');
+    const m = {};
+    (s || '').split(';').filter(Boolean).forEach(x => { const [k, id] = x.split('='); m[k] = id; });
+    SCAN.set(c, { s: m, n: +n || 0 });
+  });
+  const TOTAAL = SCAN.size;
+  const LAND = {};
+  SOORTEN.forEach(o => { LAND[o.k] = 0; });
+  SCAN.forEach(v => Object.keys(v.s).forEach(k => { if (k in LAND) LAND[k]++; }));
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  let tipBron = null;
+  function toonTip(e, html) {
+    tipBron = e.currentTarget || e.target; tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+  document.addEventListener('pointermove', ev => { if (!tip.hidden && !(tipBron && tipBron.isConnected && tipBron.contains(ev.target))) verbergTip(); }, { passive: true });
+  addEventListener('scroll', verbergTip, { passive: true, capture: true });
+  function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, i.dataset.tip)); i.addEventListener('pointerleave', verbergTip); }); }
+
+  // ---------- titels live ophalen ----------
+  async function titels(ids) {
+    const uniek = [...new Set(ids)];
+    if (!uniek.length) return {};
+    const q = uniek.map(id => 'dcterms.identifier=CVDR' + id).join(' or ');
+    let last;
+    for (let i = 0; i < 3; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 20000);
+      try {
+        const r = await fetch(SRU + encodeURIComponent(q), { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const d = new DOMParser().parseFromString(await r.text(), 'text/xml');
+        const g = (e, n) => { const x = e.getElementsByTagNameNS('*', n)[0]; return x ? x.textContent.trim() : ''; };
+        const uit = {};
+        [...d.getElementsByTagNameNS('*', 'recordData')].forEach(e => {
+          const id = g(e, 'identifier').replace(/^CVDR/, '');
+          uit[id] = { t: g(e, 'alternative') || g(e, 'title'), in: g(e, 'inwerkingtredingDatum'), door: g(e, 'creator') };
+        });
+        return uit;
+      } catch (e) { last = e; if (i < 2) await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  const viewUrl = id => { const [w, v] = id.split('_'); return `${VIEW}CVDR${w}/${v || 1}`; };
+
+  // ---------- staat ----------
+  let S = null;
+  async function kies(g) {
+    S = { g, T: null, fout: false };
+    $('#gmInput').value = g.n;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    history.replaceState(null, '', '#gm=' + g.c);
+    $('#intro').hidden = true; $('#result').hidden = false; $('#melding').hidden = true;
+    render();
+    const mijn = S;
+    const v = SCAN.get(g.c);
+    try {
+      const T = await titels(v ? Object.values(v.s) : []);
+      if (S !== mijn) return;
+      S.T = T;
+    } catch (e) {
+      if (S !== mijn) return;
+      S.fout = true;
+      $('#meldingTekst').textContent = 'De titels van de regelingen konden niet worden opgehaald bij overheid.nl. De soorten en de vindplaatsen staan er wel; de link opent de regeling.';
+      $('#melding').hidden = false;
+    }
+    renderTabel();
+  }
+
+  function render() {
+    const g = S.g, v = SCAN.get(g.c) || { s: {}, n: 0 };
+    const hier = SOORTEN.filter(o => v.s[o.k]);
+    $('#leadBig').textContent = `${g.n}: ${hier.length} van de ${SOORTEN.length} soorten gevonden`;
+    $('#leadSub').textContent = v.n
+      ? `in ${nf.format(v.n)} geldende ${v.n === 1 ? 'regeling' : 'regelingen'} over minima in de lokale regelgeving, peildatum ${datum(PEIL)}`
+      : `geen geldende regelingen over minima gevonden in de lokale regelgeving, peildatum ${datum(PEIL)}`;
+    const grs = grVan(g.c);
+    $('#grRegel').innerHTML = grs.length ? `Ook gezocht in de regelgeving van ${grs.map(esc).join(' en ')}, waaraan ${esc(g.n)} deelneemt.` : '';
+    $('#grRegel').hidden = !grs.length;
+    const veelNiet = SOORTEN.filter(o => !v.s[o.k] && LAND[o.k] / TOTAAL >= VEEL).sort((a, b) => LAND[b.k] - LAND[a.k]);
+    const weinigWel = SOORTEN.filter(o => v.s[o.k] && LAND[o.k] / TOTAAL < WEINIG).sort((a, b) => LAND[a.k] - LAND[b.k]);
+    const li = o => `<li><b>${esc(o.t)}</b> <span class="muted">gevonden bij ${nf.format(LAND[o.k])} van de ${TOTAAL} gemeenten (${pct(LAND[o.k], TOTAAL)}%)</span></li>`;
+    $('#lijsten').innerHTML = `
+      <div class="card lijst"><h2>Veel gemeenten hebben dit, hier niet gevonden</h2>
+        <p class="small muted">Soorten die bij de helft of meer van alle gemeenten zijn gevonden.</p>
+        ${veelNiet.length ? `<ul>${veelNiet.map(li).join('')}</ul><p class="small muted">Niet gevonden is niet afwezig: de regeling kan via een contract, stichting of fonds lopen.</p>` : '<p>Geen. Alles wat bij de helft of meer van de gemeenten voorkomt, is ook hier gevonden.</p>'}</div>
+      <div class="card lijst"><h2>Weinig gemeenten hebben dit, ${esc(g.n)} wel</h2>
+        <p class="small muted">Soorten die bij minder dan een kwart van alle gemeenten zijn gevonden.</p>
+        ${weinigWel.length ? `<ul>${weinigWel.map(li).join('')}</ul>` : '<p>Geen. Wat hier is gevonden, komt bij een kwart of meer van de gemeenten voor.</p>'}</div>`;
+    renderTabel();
+    renderVoet();
+  }
+
+  function renderTabel() {
+    if (!S) return;
+    const g = S.g, v = SCAN.get(g.c) || { s: {}, n: 0 };
+    const rij = o => {
+      const id = v.s[o.k];
+      const t = id && S.T && S.T[id];
+      const vind = id
+        ? `<a href="${esc(viewUrl(id))}" target="_blank" rel="noopener">${esc(t ? t.t : 'CVDR' + id.split('_')[0])} ↗</a>${t && t.in ? `<br><span class="small muted">${t.door && kaal(t.door) !== kaal(g.n) ? `vastgesteld door ${esc(t.door === 'Sociaal' ? 'Sociaal Domein Drechtsteden' : t.door)} · ` : ''}versie geldig sinds ${esc(datum(t.in))}</span>` : (!S.T && !S.fout ? '<br><span class="small muted">titel wordt opgehaald…</span>' : '')}`
+        : '<span class="muted">niet gevonden in de lokale regelgeving</span>';
+      const p = pct(LAND[o.k], TOTAAL);
+      return `<tr><td><b>${esc(o.t)}</b><br><span class="small muted">${esc(o.u)}</span></td>
+        <td class="mid">${id ? '<span class="ja" aria-label="gevonden">✓</span>' : '<span class="nee" aria-label="niet gevonden">–</span>'}</td>
+        <td>${vind}</td>
+        <td><div class="land" data-tip="${esc(`<b>${o.t}</b><br>gevonden bij <span class='num'>${nf.format(LAND[o.k])}</span> van de ${TOTAAL} gemeenten`)}"><span class="lbar"><i style="width:${p}%"></i></span><span class="num">${nf.format(LAND[o.k])} <span class="muted">(${p}%)</span></span></div></td></tr>`;
+    };
+    $('#tblWrap').innerHTML = `<table class="soorten"><thead><tr><th>Soort regeling</th><th class="mid">In ${esc(g.n)}</th><th>Vindplaats</th><th>Gevonden bij gemeenten (van ${TOTAAL})</th></tr></thead><tbody>${SOORTEN.map(rij).join('')}</tbody></table>`;
+    $('#rowCount').textContent = `${SOORTEN.length} soorten · peildatum scan ${datum(PEIL)} · de vindplaats is de regeling waarin de soort het vaakst wordt genoemd`;
+    bindTips($('#tblWrap'));
+  }
+
+  // ---------- CSV ----------
+  function csvDownload(naam, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const slug = n => n.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  const bron = () => `${PRODUCT}, Open Data Atelier, ${location.href.split('#')[0]}, versie ${VERSIE}; CVDR (KOOP, CC0), scan van ${PEIL}`;
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S) return;
+    const v = SCAN.get(S.g.c) || { s: {} };
+    csvDownload(`open-data-atelier-minimaregelingen-${slug(S.g.n)}.csv`,
+      ['gemeentecode', 'gemeente', 'soort', 'gevonden', 'vindplaats_cvdr', 'vindplaats_titel', 'vastgesteld_door', 'vindplaats_link', 'gemeenten_met_soort', 'gemeenten_totaal', 'bron'],
+      SOORTEN.map(o => { const id = v.s[o.k]; const t = id && S.T && S.T[id]; return ['GM' + S.g.c, S.g.n, o.t, id ? 'ja' : 'niet gevonden', id ? 'CVDR' + id : '', t ? t.t : '', t ? t.door : '', id ? viewUrl(id) : '', LAND[o.k], TOTAAL, bron()]; }));
+  });
+  $('#csvAlleBtn').addEventListener('click', () => {
+    const naam = new Map(GM.map(g => [g.c, g.n]));
+    csvDownload('open-data-atelier-minimaregelingen-alle-gemeenten.csv',
+      ['gemeentecode', 'gemeente', 'geldende_regelingen', 'samenwerkingen'].concat(SOORTEN.map(o => o.k + '_cvdr'), ['bron']),
+      [...SCAN.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([c, v]) => ['GM' + c, naam.get(c) || '', v.n, grVan(c).join(', ')].concat(SOORTEN.map(o => v.s[o.k] ? 'CVDR' + v.s[o.k] : ''), [bron()])));
+  });
+
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + location.href + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelke regeling of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar die regeling te vinden is:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  // ---------- voet ----------
+  function renderVoet() {
+    renderHerken();
+    const nu = new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    $('#foot').innerHTML = `Bron: Centrale Voorziening Decentrale Regelgeving (CVDR, KOOP), CC0. Scan van alle ${TOTAAL} gemeenten op ${datum(PEIL)}; titels van de vindplaatsen live opgevraagd bij <a href="https://zoekservice.overheid.nl" target="_blank" rel="noopener">zoekservice.overheid.nl</a> op ${nu}.<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  $('#retryBtn').addEventListener('click', () => S && kies(S.g));
+
+  // ---------- links met de gemeente ----------
+  function zetLinks() {
+    const c = S && S.g.c; if (!c) return;
+    [['#naarInd', 'indicatoren.html#domein=schulden&gm=' + c], ['#naarInd2', 'indicatoren.html#domein=schulden&gm=' + c], ['#naarSchulden', 'schulden.html#gm=' + c], ['#naarEa', 'energiearmoede.html#gm=' + c]]
+      .forEach(([s, h]) => { const a = $(s); if (a) a.href = h; });
+  }
+
+  // ---------- start ----------
+  const kiesEnLink = g => { kies(g); zetLinks(); };
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kiesEnLink(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kiesEnLink(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kiesEnLink(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kiesEnLink(g0);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+<script>
+/* Toegankelijkheid: tabel bedienbaar met toetsenbord, kaartvlakken geen tabstops (de tabel is de toetsenbordroute). */
+(function () {
+  var RIJ = 'tbody tr.klik';
+  var w = document.getElementById('tblWrap'), m = null;
+  var laatst = null;
+  function verrijk() {
+    w.querySelectorAll('th').forEach(function (th) {
+      var s = th.getAttribute('style') || '';
+      if (th.querySelector('.kolomknop') || !(th.dataset.k || th.dataset.sort) || /cursor:\s*default/.test(s)) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'kolomknop';
+      while (th.firstChild) b.appendChild(th.firstChild);
+      th.appendChild(b);
+    });
+    w.querySelectorAll(RIJ).forEach(function (tr) {
+      if (tr.classList.contains('gm') || tr.querySelector('.rijknop')) return;
+      var td = Array.prototype.find.call(tr.cells, function (c) { return c.textContent.trim() && !c.querySelector('a,button,input,select'); });
+      if (!td) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'rijknop';
+      while (td.firstChild) b.appendChild(td.firstChild);
+      td.appendChild(b);
+    });
+    if (laatst && document.activeElement === document.body) {
+      if (laatst === 'rij') { var r = w.querySelector('.rijknop'); if (r) r.focus(); }
+      else { var d = w.querySelector(laatst); var k = d && d.querySelector('.kolomknop'); if (k) k.focus(); }
+    }
+    laatst = null;
+  }
+  if (w) {
+    w.addEventListener('focusin', function (e) {
+      var th = e.target.closest && e.target.closest('th');
+      laatst = th ? (th.dataset.k ? 'th[data-k="' + th.dataset.k + '"]' : 'th[data-sort="' + th.dataset.sort + '"]') : (e.target.classList.contains('rijknop') ? 'rij' : null);
+    });
+    new MutationObserver(verrijk).observe(w, { childList: true });
+    verrijk();
+  }
+  if (m) {
+    var uit = function () { m.querySelectorAll('path.leaflet-interactive').forEach(function (p) { if (p.getAttribute('tabindex') !== '-1') p.setAttribute('tabindex', '-1'); }); };
+    new MutationObserver(uit).observe(m, { childList: true, subtree: true, attributes: true, attributeFilter: ['tabindex'] });
+    uit();
+    if (m.getAttribute('aria-label')) m.setAttribute('aria-label', m.getAttribute('aria-label') + '; dezelfde gegevens staan in de tabel');
+  }
+})();
+</script>
+</body>
+</html>
