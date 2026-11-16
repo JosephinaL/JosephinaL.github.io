@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
 <link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Welke indicatoren horen bij een beleidsdomein, wat zeggen ze en wat niet, en waar staan ze: in open data, bij een ketenpartner of alleen in de eigen registratie. Zonder cijfers, voor elke gemeente.">
+<meta name="description" content="Welke indicatoren horen bij een beleidsdomein en bij de energietransitie, wat zeggen ze en wat niet, en waar staan ze: in open data, bij een ketenpartner of alleen in de eigen registratie. Voor elke gemeente.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 :root {
@@ -82,6 +82,13 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 .shelf-head { display: flex; flex-direction: column; justify-content: end; gap: 2px; border-bottom: 1px solid var(--line); padding-bottom: 8px; min-width: 0; }
 .shelf-head h3 { font-size: 1.05rem; font-stretch: 100%; }
 .shelf-head span { font-size: .88rem; color: var(--muted); }
+/* thema-plank: een dwarsdoorsnede die de Iv3 niet als taakveld kent, gelijk aan de homepage */
+.shelf.thema .shelf-head { border-bottom: 2px solid var(--accent); }
+.shelf.thema .tile { border-color: var(--accent); }
+.naast { display: grid; gap: 4px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 10px 14px; }
+.naast p { margin: 0; max-width: 90ch; }
+.naast ul { margin: 0; padding-left: 1.2em; display: grid; gap: 3px; }
+.naast .klein { font-size: .88rem; color: var(--muted); }
 .rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 640px) { .rail { grid-template-columns: minmax(0, 1fr); } }
 @media (min-width: 1100px) {
@@ -275,7 +282,7 @@ main > * { min-width: 0; }
   <section class="intro">
     <span class="eyebrow">Thema's per Iv3-domein</span>
     <h2 class="groot">Welke indicatoren horen bij een beleidsdomein, en waar staan ze?</h2>
-    <p class="lead">Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden. Bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen zie je met een gekozen gemeente ook de uitkomst, als die open beschikbaar is.</p>
+    <p class="lead">Per indicator: wat hij meet, wat hij níet zegt, en of hij in open data staat, bij een ketenpartner ligt of intern opgevraagd moet worden. Bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Energietransitie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen zie je met een gekozen gemeente ook de uitkomst, als die open beschikbaar is.</p>
     <p class="gmregel" id="gmRegel"></p>
     <p class="legenda"><span><i class="open"></i>staat in open data</span><span><i class="keten"></i>ligt bij een ketenpartner</span><span><i class="intern"></i>intern opvragen</span></p>
   </section>
@@ -312,7 +319,7 @@ main > * { min-width: 0; }
         <li><b>Geen volledige lijst.</b> Per domein staan de indicatoren die het meest bijdragen aan een beleidsvraag, niet alles wat te meten is.</li>
         <li><b>Tabelnummers wijzigen.</b> Het CBS publiceert sommige reeksen elk jaar in een nieuwe tabel. Bij een kaart staat het nummer van de laatste stand; de reeks loopt vaak via voorgangers terug.</li>
         <li><b>Het GGM verschilt per domein.</b> Voor de Wmo, de jeugdtoegang en de publieke dienstverlening dekt het de interne indicatoren grotendeels; bij huiselijk geweld ontbreken attributen en voor urgente woningzoekenden is er geen entiteit. Waar iets ontbreekt, staat dat op de kaart.</li>
-        <li><b>Nog in opbouw.</b> Elf thema's zijn uitgewerkt: Publieke dienstverlening, Inkoop (MVOI), Veiligheid, Economie, zes in het sociaal domein en Wonen. De andere domeinen volgen.</li>
+        <li><b>Nog in opbouw.</b> Tweeëntwintig thema's zijn uitgewerkt, waaronder de vijf van de thema-plank Energietransitie. Onderwijs en Volksgezondheid en milieu volgen.</li>
       </ul>
     </div>
     <div class="card meldpunt">
@@ -330,11 +337,11 @@ main > * { min-width: 0; }
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, de Wet versterking regie volkshuisvesting, de Huisvestingswet 2014, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De kaarten bevatten zelf geen cijfers; de uitkomstregel per gemeente haalt de pagina bij het openen op bij het CBS, behalve bij de Monitor Dakloosheid, de bibliotheekleden, de nulmeting groen, de elektrische auto's per gemeente en de emissiezones: die cijfers staan in de pagina. Voor Jeugd ook de Centrale Monitor van het Jeugdstelsel (CBS), de Jeugdmonitor, het Informatieprotocol Beleidsinformatie Jeugd en de open data van DUO over verzuim, voortijdig schoolverlaten en jongeren in een kwetsbare positie; stand 6 november 2026. Voor Publieke dienstverlening ook het domein Dienstverlening van het GGM, het register van toegankelijkheidsverklaringen (digitoegankelijk.nl), de Burgerpeiling (waarstaatjegemeente.nl) en de Algemene wet bestuursrecht; stand 6 november 2026. Voor Schulden en armoede ook Schuldenproblematiek in beeld (CBS), de armoedecijfers en Wsnp-tabellen van het CBS, de Monitor Energiearmoede (TNO en CBS) en de Wet gemeentelijke schuldhulpverlening; stand 6 november 2026. Voor Werk en inkomen ook de Statistiek Re-integratie door Gemeenten en Arbeidsdeelname per gemeente (CBS), de uitkeringen van UWV en de bijstand per maand (CBS), de Participatiewet, de Wet banenafspraak en de GGM-domeinen Inkomen en Werk; stand 7 november 2026. Voor Maatschappelijke opvang en beschermd wonen de Monitor Dakloosheid (CBS, april 2026, cijfers 2023 en 2024), de indeling in centrumregio's (CBS Gebieden in Nederland), de Wmo-cliënten beschermd wonen, de aandachtsgroepen volkshuisvesting, de landelijke schatting dakloze mensen (CBS), de ETHOS-telling (Hogeschool Utrecht en Kansfonds), het Nationaal Actieplan Dakloosheid en het GGM-domein Dak- en thuislozen; stand 7 november 2026. Voor Inkoop het Manifest MVOI 2022–2030 en de deelnemerslijst van PIANOo, de Agenda MVOI 2026–2030 (juli 2026), de Definitiekaart MVOI van KPMG en Significant Synergy (mei 2026), de Handreiking monitoring MVOI van CE Delft en Planet+Partners (mei 2025), de factsheet MVI-zelfevaluatie 2025 (PIANOo), het RIVM-briefrapport over de nationale monitor MVOI (2025-0154), de open aanbestedingsdata van TenderNed en het Iv3-informatievoorschrift; stand 11 november 2026. Voor Veiligheid de geregistreerde criminaliteit en de Veiligheidsmonitor van het CBS, de open data van de politie over misdrijven en overlast (data.politie.nl), de Politiewet 2012, de Wet veiligheidsregio's en het GGM-domein Veiligheid en Vergunningen; stand 12 november 2026. Voor Economie de vestigingen, banen en woon-werkstromen van het CBS, de levensloop van niet-woningen uit de BAG (CBS), IBIS (provincies), LISA en de Ondernemerspeiling via waarstaatjegemeente.nl en het GGM-domein Economie; stand 12 november 2026. Voor Sport, cultuur en recreatie de Gezondheidsmonitor Volwassenen en Ouderen (GGD'en, RIVM en CBS), de nabijheid van voorzieningen en het bodemgebruik van het CBS, de rijksmonumenten (Rijksdienst voor het Cultureel Erfgoed), de bibliotheekstatistiek van CBS en KB, het wetsvoorstel zorgplicht bibliotheek (Kamerstuk 36 902), de Definitieve nulmeting groen van het PBL (augustus 2026) bij de Natuurherstelverordening, het Warenwetbesluit attractie- en speeltoestellen, het Iv3-informatievoorschrift 2026 en de GGM-domeinen Sport, Cultuur en Recreatie, Leefomgeving (IMBOR) en Interne Organisatie (subsidies); stand 15 november 2026. Voor Verkeer, vervoer en waterstaat de wegen, het fietsnetwerk, de vaarwegen, het autobezit, de jaarkilometers, de verkeersdoden, de mobiliteit (Onderweg in Nederland), de zeehavens en de begrote heffingen van het CBS, het BRON-bestand van Rijkswaterstaat (ongevallen per gemeente 2022–2024, uit de dienst Verkeersongevallen Nederland, opgehaald op 15 november 2026), de wegkenmerken (NDW en Rijkswaterstaat; maximumsnelheden per gemeente uit het wegenbestand van 1 augustus 2026, opgehaald op 15 november 2026), de laadpuntlocaties van NDW (stand 15 november 2026), de zero-emissiezones en milieuzones van NDW (opgehaald op 15 november 2026), de particuliere auto's met elektromotor per gemeente van het CBS (nieuwsbericht april 2026, stand 1 januari 2026) en het Nationaal Parkeer Register van de RDW (live), Open Data Parkeren (RDW), het Afwegingskader 30 km/u van CROW, het Strategisch Plan Verkeersveiligheid 2030 en het GGM-domein Verkeer, Vervoer en Waterstaat; stand 15 november 2026.</p>
-    <p><b>Licentie.</b> CBS, Jeugdmonitor, politie en RIVM: CC BY 4.0. TenderNed: CC0; er zijn geen cijfers overgenomen. Rijkswaterstaat (BRON): publiek domein, de dienst Verkeersongevallen Nederland CC0; de aantallen ongevallen per gemeente 2022–2024 staan in de pagina, met Rijkswaterstaat als bron. NDW en Rijkswaterstaat (wegkenmerken, maximumsnelheden): publiek domein; de lengtes per snelheid per gemeente staan in de pagina, met de bron. RDW (Open Data Parkeren): CC0, live opgehaald. NDW (laadpuntlocaties DOT-NL): CC0 (gebruiksvoorwaarden open data van NDW); de aantallen per gemeente staan in de pagina, met de bron. NDW (emissiezones): CC0; de zones per gemeente staan in de pagina, met de bron. De elektrische auto's per gemeente uit het CBS-nieuwsbericht staan als aantallen in de pagina, met het CBS als bron. Van de deelnemerslijst van PIANOo alleen twee aantallen, met bron. De cijfers uit de Monitor Dakloosheid en de Gegevensverzameling bibliotheekleden 2025 (aanvullend statistisch onderzoek van het CBS, met de KB) staan in de pagina, met het CBS als bron. Uit de Definitieve nulmeting groen van het PBL staan de percentages per gemeente in de pagina; het PBL staat overnemen toe met bronvermelding (Van Rijn (2026), Definitieve Nulmeting Groen, Den Haag: Planbureau voor de Leefomgeving). Van DUO zijn geen cijfers overgenomen, alleen verwijzingen. GGM (Gemeente Delft): EUPL-1.2; alleen namen van entiteiten en attributen overgenomen. De teksten op de kaarten vallen onder de gebruiksregel hieronder.</p>
+    <p><b>Bron en peildatum.</b> De indicatoren zijn samengesteld uit openbare kaders en bronnen: de Regeling beleidsindicatoren (BBV), de Wmo 2015, de Wet versterking regie volkshuisvesting, de Huisvestingswet 2014, het Iv3-informatievoorschrift gemeenten 2025, de Impactmonitor huiselijk geweld en kindermishandeling, een handreiking van Regioplan (2022), CBS StatLine, RIVM Gezondheid per wijk en buurt en waarstaatjegemeente.nl. Tabellen en perioden gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026. Gegevensobjecten uit het Gemeentelijk Gegevensmodel v2.5.1 (laatste wijziging 11 oktober 2026). De kaarten bevatten zelf geen cijfers; de uitkomstregel per gemeente haalt de pagina bij het openen op bij het CBS, behalve bij de Monitor Dakloosheid, de bibliotheekleden, de nulmeting groen, de elektrische auto's per gemeente en de emissiezones: die cijfers staan in de pagina. Voor Jeugd ook de Centrale Monitor van het Jeugdstelsel (CBS), de Jeugdmonitor, het Informatieprotocol Beleidsinformatie Jeugd en de open data van DUO over verzuim, voortijdig schoolverlaten en jongeren in een kwetsbare positie; stand 6 november 2026. Voor Publieke dienstverlening ook het domein Dienstverlening van het GGM, het register van toegankelijkheidsverklaringen (digitoegankelijk.nl), de Burgerpeiling (waarstaatjegemeente.nl) en de Algemene wet bestuursrecht; stand 6 november 2026. Voor Schulden en armoede ook Schuldenproblematiek in beeld (CBS), de armoedecijfers en Wsnp-tabellen van het CBS, de Monitor Energiearmoede (TNO en CBS) en de Wet gemeentelijke schuldhulpverlening; stand 6 november 2026. Voor Werk en inkomen ook de Statistiek Re-integratie door Gemeenten en Arbeidsdeelname per gemeente (CBS), de uitkeringen van UWV en de bijstand per maand (CBS), de Participatiewet, de Wet banenafspraak en de GGM-domeinen Inkomen en Werk; stand 7 november 2026. Voor Maatschappelijke opvang en beschermd wonen de Monitor Dakloosheid (CBS, april 2026, cijfers 2023 en 2024), de indeling in centrumregio's (CBS Gebieden in Nederland), de Wmo-cliënten beschermd wonen, de aandachtsgroepen volkshuisvesting, de landelijke schatting dakloze mensen (CBS), de ETHOS-telling (Hogeschool Utrecht en Kansfonds), het Nationaal Actieplan Dakloosheid en het GGM-domein Dak- en thuislozen; stand 7 november 2026. Voor Inkoop het Manifest MVOI 2022–2030 en de deelnemerslijst van PIANOo, de Agenda MVOI 2026–2030 (juli 2026), de Definitiekaart MVOI van KPMG en Significant Synergy (mei 2026), de Handreiking monitoring MVOI van CE Delft en Planet+Partners (mei 2025), de factsheet MVI-zelfevaluatie 2025 (PIANOo), het RIVM-briefrapport over de nationale monitor MVOI (2025-0154), de open aanbestedingsdata van TenderNed en het Iv3-informatievoorschrift; stand 11 november 2026. Voor Veiligheid de geregistreerde criminaliteit en de Veiligheidsmonitor van het CBS, de open data van de politie over misdrijven en overlast (data.politie.nl), de Politiewet 2012, de Wet veiligheidsregio's en het GGM-domein Veiligheid en Vergunningen; stand 12 november 2026. Voor Economie de vestigingen, banen en woon-werkstromen van het CBS, de levensloop van niet-woningen uit de BAG (CBS), IBIS (provincies), LISA en de Ondernemerspeiling via waarstaatjegemeente.nl en het GGM-domein Economie; stand 12 november 2026. Voor Sport, cultuur en recreatie de Gezondheidsmonitor Volwassenen en Ouderen (GGD'en, RIVM en CBS), de nabijheid van voorzieningen en het bodemgebruik van het CBS, de rijksmonumenten (Rijksdienst voor het Cultureel Erfgoed), de bibliotheekstatistiek van CBS en KB, het wetsvoorstel zorgplicht bibliotheek (Kamerstuk 36 902), de Definitieve nulmeting groen van het PBL (augustus 2026) bij de Natuurherstelverordening, het Warenwetbesluit attractie- en speeltoestellen, het Iv3-informatievoorschrift 2026 en de GGM-domeinen Sport, Cultuur en Recreatie, Leefomgeving (IMBOR) en Interne Organisatie (subsidies); stand 15 november 2026. Voor Verkeer, vervoer en waterstaat de wegen, het fietsnetwerk, de vaarwegen, het autobezit, de jaarkilometers, de verkeersdoden, de mobiliteit (Onderweg in Nederland), de zeehavens en de begrote heffingen van het CBS, het BRON-bestand van Rijkswaterstaat (ongevallen per gemeente 2022–2024, uit de dienst Verkeersongevallen Nederland, opgehaald op 15 november 2026), de wegkenmerken (NDW en Rijkswaterstaat; maximumsnelheden per gemeente uit het wegenbestand van 1 augustus 2026, opgehaald op 15 november 2026), de laadpuntlocaties van NDW (stand 15 november 2026), de zero-emissiezones en milieuzones van NDW (opgehaald op 15 november 2026), de particuliere auto's met elektromotor per gemeente van het CBS (nieuwsbericht april 2026, stand 1 januari 2026) en het Nationaal Parkeer Register van de RDW (live), Open Data Parkeren (RDW), het Afwegingskader 30 km/u van CROW, het Strategisch Plan Verkeersveiligheid 2030 en het GGM-domein Verkeer, Vervoer en Waterstaat; stand 15 november 2026. Voor de thema-plank Energietransitie de Kerncijfers wijken en buurten (86165NED), het energieverbruik van woningen (81528NED) en de zonnestroom per gemeente (85005NED) van het CBS, live; de energielabels per pand van het RIVM (afgeleid uit EP-Online van RVO), gekoppeld aan de BAG en per gemeente samengevat in de BAG-werkbank (labels van 11 november 2026, BAG van 1 november 2026), live uit de werkbank; de Regionale Klimaatmonitor van het Rijk, de Regeling beleidsindicatoren (hernieuwbare elektriciteit), de Wet gemeentelijke instrumenten warmtetransitie en het besluit dat die uitwerkt (stand nagelopen op 16 november 2026), de Monitor RES van het PBL, de Startanalyse aardgasvrije buurten van het PBL, het dashboard Energiesubsidies woningen van het CBS, de ISDE-gegevens van RVO, de capaciteitskaart van Netbeheer Nederland, de Lokale Energie Monitor van HIER en RVO, de gemeentefondscirculaires en de Financiële instrumenten van het Rijk, en de GGM-domeinen Interne Organisatie (vastgoed, subsidies, formatie) en Bestuur (programma, besluit); stand 16 november 2026.</p>
+    <p><b>Licentie.</b> CBS, Jeugdmonitor, politie en RIVM: CC BY 4.0; de energielabels van het RIVM: Public Domain Mark 1.0, alleen aantallen per gemeente op de pagina. TenderNed: CC0; er zijn geen cijfers overgenomen. Rijkswaterstaat (BRON): publiek domein, de dienst Verkeersongevallen Nederland CC0; de aantallen ongevallen per gemeente 2022–2024 staan in de pagina, met Rijkswaterstaat als bron. NDW en Rijkswaterstaat (wegkenmerken, maximumsnelheden): publiek domein; de lengtes per snelheid per gemeente staan in de pagina, met de bron. RDW (Open Data Parkeren): CC0, live opgehaald. NDW (laadpuntlocaties DOT-NL): CC0 (gebruiksvoorwaarden open data van NDW); de aantallen per gemeente staan in de pagina, met de bron. NDW (emissiezones): CC0; de zones per gemeente staan in de pagina, met de bron. De elektrische auto's per gemeente uit het CBS-nieuwsbericht staan als aantallen in de pagina, met het CBS als bron. Van de deelnemerslijst van PIANOo alleen twee aantallen, met bron. De cijfers uit de Monitor Dakloosheid en de Gegevensverzameling bibliotheekleden 2025 (aanvullend statistisch onderzoek van het CBS, met de KB) staan in de pagina, met het CBS als bron. Uit de Definitieve nulmeting groen van het PBL staan de percentages per gemeente in de pagina; het PBL staat overnemen toe met bronvermelding (Van Rijn (2026), Definitieve Nulmeting Groen, Den Haag: Planbureau voor de Leefomgeving). Van DUO zijn geen cijfers overgenomen, alleen verwijzingen. GGM (Gemeente Delft): EUPL-1.2; alleen namen van entiteiten en attributen overgenomen. De teksten op de kaarten vallen onder de gebruiksregel hieronder.</p>
     <p><b>Methode.</b> Per thema de indicatoren in de volgorde van de beleidsketen. Elke kaart geeft definitie, wat de indicator wel en niet zegt, laagste niveau, bron (open, ketenpartner of intern), herkomst, norm en vergelijkbaarheid. Zie "Zo is deze pagina opgebouwd".</p>
-    <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen oordeel over een gemeente en geen ranglijst: bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen staat op een open indicator één regel uit de bron, verder cijferwerk hoort bij de instrumenten. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
-    <p><b>Bekende beperkingen.</b> Zeventien thema's zijn uitgewerkt (Publieke dienstverlening, Inkoop en maatschappelijk verantwoord opdrachtgeven, Veiligheid, Wegen, verkeer en verkeersveiligheid, Parkeren en openbaar vervoer, Havens en waterwegen, Economie, Sport en bewegen, Cultuur, erfgoed en bibliotheek, Openbaar groen en recreatie, Wmo, Jeugd, huiselijk geweld en kindermishandeling, Schulden en armoede, Werk en inkomen, maatschappelijke opvang en beschermd wonen, Wonen). Bij maatschappelijke opvang en beschermd wonen is de uitkomstregel per centrumregio: die taken liggen bij de centrumgemeente. Bij Publieke dienstverlening zijn de meeste indicatoren intern; dat is een eigenschap van het domein, geen gat in de pagina. Bij Inkoop liggen de meeste bij de opdrachtnemer, die per contract rapporteert; de open kaarten uit TenderNed staan op naam van de aanbestedende dienst, niet op gemeentecode. De uitwerking van de Wet versterking regie volkshuisvesting was op 5 november 2026 nog niet definitief; de zorgplicht voor de bibliotheek was op 15 november 2026 een wetsvoorstel. Voor verkeer zijn er sinds 2018 geen BBV-indicatoren meer; ongevallen, verkeersdoden en mobiliteit zijn open, maar niet altijd per gemeente (verkeersdoden en verplaatsingen per provincie). De ongevallen per gemeente uit BRON lopen tot 2024; de registratie is onvolledig en verschilt per regio, dus verschillen tussen gemeenten zeggen ook iets over het registreren. Het aandeel 30 km/u telt gemeentelijke wegen met 30 of 50 km/u als benadering van de bebouwde kom; de komgrens zelf is niet gebruikt. Elektrische auto's per gemeente zijn alleen open voor auto's op naam van een particulier; het aantal per openbaar laadpunt is daardoor een ondergrens van de vraag. Zero-emissiezones en milieuzones melden gemeenten zelf bij NDW; ingangsdatum, overgangsregeling en verkeersbesluit staan er zoals gemeld, en voor een aangekondigde zone is vaak nog geen besluit geregistreerd. Uitzonderingen voor bijvoorbeeld kampeerauto's van bewoners en voertuigen van 40 jaar en ouder staan niet op de kaart. Over sport, cultuur en groen zegt open data per gemeente vooral wat er is en hoe ver het ligt; gebruik, bezoek en leden staan bij de instellingen. Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
+    <p><b>Wat dit niet is.</b> Geen voorschrift en geen normenkader: de pagina laat zien wat te volgen is, niet wat moet. Geen oordeel over een gemeente en geen ranglijst: bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Energietransitie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen staat op een open indicator één regel uit de bron, verder cijferwerk hoort bij de instrumenten. Een verwijzing naar het GGM is geen claim dat een uitvraag of datawarehouse GGM-conform is.</p>
+    <p><b>Bekende beperkingen.</b> Tweeëntwintig thema's zijn uitgewerkt (de vijf van de thema-plank Energietransitie: Uitstoot, energieverbruik en opwek; Warmte en verduurzaming van woningen; Utiliteit, bedrijven en eigen vastgoed; Elektriciteitsnet en ruimte; Regie, middelen en draagvlak; verder Publieke dienstverlening, Inkoop en maatschappelijk verantwoord opdrachtgeven, Veiligheid, Wegen, verkeer en verkeersveiligheid, Parkeren en openbaar vervoer, Havens en waterwegen, Economie, Sport en bewegen, Cultuur, erfgoed en bibliotheek, Openbaar groen en recreatie, Wmo, Jeugd, huiselijk geweld en kindermishandeling, Schulden en armoede, Werk en inkomen, maatschappelijke opvang en beschermd wonen, Wonen). Bij maatschappelijke opvang en beschermd wonen is de uitkomstregel per centrumregio: die taken liggen bij de centrumgemeente. Bij Publieke dienstverlening zijn de meeste indicatoren intern; dat is een eigenschap van het domein, geen gat in de pagina. Bij Inkoop liggen de meeste bij de opdrachtnemer, die per contract rapporteert; de open kaarten uit TenderNed staan op naam van de aanbestedende dienst, niet op gemeentecode. De uitwerking van de Wet versterking regie volkshuisvesting was op 5 november 2026 nog niet definitief; de zorgplicht voor de bibliotheek was op 15 november 2026 een wetsvoorstel. Voor verkeer zijn er sinds 2018 geen BBV-indicatoren meer; ongevallen, verkeersdoden en mobiliteit zijn open, maar niet altijd per gemeente (verkeersdoden en verplaatsingen per provincie). De ongevallen per gemeente uit BRON lopen tot 2024; de registratie is onvolledig en verschilt per regio, dus verschillen tussen gemeenten zeggen ook iets over het registreren. Het aandeel 30 km/u telt gemeentelijke wegen met 30 of 50 km/u als benadering van de bebouwde kom; de komgrens zelf is niet gebruikt. Elektrische auto's per gemeente zijn alleen open voor auto's op naam van een particulier; het aantal per openbaar laadpunt is daardoor een ondergrens van de vraag. Zero-emissiezones en milieuzones melden gemeenten zelf bij NDW; ingangsdatum, overgangsregeling en verkeersbesluit staan er zoals gemeld, en voor een aangekondigde zone is vaak nog geen besluit geregistreerd. Uitzonderingen voor bijvoorbeeld kampeerauto's van bewoners en voertuigen van 40 jaar en ouder staan niet op de kaart. Energie heeft geen eigen Iv3-taakveld; daarom staat het als thema-plank bovenaan. De uitstoot per gemeente loopt twee jaar achter en daalt vooral door de landelijke stroommix; de RES rekent per regio; netcongestie volgt het net, niet de gemeentegrens. De labelcijfers tellen woningen in panden met alleen woningen en utiliteitspanden van 50 m² of meer, zonder rijksmonumenten, zoals de Energielabelkalender; bijna de helft van de woningen heeft geen geregistreerd label. Over sport, cultuur en groen zegt open data per gemeente vooral wat er is en hoe ver het ligt; gebruik, bezoek en leden staan bij de instellingen. Geen volledige lijst. CBS-tabelnummers wijzigen per jaar. Het GGM dekt niet elk domein; waar attributen ontbreken, staat dat op de kaart.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Geen officiële publicatie van een gemeente, de VNG of een bronhouder.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bronnen. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Mis je een indicator of klopt er iets niet? Gebruik de knoppen bij "Mis je een indicator" hierboven, of meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -346,7 +353,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.25';
+  const VERSIE = '0.26';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -385,6 +392,7 @@ main > * { min-width: 0; }
   const BRON_UITLEG = { open: 'staat in open data', keten: 'ligt bij een ketenpartner', intern: 'alleen in de eigen registratie' };
 
   const TV = [
+    ['T', 'Energietransitie', 'Over de taakvelden heen: warmte, opwek, utiliteit, het net en het geld. De Iv3 kent geen eigen taakveld voor energie.'],
     ['0', 'Bestuur en ondersteuning', 'Bestuur, burgerzaken, belastingen en de eigen organisatie.'],
     ['1', 'Veiligheid', 'Brandweer, crisisbeheersing en openbare orde.'],
     ['2', 'Verkeer, vervoer en waterstaat', 'Wegen, parkeren, openbaar vervoer en water.'],
@@ -396,6 +404,8 @@ main > * { min-width: 0; }
     ['8', 'Volkshuisvesting, leefomgeving en stedelijke vernieuwing', 'Ruimtelijke ordening, wonen en bouwen, grondexploitatie.']
   ];
 
+  const isThema = nr => nr === 'T';
+  const tvLabel = nr => { const t = TV.find(x => x[0] === nr); return isThema(nr) ? `Thema · ${t[1]}` : `Iv3 ${nr} · ${t[1]}`; };
   const PLANK = { '8': ['Volkshuisvesting', 'Ruimtelijke ordening, wonen en bouwen.'] }; // korte kop op de plank; de volledige naam staat bij het thema
   const D = {
     publiek: {
@@ -2415,6 +2425,400 @@ main > * { min-width: 0; }
           herkomst: 'Landelijke monitor (Gezondheidsmonitor Volwassenen en Ouderen).' }
       ]
     },
+    energie: {
+      tv: 'T', kort: 'Uitstoot en opwek', naam: 'Uitstoot, energieverbruik en opwek',
+      taakvelden: 'geen eigen taakveld · beleid op 7.4 milieubeheer, eigen opwek op het taakveld van het object, de RES in de regio',
+      scope: 'Hoeveel energie de gemeente verbruikt, hoeveel broeikasgas dat oplevert en hoeveel duurzame stroom er in de gemeente wordt opgewekt. Warmte en woningen, utiliteit, het net en het geld staan in de andere thema\'s van deze plank.',
+      lees: 'De uitstoot per gemeente komt uit de Klimaatmonitor van het Rijk en loopt twee jaar achter: over 2026 is pas in het najaar van 2028 iets te zien. De daling komt voor een groot deel uit de landelijke stroommix, niet uit eigen beleid, en één groot bedrijf kan het totaal laten springen. Een vergelijking met 1990 is per gemeente niet betrouwbaar. De 35 TWh van de RES is een doel per regio, niet per gemeente.',
+      atelier: 'zonnestroom.html', atelierNaam: 'Zonnestroom per gemeente',
+      tegel: 'Uitstoot, verbruik en opwek', oms: 'Broeikasgassen, energieverbruik en duurzame stroom: waar de gemeente staat en wat er wordt opgewekt.',
+      naast: [['zonnestroom.html', 'Zonnestroom per gemeente', 'vermogen van zonnepanelen bij woningen en bedrijven, door de jaren, met de RES-regio'],
+        ['warmte.html', 'Warmte per buurt', 'gas- en stroomverbruik en zonnepanelen per buurt'],
+        ['akkoordvolger.html', 'Akkoordvolger per gemeente', 'aardgasvrije woningen en zonnestroom als meter naast een doel; waarom CO2 daar geen meter is']],
+      kaarten: [
+        { k: 'context', b: 'open', naam: 'Energieverbruik per sector',
+          def: 'Energieverbruik in de gemeente naar sector (woningen, bedrijven, mobiliteit, landbouw) en naar drager (gas, stroom, warmte, brandstof).',
+          zegt: 'Waar de energie in de gemeente naartoe gaat, en dus waar besparing en elektrificatie het meest uitmaken.',
+          niet: 'Wat de gemeente zelf verbruikt (eigen gebouwen, openbare verlichting), en bij grote bedrijven vaak niets: hun verbruik is geheim.',
+          niveau: 'Gemeente, per sector; jaarlijks. Woningen ook per wijk en buurt (Kerncijfers wijken en buurten).',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt: de opbouw naar sector verschilt sterk tussen gemeenten met en zonder industrie of glastuinbouw.',
+          bron: () => `Regionale Klimaatmonitor (Rijkswaterstaat, Public Domain Mark), via <a href="https://klimaatmonitor.databank.nl" target="_blank" rel="noopener">klimaatmonitor.databank.nl</a>. Woningen: ${cbs('81528NED')}.`,
+          herkomst: 'Landelijke monitor (Klimaatmonitor, de kerndataset van het Rijk voor decentrale overheden).' },
+        { k: 'uitkomst', b: 'open', naam: 'Uitstoot van broeikasgassen per sector',
+          def: 'CO2 en andere broeikasgassen in de gemeente, per sector: gebouwde omgeving, mobiliteit, industrie en energie, landbouw.',
+          zegt: 'Of de uitstoot in de sectoren waar de gemeente invloed op heeft daalt. Kijk vooral naar gebouwde omgeving en mobiliteit: die zijn bij bijna elke gemeente compleet.',
+          niet: 'Wat het eigen beleid oplevert: de uitstoot door stroomverbruik daalt vooral door een schonere landelijke stroommix. Ook geen percentage tegenover 1990: de schatting voor 1990 is een andere reeks.',
+          niveau: 'Gemeente, per sector; jaarlijks, het laatste jaar twee jaar terug (in 2026: 2024). Bij ongeveer dertig gemeenten ontbreekt het totaal, vooral waar grote industrie zit.',
+          norm: 'Klimaatwet: 55% minder in 2030 dan in 1990 (landelijk); eigen doel in een klimaat- of energieprogramma.', vgl: 'Beperkt: industrie en landbouw maken totalen onvergelijkbaar; geen ranglijst.',
+          bron: () => 'Regionale Klimaatmonitor (Rijkswaterstaat, Public Domain Mark), via <a href="https://klimaatmonitor.databank.nl" target="_blank" rel="noopener">klimaatmonitor.databank.nl</a>; verbruiks- en bronbenadering. Reeksen worden met terugwerkende kracht herzien.',
+          herkomst: 'Klimaatwet; landelijke monitor (Klimaatmonitor).' },
+        { k: 'uitkomst', b: 'open', naam: 'Aandeel hernieuwbare elektriciteit',
+          def: 'Hernieuwbare elektriciteit die in de gemeente wordt opgewekt, als aandeel van het elektriciteitsverbruik in de gemeente.',
+          zegt: 'Hoeveel van het stroomverbruik de gemeente zelf duurzaam opwekt: zon, wind, biomassa. Verplicht in begroting en jaarrekening.',
+          niet: 'Of de stroom ook in de gemeente gebruikt wordt, en groene stroom die huishoudens inkopen. Een gemeente met een windpark en weinig verbruik komt ver boven de 100% uit.',
+          niveau: 'Gemeente; jaarlijks, met vertraging. In begrotingen ontbreekt het recente jaar daardoor vaak.',
+          norm: 'Regeling beleidsindicatoren (BBV), programma 7.', vgl: 'Ja, met de kanttekening dat het verbruik van grote bedrijven soms ontbreekt.',
+          bron: () => 'Regionale Klimaatmonitor, ook op <a href="https://www.waarstaatjegemeente.nl/dashboard/dashboard/Besluit-Begroting-en-Verantwoording/" target="_blank" rel="noopener">waarstaatjegemeente.nl</a> (dashboard Besluit begroting en verantwoording).',
+          herkomst: 'BBV-verplicht (Regeling beleidsindicatoren gemeenten).' },
+        { k: 'bereik', b: 'open', naam: 'Zonnestroom: opgesteld vermogen',
+          def: 'Opgesteld vermogen van zonnepanelen in de gemeente, bij woningen en bij bedrijven, in megawattpiek, en het aantal installaties.',
+          zegt: 'Hoe hard zon op dak en zon op veld groeit, en welk deel bij woningen ligt.',
+          niet: 'Hoeveel stroom er echt wordt opgewekt of teruggeleverd, en of het net de stroom kan opnemen.',
+          niveau: 'Gemeente; jaarlijks (stand 31 december), het lopende jaar per half jaar.',
+          norm: 'Eigen gemeente door de jaren; de RES van de regio.', vgl: 'Ja, in verhouding tot inwoners of woningen.',
+          bron: () => `${cbs('85005NED')}.`,
+          herkomst: 'Landelijk programma (RES, Klimaatakkoord).',
+          inst: ['zonnestroom.html', 'Zonnestroom per gemeente'],
+          uit: { b: 'zon', vol: 1, geenNl: 1, w: x => x.E007161 && x.E007161.OpgesteldVermogenVanZonnepanelen_2 != null ? x.E007161.OpgesteldVermogenVanZonnepanelen_2 / 1000 : null, f: 'n', l: 'MWp aan zonnepanelen, stand 31 december',
+            x: (g, n) => { const p = r => r.E007161 && r.E007037 && r.E007161.OpgesteldVermogenVanZonnepanelen_2 ? 100 * r.E007037.OpgesteldVermogenVanZonnepanelen_2 / r.E007161.OpgesteldVermogenVanZonnepanelen_2 : null, a = p(g), b = n ? p(n) : null;
+              return a == null ? '' : `<span>waarvan ${uFmt(a, 'pct0')} bij woningen (${uFmt(g.E007037.Installaties_1, 'n')} installaties)</span>${b != null ? `<span class="un">Nederland: ${uFmt(b, 'pct0')} bij woningen</span>` : ''}`; } } },
+        { k: 'bereik', b: 'open', naam: 'Woningen met zonnepanelen',
+          def: 'Aandeel woningen met een zonnestroominstallatie.',
+          zegt: 'Hoe ver zon op het eigen dak is doorgedrongen; laag in buurten met veel huur en appartementen.',
+          niet: 'Hoeveel panelen per woning, en installaties die niet bij de netbeheerder zijn aangemeld.',
+          niveau: 'Gemeente, wijk en buurt; jaarlijks.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `Kerncijfers wijken en buurten, ${cbs('86165NED')}.`,
+          herkomst: 'Voorstel atelier.',
+          inst: ['warmte.html', 'Warmte per buurt'],
+          uit: { b: 'kwb25', w: x => x.WoningenMetZonnestroom_59, f: 'pct0', l: 'van de woningen heeft zonnepanelen' } },
+        { k: 'bereik', b: 'open', naam: 'Windenergie op land',
+          def: 'Aantal windturbines en opgesteld vermogen in de gemeente, en de stroom die ze opwekken.',
+          zegt: 'Wat de gemeente bijdraagt aan wind op land, het grootste deel van de 35 TWh van de RES.',
+          niet: 'Wie de opbrengst krijgt: de eigenaar en de omwonenden die meedoen staan er niet in.',
+          niveau: 'Gemeente in de Klimaatmonitor; het CBS publiceert per provincie en per RES-regio.',
+          norm: 'RES van de regio.', vgl: 'Ja.',
+          bron: () => `Regionale Klimaatmonitor; ${cbs('70960ned')} (provincie) en ${cbs('85004NED')} (RES-regio).`,
+          herkomst: 'Landelijk programma (RES, Klimaatakkoord).' },
+        { k: 'bereik', b: 'keten', naam: 'Bijdrage aan de RES',
+          def: 'Wat de RES-regio opwekt aan wind en grootschalige zon, naast het bod van de regio en de pijplijn van projecten.',
+          zegt: 'Hoe de regio ervoor staat. Volgens het PBL wordt de 35 TWh in 2030 waarschijnlijk gehaald; het bod van de regio\'s samen (55 TWh) raakt uit zicht.',
+          niet: 'Het aandeel van één gemeente: de RES rekent per regio, en een windpark op de grens telt bij de regio.',
+          niveau: 'RES-regio; jaarlijks (Monitor RES van het PBL).',
+          norm: 'Klimaatakkoord: 35 TWh op land in 2030, landelijk; het bod van de eigen regio.', vgl: 'Tussen regio\'s, niet tussen gemeenten.',
+          bron: () => `PBL, Monitor RES (jaarlijks); ${cbs('85004NED')}; de RES-regio zelf (Nationaal Programma RES).`,
+          herkomst: 'Landelijk programma (Nationaal Programma RES).' },
+        { k: 'inspanning', b: 'keten', naam: 'Projecten met SDE++ in de gemeente',
+          def: 'Projecten voor duurzame energie en CO2-reductie met een SDE++-beschikking, per techniek, met vermogen en status.',
+          zegt: 'Welke grote opwek of verduurzaming eraan komt: zonneparken, wind, warmte, groen gas.',
+          niet: 'Of een project ook gebouwd wordt: een deel van de beschikkingen wordt ingetrokken.',
+          niveau: 'Project; jaarlijks na elke ronde.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt.',
+          bron: () => 'RVO, open data over de SDE++ en de SDE-viewer (<a href="https://www.rvo.nl/onderwerpen/open-data" target="_blank" rel="noopener">rvo.nl, open data</a>).',
+          herkomst: 'Voorstel atelier.' }
+      ]
+    },
+    warmte: {
+      tv: 'T', kort: 'Warmte en woningen', naam: 'Warmte en verduurzaming van woningen',
+      taakvelden: 'geen eigen taakveld · verduurzamingssubsidie en bouwtoezicht op 8.3, het warmteprogramma onder de Omgevingswet',
+      scope: 'Hoe woningen nu verwarmd worden, hoe ver de gemeente is met het warmteprogramma en hoeveel woningen worden geïsoleerd of overstappen. Utiliteit en het eigen vastgoed staan in het thema Utiliteit en eigen vastgoed; energiearmoede bij Schulden en armoede.',
+      lees: 'Onder de Wet gemeentelijke instrumenten warmtetransitie stelt elke gemeente een warmteprogramma vast, het eerste uiterlijk 31 december 2027, daarna elke vijf jaar. Nagelopen op 16 november 2026: het besluit dat de wet uitwerkt, lag in augustus 2026 bij de Raad van State; de inwerkingtreding van de rest van de wet wordt per 1 januari 2027 verwacht. Subsidiecijfers tellen aanvragen en leningen, geen woningen, en alleen wat via het Rijk liep.',
+      atelier: 'warmte.html', atelierNaam: 'Warmte per buurt',
+      tegel: 'Warmte en woningen', oms: 'Aardgasvrij, gasverbruik, labels, isolatie en het warmteprogramma: hoe woningen verwarmen en wat er verandert.',
+      naast: [['warmte.html', 'Warmte per buurt', 'aardgasvrij, gas per woning, warmtenet en elektrisch verwarmd per buurt'],
+        ['energielabelkalender.html', 'Energielabelkalender', 'welke woningen een slecht label hebben, per buurt, tegenover de eisen tot 2040'],
+        ['labelregistratie.html', 'De energielabelregistratie', 'hoeveel woningen een label hebben en wat dat zegt'],
+        ['energiearmoede.html', 'Energiearmoede per buurt', 'waar een slecht label en een laag inkomen samenkomen, en wie de woning bezit']],
+      kaarten: [
+        { k: 'context', b: 'open', naam: 'Aardgasvrije woningen',
+          def: 'Aandeel woningen zonder gaslevering of zonder gasaansluiting, verwarmd met stroom of een warmtenet.',
+          zegt: 'Hoe ver de gemeente is van het gas af, en waar het per buurt begint.',
+          niet: 'Of het warmtesysteem duurzaam is: een warmtenet op gas telt mee. Een woning die alleen nog kookt op gas telt niet mee.',
+          niveau: 'Gemeente, wijk en buurt; jaarlijks, vanaf 2024.',
+          norm: 'Eigen warmteprogramma; Nederland.', vgl: 'Ja.',
+          bron: () => `Kerncijfers wijken en buurten, ${cbs('86165NED')}.`,
+          herkomst: 'Wettelijke plicht (warmteprogramma, Wgiw); landelijke monitor.',
+          inst: ['warmte.html', 'Warmte per buurt'],
+          uit: { b: 'kwb25', w: x => x.AardgasvrijeWoningen_57, f: 'pct0', l: 'van de woningen is aardgasvrij' } },
+        { k: 'context', b: 'open', naam: 'Gasverbruik per woning',
+          def: 'Gemiddeld aardgasverbruik per woning in een jaar, over alle woningen, ook die zonder gas.',
+          zegt: 'Hoeveel warmtevraag er nog op gas draait; samen met bouwjaar en woningtype waar isoleren het meest oplevert.',
+          niet: 'Het verbruik van een gasverwarmde woning: aardgasvrije woningen tellen mee met 0. Weer en gedrag spelen mee.',
+          niveau: 'Gemeente, wijk en buurt; jaarlijks.',
+          norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, met de kanttekening dat woningtype en bouwjaar veel verklaren.',
+          bron: () => `Kerncijfers wijken en buurten, ${cbs('86165NED')}; naar woningtype en eigendom ${cbs('81528NED')}.`,
+          herkomst: 'Landelijke monitor.',
+          inst: ['warmte.html', 'Warmte per buurt'],
+          uit: { b: 'kwb25', w: x => x.GemiddeldAardgasverbruik_55, f: 'n', l: 'm³ aardgas per woning gemiddeld, aardgasvrije woningen meegeteld met 0' } },
+        { k: 'context', b: 'open', naam: 'Woningen op een warmtenet en elektrisch verwarmd',
+          def: 'Aandeel woningen dat vooral elektrisch verwarmd wordt (meestal met een warmtepomp), en aandeel met stadsverwarming.',
+          zegt: 'Welke van de twee routes van het gas af in de gemeente al gelopen wordt.',
+          niet: 'Of de warmtepomp hybride is: woningen met een hybride warmtepomp tellen als gas. Stadsverwarming wordt onder tien woningen niet gepubliceerd.',
+          niveau: 'Gemeente, wijk en buurt; jaarlijks, vanaf 2024.',
+          norm: 'Eigen warmteprogramma.', vgl: 'Ja.',
+          bron: () => `Kerncijfers wijken en buurten, ${cbs('86165NED')}. Het CBS leidt de verwarming af uit levering, subsidies, labels en het stroomverbruik per maand.`,
+          herkomst: 'Wettelijke plicht (warmteprogramma, Wgiw).',
+          inst: ['warmte.html', 'Warmte per buurt'],
+          uit: { b: 'kwb25', w: x => x.WoningenHoofdzElektrischVerwarmd_60, f: 'pct0', l: 'van de woningen wordt vooral elektrisch verwarmd',
+            x: (g, n) => `<span>Stadsverwarming: ${g.PercentageWoningenMetStadsverwarming_56 == null ? 'niet gepubliceerd' : uFmt(g.PercentageWoningenMetStadsverwarming_56, 'pct0') + ' van de woningen'}</span>${n ? `<span class="un">Nederland elektrisch ${uFmt(n.WoningenHoofdzElektrischVerwarmd_60, 'pct0')}, stadsverwarming ${uFmt(n.PercentageWoningenMetStadsverwarming_56, 'pct0')}</span>` : ''}` } },
+        { k: 'context', b: 'open', naam: 'Wat het rijksmodel per buurt rekent',
+          def: 'Per buurt de warmteoptie met de laagste kosten voor Nederland volgens de Startanalyse van het PBL, met de kosten en het isolatieniveau.',
+          zegt: 'Een vertrekpunt voor het warmteprogramma: waar een warmtenet, all-electric of een hybride oplossing in het model het goedkoopst is.',
+          niet: 'Een advies of een keuze: lokale bronnen, het net en wat bewoners willen zitten niet in het model.',
+          niveau: 'Buurt; Startanalyse 2026.',
+          norm: 'Geen; ondersteuning bij het warmteprogramma.', vgl: 'Ja (één model voor alle gemeenten).',
+          bron: () => 'PBL, Startanalyse aardgasvrije buurten (<a href="https://www.pbl.nl" target="_blank" rel="noopener">pbl.nl</a>); de licentie van de data is nagevraagd bij het PBL.',
+          herkomst: 'Landelijk programma (Nationaal Programma Lokale Warmtetransitie).',
+          inst: ['warmte.html', 'Warmte per buurt'] },
+        { k: 'inspanning', b: 'open', naam: 'Warmteprogramma vastgesteld',
+          def: 'Of de gemeente een warmteprogramma heeft vastgesteld (voorheen transitievisie warmte), wanneer, en welke wijken het als eerste noemt.',
+          zegt: 'Of de gemeente op tijd is met de wettelijke plicht, en waar zij als eerste wil beginnen.',
+          niet: 'Of het programma ook wordt uitgevoerd.',
+          niveau: 'Gemeente; elke vijf jaar.',
+          norm: 'Wgiw: eerste warmteprogramma uiterlijk 31 december 2027, daarna elke vijf jaar herzien.', vgl: 'Ja.',
+          bron: () => 'Bekendmaking in het Gemeenteblad (<a href="https://zoek.officielebekendmakingen.nl" target="_blank" rel="noopener">officielebekendmakingen.nl</a>); het programma zelf op de site van de gemeente.',
+          herkomst: 'Wettelijke plicht (Wet gemeentelijke instrumenten warmtetransitie).' },
+        { k: 'inspanning', b: 'intern', naam: 'Wijken met een uitvoeringsplan of aanwijzing',
+          def: 'Wijken waarvoor de gemeente een uitvoeringsplan heeft, of die zij in het omgevingsplan aanwijst om op termijn van het gas af te gaan, met de datum.',
+          zegt: 'Waar de gemeente de stap van plan naar uitvoering zet.',
+          niet: 'Hoeveel woningen echt zijn overgestapt; daarvoor de kaart Aardgasvrije woningen.',
+          niveau: 'Wijk of buurt.',
+          norm: 'Wgiw en het besluit dat de wet uitwerkt: betaalbaarheid en een redelijke termijn.', vgl: 'Nee.',
+          bron: () => 'Eigen planning; het besluit tot aanwijzing in het omgevingsplan.',
+          ggm: '<code>besluit.datumbesluit</code>, <code>.omschrijving</code>, <code>.datumpublicatie</code> (het besluit tot aanwijzing); geen entiteit voor het warmteprogramma, een uitvoeringsplan of een wijk die van het gas af gaat. De entiteit programma in het domein Griffie is het begrotingsprogramma.',
+          herkomst: 'Wettelijke plicht (Wgiw).' },
+        { k: 'bereik', b: 'open', naam: 'Woningen met label E, F of G',
+          def: 'Woningen met een geregistreerd energielabel E, F of G, als aandeel van de woningen met een label, en hoeveel woningen een label hebben.',
+          zegt: 'Waar de slechtst geïsoleerde woningen staan; de huurwoningen daarvan moeten naar verwachting vanaf 2029 minimaal label D hebben.',
+          niet: 'Het label van woningen zonder registratie (bijna de helft), en of een woning verhuurd wordt.',
+          niveau: 'Pand; hier per gemeente, woningen in panden met alleen woningen, zonder rijksmonumenten.',
+          norm: 'Ontwerpbesluit huurwoningen (D vanaf 2029); eisen tot 2040 in de Energielabelkalender.', vgl: 'Beperkt: de dekking van de registratie verschilt.',
+          bron: () => 'RIVM, energielabels per pand (afgeleid uit EP-Online van RVO, Public Domain Mark), gekoppeld aan de BAG; samenvatting per gemeente in de <a href="bagwerkbank.html">BAG-werkbank</a>.',
+          herkomst: 'Wettelijke plicht (energielabel bij verkoop en verhuur); voorstel atelier.',
+          inst: [['energielabelkalender.html', 'Energielabelkalender'], ['labelregistratie.html', 'De energielabelregistratie']],
+          uit: { lab: 'w' } },
+        { k: 'bereik', b: 'open', naam: 'Verduurzaamde koopwoningen met rijkssteun',
+          def: 'Aandeel koopwoningen dat sinds 2021 een energiesubsidie of -lening van het Rijk kreeg: ISDE, Warmtefonds, de subsidie voor verenigingen van eigenaren en de lokale aanpak isolatie.',
+          zegt: 'Hoeveel eigenaren de regelingen gebruiken, en of dat in de eigen gemeente achterblijft.',
+          niet: 'Hoeveel woningen echt verduurzaamd zijn: een woning kan meer subsidies hebben, en wie zonder subsidie isoleert, ontbreekt. Huurwoningen lopen via corporaties en verhuurders.',
+          niveau: 'Gemeente; 2021–2025, jaarlijks.',
+          norm: 'Nationaal Isolatieprogramma; Nederland.', vgl: 'Ja.',
+          bron: () => 'CBS, dashboard Energiesubsidies woningen 2021–2025 (<a href="https://www.cbs.nl/nl-nl/maatwerk/2026/40/dashboard-energiesubsidies-woningen-2021-2025" target="_blank" rel="noopener">maatwerk, oktober 2026</a>), op gegevens van RVO en het Nationaal Warmtefonds.',
+          herkomst: 'Landelijk programma (Nationaal Isolatieprogramma).' },
+        { k: 'bereik', b: 'open', naam: 'ISDE naar maatregel',
+          def: 'Toegekende ISDE-subsidies naar maatregel: isolatie, warmtepomp, zonneboiler, aansluiting op een warmtenet.',
+          zegt: 'Welke stap bewoners zetten, en per buurt waar.',
+          niet: 'Maatregelen zonder ISDE; en een aanvraag van de gemeente namens bewoners telt hier ook mee.',
+          niveau: 'Postcode, buurt, wijk en gemeente; maandelijks bijgewerkt.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => 'RVO, ISDE-downloadbestand (<a href="https://www.rvo.nl/subsidies-financiering/isde/budget" target="_blank" rel="noopener">rvo.nl, stand van zaken budget</a>).',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'intern', naam: 'Isolatie in de lokale aanpak',
+          def: 'Woningen die de gemeente met de specifieke uitkering voor de lokale aanpak isolatie heeft laten isoleren, met de maatregel.',
+          zegt: 'Wat de eigen aanpak oplevert, vaak gericht op buurten met lage inkomens en slechte labels.',
+          niet: 'Isolatie buiten de regeling.',
+          niveau: 'Woning, buurt.',
+          norm: 'Voorwaarden van de regeling; verantwoording via SiSa.', vgl: 'Nee.',
+          bron: () => 'Eigen projectadministratie; SiSa-verantwoording.',
+          ggm: '<code>subsidie</code>, <code>subsidiebeschikking</code>, <code>subsidieprogramma.naam</code>; geen attribuut voor de maatregel of het adres van de woning.',
+          herkomst: 'Landelijk programma (Nationaal Isolatieprogramma).' },
+        { k: 'uitkomst', b: 'open', naam: 'Gas- en stroomverbruik van woningen door de jaren',
+          def: 'Gemiddeld gas- en stroomverbruik per woning, door de jaren.',
+          zegt: 'Of de woningen in de gemeente minder gas gaan gebruiken, en hoeveel stroom daarvoor terugkomt.',
+          niet: 'Waardoor: isoleren, overstappen, zuiniger stoken en een zachte winter tellen allemaal mee.',
+          niveau: 'Gemeente; jaarlijks vanaf 2010, naar woningtype en eigendom.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Ja.',
+          bron: () => `${cbs('81528NED')}.`,
+          herkomst: 'Landelijke monitor.',
+          uit: { b: 'ewon', w: x => x.GemiddeldAardgasverbruik_1, f: 'n', l: 'm³ aardgas per woning gemiddeld', reeks: [2015, 2019, 2022],
+            x: g => g.GemiddeldeElektriciteitslevering_2 != null ? `<span>${uFmt(g.GemiddeldeElektriciteitslevering_2, 'n')} kWh stroom per woning geleverd</span>` : '' } }
+      ]
+    },
+    utiliteit: {
+      tv: 'T', kort: 'Utiliteit en eigen vastgoed', naam: 'Utiliteit, bedrijven en eigen vastgoed',
+      taakvelden: 'geen eigen taakveld · toezicht op energieplichten bij de omgevingsdienst (7.4), eigen gebouwen op het taakveld van het object',
+      scope: 'Kantoren, winkels, scholen en andere gebouwen die geen woning zijn: hun labelplichten, de besparingsplicht van bedrijven en de verduurzaming van het eigen vastgoed van de gemeente.',
+      lees: 'Voor kantoren geldt sinds 2023 minimaal label C. Voor andere utiliteitsgebouwen staan eisen voor 2030 en 2033 in de Energielabelkalender, met hoe ver die regels zijn. Wie een gebouw bezit, staat niet in open data; daarom is het eigen vastgoed van de gemeente hier intern.',
+      atelier: 'labelc.html', atelierNaam: 'Label C-kantoren',
+      tegel: 'Utiliteit en eigen vastgoed', oms: 'Kantoren, utiliteit en de eigen gebouwen: labelplichten, besparingsplicht en verduurzaming.',
+      naast: [['labelc.html', 'Label C-kantoren', 'per kantoorpand of de plicht van label C wordt gehaald'],
+        ['energielabelkalender.html', 'Energielabelkalender', 'utiliteitspanden per pand tegenover de eisen van 2030 en 2033'],
+        ['labelregistratie.html', 'De energielabelregistratie', 'hoeveel utiliteitspanden een label hebben'],
+        ['eigenlijst.html', 'Eigen lijst op de kaart', 'de eigen panden van de gemeente naast hun label']],
+      kaarten: [
+        { k: 'bereik', b: 'open', naam: 'Kantoren zonder label C',
+          def: 'Kantoren die onder de plicht van minimaal label C vallen en geen label A tot en met C hebben.',
+          zegt: 'Waar toezicht nodig is: een kantoor zonder label C mag niet meer als kantoor gebruikt worden.',
+          niet: 'Of een kantoor onder een uitzondering valt (monument, kleiner dan 100 m², gesloopt of verkocht); dat staat per pand in het instrument.',
+          niveau: 'Pand.',
+          norm: 'Besluit bouwwerken leefomgeving: label C voor kantoren sinds 1 januari 2023.', vgl: 'Ja.',
+          bron: () => 'RIVM, energielabels per pand; BAG (PDOK).',
+          herkomst: 'Wettelijke plicht (label C kantoren).',
+          inst: ['labelc.html', 'Label C-kantoren'] },
+        { k: 'bereik', b: 'open', naam: 'Utiliteitspanden met E, F of G',
+          def: 'Utiliteitspanden (geen woningen, niet kleiner dan 50 m², geen rijksmonument) met een label E, F of G, en hoeveel panden geen label hebben.',
+          zegt: 'Hoe groot de opgave is voor de eisen van 2030 (minimaal D) en 2033 (minimaal C).',
+          niet: 'Welk pand onder welke eis valt: dat hangt af van de functie, en de regels zijn nog niet allemaal vastgesteld.',
+          niveau: 'Pand.',
+          norm: 'Europese richtlijn energieprestatie van gebouwen; stand van de regels in de Energielabelkalender.', vgl: 'Beperkt: de dekking van de registratie verschilt.',
+          bron: () => 'RIVM, energielabels per pand, gekoppeld aan de BAG; samenvatting per gemeente in de <a href="bagwerkbank.html">BAG-werkbank</a>.',
+          herkomst: 'Europese richtlijn (EPBD IV); voorstel atelier.',
+          inst: [['energielabelkalender.html', 'Energielabelkalender'], ['labelregistratie.html', 'De energielabelregistratie']],
+          uit: { lab: 'u' } },
+        { k: 'context', b: 'open', naam: 'Energieverbruik van bedrijven',
+          def: 'Gas- en stroomverbruik van bedrijven en instellingen in de gemeente, per sector.',
+          zegt: 'Welke sectoren de meeste energie gebruiken, en waar toezicht op de besparingsplicht het meest oplevert.',
+          niet: 'Het verbruik per bedrijf, en bij grote verbruikers vaak niets: geheimhouding.',
+          niveau: 'Gemeente, per sector; jaarlijks.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt.',
+          bron: () => 'Regionale Klimaatmonitor (<a href="https://klimaatmonitor.databank.nl" target="_blank" rel="noopener">klimaatmonitor.databank.nl</a>).',
+          herkomst: 'Landelijke monitor (Klimaatmonitor).' },
+        { k: 'inspanning', b: 'keten', naam: 'Toezicht op de energiebesparingsplicht',
+          def: 'Bedrijven en instellingen met een energiebesparingsplicht, of zij de informatieplicht nakomen, en de controles en maatregelen van het toezicht.',
+          zegt: 'Of de grootste besparing bij bedrijven ook echt wordt gehaald.',
+          niet: 'De besparing zelf: die staat in het rapport van het bedrijf.',
+          niveau: 'Inrichting; jaarlijks in het verslag van de omgevingsdienst.',
+          norm: 'Besluit activiteiten leefomgeving: besparingsplicht en informatieplicht (elke vier jaar).', vgl: 'Beperkt.',
+          bron: () => 'Omgevingsdienst (toezicht en handhaving); de meldingen bij RVO zijn niet open.',
+          herkomst: 'Wettelijke plicht (energiebesparingsplicht).' },
+        { k: 'bereik', b: 'intern', naam: 'Labels van het eigen vastgoed',
+          def: 'Labels, energieverbruik en geplande verduurzaming van de gebouwen die de gemeente bezit of huurt: kantoor, scholen, sporthallen, gemeenschapshuizen.',
+          zegt: 'Of de gemeente zelf doet wat zij van anderen vraagt, en wat de eigen gebouwen aan de doelen bijdragen.',
+          niet: 'Wie de gebruiker is: bij verhuurd maatschappelijk vastgoed betaalt de huurder vaak de energie.',
+          niveau: 'Gebouw.',
+          norm: 'Routekaarten maatschappelijk vastgoed; label C voor kantoren.', vgl: 'Nee.',
+          bron: () => 'Eigen vastgoedadministratie. De labels zijn per pand open; welke panden van de gemeente zijn, niet.',
+          ggm: '<code>vastgoedobject.energielabel</code>, <code>.energieverbruik</code>, <code>.energiekosten</code>, <code>.co2uitstoot</code>, <code>.jaarlaatsterenovatie</code>, <code>.bouwjaar</code>.',
+          herkomst: 'Landelijke afspraak (routekaarten maatschappelijk vastgoed); voorstel atelier.',
+          inst: ['eigenlijst.html', 'Eigen lijst op de kaart'] },
+        { k: 'uitkomst', b: 'intern', naam: 'Energieverbruik van de eigen organisatie',
+          def: 'Energieverbruik en uitstoot van de gemeentelijke organisatie: gebouwen, openbare verlichting, gemalen, wagenpark.',
+          zegt: 'Of de eigen organisatie op weg is naar klimaatneutraal.',
+          niet: 'Het verbruik in de gemeente als geheel.',
+          niveau: 'Organisatie; jaarlijks.',
+          norm: 'Europese energie-efficiëntierichtlijn: jaarlijks rapporteren aan RVO en elke vier jaar een plan.', vgl: 'Nee.',
+          bron: () => 'Eigen energiemonitoring; de rapportage aan RVO is niet open.',
+          ggm: '<code>vastgoedobject.energieverbruik</code>, <code>.co2uitstoot</code> (gebouwen); geen entiteit voor openbare verlichting of wagenpark met verbruik.',
+          herkomst: 'Wettelijke plicht (rapportageplicht energieverbruik overheden).' }
+      ]
+    },
+    net: {
+      tv: 'T', kort: 'Net en ruimte', naam: 'Elektriciteitsnet en ruimte',
+      taakvelden: 'geen eigen taakveld · ruimte voor het net in het omgevingsplan (8.1), de aansluitingen bij de netbeheerder',
+      scope: 'Of het elektriciteitsnet de groei van opwek, laden, warmtepompen en nieuwbouw aankan, en wat de gemeente doet om ruimte te maken. Het net is van de netbeheerder; de gemeente regelt de ruimte en de volgorde.',
+      lees: 'De capaciteitskaart van de netbeheerders laat per gebied zien waar geen transportcapaciteit meer is. Die gebieden volgen het net, niet de gemeentegrens: een cijfer per gemeente is er niet. De licentie van de onderliggende data is nog niet vastgesteld; daarom staan deze kaarten hier zonder cijfer.',
+      geenAtelier: 'Nog geen instrument: de capaciteitskaart volgt het net, niet de gemeentegrens.',
+      tegel: 'Net en ruimte', oms: 'Transportschaarste, wachtrij en ruimte voor het net: wat opwek, laden en elektrificatie tegenhoudt.',
+      kaarten: [
+        { k: 'context', b: 'keten', naam: 'Transportschaarste voor afname en invoeding',
+          def: 'Gebieden in de gemeente waar het net vol is voor nieuwe of grotere aansluitingen, apart voor afnemen en voor terugleveren.',
+          zegt: 'Waar een bedrijf, een laadplein, een warmtenet of een zonnedak voorlopig niet aangesloten kan worden.',
+          niet: 'Kleine aansluitingen van huishoudens: de kaart gaat over grootverbruik.',
+          niveau: 'Netgebied (voedingsgebied van een station); minstens elk kwartaal.',
+          norm: 'Geen; Landelijk Actieprogramma Netcongestie.', vgl: 'Nee: netgebieden volgen het net, niet de gemeentegrens.',
+          bron: () => 'Netbeheer Nederland, <a href="https://capaciteitskaart.netbeheernederland.nl" target="_blank" rel="noopener">capaciteitskaart</a>; de eigen regionale netbeheerder.',
+          herkomst: 'Landelijk programma (Landelijk Actieprogramma Netcongestie).' },
+        { k: 'context', b: 'keten', naam: 'Wachtrij voor een aansluiting',
+          def: 'Aanvragen voor een nieuwe of zwaardere aansluiting die wachten op capaciteit, met het vermogen.',
+          zegt: 'Hoeveel economische en duurzame plannen stilliggen door het net.',
+          niet: 'Wie er wacht: de netbeheerder noemt geen namen.',
+          niveau: 'Netgebied; maandelijks.',
+          norm: 'Geen.', vgl: 'Nee.',
+          bron: () => 'Netbeheer Nederland, capaciteitskaart (wachtrij); de regionale netbeheerder.',
+          herkomst: 'Landelijk programma (Landelijk Actieprogramma Netcongestie).' },
+        { k: 'bereik', b: 'keten', naam: 'Netuitbreidingen met fase en jaar',
+          def: 'Geplande uitbreidingen van stations en kabels in en rond de gemeente, met de fase van het project en het jaar waarin capaciteit vrijkomt.',
+          zegt: 'Wanneer een vol gebied weer ruimte krijgt, en welke projecten de gemeente ruimtelijk moet mogelijk maken.',
+          niet: 'Of het jaar gehaald wordt: projecten schuiven.',
+          niveau: 'Project.',
+          norm: 'Investeringsplannen van de netbeheerders.', vgl: 'Nee.',
+          bron: () => 'Regionale netbeheerder en TenneT (investeringsplannen); Netbeheer Nederland noemt inzicht in projectfasen als dataproduct voor 2026.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'inspanning', b: 'intern', naam: 'Ruimte voor stations en tracés',
+          def: 'Locaties voor nieuwe stations en kabeltracés die de gemeente in het omgevingsplan vastlegt, met de stand van de procedure.',
+          zegt: 'Wat de gemeente zelf doet om netuitbreiding niet op te houden.',
+          niet: 'Of de netbeheerder op tijd bouwt.',
+          niveau: 'Locatie.',
+          norm: 'Eigen omgevingsvisie en omgevingsplan.', vgl: 'Nee.',
+          bron: () => 'Eigen ruimtelijke planning; omgevingsplan.',
+          ggm: 'Geen entiteit voor een netproject of een gereserveerde locatie.',
+          herkomst: 'Voorstel atelier.' },
+        { k: 'bereik', b: 'intern', naam: 'Energiehubs en flexafspraken',
+          def: 'Bedrijventerreinen en locaties waar bedrijven een aansluiting delen, opslag gebruiken of flexibel afnemen, met het vermogen dat dat vrijmaakt.',
+          zegt: 'Hoe de gemeente helpt het bestaande net beter te benutten.',
+          niet: 'Of het genoeg is om de wachtrij op te lossen.',
+          niveau: 'Locatie.',
+          norm: 'Geen.', vgl: 'Nee.',
+          bron: () => 'Eigen projecten met ondernemers en de netbeheerder.',
+          ggm: 'Geen entiteit voor een energiehub of een gedeelde aansluiting.',
+          herkomst: 'Voorstel atelier.' }
+      ]
+    },
+    regie: {
+      tv: 'T', kort: 'Regie en middelen', naam: 'Regie, middelen en draagvlak',
+      taakvelden: 'geen eigen taakveld · uitvoeringsmiddelen via het gemeentefonds (0.7), lasten verspreid over 7.4, 8.3 en het eigen vastgoed',
+      scope: 'Wat de gemeente aan geld en mensen inzet voor de energietransitie, hoeveel zij daarvoor van het Rijk krijgt, en hoe inwoners meedoen en meeprofiteren.',
+      lees: 'Van 2023 tot en met 2025 kregen gemeenten de uitvoeringsmiddelen voor klimaat en energie als specifieke uitkering (CDOKE), met een verantwoording in fte per sector. Vanaf 2026 komt het geld als decentralisatie-uitkering in het gemeentefonds, zonder aanvraag en zonder die verantwoording. De Iv3 kent geen taakveld energie: de lasten zijn niet als één bedrag uit de begroting te halen.',
+      atelier: 'rijksverdeling.html', atelierNaam: 'Rijksverdeling per gemeente',
+      tegel: 'Regie en middelen', oms: 'Geld van het Rijk, eigen lasten, capaciteit en meedoen van inwoners: wat de regie draagt.',
+      naast: [['rijksverdeling.html', 'Rijksverdeling per gemeente', 'de decentralisatie-uitkering voor klimaat en energie in het gemeentefonds'],
+        ['rijksgeld.html', 'Rijksgeld per gemeente', 'wat het Rijk betaalde, waaronder CDOKE en de regelingen voor de lokale warmtetransitie'],
+        ['iv3spiegel.html', 'Iv3-spiegel', 'de lasten op milieubeheer en bouwtoezicht door de jaren'],
+        ['akkoordvolger.html', 'Akkoordvolger per gemeente', 'doelen uit het akkoord naast wat open data volgt']],
+      kaarten: [
+        { k: 'inspanning', b: 'open', naam: 'Uitvoeringsmiddelen klimaat en energie',
+          def: 'Wat de gemeente van het Rijk krijgt voor de uitvoering van klimaat- en energiebeleid: vanaf 2026 als decentralisatie-uitkering in het gemeentefonds, daarvoor als specifieke uitkering (CDOKE).',
+          zegt: 'Hoeveel geld er voor capaciteit is, en of de eigen inzet daarboven of daaronder ligt.',
+          niet: 'Waaraan het geld besteed wordt: sinds 2026 hoeft de gemeente dat niet meer apart te verantwoorden.',
+          niveau: 'Gemeente; per circulaire en per jaar.',
+          norm: 'Bestuurlijke afspraken Rijk, VNG en IPO.', vgl: 'Ja, per inwoner.',
+          bron: () => 'Gemeentefondscirculaires (rekenmodel); Financiële instrumenten (rijksfinancien.nl).',
+          herkomst: 'Landelijke afspraak (uitvoeringsmiddelen klimaat en energie).',
+          inst: [['rijksverdeling.html', 'Rijksverdeling'], ['rijksgeld.html', 'Rijksgeld']] },
+        { k: 'inspanning', b: 'open', naam: 'Specifieke uitkeringen voor isolatie en warmte',
+          def: 'Specifieke uitkeringen van het Rijk voor de lokale warmtetransitie: lokale aanpak isolatie, proeftuinen aardgasvrije wijken en verwante regelingen.',
+          zegt: 'Welke extra middelen er naast het gemeentefonds binnenkomen, en voor welke opgave.',
+          niet: 'Wat ermee bereikt wordt; daarvoor de kaarten in het thema Warmte en woningen.',
+          niveau: 'Gemeente, per regeling; jaarlijks betaald.',
+          norm: 'Voorwaarden per regeling; verantwoording via SiSa.', vgl: 'Ja.',
+          bron: () => 'Financiële instrumenten van het Rijk (<a href="https://www.rijksfinancien.nl" target="_blank" rel="noopener">rijksfinancien.nl</a>, publiek domein).',
+          herkomst: 'Landelijk programma (Nationaal Programma Lokale Warmtetransitie).',
+          inst: ['rijksgeld.html', 'Rijksgeld per gemeente'] },
+        { k: 'inspanning', b: 'open', naam: 'Lasten op milieubeheer en bouwtoezicht',
+          def: 'Lasten en baten op de taakvelden milieubeheer (7.4) en wonen en bouwen (8.3), per inwoner.',
+          zegt: 'Een ondergrens van wat de gemeente zelf aan klimaat, energie en toezicht uitgeeft, door de jaren.',
+          niet: 'De lasten van de energietransitie: de Iv3 kent geen taakveld energie, deze taakvelden bevatten ook ander werk, en verduurzaming van eigen gebouwen staat op het taakveld van het gebouw.',
+          niveau: 'Gemeente. Begroting en jaarrekening, jaarlijks.',
+          norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt.',
+          bron: () => 'CBS, onbewerkte Iv3-data gemeenten (<a href="https://dataderden.cbs.nl" target="_blank" rel="noopener">dataderden.cbs.nl</a>).',
+          herkomst: 'Voorstel atelier.',
+          inst: ['iv3spiegel.html', 'Iv3-spiegel'] },
+        { k: 'inspanning', b: 'intern', naam: 'Ambtelijke capaciteit klimaat en energie',
+          def: 'Fte die de gemeente inzet voor klimaat en energie, naar opgave (warmte, opwek, mobiliteit, bedrijven, regie), vast en ingehuurd.',
+          zegt: 'Of de capaciteit past bij de opgave en bij de middelen van het Rijk.',
+          niet: 'Wat de mensen opleveren.',
+          niveau: 'Organisatie; jaarlijks. Tot en met 2025 vroeg RVO dit in het voortgangsoverzicht CDOKE, in fte per sector.',
+          norm: 'Raad voor het Openbaar Bestuur, raming van de benodigde capaciteit (2024).', vgl: 'Beperkt.',
+          bron: () => 'Eigen formatie en inhuuradministratie.',
+          ggm: '<code>formatieplaats.uren_per_week</code> en <code>.onderdeel_van_organisatorischeeenheid_id</code>; geen attribuut voor het beleidsterrein of de opgave.',
+          herkomst: 'Landelijke afspraak (verantwoording CDOKE 2023–2025).' },
+        { k: 'bereik', b: 'keten', naam: 'Energiecoöperaties en lokaal eigendom',
+          def: 'Energiecoöperaties en bewonersinitiatieven in de gemeente, hun leden en projecten, en het deel van wind- en zonneparken in lokaal eigendom.',
+          zegt: 'Of inwoners mee-eigenaar worden van de opwek; het Klimaatakkoord streeft naar 50% lokaal eigendom.',
+          niet: 'Wat de projecten opleveren voor de omgeving buiten het eigendom.',
+          niveau: 'Coöperatie en project; jaarlijks in de Lokale Energie Monitor.',
+          norm: 'Klimaatakkoord: streven naar 50% lokaal eigendom bij nieuwe wind- en zonneparken op land.', vgl: 'Beperkt.',
+          bron: () => 'Klimaatstichting HIER en RVO, Lokale Energie Monitor; de coöperaties zelf.',
+          herkomst: 'Landelijke afspraak (Klimaatakkoord, lokaal eigendom).' },
+        { k: 'bereik', b: 'keten', naam: 'Financiële participatie in wind- en zonneparken',
+          def: 'Of omwonenden van een wind- of zonnepark kunnen meedoen: een omgevingsfonds, een bijdrage per kWh, mede-eigendom.',
+          zegt: 'Of de lusten en lasten van opwek eerlijk worden verdeeld.',
+          niet: 'Hoeveel omwonenden echt meedoen.',
+          niveau: 'Project; jaarlijks in de Monitor financiële participatie.',
+          norm: 'Gedragscodes van de wind- en zonnebranche; eigen participatiebeleid.', vgl: 'Beperkt.',
+          bron: () => 'Monitor financiële participatie hernieuwbare energie op land (in opdracht van het Rijk); de ontwikkelaar.',
+          herkomst: 'Landelijke afspraak (Klimaatakkoord).' },
+        { k: 'uitkomst', b: 'intern', naam: 'Doelen uit het eigen klimaat- of energieprogramma',
+          def: 'De doelen die de gemeente zichzelf stelt (uitstoot, aardgasvrije woningen, opwek, besparing) naast de stand.',
+          zegt: 'Of de gemeente op koers ligt met haar eigen ambitie.',
+          niet: 'Of de ambitie genoeg is voor de landelijke doelen.',
+          niveau: 'Gemeente; per begroting en jaarrekening.',
+          norm: 'Eigen programma en coalitieakkoord.', vgl: 'Nee.',
+          bron: () => 'Eigen programma, begroting en jaarrekening.',
+          herkomst: 'Voorstel atelier.',
+          akk: 1 }
+      ]
+    },
     wonen: {
       tv: '8', kort: 'Wonen', naam: 'Wonen',
       taakvelden: '8.1 ruimtelijke ordening · 8.2 grondexploitatie · 8.3 wonen en bouwen',
@@ -2599,7 +3003,7 @@ main > * { min-width: 0; }
 
   // ---------- render ----------
   // volgorde van de thema's op een plank (keuze Josephine, 7 nov 2026); niet genoemde thema's volgen in de volgorde van D
-  const VOLG = ['publiek', 'inkoop', 'wmo', 'jeugd', 'werk', 'schulden', 'hg', 'opvang'];
+  const VOLG = ['energie', 'warmte', 'utiliteit', 'net', 'regie', 'publiek', 'inkoop', 'wmo', 'jeugd', 'werk', 'schulden', 'hg', 'opvang'];
   const plek = k => { const i = VOLG.indexOf(k); return i < 0 ? 99 : i; };
   function themasVan(nr) { return Object.entries(D).filter(([, d]) => d.tv === nr).sort((a, b) => plek(a[0]) - plek(b[0])); }
   function renderOverzicht() {
@@ -2618,8 +3022,8 @@ main > * { min-width: 0; }
     };
     const uitgewerkt = TV.filter(([nr]) => themasVan(nr).length);
     const rest = TV.filter(([nr]) => !themasVan(nr).length);
-    $('#shelves').innerHTML = uitgewerkt.map(([nr, naam, oms]) => `<div class="shelf">
-        <div class="shelf-head"><h3>${nr} · ${esc(PLANK[nr] ? PLANK[nr][0] : naam)}</h3><span>${esc(PLANK[nr] ? PLANK[nr][1] : oms)}</span></div>
+    $('#shelves').innerHTML = uitgewerkt.map(([nr, naam, oms]) => `<div class="shelf${isThema(nr) ? ' thema' : ''}">
+        <div class="shelf-head"><h3>${isThema(nr) ? 'Thema' : nr} · ${esc(PLANK[nr] ? PLANK[nr][0] : naam)}</h3><span>${esc(PLANK[nr] ? PLANK[nr][1] : oms)}</span></div>
         <div class="rail">${themasVan(nr).map(tegel).join('')}</div></div>`).join('')
       + (rest.length ? `<div class="shelf">
         <div class="shelf-head"><h3>Binnenkort</h3><span>Nog niet uitgewerkt.</span></div>
@@ -2627,16 +3031,15 @@ main > * { min-width: 0; }
 
     $('#infos').innerHTML = Object.entries(D).map(([key, d]) => {
       const t = telling(d);
-      const tvNaam = TV.find(x => x[0] === d.tv)[1];
       return `<article class="product" id="info-${key}" aria-labelledby="h-info-${key}" hidden>
-        <div class="product-body"><span class="eyebrow">Iv3 ${esc(d.tv)} · ${esc(tvNaam)}</span><h3 id="h-info-${key}">${esc(d.naam)}</h3>
+        <div class="product-body"><span class="eyebrow">${esc(tvLabel(d.tv))}</span><h3 id="h-info-${key}">${esc(d.naam)}</h3>
           <p>${esc(d.scope)}</p>
           <div class="facts"><div><b>${d.kaarten.length}</b><span>indicatoren</span></div><div><b>${t.open}</b><span>staan in open data</span></div><div><b>${t.keten} · ${t.intern}</b><span>vanuit de keten · intern opvragen</span></div></div>
           <a class="btn-start" data-nav href="#domein=${key}${gmDeel}">Open de indicatoren <span aria-hidden="true">→</span></a></div>
         <div class="product-aside"><span class="eyebrow">Per stap van de keten</span>
           <ol>${KETEN.map(([k, kop]) => { const cs = d.kaarten.filter(c => c.k === k); if (!cs.length) return ''; const x = { open: 0, keten: 0, intern: 0 }; cs.forEach(c => x[c.b]++);
             return `<li><b>${kop}</b>: ${cs.length} (${['open', 'keten', 'intern'].filter(b => x[b]).map(b => x[b] + ' ' + BRON[b]).join(', ')})</li>`; }).join('')}</ol>
-          <p class="small">${d.atelier ? `Cijfers per gemeente: <a href="${esc(instLink(d.atelier))}">${esc(d.atelierNaam)}</a>` : 'Geen instrument; cijfers per centrumregio staan op de kaarten.'}</p>
+          <p class="small">${d.atelier ? `Cijfers per gemeente: <a href="${esc(instLink(d.atelier))}">${esc(d.atelierNaam)}</a>${d.naast && d.naast.length > 1 ? `, en ${d.naast.length - 1} andere instrumenten bij dit thema` : ''}` : esc(d.geenAtelier || 'Geen instrument; cijfers per centrumregio staan op de kaarten.')}</p>
           <button class="sluit" type="button">Sluiten</button></div></article>`;
     }).join('');
     const mores = document.querySelectorAll('#shelves .more'), infos = document.querySelectorAll('#infos .product');
@@ -2689,6 +3092,8 @@ main > * { min-width: 0; }
     kwb25: { api: CBSAPI, t: '86165NED', geo: 'WijkenEnBuurten', per: null, jaar: 2025, nl: 'NL00' },
     km25: { api: CBSAPI, t: '86409NED', geo: 'Regio', per: null, jaar: 2025 },
     pheff: { api: CBSAPI, t: '83642NED', geo: 'RegioS', per: 'JJ', extra: "GemeentelijkeHeffingenVanaf2017 eq 'A047002'" },
+    ewon: { api: CBSAPI, t: '81528NED', geo: 'RegioS', per: 'JJ', extra: "Woningkenmerken eq 'T001100'" },
+    zon: { api: CBSAPI, t: '85005NED', geo: 'RegioS', per: 'JJ', dim: 'SectorEnVermogensklasse', extra: "(SectorEnVermogensklasse eq 'E007161' or SectorEnVermogensklasse eq 'E007037' or SectorEnVermogensklasse eq 'T001081')" },
     bw: { api: CBSAPI, t: '85588NED', geo: 'RegioS', per: 'MM12', extra: "TypeReIntegratieParticipatievoorz eq 'A047998' and StatusVoorziening eq 'A048171'" }
   };
   const UCACHE = {};
@@ -2817,6 +3222,40 @@ main > * { min-width: 0; }
       el.innerHTML = `<b>${esc(naam)} · nulmeting 2024, stedelijk gebied</b><span><span class="uw">${uFmt(x.g, 'pct0')}</span> groen en water · <span class="uw">${uFmt(x.b, 'pct0')}</span> boomkroon</span><span>${esc(wat)}</span><span class="un">Alle stedelijke gemeenten samen ${PBLG.nl[0]}% en ${PBLG.nl[1]}%</span>`;
     }
   }
+  // ---------- uitkomst uit de labelbestanden van de BAG-werkbank (thema's Warmte en Utiliteit) ----------
+  // RIVM-labels per pand, samengevat per gemeente in /bag-werkbank/label/ (zelfde rekenregels als de Energielabelkalender)
+  const LABDATA = '/bag-werkbank/label/', LABC = {};
+  function labHaal(n) {
+    if (LABC[n]) return LABC[n];
+    return (LABC[n] = fetch(LABDATA + n, { cache: 'no-cache' }).then(async r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const buf = new Uint8Array(await r.arrayBuffer());
+      if (buf[0] === 0x1f && buf[1] === 0x8b) { if (typeof DecompressionStream === 'undefined') throw new Error('geen gzip'); return JSON.parse(await new Response(new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'))).text()); }
+      return JSON.parse(new TextDecoder().decode(buf));
+    }).catch(e => { delete LABC[n]; throw e; }));
+  }
+  function labMaten(t) {
+    const n = k => t[k] || 0, GR = ['ab', 'c', 'd', 'efg'], o = {};
+    GR.forEach(g => { o['w_' + g] = n('w_' + g) - n('w_mon_' + g); }); // woningen in panden met alleen woningen, zonder rijksmonumenten
+    const monLab = GR.reduce((a, g) => a + n('w_mon_' + g), 0);
+    o.w_geen = n('w_geen') - (n('w_mon') - monLab); o.w_lab = GR.reduce((a, g) => a + o['w_' + g], 0); o.w_tot = o.w_lab + o.w_geen;
+    o.pefg = o.w_lab >= 20 ? 100 * o.w_efg / o.w_lab : null; o.plab = o.w_tot ? 100 * o.w_lab / o.w_tot : null;
+    o.u_p = n('u_p'); o.u_geen = n('u_geen'); o.u_lab = o.u_p - o.u_geen; o.u_efg = n('u_efg'); o.u_d = n('u_d'); // utiliteit zonder rijksmonumenten en panden onder 50 m2
+    o.u_pefg = o.u_lab >= 10 ? 100 * o.u_efg / o.u_lab : null; o.u_pgeen = o.u_p ? 100 * o.u_geen / o.u_p : null;
+    return o;
+  }
+  async function labVul(el, c, gm) {
+    const [g, ix] = await Promise.all([labHaal(gm + '.json.gz'), labHaal('index.json').catch(() => null)]);
+    if (S.gm !== gm || !el.isConnected) return;
+    const x = labMaten(g.t), nl = ix && ix.nl ? labMaten(ix.nl) : null, naam = byCode.get(gm).n, st = dNl(g.opgehaald || g.peil_bag);
+    if (c.uit.lab === 'w') {
+      if (x.pefg == null) { el.className = 'uitkomst stil'; el.textContent = `Geen cijfer voor ${naam}: te weinig woningen met een label.`; return; }
+      el.innerHTML = `<b>${esc(naam)} · labels van ${st}</b><span><span class="uw">${uFmt(x.pefg, 'pct0')}</span> van de woningen met een label heeft E, F of G (${uFmt(x.w_efg, 'n')} woningen)</span><span>${uFmt(x.plab, 'pct0')} van de woningen heeft een geregistreerd label (${uFmt(x.w_lab, 'n')} van ${uFmt(x.w_tot, 'n')})</span>${nl ? `<span class="un">Nederland ${uFmt(nl.pefg, 'pct0')} E, F of G; ${uFmt(nl.plab, 'pct0')} met een label. Woningen in panden met alleen woningen, zonder rijksmonumenten.</span>` : ''}`;
+    } else {
+      if (!x.u_p) { el.className = 'uitkomst stil'; el.textContent = `Geen utiliteitspanden van 50 m² of meer gevonden in ${naam}.`; return; }
+      el.innerHTML = `<b>${esc(naam)} · labels van ${st}</b><span><span class="uw">${uFmt(x.u_efg, 'n')}</span> utiliteitspanden met E, F of G${x.u_pefg != null ? ` (${uFmt(x.u_pefg, 'pct0')} van de panden met een label)` : ''}; met D erbij ${uFmt(x.u_efg + x.u_d, 'n')}</span><span>${uFmt(x.u_pgeen, 'pct0')} van de ${uFmt(x.u_p, 'n')} utiliteitspanden heeft geen label</span>${nl ? `<span class="un">Nederland ${uFmt(nl.u_pefg, 'pct0')} E, F of G onder de panden met een label; ${uFmt(nl.u_pgeen, 'pct0')} zonder label. Zonder rijksmonumenten en panden kleiner dan 50 m².</span>` : ''}`;
+    }
+  }
   // ---------- uitkomst per centrumregio (thema Opvang en beschermd wonen) ----------
   // CBS Monitor Dakloosheid, tabel 2 (april 2026): [personen, per 1.000 inwoners in de regio], sleutel = GM-code van de centrumgemeente
   const MON = {
@@ -2890,21 +3329,33 @@ main > * { min-width: 0; }
     if (c.uit.regio) { try { await rVul(el, c, gm); } catch (e) { el.remove(); } return; }
     if (c.uit.lok) { lVul(el, c, gm); return; }
     if (c.uit.rdw) { try { await pVul(el, gm); } catch (e) { el.remove(); } return; }
+    if (c.uit.lab) { try { await labVul(el, c, gm); } catch (e) { el.remove(); } return; }
     try {
       const d = await uLaad(c.uit.b, gm);
       if (S.gm !== gm || !el.isConnected) return;
-      const jaren = Object.keys(d.gm).map(Number).filter(j => c.uit.w(d.gm[j]) != null).sort((a, b) => a - b);
+      const jaren = Object.keys(d.gm).map(Number).filter(j => c.uit.w(d.gm[j]) != null && !(c.uit.vol && j >= new Date().getFullYear())).sort((a, b) => a - b); // vol: geen lopend jaar
       if (!jaren.length) { el.className = 'uitkomst stil'; el.textContent = `Geen cijfer voor ${naam}: ${c.uit.leeg || 'te klein aantal of niet aangeleverd'}.`; return; }
       const j = jaren[jaren.length - 1], v = c.uit.w(d.gm[j]), n = d.nl[j] && !c.uit.geenNl ? c.uit.w(d.nl[j]) : null;
       const lab = c.uit.sj ? `${j}/${String(j + 1).slice(2)}` : c.uit.dec ? `december ${j}` : j;
       const nu = Math.max(...Object.keys(d.gm).map(Number));
       if (c.uit.vl && j < nu - 1) { el.className = 'uitkomst stil'; el.textContent = `Geen recent cijfer voor ${naam}: te klein aantal.`; return; } // geen oud jaar als laatste stand
       el.innerHTML = `<b>${esc(naam)} ${lab}${c.uit.vl && j === nu ? ' (voorlopig)' : ''}</b><span class="uw">${uFmt(v, c.uit.f)}</span> <span>${esc(c.uit.l)}</span>${n != null ? `<span class="un">Nederland ${uFmt(n, c.uit.f)}</span>` : ''}`;
+      if (c.uit.x) el.innerHTML += c.uit.x(d.gm[j], d.nl[j] || null);
+      if (c.uit.reeks) { const r = c.uit.reeks.filter(y => y < j && d.gm[y] && c.uit.w(d.gm[y]) != null).map(y => `${y}: ${uFmt(c.uit.w(d.gm[y]), c.uit.f)}`); if (r.length) el.innerHTML += `<span class="un">Eerder: ${r.join(' · ')}</span>`; }
     } catch (e) { el.remove(); } // stille terugval: de kaart blijft zonder cijfer
+  }
+  // instrumenten bij een thema, met de reden van de link; op de thema-plank ook waar mobiliteit en energiearmoede staan
+  function naastHtml(d) {
+    const gmDeel = S.gm ? '&gm=' + S.gm : '';
+    const li = (d.naast || []).map(([h, n, r]) => `<li><a href="${esc(instLink(h))}">${esc(n)}</a>: ${esc(r)}</li>`).join('');
+    const ook = isThema(d.tv) ? `<p class="klein">Ook voor de energietransitie, elders op deze pagina: openbare laadpunten, stekkerauto's per laadpunt en zero-emissiezones bij <a data-nav href="#domein=verkeer${gmDeel}">Wegen en verkeersveiligheid</a>; energiearmoede bij <a data-nav href="#domein=schulden${gmDeel}">Schulden en armoede</a> en in het instrument <a href="${esc(instLink('energiearmoede.html'))}">Energiearmoede per buurt</a>.</p>` : '';
+    if (!li && !ook) return '';
+    return `<div class="naast">${li ? `<p><b>Instrumenten bij dit thema${S.gm ? ', geopend op ' + esc(byCode.get(S.gm).n) : ''}</b></p><ul>${li}</ul>` : ''}${ook}</div>`;
   }
   function kaartHtml(c) {
     const rij = (dt, dd) => dd ? `<dt>${dt}</dt><dd>${dd}</dd>` : '';
-    const inst = c.inst ? `<a class="btn primary klein" href="${esc(instLink(c.inst[0]))}">Bekijk in ${esc(c.inst[1])}${S.gm ? ' · ' + esc(byCode.get(S.gm).n) : ''} →</a>` : '';
+    const insts = c.inst ? (Array.isArray(c.inst[0]) ? c.inst : [c.inst]) : [];
+    const inst = insts.map(([h, n], i) => `<a class="btn${i ? '' : ' primary'} klein" href="${esc(instLink(h))}">Bekijk in ${esc(n)}${S.gm && !i ? ' · ' + esc(byCode.get(S.gm).n) : ''} →</a>`).join('');
     return `<article class="kaart" data-b="${c.b}">
       <div class="kop"><span class="badge ${c.b}">${BRON[c.b]}</span><h3>${esc(c.naam)}</h3></div>
       <p class="def">${esc(c.def)}</p>
@@ -2961,8 +3412,8 @@ main > * { min-width: 0; }
   function render() {
     $('#gmInput').value = S.gm ? byCode.get(S.gm).n : '';
     $('#gmRegel').textContent = S.gm
-      ? `De indicatoren zijn voor elke gemeente gelijk. Bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen staat de uitkomst voor ${byCode.get(S.gm).n} erbij, en links openen op die gemeente.`
-      : 'Kies je hierboven een gemeente, dan openen de links op die gemeente en zie je bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen de uitkomst. De indicatoren zelf zijn voor elke gemeente gelijk.';
+      ? `De indicatoren zijn voor elke gemeente gelijk. Bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Energietransitie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen staat de uitkomst voor ${byCode.get(S.gm).n} erbij, en links openen op die gemeente.`
+      : 'Kies je hierboven een gemeente, dan openen de links op die gemeente en zie je bij Publieke dienstverlening, Veiligheid, Verkeer en parkeren, Economie, Energietransitie, Sport, cultuur en groen, Jeugd, Schulden en armoede, Werk en inkomen, en Opvang en beschermd wonen de uitkomst. De indicatoren zelf zijn voor elke gemeente gelijk.';
     const d = S.d ? D[S.d] : null;
     $('#overzicht').hidden = !!d; $('#detail').hidden = !d; $('#kruimel').hidden = !d;
     renderMeld(d);
@@ -2970,14 +3421,15 @@ main > * { min-width: 0; }
     if (!d) { renderOverzicht(); schrijfHash(); return; }
     const tvNaam = TV.find(t => t[0] === d.tv)[1];
     const themas = themasVan(d.tv);
-    $('#kruimel').innerHTML = `<a data-nav href="#${S.gm ? 'gm=' + S.gm : ''}" id="naarOverzicht">← Alle thema's</a><span class="sep">›</span><span>${esc(d.tv)} ${esc(tvNaam)}</span><span class="sep">›</span><b>${esc(d.kort)}</b>`;
+    $('#kruimel').innerHTML = `<a data-nav href="#${S.gm ? 'gm=' + S.gm : ''}" id="naarOverzicht">← Alle thema's</a><span class="sep">›</span><span>${isThema(d.tv) ? 'Thema ' + esc(tvNaam) : esc(d.tv) + ' ' + esc(tvNaam)}</span><span class="sep">›</span><b>${esc(d.kort)}</b>`;
 
-    $('#dkop').innerHTML = `<span class="eyebrow">Iv3 ${esc(d.tv)} · ${esc(tvNaam)}</span>
+    $('#dkop').innerHTML = `<span class="eyebrow">${esc(tvLabel(d.tv))}</span>
       <h2>${esc(d.naam)}</h2>
       <p class="small muted">Iv3-taakvelden: ${esc(d.taakvelden)}</p>
       <p>${esc(d.scope)}</p>
       <div class="lees"><p><b>Lees dit eerst.</b> ${esc(d.lees)}</p></div>
-      ${themas.length > 1 ? `<div class="themakeuze"><span class="muted">Thema in dit domein:</span><div class="seg" role="group" aria-label="Thema">${themas.map(([k, x]) => `<button type="button" data-thema="${k}" aria-pressed="${k === S.d}">${esc(x.kort)}</button>`).join('')}</div></div>` : ''}`;
+      ${naastHtml(d)}
+      ${themas.length > 1 ? `<div class="themakeuze"><span class="muted">${isThema(d.tv) ? 'Thema op deze plank:' : 'Thema in dit domein:'}</span><div class="seg" role="group" aria-label="Thema">${themas.map(([k, x]) => `<button type="button" data-thema="${k}" aria-pressed="${k === S.d}">${esc(x.kort)}</button>`).join('')}</div></div>` : ''}`;
     const tk = $('#dkop .themakeuze'); if (tk) $('#dkop').insertBefore(tk, $('#dkop h2'));
     document.querySelectorAll('[data-thema]').forEach(btn => btn.addEventListener('click', () => { if (btn.dataset.thema !== S.d) { S.d = btn.dataset.thema; S.b = null; render(); } }));
 
@@ -3049,7 +3501,7 @@ main > * { min-width: 0; }
   }
 
   function renderVoet() {
-    $('#foot').innerHTML = `<p>Bronnen van de indicatoren: CBS (StatLine, CC-BY 4.0), RIVM (Gezondheid per wijk en buurt, CC-BY 4.0), waarstaatjegemeente.nl (VNG), Iv3-informatievoorschrift gemeenten 2025, Wmo 2015, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling, Regioplan (handreiking lokale procesindicatoren, 2022), Wet versterking regie volkshuisvesting (Stb. 2026, 156), Huisvestingswet 2014, Landelijke Monitor Voortgang Woningbouw en Primos-prognose 2026 (ABF Research), Lokale Monitor Wonen, COELO, register toegankelijkheidsverklaringen (digitoegankelijk.nl), Burgerpeiling (VNG), Algemene wet bestuursrecht, Schuldenproblematiek in beeld (CBS), Monitor Energiearmoede (TNO en CBS), Wet gemeentelijke schuldhulpverlening, Aanbestedingswet 2012, Manifest MVOI (PIANOo), Agenda MVOI 2026–2030, Definitiekaart MVOI (KPMG en Significant Synergy, 2026), Handreiking monitoring MVOI (CE Delft en Planet+Partners, 2025), factsheet MVI-zelfevaluatie 2025 (PIANOo), RIVM (nationale monitor MVOI), TenderNed (CC0), Gezondheidsmonitor Volwassenen en Ouderen (GGD'en, RIVM, CBS), Rijksdienst voor het Cultureel Erfgoed (CC-BY 4.0), KB (bibliotheekstatistiek), Wet stelsel openbare bibliotheekvoorzieningen (wetsvoorstel 36 902), PBL (Definitieve nulmeting groen, 2026), Natuurherstelverordening (EU) 2024/1991, Warenwetbesluit attractie- en speeltoestellen, Iv3-informatievoorschrift gemeenten 2026, Rijkswaterstaat (BRON, publiek domein), NDW en Rijkswaterstaat (Wegkenmerkendatabase, publiek domein), NDW (laadpuntlocaties DOT-NL, CC0), NDW (emissiezones, CC0), RDW (Open Data Parkeren, CC0, live), CROW (Afwegingskader 30 km/u), Strategisch Plan Verkeersveiligheid 2030, VeiligheidNL. Gegevensobjecten: <a href="https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel" target="_blank" rel="noopener">Gemeentelijk Gegevensmodel</a> v2.5.1 (EUPL-1.2, Gemeente Delft); alleen entiteit- en attribuutnamen overgenomen. Tabelnummers gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026, die van Publieke dienstverlening op 6 november 2026, die van Sport, cultuur en recreatie en van Verkeer, vervoer en waterstaat op 15 november 2026.</p>
+    $('#foot').innerHTML = `<p>Bronnen van de indicatoren: CBS (StatLine, CC-BY 4.0), RIVM (Gezondheid per wijk en buurt, CC-BY 4.0), waarstaatjegemeente.nl (VNG), Iv3-informatievoorschrift gemeenten 2025, Wmo 2015, Regeling beleidsindicatoren (BBV), Impactmonitor huiselijk geweld en kindermishandeling, Regioplan (handreiking lokale procesindicatoren, 2022), Wet versterking regie volkshuisvesting (Stb. 2026, 156), Huisvestingswet 2014, Landelijke Monitor Voortgang Woningbouw en Primos-prognose 2026 (ABF Research), Lokale Monitor Wonen, COELO, register toegankelijkheidsverklaringen (digitoegankelijk.nl), Burgerpeiling (VNG), Algemene wet bestuursrecht, Schuldenproblematiek in beeld (CBS), Monitor Energiearmoede (TNO en CBS), Wet gemeentelijke schuldhulpverlening, Aanbestedingswet 2012, Manifest MVOI (PIANOo), Agenda MVOI 2026–2030, Definitiekaart MVOI (KPMG en Significant Synergy, 2026), Handreiking monitoring MVOI (CE Delft en Planet+Partners, 2025), factsheet MVI-zelfevaluatie 2025 (PIANOo), RIVM (nationale monitor MVOI), TenderNed (CC0), Gezondheidsmonitor Volwassenen en Ouderen (GGD'en, RIVM, CBS), Rijksdienst voor het Cultureel Erfgoed (CC-BY 4.0), KB (bibliotheekstatistiek), Wet stelsel openbare bibliotheekvoorzieningen (wetsvoorstel 36 902), PBL (Definitieve nulmeting groen, 2026), Natuurherstelverordening (EU) 2024/1991, Warenwetbesluit attractie- en speeltoestellen, Iv3-informatievoorschrift gemeenten 2026, Rijkswaterstaat (BRON, publiek domein), NDW en Rijkswaterstaat (Wegkenmerkendatabase, publiek domein), NDW (laadpuntlocaties DOT-NL, CC0), NDW (emissiezones, CC0), RDW (Open Data Parkeren, CC0, live), CROW (Afwegingskader 30 km/u), Strategisch Plan Verkeersveiligheid 2030, VeiligheidNL, RIVM (energielabels per pand, Public Domain Mark, via de BAG-werkbank), Regionale Klimaatmonitor (Rijkswaterstaat, Public Domain Mark), PBL (Monitor RES, Startanalyse), RVO (ISDE, SDE++), Netbeheer Nederland (capaciteitskaart), Klimaatstichting HIER (Lokale Energie Monitor), Wet gemeentelijke instrumenten warmtetransitie. Gegevensobjecten: <a href="https://github.com/Gemeente-Delft/Gemeentelijk-Gegevensmodel" target="_blank" rel="noopener">Gemeentelijk Gegevensmodel</a> v2.5.1 (EUPL-1.2, Gemeente Delft); alleen entiteit- en attribuutnamen overgenomen. Tabelnummers gecontroleerd op 30 oktober 2026, die van Wonen op 5 november 2026, die van Publieke dienstverlening op 6 november 2026, die van Sport, cultuur en recreatie en van Verkeer, vervoer en waterstaat op 15 november 2026, die van de Energietransitie op 16 november 2026.</p>
       <p>Josephine Linders · ${PRODUCT} · versie ${VERSIE}</p>`;
   }
 
