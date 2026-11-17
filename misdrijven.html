@@ -274,7 +274,7 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
   <section class="intro" id="intro">
     <p>De politie publiceert elk jaar hoeveel misdrijven en hoeveel meldingen van overlast ze per wijk registreert. Deze pagina zet het laatste jaar van elke wijk naast het gemiddelde van de drie jaren ervoor: gaat het omhoog of omlaag in de eigen wijk.</p>
     <p>De kaart kleurt op die verandering, niet op het aantal. Een wijk met een station, een winkelcentrum of een uitgaansgebied heeft veel registraties zonder dat de bewoners onveiliger wonen. Daarom staat er geen ranglijst en geen cijfer per inwoner.</p>
-    <p class="muted small">Open data van de politie, via de dataset voor derden van het CBS (47018NED en 47024NED), live opgevraagd. Kleine aantallen staan als "minder dan 5".</p>
+    <p class="muted small">Open data van de politie, via de dataset voor derden van het CBS (47018NED en 47024NED), live opgevraagd. Minder dan 5 registraties staat als "minder dan 5".</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
 
@@ -356,9 +356,9 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
           <ul class="small">
             <li><b>Laatste jaar</b>: het laatste volledige jaar in de open data van de politie.</li>
             <li><b>Gemiddelde</b>: het gemiddelde van de drie jaren voor het laatste jaar, afgerond. Het staat er alleen als geen van die drie jaren onder de ondergrens valt.</li>
-            <li><b>Verandering</b>: het laatste jaar tegenover dat gemiddelde, in procenten. Pas vanaf een gemiddelde van 20 per jaar; daaronder springt een percentage door toeval.</li>
-            <li><b>Kaartkleuren</b>: vijf vaste klassen: 25% of meer minder, 10 tot 25% minder, ongeveer gelijk (minder dan 10% verschil), 10 tot 25% meer, 25% of meer. Blauw is minder, oranje is meer. Grijs: een gemiddelde onder 20, of een aantal onder de ondergrens.</li>
-            <li><b>Ondergrens</b>: een aantal onder de 5 staat als "minder dan 5", voor elke soort, elk jaar en elk niveau. Valt in een jaar precies één wijk onder de 5, dan staat ook de kleinste andere wijk zo; anders is het verborgen aantal terug te rekenen uit het totaal van de gemeente.</li>
+            <li><b>Verandering</b>: het laatste jaar tegenover dat gemiddelde, in procenten. Alleen bij gemiddeld 20 registraties per jaar of meer; bij minder springt het percentage door toeval.</li>
+            <li><b>Kaartkleuren</b>: vijf vaste klassen: 25% of meer minder, 10 tot 25% minder, ongeveer gelijk (minder dan 10% verschil), 10 tot 25% meer, 25% of meer. Blauw is minder, oranje is meer. Grijs: gemiddeld minder dan 20 registraties per jaar, of minder dan 5 registraties (de ondergrens).</li>
+            <li><b>Ondergrens</b>: minder dan 5 registraties staat als "minder dan 5", voor elke soort, elk jaar en elk niveau. Heeft in een jaar precies één wijk minder dan 5 registraties, dan staat ook de kleinste andere wijk zo; anders is het verborgen aantal terug te rekenen uit het totaal van de gemeente.</li>
             <li><b>Soorten</b>: woninginbraak (1.1.1), diefstal van of uit motorvoertuigen (1.2.1 en 1.2.2), diefstal van fietsen, brommers en snorfietsen (1.2.3), geweld (1.4.2 tot en met 1.4.7: moord en doodslag, openlijk geweld, bedreiging, mishandeling, straatroof, overval; zonder zedenmisdrijven), vernieling en zaakbeschadiging (2.2.1), winkeldiefstal (2.5.2). Overlast: de acht soorten van de politie.</li>
             <li><b>Wijken</b>: de wijken van de politie (indeling van het CBS), met de grenzen van de CBS-wijkkaart 2025.</li>
           </ul>
@@ -368,7 +368,7 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
           <ul class="small">
             <li><b>Registratie is geen criminaliteit.</b> Het aantal volgt ook de aangiftebereidheid, de inzet van de politie en acties. Een daling kan betekenen dat er minder gebeurt, of dat er minder gemeld of geregistreerd wordt.</li>
             <li><b>Bezoekers tellen mee.</b> Misdrijven tellen waar ze gebeuren. Winkeldiefstal zit waar de winkels zijn, fietsdiefstal bij het station. Daarom staat er geen cijfer per inwoner.</li>
-            <li><b>Kleine aantallen schommelen.</b> Bij een gemiddelde onder 20 is er geen verandering berekend. Ook daarboven kan één incident of één actie een jaar laten verspringen.</li>
+            <li><b>Kleine aantallen schommelen.</b> Bij gemiddeld minder dan 20 registraties per jaar is er geen verandering berekend. Ook daarboven kan één incident of één actie een jaar laten verspringen.</li>
             <li><b>Overlast is een melding.</b> Het gaat om meldingen bij de politie, ook als er niets strafbaars gebeurde. Sinds maart 2021 tellen meldingen via 0900-8844 mee; daarom begint de reeks hier in 2022.</li>
             <li><b>Geen ranglijst en geen buurten.</b> Er staat geen lijst van wijken met de meeste of de minste registraties, en geen cijfers per buurt: daar worden de aantallen zo klein dat ze naar personen kunnen wijzen.</li>
           </ul>
@@ -390,7 +390,7 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
     <h2 id="vh">Verantwoording</h2>
     <p><b>Bron en peildatum.</b> Geregistreerde misdrijven: politie, tabel 47018NED (wijken en buurten, per jaar). Geregistreerde overlast: politie, tabel 47024NED (wijken en buurten, per maand en jaar; hier de jaarcijfers). Beide in de catalogus Politie van de dataset voor derden van het CBS, live opgevraagd. Wijkgrenzen: CBS-wijkkaart 2025 via PDOK. De standen staan na de gemeentekeuze onder de cijfers.</p>
     <p><b>Licentie.</b> Open data van de politie: CC BY 4.0. Wijkgrenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
-    <p><b>Methode.</b> Per wijk en per gemeente het laatste jaar tegenover het gemiddelde van de drie jaren ervoor, voor het totaal en voor zes soorten misdrijven en acht soorten overlast. Aantallen onder de 5 worden niet getoond. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Methode.</b> Per wijk en per gemeente het laatste jaar tegenover het gemiddelde van de drie jaren ervoor, voor het totaal en voor zes soorten misdrijven en acht soorten overlast. Minder dan 5 registraties wordt niet als getal getoond. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen maat voor de veiligheid van een wijk of het gevoel van bewoners; geen ranglijst tussen wijken of gemeenten; geen cijfers per buurt, per adres of per persoon; geen cijfer per inwoner.</p>
     <p><b>Bekende beperkingen.</b> Registraties volgen aangiftebereidheid en inzet. Een misdrijf zonder bekende plaats telt alleen voor de gemeente. Bij de overlast zit een breuk in maart 2021. Het gemiddelde van drie jaren per wijk is in een enkel geval terug te rekenen uit de gemeente en de andere wijken; het gaat dan om een som over drie jaren, niet om één jaar.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of van de politie.</p>
@@ -418,7 +418,7 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
     return gj;
   }
 
-  const VERSIE = '1.0';
+  const VERSIE = '1.0.1';
   const PRODUCT = 'Misdrijven en overlast per wijk';
   // Open data van de politie in de dataset voor derden van het CBS (catalogus Politie), live.
   const API = 'https://dataderden.cbs.nl/ODataApi/OData/';
@@ -597,7 +597,7 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
     const basisOk = basis.every(j => raw(j) != null && !verb(j)) && basis.every(j => S.js[id].includes(j));
     const gem = basisOk ? basis.reduce((a, j) => a + raw(j), 0) / BASIS : null;
     const ver = gem != null && gem >= MIN_GEM && v != null && !vh ? 100 * (v - gem) / gem : null;
-    return { v: vh ? null : v, verb: vh, leeg: v == null && !vh, gem, ver, kl: klasse(ver), basis, Y, reden: ver != null ? '' : vh ? 'aantal onder de ondergrens' : gem == null ? (basis.some(verb) ? 'een van de drie jaren onder de ondergrens' : 'geen drie jaren ervoor') : gem < MIN_GEM ? `gemiddeld minder dan ${MIN_GEM} per jaar` : '' };
+    return { v: vh ? null : v, verb: vh, leeg: v == null && !vh, gem, ver, kl: klasse(ver), basis, Y, reden: ver != null ? '' : vh ? `minder dan ${ONDER} registraties` : gem == null ? (basis.some(verb) ? 'een van de drie jaren onder de ondergrens' : 'geen drie jaren ervoor') : gem < MIN_GEM ? `gemiddeld minder dan ${MIN_GEM} registraties per jaar` : '' };
   }
   const tAant = c => c.verb ? MIN5 : c.leeg ? '–' : fmt(c.v);
   const tGem = c => c.gem == null ? '–' : fmt(c.gem);
@@ -889,7 +889,7 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
   function renderVoet() {
     renderHerken();
     const nu = new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    $('#foot').innerHTML = S && S.r ? `Bronnen: politie, geregistreerde misdrijven per wijk en buurt (<a href="https://dataderden.cbs.nl/ODataApi/OData/${T_M}">${T_M}</a>, ${S.js.m[0]}–${S.laatst.m}) en geregistreerde overlast per wijk en buurt (<a href="https://dataderden.cbs.nl/ODataApi/OData/${T_O}">${T_O}</a>, jaarcijfers ${S.js.o[0]}–${S.laatst.o}), via de dataset voor derden van het CBS, opgevraagd ${nu}. Wijkgrenzen ${WIJKJAAR}: CBS via PDOK. Achtergrondkaart: PDOK BRT. Aantallen onder de ${ONDER} staan als "minder dan ${ONDER}".<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
+    $('#foot').innerHTML = S && S.r ? `Bronnen: politie, geregistreerde misdrijven per wijk en buurt (<a href="https://dataderden.cbs.nl/ODataApi/OData/${T_M}">${T_M}</a>, ${S.js.m[0]}–${S.laatst.m}) en geregistreerde overlast per wijk en buurt (<a href="https://dataderden.cbs.nl/ODataApi/OData/${T_O}">${T_O}</a>, jaarcijfers ${S.js.o[0]}–${S.laatst.o}), via de dataset voor derden van het CBS, opgevraagd ${nu}. Wijkgrenzen ${WIJKJAAR}: CBS via PDOK. Achtergrondkaart: PDOK BRT. Minder dan ${ONDER} registraties staat als "minder dan ${ONDER}".<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
       : `Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
