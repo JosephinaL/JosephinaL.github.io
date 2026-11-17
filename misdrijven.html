@@ -242,6 +242,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 .chart .staaf.basis { fill: var(--oud); }
 .chart .staaf.laatst { fill: var(--accent); }
 td.min5, .min5 { color: var(--muted); font-style: italic; }
+.naarsoort { background: none; border: 0; padding: 0; font: inherit; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -418,7 +419,7 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
     return gj;
   }
 
-  const VERSIE = '1.0.1';
+  const VERSIE = '1.0.2';
   const PRODUCT = 'Misdrijven en overlast per wijk';
   // Open data van de politie in de dataset voor derden van het CBS (catalogus Politie), live.
   const API = 'https://dataderden.cbs.nl/ODataApi/OData/';
@@ -793,9 +794,11 @@ td.min5, .min5 { color: var(--muted); font-style: italic; }
     const m = maatInfo(), c = cel(x, m.id, m.s);
     const ref = o ? cel(S.r.gm, m.id, m.s) : null;
     const focus = `<div class="focus"><span class="fl">${esc(m.t)}, ${c.Y}</span><span class="fv">${tAant(c)}</span><span class="fc">gemiddeld ${tGem(c)} in ${c.basis[0]}–${c.basis[c.basis.length - 1]} · verandering ${c.ver != null ? fVer(c.ver) : 'niet berekend'}</span>${ref && ref.ver != null ? `<span class="fc">${esc(S.g.n)}: ${fVer(ref.ver)}</span>` : ''}</div>`;
-    $('#dossier').innerHTML = `<nav class="kruimel" aria-label="Niveau">${kr}</nav><h2>${esc(x.naam)}</h2>${focus}${soortTabel(x, m.id, true)}
+    $('#dossier').innerHTML = `<nav class="kruimel" aria-label="Niveau">${kr}</nav><h2>${esc(x.naam)}</h2>${focus}
+      <p class="small muted" style="margin:0">Alle soorten ${o ? 'van deze wijk' : 'van de gemeente'} staan hierboven onder <button type="button" class="naarsoort" data-naarsoort>Naar soort</button>.</p>
       <p class="small muted" style="margin:0">${o ? 'Cijfers voor de hele wijk; per buurt staan ze hier niet, omdat de aantallen daar zo klein worden dat ze naar personen kunnen wijzen.' : 'Klik een wijk op de kaart of een rij in de tabel.'}</p>`;
     $('#dossier').querySelectorAll('[data-naar]').forEach(k => k.addEventListener('click', () => kiesWijk(null, true)));
+    $('#dossier').querySelectorAll('[data-naarsoort]').forEach(k => k.addEventListener('click', () => { const fb = $('#focusbar'), boven = fb && !fb.hidden && getComputedStyle(fb).position === 'sticky' ? fb.offsetHeight + 12 : 12; scrollTo({ top: $('#soortKop').closest('.sectiekop').getBoundingClientRect().top + scrollY - boven, behavior: 'smooth' }); }));
   }
   function zetLinks() {
     if (!S) return;
