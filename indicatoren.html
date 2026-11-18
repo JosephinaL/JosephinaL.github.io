@@ -252,6 +252,7 @@ main { display: contents; }
 main > * { min-width: 0; }
 #inhoud { position: absolute; }
 #inhoud:focus { outline: none; }
+.ggm-in { display: block; margin-top: 4px; font-size: .92em; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -311,7 +312,7 @@ main > * { min-width: 0; }
         <li><b>Volgorde van de keten.</b> Context (de situatie in de gemeente), inspanning (geld, capaciteit), bereik en prestatie (wie wordt bereikt, hoe snel), uitkomst (wat het oplevert).</li>
         <li><b>Herkomst.</b> Elke indicator zegt waarom hij erin staat: verplicht in het BBV, een wettelijke plicht, een landelijke monitor, een handreiking, of een voorstel van het atelier. Zonder herkomst is "relevant" een mening.</li>
         <li><b>Vergelijkbaar en norm.</b> Open is niet hetzelfde als vergelijkbaar. Elke kaart zegt of je de indicator tussen gemeenten of door de jaren kunt leggen, en waartegen.</li>
-        <li><b>Gegevensobject.</b> Bij interne indicatoren staat waar de gegevens zitten in het Gemeentelijk Gegevensmodel (GGM) v2.5.1, als <code>entiteit.attribuut</code>. Alleen de namen zijn overgenomen.</li>
+        <li><b>Gegevensobject.</b> Bij interne indicatoren staat waar de gegevens zitten in het Gemeentelijk Gegevensmodel (GGM) v2.5.1, als <code>entiteit.attribuut</code>. Alleen de namen zijn overgenomen. Dezelfde kaarten, gerangschikt per entiteit, staan in <a href="gegevensmodel.html">Het gegevensmodel als ingang</a>.</li>
       </ul>
     </div>
     <div class="card">
@@ -354,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.27';
+  const VERSIE = '0.28';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -3371,7 +3372,7 @@ main > * { min-width: 0; }
         ${rij('Norm', esc(c.norm))}
         ${rij('Vergelijkbaar', esc(c.vgl))}
         ${rij('Bron', c.bron())}
-        ${rij('Gegevensobject', c.ggm || '')}
+        ${rij('Gegevensobject', c.ggm ? c.ggm + (/<code>/.test(c.ggm) && !/^Geen /.test(c.ggm) ? '<span class="ggm-in">Alle kaarten per entiteit: <a href="gegevensmodel.html">Het gegevensmodel als ingang</a></span>' : '') : '')}
         ${rij('Herkomst', esc(c.herkomst))}
       </dl>
       ${c.akk ? `<p class="akk">Staat vaak als doel in een coalitieakkoord. Dit cijfer komt uit de eigen administratie; welke doelen open data wel volgt, staat in de <a href="${esc(instLink('akkoordvolger.html'))}">Akkoordvolger per gemeente</a>.</p>` : ''}
