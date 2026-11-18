@@ -352,7 +352,7 @@ table.soorten td:first-child { max-width: 42ch; }
             <li><b>Erbij en eraf</b>: nieuwbouw, overige toevoeging (zoals splitsing of verbouw van een kantoor), sloop en overige onttrekking (zoals samenvoegen) van corporatiewoningen, plus de woningen die van eigenaar wisselden: van corporatie naar koopwoning (verkoop), naar een andere verhuurder, of omgekeerd. Correcties van het CBS staan apart. Netto is de optelling.</li>
             <li><b>Per 1.000</b>: het aantal gedeeld door de corporatievoorraad op 1 januari van dat jaar, keer 1.000, zodat een gemeente naast Nederland te lezen is.</li>
             <li><b>Vergund</b>: huurwoningen met een bouwvergunning (CBS 83671NED), opgeteld per jaar: met een corporatie of de overheid als opdrachtgever, en alle huurwoningen.</li>
-            <li><b>Huurtoeslag</b>: particuliere huishoudens in een huurwoning met huurtoeslag (CBS 86380NED), bij elke verhuurder; naast het aantal DAEB-woningen.</li>
+            <li><b>Huurtoeslag</b>: particuliere huishoudens zonder studenten in een huurwoning met huurtoeslag (CBS 86380NED), bij elke verhuurder; naast het aantal DAEB-woningen. Zonder studenten, omdat studentenwoningen van corporaties meestal geen DAEB zijn en de woonlastentabel studenten ook weglaat. De studentenhuishoudens staan apart: het CBS-cijfer met studenten min dat zonder studenten.</li>
             <li><b>Woonquote</b>: de mediaan van de woonlasten als deel van het besteedbaar inkomen, voor huurders van een corporatie en van een andere verhuurder (CBS 85950NED).</li>
           </ul>
         </div>
@@ -401,7 +401,7 @@ table.soorten td:first-child { max-width: 42ch; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.0';
+  const VERSIE = '1.0.1';
   const PRODUCT = 'Sociale huur per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const LNK = t => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${t}/table" target="_blank" rel="noopener">${t}</a>`;
@@ -500,9 +500,11 @@ table.soorten td:first-child { max-width: 42ch; }
     return { j, alle, laatste };
   }
   async function laadHuurtoeslag(c) {
-    const [rows, vl] = await Promise.all([odata('86380NED', `TypedDataSet?$filter=${regio(c)} and Populatie eq '1050010' and (KenmerkenVanHuishoudens eq '1014900' or KenmerkenVanHuishoudens eq '1014850') and Perioden ge '2023JJ00'&$select=RegioS,KenmerkenVanHuishoudens,Perioden,ParticuliereHuishoudens_1`), voorlopig('86380NED')]);
+    // 3000870 = particuliere huishoudens zonder studenten, 1050010 = met studenten; het verschil zijn de studentenhuishoudens
+    const [rows, vl] = await Promise.all([odata('86380NED', `TypedDataSet?$filter=${regio(c)} and (Populatie eq '3000870' or Populatie eq '1050010') and (KenmerkenVanHuishoudens eq '1014900' or KenmerkenVanHuishoudens eq '1014850') and Perioden ge '2023JJ00'&$select=RegioS,Populatie,KenmerkenVanHuishoudens,Perioden,ParticuliereHuishoudens_1`), voorlopig('86380NED')]);
     const uit = { gm: {}, nl: {}, vl };
-    rows.forEach(r => { const w = isNL(r) ? uit.nl : uit.gm, p = tr(r.Perioden); (w[p] ??= {})[tr(r.KenmerkenVanHuishoudens) === '1014900' ? 'ht' : 'huur'] = num(r.ParticuliereHuishoudens_1); });
+    rows.forEach(r => { const w = isNL(r) ? uit.nl : uit.gm, p = tr(r.Perioden), m = tr(r.Populatie) === '3000870' ? '' : 'Met';
+      (w[p] ??= {})[(tr(r.KenmerkenVanHuishoudens) === '1014900' ? 'ht' : 'huur') + m] = num(r.ParticuliereHuishoudens_1); });
     const per = Object.keys(uit.gm).filter(p => uit.gm[p].ht != null).sort().pop();
     return { per, gm: per && uit.gm[per], nl: per && uit.nl[per], vl: per && vl.has(per) };
   }
@@ -631,6 +633,16 @@ table.soorten td:first-child { max-width: 42ch; }
       <p class="small muted">Een corporatie die woningen kant-en-klaar koopt van een ontwikkelaar, staat niet als opdrachtgever in de vergunning; die woningen zitten alleen in "alle huur". Vergund in het ene jaar wordt meestal pas jaren later opgeleverd. Bron: CBS ${LNK('83671NED')} (vergund) en het CBS-maatwerk voor BZK (nieuwbouw).</p>`;
   }
 
+  // Studentenhuishoudens: met studenten min zonder studenten. Het CBS rondt af op honderdtallen; onder 500 studentenhuishoudens in een huurwoning geen apart cijfer.
+  function studentRegel(H) {
+    const s = x => x && x.htMet != null && x.ht != null && x.huurMet != null && x.huur != null ? { ht: x.htMet - x.ht, huur: x.huurMet - x.huur } : null;
+    const g = s(H.gm), n = s(H.nl);
+    const lnk = `<a href="studenten.html#gm=${S.g.c}">Hoger onderwijs: studenten per gemeente</a>`;
+    if (!g) return '';
+    if (g.huur < 0.5) return `<p class="small">Studenten: minder dan 500 studentenhuishoudens in een huurwoning; geen apart cijfer. Zie ook ${lnk}.</p>`;
+    return `<p class="small"><b>Daarnaast ${nf.format(Math.round(g.ht * 1000))} studentenhuishoudens met huurtoeslag</b>, ${pct1(g.ht, g.huur)} van de ${nf.format(Math.round(g.huur * 1000))} studentenhuishoudens in een huurwoning${n ? ` (Nederland ${pct1(n.ht, n.huur)})` : ''}. Studentenwoningen, ook die van corporaties, zijn meestal geen DAEB; daarom staan ze apart van het cijfer hierboven. Het verschil tussen twee CBS-cijfers in honderdtallen; grof. Zie ook ${lnk}.</p>`;
+  }
+
   function renderVoorWie() {
     const H = S.H, W = S.W, d = D.get(S.g.c);
     let h = '';
@@ -638,9 +650,10 @@ table.soorten td:first-child { max-width: 42ch; }
     else if (!H.gm) h += '<p class="small muted">Geen cijfer over huurtoeslag voor deze gemeente.</p>';
     else {
       const ht = H.gm.ht * 1000, htN = H.nl.ht * 1000;
-      h += `<div class="focus"><span class="fl">Huishoudens met huurtoeslag, ${H.per.slice(0, 4)}${H.vl ? ' (voorlopig)' : ''}</span><span class="fv">${nf.format(ht)}</span>
+      h += `<div class="focus"><span class="fl">Huishoudens met huurtoeslag, zonder studenten, ${H.per.slice(0, 4)}${H.vl ? ' (voorlopig)' : ''}</span><span class="fv">${nf.format(ht)}</span>
         <span class="fc">${pct1(H.gm.ht, H.gm.huur)} van de huishoudens in een huurwoning (Nederland ${pct1(H.nl.ht, H.nl.huur)})${d && d.d ? ` · ${nf.format(Math.round(100 * ht / d.d))} per 100 DAEB-woningen (Nederland ${nf.format(Math.round(100 * htN / NLD.d))})` : ''}</span></div>
-        <p class="small muted">Huurtoeslag krijgen ook huurders van andere verhuurders; het CBS geeft dit cijfer in duizenden met één decimaal. Bron: CBS ${LNK('86380NED')}.</p>`;
+        ${studentRegel(H)}
+        <p class="small muted">Zonder studenten, zoals in de woonlasten hieronder: studentenwoningen van corporaties zijn meestal geen DAEB. Huurtoeslag krijgen ook huurders van andere verhuurders; het CBS geeft dit cijfer in duizenden met één decimaal. Bron: CBS ${LNK('86380NED')}.</p>`;
     }
     if (!W) h += `<p>${W === false ? mis : laadt}</p>`;
     else if (!W.gm) h += '<p class="small muted">Geen cijfer over woonlasten voor deze gemeente.</p>';
