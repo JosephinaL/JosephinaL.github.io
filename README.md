@@ -6,6 +6,12 @@ Van open data naar een bruikbaar instrument, voor elke gemeente. Door Josephine 
 
 Instrumenten voor gemeentelijke vraagstukken, gebouwd op openbare registraties. Geen rapporten en geen dashboards: met een instrument kies je zelf waar je kijkt. Elk instrument werkt voor alle 342 Nederlandse gemeenten: kies een gemeente en de pagina rekent ter plekke. Geen installatie, geen account.
 
+De homepage heeft drie ingangen: Instrumenten (zoek voor je gemeente naar antwoorden op vraagstukken), Indicatoren belicht (ontdek wat je per beleidsdomein kunt meten) en Registraties belicht (toets de registratie onder de cijfers).
+
+### Zoeken op de site
+
+Elke pagina heeft in de kop een knop Zoeken (ook met de toets `/`). Het zoeken gebeurt in de browser, in een vaste lijst in `zoeken/zoeken.js`: de instrumenten, de tegels van Registraties belicht, de overzichtspagina's en de thema's en kaarten van Indicatoren belicht, met naam, trefwoorden en de tekst van tegels en Meer weten. Resultaten staan per onderdeel; een kaart van Indicatoren belicht opent haar thema. Geen zoekdienst van buiten: wat je typt, wordt niet verstuurd en niet geteld. De gekozen gemeente gaat mee naar de pagina die je opent.
+
 ## Instrumenten
 
 Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waar de gemeente het boekt. Uitzonderingen: een thema-plank voor een dwarsdoorsnede die de Iv3 niet als taakveld kent (Energietransitie), en de Werkbank.
