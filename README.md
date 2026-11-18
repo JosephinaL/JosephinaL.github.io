@@ -35,7 +35,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | Misdrijven en overlast per wijk | [misdrijven.html](https://josephinelinders.nl/misdrijven.html) | Wat registreert de politie per wijk aan misdrijven en overlast, en gaat het omhoog of omlaag tegenover de drie jaren ervoor? Geen ranglijst, geen buurten, geen cijfer per inwoner. | Politie (misdrijven per wijk 47018NED, overlast per wijk 47024NED, via de dataset voor derden van het CBS), PDOK |
 | **3 · Economie** | | | |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
-| Gebied in beeld | [gebied.html](https://josephinelinders.nl/gebied.html) | Wat staat er op een bedrijventerrein, of op een paar terreinen samen, en wat verandert er? | BAG, IBIS, RIVM |
+| Gebied in beeld | [gebied.html](https://josephinelinders.nl/gebied.html) | Wat staat er op een bedrijventerrein of in een innovatiedistrict, en wat verandert er? | BAG, IBIS, CBS-buurten, RIVM |
 | **4 · Onderwijs** | | | |
 | Basisonderwijs per buurt | [onderwijs.html](https://josephinelinders.nl/onderwijs.html) | Waar krimpen en groeien basisscholen tot 2035? | DUO, BAG/PDOK, CBS |
 | Hoger onderwijs: studenten per gemeente | [studenten.html](https://josephinelinders.nl/studenten.html) | Waar wonen de studenten van een stad, en waar studeren de jongeren uit een gemeente? | DUO (studenten per woon- en studeergemeente), CBS, PDOK |

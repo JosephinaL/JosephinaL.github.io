@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
 <link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
 <meta name="author" content="Josephine Linders">
-<meta name="description" content="Gebied in beeld. Wat er staat en wat er verandert op een bedrijventerrein, of op een paar terreinen samen, in elke Nederlandse gemeente: woningen, bedrijfsruimte en kantoren in vierkante meters, bouwjaar, bouwen en slopen en energielabels, uit open data.">
+<meta name="description" content="Gebied in beeld. Wat er staat en wat er verandert op een bedrijventerrein of in een innovatiedistrict, in elke Nederlandse gemeente: woningen, bedrijfsruimte en kantoren in vierkante meters, bouwjaar, bouwen en slopen en energielabels, uit open data.">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
 <script src="vendor/leaflet-1.9.4/leaflet.js"></script>
@@ -250,6 +250,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   --l-a: #a6dde3; --l-b: #62b0ba; --l-c: #3f8790; --l-d: #b9793f; --l-efg: #e2734f; --l-geen: #4f5f62; } }
 :root[data-theme="dark"] { --f-woon: #3987e5; --f-ind: #e2734f; --f-kant: #c98500; --f-ond: #199e70; --f-wink: #a584d6; --f-ov: #4f5f62; --f-mix: #3f8790;
   --l-a: #a6dde3; --l-b: #62b0ba; --l-c: #3f8790; --l-d: #b9793f; --l-efg: #e2734f; --l-geen: #4f5f62; }
+#distLijst { display: grid; gap: 8px; }
+#distLijst .dist { display: grid; gap: 3px; justify-items: start; }
+#distLijst .dist.aan { padding: 6px 8px; background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 4px; }
 </style>
 <script data-goatcounter="https://josephinel.goatcounter.com/count"
         async src="https://gc.zgo.at/count.js"></script>
@@ -263,7 +266,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
       <span class="eyebrow">Economie · open data</span>
       <h1 id="title">Gebied in beeld</h1>
-      <p class="ondertitel">Wat er staat en wat er verandert op een bedrijventerrein, of op een paar terreinen samen</p>
+      <p class="ondertitel">Wat er staat en wat er verandert op een bedrijventerrein of in een innovatiedistrict</p>
       <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
     </div>
     <form class="picker" id="pickForm">
@@ -280,9 +283,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
-    <p>Een gebiedsontwikkeling, een bedrijventerrein of een campus houdt zich niet aan buurtgrenzen. Kies een gemeente en stel een gebied samen uit de bedrijventerreinen van het landelijke register: één terrein, of een paar terreinen die bij elkaar horen.</p>
+    <p>Een gebiedsontwikkeling, een bedrijventerrein of een campus houdt zich niet aan buurtgrenzen. Kies een gemeente en klik een bedrijventerrein aan uit het landelijke register, of een paar terreinen die bij elkaar horen. Of open een van de innovatiedistricten: gebieden waar een stad wonen, werken, leren en onderzoek bij elkaar brengt.</p>
     <p>Je ziet wat er in dat gebied staat (woningen, kantoren, bedrijfsruimte, in aantallen en vierkante meters), hoe oud het is, wat er gebouwd en gesloopt wordt en welke energielabels de gebouwen hebben. Steeds met de hele gemeente ernaast. Het gebied zit in de link: wie de link opent, ziet hetzelfde gebied.</p>
     <p class="muted small">Adressen en gebouwen uit de BAG (maandstand), bedrijventerreinen uit IBIS van de provincies, energielabels uit de open laag van het RIVM. Banen en bedrijven per gebied staan niet in open data en dus niet op deze pagina.</p>
+    <p class="snel"><span class="muted">Innovatiedistricten</span><span id="distIntro" style="display:contents"></span></p>
+    <p class="muted small">De lijst van innovatiedistricten is die van Buck Consultants International (2025, vijftien gebieden). Een officiële grens hebben ze niet: elk district is hier benaderd met bedrijventerreinen en buurten, en de pagina zegt uit welke. Voor twee van de vijftien (Breda, Dordrecht) is nog geen afbakening te maken.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
 
@@ -297,7 +302,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       <!-- gebied kiezen -->
       <div class="sectiekop">
         <div><span class="eyebrow">Stap 1</span><h2 id="kiesKop">Stel het gebied samen</h2></div>
-        <p class="small muted">Klik een bedrijventerrein aan op de kaart of in de lijst. Meerdere terreinen tellen samen als één gebied; wat in twee terreinen ligt, telt één keer.</p>
+        <p class="small muted">Kies een innovatiedistrict, of klik bedrijventerreinen aan op de kaart of in de lijst. Meerdere delen tellen samen als één gebied; wat in twee delen ligt, telt één keer.</p>
       </div>
       <div class="split">
         <div class="mapwrap">
@@ -305,6 +310,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <div class="maplegend" id="mapLegend"></div>
         </div>
         <aside class="dossier" id="kiezer">
+          <div id="distBlok" hidden><h3>Innovatiedistrict</h3><div id="distLijst"></div></div>
           <div class="field">
             <label for="naamInput">Naam van het gebied (komt in de link en boven de cijfers)</label>
             <input id="naamInput" type="text" maxlength="60" autocomplete="off" placeholder="Bijvoorbeeld: Stationsgebied">
@@ -327,7 +333,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <summary>Herken je het gebied niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
         <ol>
           <li><b>Een ander begrip.</b> De pagina telt verblijfsobjecten uit de BAG: een woning, een winkel, een kantoor of een bedrijfshal met een eigen adres. Een woning is een verblijfsobject met een woonfunctie. De oppervlakte is de gebruiksoppervlakte uit de BAG, niet het perceel en niet het bruto vloeroppervlak uit een bouwplan. Een gebouw zonder adres (een schuur, een fietsenstalling, een trafo) telt niet mee.</li>
-          <li><b>Een andere grens of peildatum.</b> Een object telt mee als het punt van het adres binnen het gebied ligt; een gebouw op de rand kan er net buiten vallen. De grens is die van het register van bedrijventerreinen, met het peiljaar erbij; een gebiedsvisie of bestemmingsplan trekt de grens vaak anders. De BAG-stand staat onder de cijfers.</li>
+          <li><b>Een andere grens of peildatum.</b> Een object telt mee als het punt van het adres binnen het gebied ligt; een gebouw op de rand kan er net buiten vallen. De grens is die van het register van bedrijventerreinen, met het peiljaar erbij, of die van een buurt van het CBS. Een innovatiedistrict heeft geen officiële grens: de afbakening hier is een benadering, en een gebiedsvisie of bestemmingsplan trekt de grens vaak anders. De BAG-stand staat onder de cijfers.</li>
           <li><b>Registratie bij de bron.</b> Het gebruiksdoel en de oppervlakte zijn wat de gemeente in de BAG heeft vastgelegd. Een kantoor dat als industriefunctie staat, telt hier als bedrijfsruimte. Een oppervlakte van 1 of 999.999 m² is een opvulwaarde en telt niet mee in de vierkante meters. Een label ontbreekt vaak: het is alleen verplicht bij verkoop, verhuur en oplevering.</li>
           <li><b>Een fout in deze bewerking.</b> Een adres of pand kun je nakijken in de <a href="https://bagviewer.kadaster.nl/" target="_blank" rel="noopener">BAG-viewer</a>, alle adressen van de gemeente in de <a href="bagwerkbank.html" class="naarWerkbank">BAG-werkbank</a>. Wijkt de pagina daarvan af zonder dat grens of peildatum het verklaart, dan zit de fout hier. Meld het hieronder.</li>
         </ol>
@@ -390,14 +396,15 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="card">
           <h2>Zo is gerekend</h2>
           <ul class="small">
-            <li><b>In het gebied</b>: een adresseerbaar object telt mee als zijn punt uit de BAG binnen een van de gekozen terreinen ligt. Bij een verblijfsobject is dat het punt van het object, bij een ligplaats of standplaats een punt binnen het vlak. Een object in twee overlappende terreinen telt één keer.</li>
+            <li><b>In het gebied</b>: een adresseerbaar object telt mee als zijn punt uit de BAG binnen een van de gekozen delen ligt (een bedrijventerrein of een buurt). Bij een verblijfsobject is dat het punt van het object, bij een ligplaats of standplaats een punt binnen het vlak. Een object in twee overlappende delen telt één keer.</li>
             <li><b>Wat er staat</b>: verblijfsobjecten met de status in gebruik, in gebruik (niet ingemeten), verbouwing of buiten gebruik. Een object dat alleen "gevormd" is, bestaat nog niet en staat bij Bouwen en slopen.</li>
             <li><b>Gebruik</b>: een verblijfsobject met een woonfunctie telt als woning, ook als het daarnaast een andere functie heeft. De andere objecten staan bij hun functie; met meer dan één functie bij "meer functies samen".</li>
             <li><b>Vierkante meters</b>: de gebruiksoppervlakte uit de BAG, opgeteld. Opvulwaarden (1 m² en 999.999 m²) tellen niet mee; de pagina noemt het aantal.</li>
             <li><b>Bouwjaar</b>: het bouwjaar van het pand waarin het object ligt, gewogen naar vierkante meters. Een bouwjaar vóór 1200 is een opvulwaarde en staat bij onbekend.</li>
             <li><b>Bouwen en slopen</b>: dezelfde regels als <a href="bouwstroom.html" class="naarBouw">Bouwstroom</a>. Vergund, in aanbouw en sloop naar de status van het pand; opgeleverd is een pand in gebruik met een bouwjaar van dit of vorig jaar, of een pand "in gebruik (niet ingemeten)". Een nieuw adres in een bestaand pand (splitsing, ombouw van kantoor of bedrijf naar wonen) staat apart. Een pand telt mee als zijn middelpunt in het gebied ligt.</li>
             <li><b>Utiliteitspand en label</b>: dezelfde regels als de <a href="energielabelkalender.html" class="naarKal">Energielabelkalender</a>: een pand zonder woningen met minstens één van de acht utiliteitsfuncties, 50 m² of groter. Het label is het label dat in het pand het meest voorkomt. A tot en met A+++++ telt als A.</li>
-            <li><b>Oppervlakte van het gebied</b>: uit de grenzen berekend, de terreinen opgeteld. Overlappen twee terreinen, dan telt de overlap dubbel in de hectares, niet in de objecten.</li>
+            <li><b>Oppervlakte van het gebied</b>: uit de grenzen berekend, de delen opgeteld. Overlappen twee delen (een terrein en de buurt waarin het ligt), dan telt de overlap dubbel in de hectares, niet in de objecten.</li>
+            <li><b>Innovatiedistrict</b>: de lijst van vijftien is die van Buck Consultants International (inventarisatie 2025). Elk district is samengesteld uit bedrijventerreinen uit het register en hele buurten van het CBS; naast de kaart staat uit welke. Je kunt een deel weghalen en de link opnieuw kopiëren.</li>
             <li><b>Naast de gemeente</b>: dezelfde telling voor alle objecten van de gemeente (gemeente is de bronhouder in de BAG).</li>
           </ul>
         </div>
@@ -410,7 +417,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
             <li><b>Leegstand is niet te zien.</b> "In gebruik" is een status in de registratie, geen vaststelling dat er iemand zit.</li>
             <li><b>Onderwijs en onderzoek</b>: een universiteit of hogeschool staat in de BAG meestal met een onderwijsfunctie, soms als kantoor of bijeenkomstfunctie. Een campus bestaat uit weinig, zeer grote objecten; één verkeerd geregistreerd gebouw verschuift de verdeling.</li>
             <li><b>Kassen en schuren</b> zonder adres tellen niet mee; in een glastuinbouwgebied mist daardoor het grootste deel van de bebouwing.</li>
-            <li><b>Bedrijventerreinen</b>: IBIS bevat terreinen vanaf één hectare, zoals gemeenten ze aan de provincie hebben opgegeven. Kantoorlocaties, winkelgebieden en campussen staan er meestal niet in en zijn op deze pagina dan niet te kiezen. Een deel van de terreinen in het register heeft geen gemeente en ontbreekt in de lijst.</li>
+            <li><b>Bedrijventerreinen</b>: IBIS bevat terreinen vanaf één hectare, zoals gemeenten ze aan de provincie hebben opgegeven. Kantoorlocaties, winkelgebieden en campussen staan er meestal niet in en zijn op deze pagina alleen te kiezen als deel van een innovatiedistrict. Een deel van de terreinen in het register heeft geen gemeente en ontbreekt in de lijst.</li>
+            <li><b>De afbakening van een innovatiedistrict is een benadering.</b> Een district heeft geen officiële grens en houdt zich niet aan buurten. Een hele buurt meenemen betekent ook de woningen erin meenemen; bij een stedelijk district of een straat-as (Den Haag, de Knowledge Mile) beschrijven de cijfers daardoor vooral de buurten eromheen. De pagina zegt per district hoe grof de benadering is. De indeling in fasen en de keuze welke gebieden een innovatiedistrict zijn, is van het bureau, niet van deze pagina.</li>
             <li><b>Een klein terrein</b> is een paar adressen. De pagina toont geen namen en geen eigenaren; het CSV-bestand bevat BAG-ID's, geen adressen.</li>
           </ul>
         </div>
@@ -433,11 +441,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> Adressen en gebouwen: Basisregistratie Adressen en Gebouwen (Kadaster, via PDOK), maandstand zoals in de BAG-werkbank en Bouwstroom; de stand staat na de gemeentekeuze onder de cijfers. Bedrijventerreinen: IBIS, het Integraal Bedrijventerreinen Informatie Systeem van de provincies (Interprovinciaal Overleg), opgevraagd bij de kaartdienst van de WarmteAtlas van RVO op het moment dat je de gemeente kiest; het peiljaar staat per terrein in de tabel. Energielabels: RIVM, laag <i>rvo_energielabels</i> (afgeleid uit EP-Online van RVO), opgevraagd op het moment dat het gebied verandert.</p>
-    <p><b>Licentie.</b> BAG: zonder gebruiksbeperkingen. IBIS bedrijventerreinen: CC0. Energielabels RIVM: Public Domain Mark 1.0. Achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+    <p><b>Bron en peildatum.</b> Adressen en gebouwen: Basisregistratie Adressen en Gebouwen (Kadaster, via PDOK), maandstand zoals in de BAG-werkbank en Bouwstroom; de stand staat na de gemeentekeuze onder de cijfers. Bedrijventerreinen: IBIS, het Integraal Bedrijventerreinen Informatie Systeem van de provincies (Interprovinciaal Overleg), opgevraagd bij de kaartdienst van de WarmteAtlas van RVO op het moment dat je de gemeente kiest; het peiljaar staat per terrein in de tabel. Buurtgrenzen: Wijk- en buurtkaart van het CBS, via PDOK. Lijst van innovatiedistricten: Buck Consultants International, "Innovatiedistricten: dit zijn de ontwikkelingen in Nederland" (2025); alleen de namen, plaatsen en fasen zijn overgenomen. Energielabels: RIVM, laag <i>rvo_energielabels</i> (afgeleid uit EP-Online van RVO), opgevraagd op het moment dat het gebied verandert.</p>
+    <p><b>Licentie.</b> BAG: zonder gebruiksbeperkingen. IBIS bedrijventerreinen: CC0. Wijk- en buurtkaart CBS: CC BY 4.0. De lijst van innovatiedistricten: geen licentie vermeld; overgenomen als feitelijke opsomming met bronvermelding. Energielabels RIVM: Public Domain Mark 1.0. Achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
     <p><b>Methode.</b> Alles wat een punt in de BAG heeft en binnen het gekozen gebied ligt, telt mee, ingedeeld naar gebruik, oppervlakte, bouwjaar en status; dezelfde telling voor de hele gemeente staat ernaast. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
-    <p><b>Wat dit niet is.</b> Geen monitor van een gebiedsontwikkeling of programma, geen toets aan een plan, geen telling van banen of bedrijven, geen vaststelling van leegstand en geen vergelijking of ranglijst van gebieden of gemeenten. De grens van een terrein is de opgave in het register, geen juridische begrenzing; welke terreinen samen één gebied vormen, is de keuze van wie de link maakte.</p>
-    <p><b>Bekende beperkingen.</b> Gebouwen zonder adres tellen niet mee. Gebruiksdoel en oppervlakte zijn zo goed als de registratie. Objecten op de rand van het gebied kunnen er net binnen of buiten vallen. De bedrijventerreinen komen van een kaartdienst die niet van de bronhouder zelf is; valt die weg, dan is er geen gebied te kiezen en meldt de pagina dat. Labels ontbreken bij veel utiliteitspanden.</p>
+    <p><b>Wat dit niet is.</b> Geen monitor van een gebiedsontwikkeling of programma, geen toets aan een plan, geen telling van banen of bedrijven, geen vaststelling van leegstand en geen vergelijking of ranglijst van gebieden of gemeenten. De grens van een terrein is de opgave in het register, geen juridische begrenzing. De afbakening van een innovatiedistrict is een eigen benadering van de maker van deze pagina, niet die van de gemeente, het samenwerkingsverband of het bureau dat de lijst maakte.</p>
+    <p><b>Bekende beperkingen.</b> Gebouwen zonder adres tellen niet mee. Gebruiksdoel en oppervlakte zijn zo goed als de registratie. Objecten op de rand van het gebied kunnen er net binnen of buiten vallen. De bedrijventerreinen komen van een kaartdienst die niet van de bronhouder zelf is; valt die weg, dan zijn er geen terreinen te kiezen en meldt de pagina dat. Labels ontbreken bij veel utiliteitspanden.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente, een provincie of een samenwerkingsverband.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de keuze van een gebied staat onder de kerncijfers het blok "Herken je het gebied niet?", met een melding per e-mail waarin gemeente, gebied en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>. Eigenaar van een gebouw op deze pagina? Zie <a href="colofon.html#gebouwen">Gegevens over gebouwen: een fout melden of bezwaar maken</a>.</p>
@@ -450,7 +458,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.2';
   const PRODUCT = 'Gebied in beeld';
   // BAG-maandstand per gemeente uit de data van de BAG-werkbank (gm/) en Bouwstroom (bouw/).
   const WB = '/bag-werkbank/gm/';
@@ -459,6 +467,29 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   const IBIS = 'https://www.warmteatlas.nl/geoserver/WarmteAtlas/wfs';
   const IBIS_VELDEN = 'RIN_NUMMER,JAAR,PLAN_NAAM,KERN_NAAM,HA_BRUTO,HA_NETTO,HA_UITGEG,HA_UITGEM,HA_UITPAR,START_JAAR,VEROUDERD,the_geom';
   const RIVM = 'https://data.rivm.nl/geo/nl/wfs';
+  // CBS-buurten (PDOK), voor de delen van een innovatiedistrict die geen bedrijventerrein zijn
+  const BUURT = j => `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/buurten/items?f=json&limit=100&crs=http%3A%2F%2Fwww.opengis.net%2Fdef%2Fcrs%2FEPSG%2F0%2F28992&filter=`;
+  // Innovatiedistricten: de lijst is van Buck Consultants International (inventarisatie 2025, 15 gebieden).
+  // De afbakening is een eigen benadering uit bedrijventerreinen (t, RIN-nummer in IBIS) en CBS-buurten (b), nagelopen 18 nov 2026.
+  // fase: r = in realisatie, o = in ontwikkeling, c = campus in transformatie (indeling BCI). Zonder t en b: nog geen afbakening.
+  const DISTRICTEN = [
+    { naam: 'Strijp S en T', gm: '0772', fase: 'r', t: ['190105'], b: ['BU07726160'], noot: 'Bedrijventerrein Strijp T en de buurt Strijp S.' },
+    { naam: 'Central Innovation District', gm: '0518', fase: 'r', t: [], b: ['BU05182813', 'BU05182664', 'BU05182763', 'BU05182762', 'BU05182718', 'BU05183822', 'BU05183819'], noot: 'Grof: de buurten rond Den Haag Centraal en Hollands Spoor. De kant van Laan van NOI en het deel in Leidschendam-Voorburg ontbreken.' },
+    { naam: 'Food Innovation District', gm: '0228', fase: 'r', t: ['25201106'], b: [], noot: 'Het voormalige kazerneterrein bij station Ede-Wageningen (World Food Center), zoals het in het register van bedrijventerreinen staat.' },
+    { naam: 'Amsterdam Life Sciences District', gm: '0363', fase: 'r', t: [], b: ['BU0363TA06'], noot: 'De buurt AMC in Zuidoost.' },
+    { naam: 'Knowledge Mile', gm: '0363', fase: 'r', t: [], b: ['BU0363AF07', 'BU0363AJ01', 'BU0363AJ03', 'BU0363MB01', 'BU0363MB02', 'BU0363MB03', 'BU0363MM04'], noot: 'Grof: de Knowledge Mile is een straat-as (Valkenburgerstraat, Weesperstraat, Wibautstraat). Hier de buurten erlangs, met al hun woningen.' },
+    { naam: 'Innovation District Tilburg', gm: '0855', fase: 'r', t: [], b: ['BU08552801', 'BU08552802'], noot: 'De twee buurten van de Spoorzone ten noorden van het station.' },
+    { naam: 'Innovatiedistrict Zwolle', gm: '0193', fase: 'o', t: [], b: ['BU01931360'], noot: 'De buurt Hanzeland in de Spoorzone, ten zuiden van het station.' },
+    { naam: 'Innovatie Kwartier Den Bosch', gm: '0796', fase: 'o', t: ['4335'], b: [], noot: 'Het bedrijventerrein Boschveld (Grasso-terrein) in de noordelijke Spoorzone.' },
+    { naam: 'Innovatie District Breda', gm: '0758', fase: 'o', t: [], b: [], noot: '' },
+    { naam: 'Innovatiedistrict Dordrecht', gm: '0505', fase: 'o', t: [], b: [], noot: '' },
+    { naam: 'Kenniskwartier Zuidas', gm: '0363', fase: 'o', t: [], b: ['BU0363KP03'], noot: 'De buurt VU-kwartier.' },
+    { naam: 'Winkelsteeg en Noviotech Campus', gm: '0268', fase: 'c', t: ['1071', '25201631'], b: [], noot: 'De twee bedrijventerreinen Winkelsteeg uit het register.' },
+    { naam: 'Kennispark Twente', gm: '0153', fase: 'c', t: ['23202203'], b: ['BU01530703', 'BU01530406'], noot: 'Het bedrijventerrein Kennispark en de buurten Kennispark en Drienerveld-U.T. (de campus van de universiteit).' },
+    { naam: 'Leiden Bio Science Park', gm: '0546', fase: 'c', t: ['170439'], b: ['BU05460704'], noot: 'Het terrein Bio Science Park / Leeuwenhoek en de buurt Leeuwenhoek. Het deel in Oegstgeest ontbreekt.' },
+    { naam: 'Innovatiedistrict Delft', gm: '0503', fase: 'c', t: ['170019', '170020', '171021', '170025', '170951', '170950', '170949'], b: ['BU05032801', 'BU05032805'], noot: 'Schieoevers Noord en Zuid, TU Campus Zuid, Delftechpark, Rotterdamseweg Noord en Zuid, Vulcanusweg en de buurten TU-Noord en TU-Campus. Het stationsgebied Delft Campus valt deels binnen deze terreinen.' }
+  ];
+  const FASE = { r: 'in realisatie', o: 'in ontwikkeling', c: 'campus in transformatie' };
 
   const $ = s => document.querySelector(s);
   const nf = new Intl.NumberFormat('nl-NL');
@@ -646,6 +677,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- staat ----------
   let S = null;            // { g, wb, bouw, ibis: [..], gmTel }
   let gekozen = new Set(); // RIN-nummers
+  let gekozenBu = new Set(); // buurtcodes
   let naam = '';
   let R = null;            // uitkomst voor het gebied
   let map = null, lagen = null;
@@ -666,13 +698,39 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function delen() {
     const out = [];
     if (S && S.ibis) S.ibis.forEach(t => { if (gekozen.has(t.rin)) out.push({ soort: 'ibis', id: t.rin, naam: t.naam, polys: t.polys, bb: t.bb, ha: t.haGeo, t }); });
+    gekozenBu.forEach(c => { const b = S && S.bu && S.bu.get(c); if (b) out.push({ soort: 'buurt', id: c, naam: 'Buurt ' + b.naam, polys: b.polys, bb: b.bb, ha: b.ha }); });
     return out;
+  }
+  async function laadBuurten() {
+    if (!S || !S.wb) return;
+    const mist = [...gekozenBu].filter(c => !S.bu.has(c));
+    if (!mist.length) return;
+    const g = S.g;
+    try {
+      const d = await getJSON(BUURT(S.wb.kop.buurtjaar || 2026) + encodeURIComponent(`bu_code IN (${mist.map(c => `'${c}'`).join(',')})`));
+      if (S.g !== g) return;
+      d.features.forEach(f => {
+        const polys = (f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates).map(pl => pl.map(r => r.map(c => [c[0], c[1]])));
+        S.bu.set(f.properties.bu_code, { naam: f.properties.bu_naam, polys, bb: bbVan(polys), ha: haVan(polys) });
+      });
+    } catch (e) { fouten.add('de buurtgrenzen (CBS, via PDOK)'); toonMelding(); }
+    mist.forEach(c => { if (!S.bu.has(c)) gekozenBu.delete(c); });
+  }
+  const zelfde = (a, b) => a.size === b.length && b.every(x => a.has(x));
+  const actiefDistrict = () => S ? DISTRICTEN.find(d => d.gm === S.g.c && (d.t.length || d.b.length) && zelfde(gekozen, d.t) && zelfde(gekozenBu, d.b)) : null;
+  async function kiesDistrict(d) {
+    const g = GM.find(x => x.c === d.gm); if (!g) return;
+    const h = '#gm=' + d.gm + (d.t.length ? '&t=' + d.t.join(',') : '') + (d.b.length ? '&b=' + d.b.join(',') : '') + '&naam=' + encodeURIComponent(d.naam);
+    if (!S || S.g !== g || !S.wb) { try { history.replaceState(null, '', h); } catch (e) {} return kies(g, true); }
+    gekozen = new Set(d.t.filter(r => !S.ibis || !S.ibis.length || S.ibis.some(t => t.rin === r))); gekozenBu = new Set(d.b); naam = d.naam; $('#naamInput').value = naam;
+    await laadBuurten();
+    renderLijst(); S.bounded = false; renderKaart(); reken();
   }
   function gebiedNaam() {
     if (naam) return naam;
     const d = delen();
     if (d.length === 1) return d[0].naam;
-    return d.length ? `${d.length} bedrijventerreinen samen` : '';
+    return d.length ? `${d.length} delen samen` : '';
   }
 
   // ---------- link ----------
@@ -680,6 +738,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     if (!S) return '';
     let h = '#gm=' + S.g.c;
     if (gekozen.size) h += '&t=' + [...gekozen].join(',');
+    if (gekozenBu.size) h += '&b=' + [...gekozenBu].join(',');
     if (naam) h += '&naam=' + encodeURIComponent(naam);
     return h;
   }
@@ -687,8 +746,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function leesHash() {
     const h = location.hash;
     const t = (h.match(/[#&]t=([\w,]+)/) || [])[1];
+    const b = (h.match(/[#&]b=([\w,]+)/) || [])[1];
     const n = (h.match(/[#&]naam=([^&]*)/) || [])[1];
-    return { t: t ? t.split(',').filter(Boolean) : [], naam: n ? decodeURIComponent(n).slice(0, 60) : '' };
+    return { t: t ? t.split(',').filter(Boolean) : [], b: b ? b.split(',').filter(c => /^BU\w{8}$/.test(c)) : [], naam: n ? decodeURIComponent(n).slice(0, 60) : '' };
   }
 
   // ---------- gemeente kiezen ----------
@@ -697,9 +757,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#gmInput').value = g.n;
     document.title = `${PRODUCT} ${g.n} · Open Data Atelier`;
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
-    S = { g, wb: null, bouw: null, ibis: null, gmTel: null };
-    const wens = uitLink ? leesHash() : { t: [], naam: '' };
-    gekozen = new Set(wens.t); naam = wens.naam; $('#naamInput').value = naam;
+    S = { g, wb: null, bouw: null, ibis: null, gmTel: null, bu: new Map() };
+    const wens = uitLink ? leesHash() : { t: [], b: [], naam: '' };
+    gekozen = new Set(wens.t); gekozenBu = new Set(wens.b); naam = wens.naam; $('#naamInput').value = naam;
     R = null; fouten.clear(); toonMelding();
     $('#uitkomst').hidden = true; $('#terrLijst').innerHTML = ''; $('#delen').innerHTML = ''; $('#foot').innerHTML = '';
     $('#kiesKop').textContent = `Stel het gebied samen in ${g.n}`;
@@ -715,7 +775,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     voortgang(1, 3, 'Bedrijventerreinen ophalen (IBIS)…');
     const gj = await pIbis;
     if (S.g !== g) return;
-    if (!gj || !gj.features) { fouten.add('de bedrijventerreinen (IBIS, kaartdienst WarmteAtlas); zonder die lijst is er geen gebied te kiezen'); S.ibis = []; }
+    if (!gj || !gj.features) { fouten.add('de bedrijventerreinen (IBIS, kaartdienst WarmteAtlas)'); S.ibis = []; }
     else S.ibis = gj.features.filter(f => f.geometry).map(f => {
       const p = f.properties;
       const polys = (f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates).map(pl => pl.map(r => r.map(c => [c[0], c[1]])));
@@ -730,6 +790,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     S.bouw = await pBouw;
     if (S.g !== g) return;
     if (!S.bouw) fouten.add('bouwen en slopen (BAG-maandstand, Open Data Atelier)');
+    await laadBuurten();
+    if (S.g !== g) return;
     toonMelding(); voortgang(3, 3, '');
     renderLijst(); S.bounded = false; renderKaart(); reken();
   }
@@ -737,7 +799,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   // ---------- rekenen voor het gebied ----------
   function reken() {
     const D = delen();
-    renderDelen(D);
+    renderDelen(D); if (S && S.wb) renderDistricten();
     zetHash();
     if (!S || !S.wb || !D.length) { R = null; $('#uitkomst').hidden = true; renderVoet(); renderKaartGebied(); return; }
     const wb = S.wb, t = leegTel(), idx = [];
@@ -836,27 +898,35 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   const LGR = [['a', 'A', '--l-a'], ['b', 'B', '--l-b'], ['c', 'C', '--l-c'], ['d', 'D', '--l-d'], ['efg', 'E, F, G', '--l-efg'], ['geen', 'geen label', '--l-geen']];
 
   // ---------- lijst en gekozen terreinen ----------
+  function renderDistricten() {
+    const L = DISTRICTEN.filter(d => d.gm === S.g.c), act = actiefDistrict(), el = $('#distBlok');
+    el.hidden = !L.length; if (!L.length) return;
+    $('#distLijst').innerHTML = L.map(d => { const i = DISTRICTEN.indexOf(d), kan = d.t.length || d.b.length;
+      return `<div class="dist${d === act ? ' aan' : ''}"><button class="btn${d === act ? ' primary' : ''}" type="button" data-d="${i}"${kan ? '' : ' disabled'} aria-pressed="${d === act}">${esc(d.naam)}</button><span class="small muted">${FASE[d.fase]}${kan ? ' · ' + esc(d.noot) : ' · nog geen afbakening: uit openbare stukken is niet op te maken welke terreinen of buurten het zijn.'}</span></div>`; }).join('');
+    $('#distLijst').querySelectorAll('button[data-d]').forEach(b => b.addEventListener('click', () => kiesDistrict(DISTRICTEN[+b.dataset.d])));
+  }
   function renderLijst() {
+    renderDistricten();
     const q = $('#terrZoek').value.trim().toLowerCase();
     const L = (S.ibis || []).filter(t => !q || (t.naam + ' ' + t.kern).toLowerCase().includes(q));
     $('#terrKop').textContent = S.ibis && S.ibis.length ? `Bedrijventerreinen (${S.ibis.length})` : 'Bedrijventerreinen';
     $('#terrZoek').hidden = !(S.ibis && S.ibis.length > 8);
-    $('#terrLijst').innerHTML = !S.ibis ? '<span class="small muted">Ophalen…</span>' : !S.ibis.length ? '<span class="small muted">Het register heeft voor deze gemeente geen bedrijventerreinen. Er is hier geen gebied te kiezen.</span>'
+    $('#terrLijst').innerHTML = !S.ibis ? '<span class="small muted">Ophalen…</span>' : !S.ibis.length ? '<span class="small muted">Het register heeft voor deze gemeente geen bedrijventerreinen.</span>'
       : L.map(t => `<label><input type="checkbox" data-rin="${esc(t.rin)}"${gekozen.has(t.rin) ? ' checked' : ''}><span>${esc(t.naam)}${t.kern && t.kern.toLowerCase() !== S.g.n.toLowerCase() ? ` <span class="muted small">${esc(t.kern)}</span>` : ''}</span><span class="ha">${f1(t.bruto)} ha</span></label>`).join('') || '<span class="small muted">Geen terrein met die naam.</span>';
     $('#terrLijst').querySelectorAll('input').forEach(i => i.addEventListener('change', () => { if (i.checked) gekozen.add(i.dataset.rin); else gekozen.delete(i.dataset.rin); reken(); }));
   }
   function renderDelen(D) {
     $('#delen').innerHTML = D.length ? D.map(d => `<div class="deel"><span>${esc(d.naam)} <span class="muted small">${f1(d.ha)} ha</span></span><button type="button" data-s="${d.soort}" data-id="${esc(d.id)}" aria-label="Haal ${esc(d.naam)} uit het gebied">weghalen</button></div>`).join('')
-      : '<p class="small muted" style="margin:0">Nog geen gebied. Kies een terrein op de kaart of in de lijst.</p>';
+      : '<p class="small muted" style="margin:0">Nog geen gebied. Kies een innovatiedistrict of een bedrijventerrein.</p>';
     $('#delen').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-      gekozen.delete(b.dataset.id);
+      if (b.dataset.s === 'buurt') gekozenBu.delete(b.dataset.id); else gekozen.delete(b.dataset.id);
       renderLijst(); reken();
     }));
     $('#wisBtn').hidden = !D.length; $('#linkBtn').hidden = !D.length;
   }
   $('#terrZoek').addEventListener('input', renderLijst);
   $('#naamInput').addEventListener('input', () => { naam = $('#naamInput').value.trim().slice(0, 60); zetHash(); if (R) { renderKern(); renderVoet(); } });
-  $('#wisBtn').addEventListener('click', () => { gekozen.clear(); renderLijst(); reken(); });
+  $('#wisBtn').addEventListener('click', () => { gekozen.clear(); gekozenBu.clear(); renderLijst(); reken(); });
   $('#linkBtn').addEventListener('click', () => {
     const v = location.href, b = $('#linkBtn');
     const ok = () => { b.textContent = 'Link gekopieerd'; setTimeout(() => { b.textContent = 'Kopieer de link naar dit gebied'; }, 1800); };
@@ -899,6 +969,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       ly.on('click', ev => { L.DomEvent.stopPropagation(ev); if (sel) gekozen.delete(t.rin); else gekozen.add(t.rin); renderLijst(); reken(); });
       ly.addTo(lagen);
     });
+    delen().filter(d => d.soort === 'buurt').forEach(d => {
+      L.polygon(d.polys.map(p => p.map(llRing)), { color: acc, weight: 2.5, fillColor: acc, fillOpacity: 0.22 }).bindTooltip(`<b>${esc(d.naam)}</b><br>${f1(d.ha)} ha · CBS-buurt`, { sticky: true }).addTo(lagen);
+    });
     if (R && R.bouw) R.bouw.proj.forEach(pd => {
       const kl = css(FASEKL[pd.fase]) || acc;
       const tt = `<b>${esc(FASENAAM[pd.fase])}</b><br>${pd.woon ? fmt(pd.woon) + mv(pd.woon, ' woning', ' woningen') : ''}${pd.woon && pd.ander ? ' · ' : ''}${pd.ander ? fmt(pd.ander) + mv(pd.ander, ' ander object', ' andere objecten') : ''}${!pd.woon && !pd.ander ? 'nog geen adressen' : ''}${pd.bouwjaar ? '<br>bouwjaar ' + pd.bouwjaar : ''}`;
@@ -917,7 +990,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderKern() {
     const t = R.t, G = S.gmTel;
     $('#leadBig').textContent = `${gebiedNaam()}, ${S.g.n}`;
-    $('#leadSub').textContent = `${f1(R.ha)} hectare · BAG-stand ${datum(S.wb.kop.peil)}`;
+    const ad = actiefDistrict();
+    $('#leadSub').textContent = `${f1(R.ha)} hectare · BAG-stand ${datum(S.wb.kop.peil)}` + (ad ? ' · afbakening: eigen benadering, geen officiële grens' : '');
     const werk = t.opp - fm('woon').m, werkG = G.opp - gf('woon').m;
     const b = R.bouw, pijp = b ? b.F.vergund.woon + b.F.bouw.woon : null;
     const u = [
@@ -1054,7 +1128,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
   const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
-  const bronTxt = () => `${PRODUCT}, Open Data Atelier, ${location.href}, versie ${VERSIE}; BAG ${S.wb.kop.peil} (Kadaster), bedrijventerreinen IBIS (IPO, CC0)`;
+  const bronTxt = () => `${PRODUCT}, Open Data Atelier, ${location.href}, versie ${VERSIE}; BAG ${S.wb.kop.peil} (Kadaster), bedrijventerreinen IBIS (IPO, CC0), buurten CBS (PDOK)`;
   $('#csvBtn').addEventListener('click', () => {
     if (!R) return;
     const t = R.t, G = S.gmTel, bron = bronTxt(), gn = gebiedNaam();
@@ -1088,11 +1162,14 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     document.querySelectorAll('a.naarBouw, a.naarLabelC, a.naarKal, a.naarBedr, a.naarWerkbank').forEach(a => { if (S) a.href = a.getAttribute('href').split('#')[0] + '#gm=' + S.g.c; });
     const wb = S && S.wb;
     const jaren = S && S.ibis && S.ibis.length ? [...new Set(S.ibis.map(t => t.jaar))].sort().join(' en ') : '';
-    $('#foot').innerHTML = wb ? `Bronnen: BAG (Kadaster, via PDOK), stand ${datum(wb.kop.peil)}${S.bouw ? '; bouwen en slopen uit dezelfde maandstand' : ''}. Bedrijventerreinen: IBIS (Interprovinciaal Overleg, CC0), via de kaartdienst van de WarmteAtlas (RVO)${jaren ? ', peiljaar ' + jaren : ''}. Energielabels: RIVM, laag rvo_energielabels (afgeleid uit EP-Online van RVO), live opgevraagd. Achtergrondkaart: BRT (Kadaster, CC BY 4.0). Opgehaald op ${new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}. Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
+    $('#foot').innerHTML = wb ? `Bronnen: BAG (Kadaster, via PDOK), stand ${datum(wb.kop.peil)}${S.bouw ? '; bouwen en slopen uit dezelfde maandstand' : ''}. Bedrijventerreinen: IBIS (Interprovinciaal Overleg, CC0), via de kaartdienst van de WarmteAtlas (RVO)${jaren ? ', peiljaar ' + jaren : ''}. Energielabels: RIVM, laag rvo_energielabels (afgeleid uit EP-Online van RVO), live opgevraagd. Buurtgrenzen: CBS Wijk- en buurtkaart (via PDOK, CC BY 4.0). Lijst van innovatiedistricten: Buck Consultants International, 2025; afbakening eigen benadering. Achtergrondkaart: BRT (Kadaster, CC BY 4.0). Opgehaald op ${new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}. Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
       : `Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
   // ---------- start ----------
+  $('#distIntro').innerHTML = DISTRICTEN.map((d, i) => { const g = GM.find(x => x.c === d.gm), kan = d.t.length || d.b.length;
+    return kan ? `<button class="btn linkish" type="button" data-d="${i}">${esc(d.naam)} <span class="muted">${esc(g ? g.n.replace("'s-Gravenhage", 'Den Haag').replace("'s-Hertogenbosch", 'Den Bosch') : '')}</span></button>` : ''; }).join('');
+  $('#distIntro').querySelectorAll('button').forEach(b => b.addEventListener('click', () => kiesDistrict(DISTRICTEN[+b.dataset.d])));
   $('#retryBtn').addEventListener('click', () => kies(S.g, true));
   $('#pickForm').addEventListener('submit', e => {
     e.preventDefault();
