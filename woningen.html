@@ -304,6 +304,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="chart" id="chLeegEig"></div>
       </div>
       <details class="tabelview"><summary>Toon als tabel</summary><div class="scroll" id="trendTabel"></div></details>
+      <p class="small"><a id="lnkSoc" href="sociale-huur.html">Welk deel van de corporatiewoningen sociale huur is, en hoe die voorraad verandert door nieuwbouw, sloop en verkoop: Sociale huur per gemeente →</a></p>
 
       <!-- woz-waarde -->
       <div class="sectiekop">
@@ -415,7 +416,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.8.2';
+  const VERSIE = '1.8.3';
   const PRODUCT = 'Woningvoorraad en leegstand';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const T_VOOR = '86286NED';   // voorraad; eigendom, type eigenaar, status van bewoning, regio
@@ -595,6 +596,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   }
   function renderWoz() {
     try { document.getElementById('lnkWoonl').href = 'woonlasten.html#gm=' + S.g.c; } catch (e) {}
+    try { document.getElementById('lnkSoc').href = 'sociale-huur.html#gm=' + S.g.c; } catch (e) {}
     const rs = S.woz, el = $('#chWoz'), tb = $('#wozTabel');
     if (!rs) { el.innerHTML = '<p class="small muted" style="margin:0">Geen WOZ-cijfers voor deze gemeente.</p>'; tb.innerHTML = ''; return; }
     const nl = new Map((S.wozNl || []).map(r => [r.j, r]));

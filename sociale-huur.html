@@ -1,0 +1,814 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sociale huur per gemeente · Open Data Atelier</title>
+<link rel="icon" type="image/svg+xml" href="beeldmerk/beeldmerk-stil.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
+<link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Sociale huur per gemeente: hoeveel woningen van corporaties er zijn en hoeveel daarvan sociale huur (DAEB), hoe die voorraad verandert door nieuwbouw, sloop, verkoop en overdracht, wat er vergund is en voor wie: huishoudens met huurtoeslag en de woonquote van corporatiehuurders. Uit open data van het CBS, voor elke gemeente. Geen ranglijst.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --dn-1: #b4492a; --dn-2: #de8b5c; --dn-3: #f0c4a3; --ov: #aab6b8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .ax0 { stroke: var(--muted); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart .noot { font-size: .82rem; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.streep { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; width: 16px; vertical-align: 3px; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 320px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.eig { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; font-size: .88rem; }
+.eig .t { position: relative; height: 14px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.eig .t i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.eig .t b { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px solid var(--fg); }
+.eig .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.eig .rij { display: contents; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 540px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.kruimel { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.kruimel .sep { color: var(--muted); font-size: .72rem; }
+.kruimel button.eyebrow { background: none; border: 0; padding: 0; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.kruimel button.eyebrow:hover { color: var(--fg); }
+.focus { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 1px; }
+.focus .fl { font-size: .82rem; color: var(--muted); }
+.focus .fv { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.focus .fc { font-size: .82rem; color: var(--muted); }
+.focus .fv small { font-size: 1rem; font-weight: 700; margin-left: 6px; }
+.dossier dl .uit { color: var(--fg); font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier dl dt.uit { box-shadow: -6px 0 0 color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier .legend span.uit { color: var(--fg); font-weight: 700; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+tbody tr.voorl td { color: var(--muted); }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 140px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
+th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td .rijknop { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+/* Minimaregelingen per gemeente */
+.ondertitel { margin: 0; font-family: var(--f-display); font-stretch: 85%; font-size: 1.05rem; font-weight: 600; color: var(--muted); }
+.grregel { margin: -8px 0 0; max-width: 92ch; }
+.duo2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.lijst ul { list-style: none; padding: 0; gap: 6px; }
+.lijst li { border-left: 3px solid var(--accent); padding: 2px 0 2px 10px; }
+.lijst p { margin: 0; }
+table.soorten td { padding: 8px 10px; }
+table.soorten th { cursor: default; }
+table.soorten td:first-child { max-width: 42ch; }
+.mid { text-align: center; }
+.ja { color: var(--accent); font-weight: 800; font-size: 1.1rem; }
+.nee { color: var(--muted); }
+.land { display: grid; grid-template-columns: minmax(80px, 160px) auto; gap: 8px; align-items: center; white-space: nowrap; }
+.lbar { display: block; height: 12px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.lbar i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.land .num { font-family: var(--f-mono); font-variant-numeric: tabular-nums; font-size: .85rem; }
+#tblWrap { max-height: none; }
+.grens { font-weight: 700; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+/* Sociale huur per gemeente */
+#pijp table, #voorwie table, #perJaar table { font-size: .85rem; }
+#brugBalk { margin-top: 4px; }
+.card h3 { font-size: .95rem; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+<script src="zoeken/zoeken.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Volkshuisvesting · open data</span>
+      <h1 id="title">Sociale huur per gemeente</h1>
+      <p class="ondertitel">Hoeveel sociale huur er is, waardoor dat verandert en voor wie</p>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente" aria-label="Kies een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Hoeveel woningen in een gemeente zijn van een woningcorporatie, en hoeveel daarvan zijn sociale huur? Komen er corporatiewoningen bij of gaan er af, en langs welke weg: nieuwbouw, sloop, verkoop of overdracht aan een andere verhuurder? En hoe verhoudt de sociale voorraad zich tot de huishoudens die er gebruik van maken?</p>
+    <p>Dit is de vraag aan de tafel van de prestatieafspraken tussen gemeente, corporatie en huurders. De pagina laat zien wat open data erover zeggen, voor elke gemeente.</p>
+    <p class="small"><b>Sociale huur, zo geteld:</b> de cijfers gaan over woningen van woningcorporaties. Het deel dat de corporaties zelf als sociale huur verantwoorden (DAEB), dient als benadering van sociale huur. Sociale huur van andere verhuurders valt erbuiten.</p>
+    <p class="muted small">Bron: CBS, met tabellen die het CBS voor het ministerie van BZK maakte. Live opgehaald bij de gemeentekeuze, behalve de DAEB-splitsing en de veranderingen van de voorraad: die staan in de pagina.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="top4" id="kern"></div>
+
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> De pagina telt woningen van woningcorporaties (toegelaten instellingen). Een gemeentelijk woningbedrijf, een stichting voor studentenhuisvesting zonder toelating of een particuliere verhuurder met sociale huur telt niet mee. Het DAEB-deel is wat de corporaties zelf als sociale huur verantwoorden, geen toets aan de huurprijs.</li>
+          <li><b>Een andere peildatum of indeling.</b> De voorraad geldt op 1 januari, de DAEB-splitsing op 1 januari 2025, de veranderingen per kalenderjaar. Gemeenten die zijn samengevoegd, staan in hun huidige vorm.</li>
+          <li><b>Registratie bij de bron.</b> Het CBS leidt het eigendom af uit het Kadaster, de WOZ en de opgave van de corporaties zelf (de dVi). Een woning die net is verkocht of overgedragen, kan bij de ene bron al en bij de andere nog niet zijn verwerkt. Daarom sluit de optelling van de veranderingen niet altijd precies aan op de stand een jaar later.</li>
+          <li><b>Een fout in deze bewerking.</b> De pagina telt de CBS-tabellen op en rekent aandelen uit. Klopt een cijfer niet met de bron, meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente of corporatie en geen oordeel over het woonbeleid.</p>
+        <div class="meld">
+          <span>Een cijfer dat niet klopt?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">1 · Hoeveel</span><h2>Corporatiewoningen door de jaren</h2></div>
+        <p class="small muted">Stand op 1 januari. Het aandeel is het deel van alle woningen in de gemeente.</p>
+      </div>
+      <div class="panel"><div class="scroll" id="reeksWrap" tabindex="0" role="region" aria-label="Tabel corporatiewoningen per jaar"></div></div>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">2 · Waardoor het verandert</span><h2 id="brugKop">Erbij en eraf, 2022–2025</h2></div>
+        <p class="small muted">Hoe de corporatievoorraad per jaar veranderde: wat er fysiek bij kwam of verdween, en wat van eigenaar wisselde.</p>
+      </div>
+      <div class="duo">
+        <div class="card"><h3 id="brugSomKop">Samen over vier jaar</h3><div class="eig" id="brugBalk"></div><p class="small muted" id="brugZin"></p></div>
+        <div class="card"><h3>Per jaar, naast Nederland</h3><div id="perJaar"></div></div>
+      </div>
+      <div class="panel">
+        <div class="tools">
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvBtn" type="button">CSV deze gemeente</button>
+          <button class="btn" id="csvAlleBtn" type="button">CSV alle gemeenten</button>
+        </div>
+        <div class="scroll" id="tblWrap" tabindex="0" role="region" aria-label="Tabel met de veranderingen van de corporatievoorraad per jaar; scroll met de pijltjestoetsen"></div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <span class="eyebrow">3 · Wat eraan komt</span>
+          <h2>Vergunde huurwoningen</h2>
+          <div id="pijp"></div>
+        </div>
+        <div class="card">
+          <span class="eyebrow">4 · Voor wie</span>
+          <h2>Huishoudens en woonlasten</h2>
+          <div id="voorwie"></div>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Corporatiewoningen</b>: woningen in eigendom van een woningcorporatie op 1 januari (CBS 86286NED), ook als ze leegstaan of anders worden gebruikt. Het aandeel is gedeeld door alle woningen.</li>
+            <li><b>Sociale huur (DAEB)</b>: het deel van de corporatiewoningen dat de corporatie in haar verantwoording (dVi) als dienst van algemeen economisch belang opgeeft, op 1 januari 2025. Eenmalige, voorlopige CBS-tabel. Het CBS rondt af op tientallen en laat cellen onder 100 leeg; dan staat er "minder dan 100".</li>
+            <li><b>Erbij en eraf</b>: nieuwbouw, overige toevoeging (zoals splitsing of verbouw van een kantoor), sloop en overige onttrekking (zoals samenvoegen) van corporatiewoningen, plus de woningen die van eigenaar wisselden: van corporatie naar koopwoning (verkoop), naar een andere verhuurder, of omgekeerd. Correcties van het CBS staan apart. Netto is de optelling.</li>
+            <li><b>Per 1.000</b>: het aantal gedeeld door de corporatievoorraad op 1 januari van dat jaar, keer 1.000, zodat een gemeente naast Nederland te lezen is.</li>
+            <li><b>Vergund</b>: huurwoningen met een bouwvergunning (CBS 83671NED), opgeteld per jaar: met een corporatie of de overheid als opdrachtgever, en alle huurwoningen.</li>
+            <li><b>Huurtoeslag</b>: particuliere huishoudens in een huurwoning met huurtoeslag (CBS 86380NED), bij elke verhuurder; naast het aantal DAEB-woningen.</li>
+            <li><b>Woonquote</b>: de mediaan van de woonlasten als deel van het besteedbaar inkomen, voor huurders van een corporatie en van een andere verhuurder (CBS 85950NED).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Corporatie is niet hetzelfde als sociaal.</b> Ook studentenwoningen en middenhuur van corporaties tellen bij de corporatievoorraad. Het DAEB-deel komt dichter bij sociale huur, maar is een opgave van de corporaties, geen toets aan de huurprijs.</li>
+            <li><b>Kleine aantallen springen.</b> De veranderingen over 2024 en 2025 zijn door het CBS afgerond op vijftallen, die over 2022 en 2023 niet. In een kleine gemeente kan één project een jaar bepalen; kijk naar de vier jaren samen.</li>
+            <li><b>De optelling sluit niet precies.</b> Stand plus veranderingen geeft niet altijd exact de stand een jaar later: de tabellen gebruiken deels andere bronnen en momenten.</li>
+            <li><b>Vergund is niet gebouwd.</b> Een vergunning kan jaren voor de oplevering liggen, of niet tot bouw leiden. De opdrachtgever "overheid of corporatie" is één categorie bij het CBS, en een corporatie die kant-en-klaar koopt van een ontwikkelaar staat er niet als opdrachtgever in.</li>
+            <li><b>Huurtoeslag is geen wachtlijst.</b> Wie wacht op een sociale huurwoning, staat niet in open data. Huurtoeslag krijgen ook huurders van particuliere verhuurders.</li>
+            <li><b>Geen oordeel.</b> De pagina zegt niet of een gemeente genoeg sociale huur heeft. De afspraak over 30% sociale huur geldt per regio en voor nieuwbouw, niet voor de voorraad van één gemeente.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><a href="woningen.html" id="naarWon">Woningvoorraad en leegstand</a>: alle woningen naar eigendom, leegstand en de corporatiewoningen per buurt.</li>
+            <li><a href="bouwstroom.html" id="naarBouw">Bouwstroom</a>: wat er per pand aan komt volgens de BAG.</li>
+            <li><a href="huishoudens.html" id="naarHh">Huishoudens en vergrijzing</a>: hoeveel en welke huishoudens er zijn.</li>
+            <li><a href="energiearmoede.html" id="naarEa">Energiearmoede per buurt</a>: energielabels en inkomen naar eigendom, ook van corporatiewoningen.</li>
+            <li><a href="indicatoren.html#domein=wonen" id="naarInd">Indicatoren belicht, Wonen</a>: welke cijfers er over wonen zijn, en welke alleen bij corporaties en woonruimteverdeling liggen (zoals slaagkans en wachttijd).</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> CBS, live opgehaald bij de gemeentekeuze: woningvoorraad naar eigendom (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86286NED/table">86286NED</a>, 1 januari 2021–2026), bouwvergunningen naar opdrachtgever (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/83671NED/table">83671NED</a>), inkomen van huishoudens (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/86380NED/table">86380NED</a>) en woonlasten (<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85950NED/table">85950NED</a>). In de pagina: de maatwerktabellen die het CBS voor het ministerie van BZK maakte, <a href="https://www.cbs.nl/nl-nl/maatwerk/2026/13/daeb-en-niet-daeb-corporatiewoningen-2025-haalbaarheidsonderzoek">DAEB en niet-DAEB corporatiewoningen 2025</a> (voorlopig, 25 maart 2026) en <a href="https://www.cbs.nl/nl-nl/reeksen/tijd/woningvoorraad-mutaties-en-statusontwikkelingen">Woningvoorraad, mutaties en statusontwikkelingen</a> over 2022 tot en met 2025 (tabel A en C, per gemeente). De periode van elk cijfer staat erbij; het tijdstip van ophalen onder de cijfers.</p>
+    <p><b>Licentie.</b> CBS: CC BY 4.0 (de maatwerktabellen vermelden "© CBS"; volgens de copyrightpagina van het CBS geldt CC BY 4.0, tenzij anders vermeld).</p>
+    <p><b>Methode.</b> Aantallen en aandelen per gemeente in de indeling van 2025, met Nederland ernaast. De veranderingen van vóór een herindeling zijn opgeteld bij de huidige gemeente. Wat eraf en erbij komt, staat per jaar; netto is de optelling. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen oordeel of een gemeente genoeg sociale huur heeft; geen toets aan een norm of prestatieafspraak; geen cijfers per corporatie; geen ranglijst tussen gemeenten; geen wachttijd of slaagkans.</p>
+    <p><b>Bekende beperkingen.</b> Sociale huur van andere verhuurders ontbreekt. De DAEB-splitsing is voorlopig, eenmalig en mist bij ongeveer 2% van de corporatiewoningen. Stand en veranderingen komen uit verschillende tabellen en sluiten niet precies op elkaar aan. De veranderingen over 2024 en 2025 zijn afgerond op vijftallen. Huurtoeslag staat in duizenden met één decimaal; in een kleine gemeente is dat grof.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente of corporatie.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Een cijfer dat niet klopt? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=wonen" id="naarInd2">Welke cijfers er over wonen zijn. Indicatoren belicht, Wonen →</a></p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const PRODUCT = 'Sociale huur per gemeente';
+  const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
+  const LNK = t => `<a href="https://opendata.cbs.nl/statline/#/CBS/nl/dataset/${t}/table" target="_blank" rel="noopener">${t}</a>`;
+
+  // DAEB-splitsing per gemeente, 1 januari 2025 (CBS-maatwerk voor BZK, voorlopig): "code:daeb,niet_daeb,onbekend,totaal|…"; leeg = minder dan 100 of geen.
+  const DAEB = "0014:37200,1110,1000,39310|0034:21450,3160,410,25020|0037:4310,140,,4550|0047:3030,,100,3140|0050:2040,,,2100|0059:3520,,180,3720|0072:2470,,130,2600|0074:6520,210,100,6840|0080:17500,320,420,18230|0085:3040,,,3050|0086:2700,170,,2880|0088:160,,,160|0090:7810,,,7980|0093:430,,,450|0096:210,,,210|0098:3080,,,3170|0106:8980,,,9100|0109:3580,,,3590|0114:13710,240,,14030|0118:7090,,220,7320|0119:4940,,210,5180|0141:11090,330,120,11540|0147:2210,,,2290|0148:2140,,,2190|0150:13540,330,190,14070|0153:26490,1540,170,28200|0158:2140,,,2230|0160:5450,,,5530|0163:3120,,,3170|0164:11730,380,,12150|0166:5720,,120,5880|0168:1850,,,1910|0171:4790,,,4810|0173:3990,,,4090|0175:1370,,,1390|0177:3750,110,,3890|0180:660,,,660|0183:1000,,,1020|0184:960,,,970|0189:1710,,,1810|0193:19580,320,220,20110|0197:2300,,,2370|0200:20040,690,330,21050|0202:26450,1060,500,28010|0203:3970,280,200,4440|0209:2310,230,,2550|0213:2830,,130,2980|0214:2050,110,,2160|0216:3290,350,,3660|0221:1960,,,2120|0222:7410,300,,7760|0225:1700,150,,1900|0226:2560,270,,2870|0228:10550,130,370,11050|0230:2530,,,2590|0232:3900,,,3940|0233:2720,,130,2930|0243:5550,200,220,5970|0244:1430,,,1450|0246:1930,,,1980|0252:1440,,,1440|0262:2730,,,2780|0263:2040,,,2070|0267:3910,320,,4240|0268:31470,1720,590,33780|0269:2110,,,2190|0273:2120,,,2240|0274:2950,180,,3150|0275:5780,230,130,6130|0277:,,,|0279:710,,,720|0281:5980,310,,6330|0285:2360,130,,2540|0289:6060,420,1280,7770|0293:1940,150,,2110|0294:2180,,,2270|0296:4560,,,4690|0297:2710,130,,2920|0299:5640,140,,5830|0301:6900,100,,7020|0302:2610,,,2680|0303:4290,,190,4490|0307:18960,1760,260,20980|0308:2790,,100,2960|0310:4910,390,170,5460|0312:1080,,,1150|0313:1230,,,1290|0317:840,120,,970|0321:4840,340,,5190|0327:2760,,,2880|0331:980,,,1030|0335:880,,,930|0340:2260,,,2280|0342:4340,300,,4660|0344:48120,2670,850,51640|0345:8740,380,,9120|0351:1140,,,1170|0352:2140,190,,2390|0353:3170,320,,3560|0355:8210,430,,8650|0356:8660,320,,9000|0358:2920,390,,3310|0361:14680,490,,15220|0362:10590,1810,250,12650|0363:168090,17740,5180,191010|0373:2750,,,2850|0375:6580,380,340,7290|0376:1080,,,1150|0377:1600,150,,1800|0383:2450,110,,2640|0384:3090,140,160,3390|0385:2690,,,2730|0388:2460,,120,2590|0392:21140,1860,140,23130|0394:13970,1180,120,15260|0396:5300,160,320,5770|0397:2210,300,200,2710|0399:1770,,,1850|0400:8040,2110,290,10440|0402:11200,1540,120,12860|0405:10040,280,,10320|0406:5480,680,,6180|0415:1180,110,,1290|0417:800,120,,930|0420:4390,,120,4520|0431:1100,,,1160|0432:150,,,190|0437:1700,290,,2000|0439:12910,410,440,13760|0441:4630,,,4680|0448:1520,,,1570|0450:1230,,,1290|0451:3540,520,150,4210|0453:10260,550,650,11460|0473:2750,100,,2930|0479:23630,2260,190,26080|0482:2690,,,2770|0484:11920,640,260,12820|0489:4030,190,,4220|0498:1670,,,1700|0502:10200,700,,10910|0503:20360,1890,580,22820|0505:15200,340,320,15860|0512:6470,,170,6700|0513:9850,410,,10260|0518:76620,5420,1120,83150|0523:2010,,110,2130|0531:2840,,,2920|0532:2340,,,2370|0534:1990,220,190,2400|0537:6770,750,,7540|0542:4330,180,,4550|0546:18820,1430,150,20400|0547:2890,,,3030|0553:2720,150,,2870|0556:5810,430,220,6460|0569:2320,120,,2450|0575:3790,620,,4430|0579:1740,,,1790|0589:960,,,1020|0590:4040,,,4090|0597:6900,1040,320,8260|0599:120340,17050,3460,140860|0603:8590,500,180,9270|0606:11420,310,,11730|0610:3600,200,,3800|0613:2470,140,,2660|0622:14600,370,160,15130|0626:2340,180,,2530|0627:3150,370,,3530|0629:2830,290,,3170|0632:4950,230,,5250|0637:17480,2270,170,19920|0638:760,,,770|0642:7400,,,7540|0654:1970,,,1990|0664:5240,,,5330|0668:1680,,,1730|0677:2420,,,2460|0678:760,,,790|0687:6210,310,,6560|0703:1990,,,2010|0715:4900,,100,5010|0716:2310,,,2360|0717:1120,,,1130|0718:6590,,,6640|0736:4380,120,,4530|0737:2660,,,2700|0743:1540,,,1540|0744:330,,,360|0748:8320,760,250,9330|0753:2620,,,2680|0755:710,,,710|0757:4110,110,,4270|0758:23560,1220,270,25050|0762:3530,,,3550|0765:1370,,,1410|0766:2240,,180,2470|0770:1460,,,1480|0772:40150,2570,810,43540|0777:4730,540,350,5620|0779:2940,140,,3160|0784:2870,110,330,3310|0785:2080,,440,2560|0794:14950,270,250,15470|0796:24560,970,,25570|0797:4400,680,,5100|0798:810,,180,1020|0809:2300,,,2470|0820:1670,,,1690|0823:1010,,,1090|0824:2410,110,360,2880|0826:7620,560,210,8390|0828:11310,120,,11470|0840:2830,,,2890|0845:2040,,,2060|0847:1730,,,1740|0848:1030,150,,1180|0851:2260,100,,2360|0852:1810,,,1860|0855:31710,1210,660,33580|0858:4280,,,4360|0861:4770,210,,4990|0865:3330,,110,3520|0866:1300,,,1340|0867:6290,160,380,6820|0873:1630,130,,1810|0879:1310,,,1360|0880:2120,,,2160|0882:4870,130,140,5140|0888:1560,,,1590|0889:1670,,,1740|0893:1240,,100,1340|0899:3780,210,130,4110|0907:1810,,,1890|0917:16260,230,350,16840|0928:7340,170,120,7630|0935:21280,1020,,22390|0938:1560,,,1630|0944:600,,,600|0946:1420,,,1460|0957:8030,590,150,8770|0965:1170,,,1220|0971:2490,,,2590|0981:1550,,,1590|0983:12570,1010,,13670|0984:4660,420,,5110|0986:1210,,,1220|0988:5030,410,,5520|0994:1360,130,,1500|0995:9270,780,150,10190|1507:2580,220,,2830|1509:4130,190,,4360|1525:3140,480,,3680|1581:4700,200,220,5130|1586:1960,,,2000|1598:530,,,540|1621:4650,140,110,4900|1640:1870,180,,2070|1641:1650,,100,1840|1652:2670,210,,2890|1655:3850,,,4010|1658:1020,,,1040|1659:2240,,,2250|1667:780,,,790|1669:1560,,,1620|1674:9100,340,430,9870|1676:3670,350,,4060|1680:2040,,180,2220|1681:2200,,,2270|1690:1770,,,1810|1695:610,,,620|1696:2080,,,2130|1699:2820,,,2850|1700:3390,,140,3590|1701:1480,,,1490|1705:3800,,,3930|1706:1460,,,1510|1708:4830,100,230,5160|1709:4280,160,,4520|1711:2720,,,2820|1714:2270,,,2280|1719:2710,,,2790|1721:2560,,,2590|1723:470,,,590|1724:1010,,,1090|1728:1290,,,1310|1729:1210,,,1280|1730:2140,,,2160|1731:3230,,,3300|1734:4210,120,150,4480|1735:2980,,,3030|1740:2420,180,,2590|1742:3100,,,3190|1771:4750,,100,4920|1773:1720,,,1830|1774:1340,,,1410|1783:9560,1530,,11130|1842:1630,130,,1760|1859:4610,,,4710|1876:2940,,,3010|1883:12340,640,,13040|1884:3280,,,3400|1891:2540,,120,2660|1892:4450,470,,4950|1894:3310,380,,3720|1895:4760,,110,4900|1896:1680,,140,1820|1900:10100,390,600,11100|1901:2930,,,2990|1903:1090,,,1170|1904:6120,190,,6380|1911:4660,,,4720|1916:9020,290,,9330|1924:5950,,330,6330|1926:3890,600,,4510|1930:13410,730,290,14430|1931:6100,110,170,6380|1940:5410,,,5440|1942:4980,740,240,5960|1945:4360,170,,4550|1948:7560,240,,7840|1949:4990,,,5150|1950:2540,,,2620|1952:8010,110,210,8340|1954:2850,190,,3040|1955:3600,110,,3720|1959:5530,,,5620|1960:4150,300,,4500|1961:6890,590,290,7780|1963:8530,970,240,9750|1966:5400,,,5530|1969:5490,,,5540|1970:4790,,140,4950|1978:4300,140,,4450|1979:6820,,500,7380|1980:7310,190,,7560|1982:8910,,,9020|1991:6540,190,,6780|1992:6530,610,,7240";
+  // Veranderingen van de corporatievoorraad per jaar (CBS-maatwerk voor BZK, tabel A en C), indeling 2025:
+  // "code:j2022/j2023/j2024/j2025|…", per jaar 12 getallen gescheiden door punten (leeg = 0):
+  // nieuwbouw, overige toevoeging, sloop, overige onttrekking, correctie +, correctie −,
+  // corporatie → koop, corporatie → andere verhuurder, corporatie → onbekend, koop → corporatie, andere verhuurder → corporatie, onbekend → corporatie.
+  const MUT = "0014:461.38.86.32...119.41..10.166/323.10.54.10...141.242...78/270.20.270.10.10..110.20...35/350.30.305.15...130.40...15|0034:261.10.....61...18/551.37..70...119...10.15/510.90.....85.70..15/445.95.....95...10.65|0037:......15/..10....22/15..10....10/......10|0047:..26/29.10..10/50..25/50..15....10|0050:45......12/......11/45......20/45......25|0059:..20....10.24/33..12/15..25/45..20|0060:///|0072:102/29/25..30/..20.45...10|0074:......10/..42....10/115......10/45......10|0080:..46.10...14/76......25/35..145.15...30/30.15..45...35.245|0085:......10/......12//10.100.10|0086:26..26/18..18....10/......10/..35....10|0088:16///|0090:......11/75/45/|0093:/19//|0096:///|0098:22..20....10/32..31....10/..30/80|0106:39.25.103....14/21.11.....16/200..140........15/200......10|0109:35..22....10/10..30....10....11/10..15.100/10....10..10.20|0114:45......35/21..62....33....20/125.10.125...10.30/35..10....35.10|0118:33.10.18....14....69/..10....18.77...58.16/35..10....15.....10/10.20.....20|0119:/61......10/75......10/40......10|0141:46..48....23.10...35/17......21.26/10......25....40/45......35|0147:/20......10/25/......10|0148:64/10/45.15.10/......10|0150:73.19..10...10.12...60/36...195.84..14.10...313/195.30.20.25...15/100.35..25...25....10|0153:57...10..21.34.17/23.10.454.10...34...12/520.30.10.15...35/410..160.30...35...10.15|0158:......15/40......10/15..25....10/..45....10|0160:56/23..........65.10/75..25/140..80|0163:/......10/20......15/|0164:20.10.14....21.18/34..22....29.10..10/130.30.160....10/150.10.....10....420|0166:56.76.....10/42..44.12...11/65..20....10/95.20.20....10|0168:16......10/......10/15......10/|0171:10..12....23.101/77..12....29/75......30/55..10....15|0173:..26....10.71/36..20....10/20..20....15.95/..10....10|0175:30/..10/15/|0177:10.64.....11/.10.....10/10.10.....15/70.10.20....35|0180:/14/45..40/65|0183:///|0184:......10/......10/15/45......10|0189:19..22/41..20....10/90......15/15......10|0193:.44.84.20...41/295.19.35....17....63/260.10.....20.35/160.100.35.15...20.10|0197://55/10|0200:135.61..67...24...20/64.13.24.10.40..25...16/140..50.10...25...10.10/190..25....25...15.10|0202:98.41.20....23..11.10.71/126..63....26.28..10/300......25....15/160.10.....30....45|0203:64..17.32...10.143/119..........10/......10/20......10|0209:......10/19......12//10......10|0213:45...10...15/16......18/20......15....10/40..15.15...15....10|0214:28.10.....11/16......10/......10/|0216:34.10.....10...10/57...10...15...10/15.60..10...10...15.125/..25....25.20..10|0221:/..........42/15..25..10/25..35....10|0222:..64....10.163/91.......10..10/10......10/60......10...10|0225:......17/......15/15......10/105......15|0226:12/.......24/10.10/|0228:356.198.32....31.160..27/49.66.....30...24/125.40.....30.15..20/230.15.205....35...10|0230:..........39//30/|0232:......10/48......10/..10....10/40..10....15|0233:20.......10...25/43..........14/40/|0243:56..16.....10/..66/45/10|0244:......10....24//20/......10|0246://40.10.....10/20..10....20|0252:29....10//50.........10/|0262:.10.....10.44/20//|0263:10......10/13......10/15..25....10/90.20.....10|0267:154......13/91......23.30/25..20..30.30.20/325......25|0268:224.10.84....57.112..13/525..84....54...13.110/540.20.....60...10.10/445......85.30..10.10|0269:15..........10///40|0273:38/..........20/25..20/55|0274:......10///15|0275:/..34.....10/40...10/10.......10|0277:///|0279:/..13/15/50......10|0281:.11.29....13.10/32......10....10/......10/35..30....10|0285:/23/10.15/..15|0289:45.10.....10.12/192......10....14/155......10/|0293:..10/10.10//25|0294:11.......131///30..30|0296:73..78....10/121......10/70......10/55.25..10...15|0297:13/12......13/110......10/25...65...10|0299:10..12....10/20..19/85..10.....20/50......10|0301:36..16/......10/10.10.50....10/60..50|0302:/51/......10/|0303:64.10.....22/25......10....18/10......15/105......15|0307:41......35...10/316.50.146.10...35...10/300.10..20...85.10..10.10.15/160......95.30|0308:.10.24....10/41......10/......15/.65.25|0310://55/|0312:71/10/55/10......10|0313:.23/54//80|0317:/82..........10/20.......10/..........10|0321:116......17/......23...10/25......15...10/......10...10|0327:119......10...10/21......10...10/20......10/40......10...10|0331:///|0335:///|0339:///|0340:39/20//|0342:......17/79......18/55......20....10/..50....25.10...495|0344:455.112.227.12...92.112..21.36/488..206.10...94.30..10.50/645.10.335.10...45.30..10.10/600..110....60...10|0345:60.10.....15/92..20....23/..40....10/100..10....10|0351:47/30/10/20|0352:......10/44......10/15......10/......10|0353:30.14.30.10......10.24//35.........10/.10.....10|0355:42.10..10...12...10/......10...10/25.20.45....10...20/90......10...10|0356:......36/40......31....67/..30....45/180......30|0358:/100.10/.......10/|0361:64.10.58....19/32..36....32.10/235..95.25...35/65.30.....20...10|0362:......12...10/......14...10/35......10....60/60......10|0363:2036.291.543.76.10.31.599.91.10.10.231.61/972.286.113.217.60..660.50...193/1785.105.450.70...685.160...75/2845.440.395.35...675.40...15|0373:12/16/20/|0375:40......10.41..10.115/......16...15.63/35..10....20...10/55..65....20...10|0376:///|0377:/......10//|0383:/48.........10/......10/95......10.10|0384:76..250/..250/..........30/40|0385:47/54/..20/......10|0388:16.10.....10/12......10/......15/..20....10|0392:49.10.48....33...12/19.98..18...33.230..15.10/440..100....50...10.10/70.10.115....20.50..10|0394:243.44.....25...10/59.18.17....43...10.34/115......30...10.10/595......30|0396:152......10.16/49......10...10/..50....10/70..75.......10|0397:......10/......10/......10/......10|0399:///15|0400:13.14.....25....37/10......29....82/45..55....30/......25.65|0402:129.21.....65....12/......41....16/..120....40.10...10/195.15.....50.10..10|0405:169......16/......20....22/210..40....10/...40.......10|0406:......11/......12/......15/......10|0415:///|0417:...........10//10..........10/|0420:...10...14/10......10....42/10.10.....10/10..10....10|0431:.......10/..........10//|0432://100/|0437://..40/95|0439:291.14.....21/.15..10...15.15/50..35....10/125.60.55....15...10|0441:35......16/37......15/70.50.....15....10/75......35|0448:......11/......10/70......10/40......10|0450:..54//90/|0451:///35..55|0453:......14.....10//70.25..15/.25|0473:...14/.10/20/|0479:107..136....39...23/101..106....20...19.10/470..90....25.10..15.10/205.10.280.10.80..40.25..20|0482:/20......10/......10/|0484:47.10.65.10...83.12/177.131.....71....14/50.10.85.10...55/200.10.....65.60|0489:127..99..53/..88/20..65/240|0498:36/..15....10//30.15.....10|0502:..53....10...10/15.10.....22/30..25....10/145.10|0503:78.22..66...41.80..48.14/158......40...29/135......55...35.85/.60.120....55...20|0505:.29.139.10...25...37/98..117....36...24.10/160.10.105.30.30..40...10/300..25....25.25..10|0512:......10.10..10/...10......10/75.10........10/30.15.130....10|0513:50......16/148......27/80......10/340......20|0518:244.223.363.325...69....496/535.17..14...121.139...144/270.30.50.10...40.10..10.170.10/145.10..45...25...10.665|0523://.10/|0531:28..42.......10/..41.....11..10/95/25|0532:......10//15..10/30.20.....10|0534:28......10/......10/..60/95..120|0537:20..34/21......10...10/115......10...10/70..80....10|0542:......10/44......10/45/55......10|0546:103.........23.57/305..91.......23/.45.90.15......20.20/80......20...10|0547:......27....10/..72....10....15/......15/90......10|0553://70/|0556:161..126/81..76....10/200..110....10....10/55......10|0569:16......10//.......10/70|0575:65......10....10/90..10....10/20......10/160..20....10|0579:/.........10//90|0589:21//70/......10|0590:.........10/.10.99.......10/.........10/115......10|0597:32..72....12/......14/35..50....10....10/..95....10|0599:208.100.489.83.19..217.467..406.286/693.50.219.100...326.132..302.253/445.465.455.280...330.75..220.45/445.255.360.305...305.310..220.20|0603:........30.10/93......10....42.30/45......10/..40.....60|0606:35.39.48.41...19...10/81......10....41/35.40..90...10...10/.55.....10...10|0610:///|0613://..35.10/|0622:39......28/98..84....27/......20....60/..120....20|0626:.10//40...60/|0627:......10//30/80......10|0629:10..35....10/86......13...10/30..45....15/..20....10|0632:21.......14/107.11.....10.10...10/.10/120..........10|0637:27.27..10...24/125......23...10/65.10..10...30....65/165.10...85..45.10|0638://120/......10|0642:29......10/......10/..130....10/.10.....10|0654:40..29....10/......10/..10/60..10....10|0664:10..36....10/35......13.66/55..70....10/80..55.35...10|0668:26......10/35......15/20......10/15......10|0677:17.10.45....10/25..38/65..60....15/75..10....10....10|0678:..........10/......10/..10/85..15|0687:139.14..13...23/126..55....29/10..40....25.35/85..90....25|0703:28..87....10/28..15....10/25......10/..25....10|0715:31.22.30....11....51.220/..20....16...10/20..75....15.35/115..35....10|0716:..42....10/..10....14/20..40/25|0717:17..24....10/..24/15......10....10/30......10|0718:68......17/18.10.....30/90..95....25/90..20....25|0736:45/61//|0737:39..16/16/..10.....25/30..25|0743://10/|0744:/10/.20/25.......20|0748:37..154....14.27/211..38....10....10/50..255....10....30/60.20.25.55...10.10|0753:25/17......10/......10.10/25......10...10|0755:/24/10/|0757:24..........34//55/20......10|0758:61..26....36.62..28.19/186.83.10.51...20.10.30.21.65/45.55.....25...25.35/520.65..25...15.20..20.30|0762:97......10/......10....10//20......10...10|0765:..20//......10/55..25|0766:48..48....10/..41....10/115......10/......10|0770:/10/55......10/|0772:352.121.11.10.37..198...77.46/163.33.183..10..240.10..51.61/760.15.265....175.10..60.25/495.90.100....225.10..100.10|0777:151/164..........18/100/30.......20|0779:69..........28//.....15/..30..10|0784:..10....13....11/36..24....10.21/..15/25|0785:13......10/......10.13/15..........10/25......10|0794:144..18....43/84.13.10....29.61...22/......25/65..15....15.10|0796:400.122.23....35....74.50/298.47.52.10...56.11.14/325.30.150.20...55.10..10.10/410.25.20....50|0797:49/42..22/15/50......10|0798:10//15/15|0809:..34....10/......10/20......10/30..30....10....15|0820:......10....15/..10....10/55......10/45..10|0823://25/20|0824:19......10.10/10/..35.........40/10......10|0826:89..48/156..49...34.10/90......10/175...10.15...10|0828:51...10.15..17.30/81..68....10/100..35....10/65......10|0840:59///|0845:23/38//10..15....10|0847:10......10/......10//20..10|0848:/......10/......10/......10|0851:10......12/16.10.....10/25......10/..40....10...10|0852:20......10/......10/10/30.10.....10.10|0855:10.90.11.10...58...18.84/177.11.....62.10..24.116/105.30..10...50.140..15/345......55.10..15|0858:37/28/20..60....10/45......15|0861:..28....21/83......12....23/115......15/25..20....15|0865:/.......16/10..10/|0866:28/..........10/30/|0867:86.10.....11...10.93/23..120....19...10/140.15.30.35...35/90.55.65.35...20...10|0873:......11/10......13/10..25....10/15..10....10|0879:16/10..........10/20/45.......10|0880:74//30/10|0882:12..28/10/60/..55....10.10..10|0888:///......10|0889:......11/......10/70......10/.10.....10|0893:/......10/......10/......10|0899:44..60.......10..25/89..102........10/.........10/..10.......15|0907:20.10.....10/10......10/25/15..10|0917:104......10.10...56/15.24..23.......10/55.10.90.15...10.10/45..55....10.50...15|0928:24.115........15.10/..200........43/25..90.......10.15/125.........10.10|0935:118.10.38.40.41..10.33...189/294..80.10...10....149.43/130..135....10....65/345..55....15.35|0938:///..25|0944:/16//|0946:10//..20/25|0957:59..50....15.10/77..10....10/125.105.115....15/85..35....10....10|0965:..........30/..39/..30/..15|0971:11//10/.10.25|0981:10///|0983:12..14....31....13/165.25.19....21/90..55.20...10....10/95.10.100....15.15|0984:......10/.10.....10/..20....10/35......10|0986:/20//|0988:47...28...14/10.33.....17....54.11/......10....25/20......10....25|0994:..16//30..15/10...10|0995:28.........10/80/210....135.135/70|1507:21......10//30..10........10/75.10......10|1509:.........10/24.........10/10..10/35..35....10.55|1525:......10/83......10/30/|1581:..14.....188/50.18.10....11...10.10/10.......10/25......10...10|1586:/10/.10/10..10|1598:/..........14/10/10|1621:..50....10/188......10...10.74/45......10/55|1640:42//20/.15.20.....10|1641:18.22/..10/10..........10/.......10|1652:.10.........10/16..10/80..15/50.........10.50|1655:10/12/10/|1658:10//30/20|1659:......10/..28/....15/55|1667:12/10/35......10/......10|1669:......10/......10/40..........15/75..........15|1674:.17.101.....10..10/58..35.......10.10/115..95/50......10|1676:34..10.10...15/..24....23....20/30..30..20..15/70..15....25|1680:10.10.....10/.35.50.10...10....10/30..10....10.10/15.15|1681:10.24.21....13/..20....17/40..15....10/10..15....10|1690:......11/......10//|1695:......10/10..10..10.10/......10/20..10|1696://....20/15|1699:12......10/16......10//......10|1700:......10.18/..52....11....17/55......10/35..50....10.55|1701:......10/......12/.15/10......10|1705:10......10/10..92....10....10/95..20/55..35....10.10|1706:..........15/10//25..25|1708:12..19.10...12.45/24..113....16/75..15....10/75.15.75....15|1709:16......10/84..10....10/......10/15......15|1711:10......15/97..10....16.10/10......15/30......15|1714:......14/10..21/65......10/20..20|1719:50......10/10......10/15.15.....10/......10|1721:20/61/30/|1723:/12//|1724:10..23/10......11/30......10/30......10|1728:17......10/......10.12//20.25.....10|1729://..10/|1730:..32....10.10/34......10/15..20....10/30......10|1731:..42....10/14..29....10/25......10/50..10....10|1734:..60....10/46......10/30......10/45..30....10|1735:......12/12......10/....10..10/15......10|1740:......10/11......12...10/20......10/......10|1742:..........19/41......10.19/.15.20....10/30..........65|1771:152//30..........10/15.......10|1773:......14/105..20....11/25..15....10/25.10.....10|1774:......10/14......10/10......10/......10|1783:66......10...10/99......35...10.10/90......15.10...15/85......20|1842:.........10/30/10/..15|1859:10.........10/.........10/35..20.......10/30.......110..10|1876:10..10.....10/87..54//..10.......10|1883:56.10.....28....10/75..186....27.14...34/..40....35....25/60......45.35...10|1884:80.10/61//.20|1891:10//.10/|1892:14/13..38........10/85..35/80......10|1894:19......14....40/18...39.......18/20/..........15|1895:78..........10/.10/..15....10/20......10....10|1896:///..20|1900:10.10.74.10...19.25/31...10...19.11/115..55....20/105......20|1901:15/..10....10/50/30......10|1903://30/10|1904:..11....15/15......22....13/..15....20....50/40......30....65|1911:12......32....10/54..60....32.38/35..10..10..30....40/115.50.10....50.....15|1916:......15...10/......26...10.10/10..55....15.10/90.10.....10...10|1924:10......26....12/.33.16.16.16..25/10......20/15.10.....35|1926:41......10/26..........31/115......10.10/135......10|1930:..140....23...20/11......32...10/35..205....35...10/115......15...10|1931:58..13....14...10.38/12..60....12...10/40..30....15/100......10|1940:..43....15/39..44....22/50..25....10/15......15|1942:21...13...38/41......24....32/40......15....10/40..25....20...10|1945:......10/11.13........10/25..10....15.10/70..30....20...10|1948:85...52.10..10/83.94.20..95..14...10/120.40.........15/80..25....10...10|1949:57..10....17...10/10..40.......10/15.10.10/10..20.....90..10|1950:.10/14..17/20/25..40....10|1952:117..50...10.16/.65.32.31.30.36.14/20..10....15/140..80....20|1954:/.........10/50..20.......15/25|1955:44......10/34...10...12/..55....10/95..10....10|1959:39.15.....14/10......20/45......10/10...10...25|1960:17......20...10/28..16..14.14.26/95..35....25...10/15..20....30...10|1961:85..10....11...10/186......10...10/50.10.10....10...10/105.10.....10...15|1963:10.40.50....23...10/120......11...10.31/120....55..15...10/35......20.55|1966:72..26..10..10....13/32..97....11/120..150.15...15/55..55....10|1969:37...78...10/..32....20/45..10....10/65..45....15|1970:37..28....13/23..22....13/20..50....10/10......10|1978:37......11/10..10/......10/15..10....10|1979:247..90....10.54...90/145..192..13.12.10.10...15/420..345....10.85..10.15/165..270.30.10..10|1980:96......10.88..10/109......12...12/......10/205......10|1982:50..10....11.10/78..24....10....21/120......10....10/85.35.....15.10....10|1991:39.13.....10/112......10/95......10/30..20....10|1992:.10......43/.......43/25......10.290...45/......15";
+  const JAREN = [2022, 2023, 2024, 2025];
+  const WB = new Set(['0060', '0339']);   // Ameland en Renswoude: gemeentelijk woningbedrijf (toelichting CBS bij de DAEB-tabel)
+  const MUT_BRON = 'CBS-maatwerk voor BZK, Woningvoorraad, mutaties en statusontwikkelingen 2022–2025 (gepubliceerd 18 dec 2023 tot en met 30 okt 2026)';
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const nf1 = new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const num = v => (v == null || v === '' || isNaN(+v)) ? null : +v;
+  const pct1 = (a, b) => (a != null && b) ? nf1.format(100 * a / b) + '%' : '–';
+  const tek = v => (v > 0 ? '+' : v < 0 ? '−' : '') + nf.format(Math.abs(v));
+
+  // ---------- gemeenten ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- data in de pagina ----------
+  const D = new Map();
+  DAEB.split('|').forEach(r => { const [c, w] = r.split(':'); const [d, nd, o, t] = w.split(',').map(num); D.set(c, { d, nd, o, t }); });
+  const M = new Map();
+  MUT.split('|').forEach(r => {
+    const [c, w] = r.split(':');
+    M.set(c, w.split('/').map(j => { const a = j.split('.').map(v => +v || 0); while (a.length < 12) a.push(0); return a; }));
+  });
+  // per jaar: componenten
+  const comp = a => ({ nb: a[0], ot: a[1], sl: a[2], oo: a[3], corr: a[4] - a[5], verk: a[6], uitV: a[7] + a[8], inK: a[9], inV: a[10] + a[11] });
+  const netto = k => k.nb + k.ot - k.sl - k.oo + k.corr - k.verk - k.uitV + k.inK + k.inV;
+  const NLM = JAREN.map((_, i) => { const s = Array(12).fill(0); M.forEach(v => v[i].forEach((x, j) => s[j] += x)); return s; });
+  const NLD = { d: 0, nd: 0, o: 0, t: 0 }; D.forEach(v => { ['d', 'nd', 'o', 't'].forEach(k => NLD[k] += v[k] || 0); });
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+  });
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  let tipBron = null;
+  function toonTip(e, html) {
+    tipBron = e.currentTarget || e.target; tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+  document.addEventListener('pointermove', ev => { if (!tip.hidden && !(tipBron && tipBron.isConnected && tipBron.contains(ev.target))) verbergTip(); }, { passive: true });
+  addEventListener('scroll', verbergTip, { passive: true, capture: true });
+  function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, i.dataset.tip)); i.addEventListener('pointerleave', verbergTip); }); }
+
+  // ---------- CBS live ----------
+  async function getJSON(u) { const r = await fetch(u); if (!r.ok) throw new Error(r.status + ' ' + u); return r.json(); }
+  const odata = async (t, q) => (await getJSON(CBS + t + '/' + q.replace(/ /g, '%20'))).value;
+  const tr = s => String(s).trim();
+  const regio = c => `(startswith(RegioS,'GM${c}') or startswith(RegioS,'NL01'))`;
+  const isNL = r => tr(r.RegioS) === 'NL01';
+  const statusCache = {};
+  const voorlopig = t => statusCache[t] ??= odata(t, 'Perioden?$select=Key,Status').then(v => new Set(v.filter(p => /voorlopig/i.test(p.Status || '')).map(p => tr(p.Key)))).catch(() => new Set());
+
+  async function laadVoorraad(c) {
+    const rows = await odata('86286NED', `TypedDataSet?$filter=${regio(c)}&$select=RegioS,Perioden,StatusVanBewoning,TotaleWoningvoorraad_1,EigendomWoningcorporaties_5`);
+    const uit = { gm: {}, nl: {} };
+    rows.forEach(r => {
+      const j = +tr(r.Perioden).slice(0, 4), w = isNL(r) ? uit.nl : uit.gm, s = tr(r.StatusVanBewoning);
+      const o = w[j] ??= {};
+      if (s === 'T001742') { o.tot = num(r.TotaleWoningvoorraad_1); o.corp = num(r.EigendomWoningcorporaties_5); }
+      if (s === 'A059383') o.leeg = num(r.EigendomWoningcorporaties_5);
+      if (s === 'A059382') o.ander = num(r.EigendomWoningcorporaties_5);
+    });
+    return uit;
+  }
+  async function laadPijp(c) {
+    const rows = await odata('83671NED', `TypedDataSet?$filter=startswith(RegioS,'GM${c}') and (Opdrachtgever eq 'A028184' or Opdrachtgever eq 'T001209') and Eigendom eq 'A028867' and Perioden ge '2022'&$select=Opdrachtgever,Perioden,Woningen_2`);
+    const j = {}, alle = {}; let laatste = '';
+    rows.forEach(r => { const p = tr(r.Perioden); if (!/KW/.test(p)) return; const y = +p.slice(0, 4), w = tr(r.Opdrachtgever) === 'A028184' ? j : alle; w[y] = (w[y] || 0) + (num(r.Woningen_2) || 0); if (num(r.Woningen_2) != null && p > laatste) laatste = p; });
+    return { j, alle, laatste };
+  }
+  async function laadHuurtoeslag(c) {
+    const [rows, vl] = await Promise.all([odata('86380NED', `TypedDataSet?$filter=${regio(c)} and Populatie eq '1050010' and (KenmerkenVanHuishoudens eq '1014900' or KenmerkenVanHuishoudens eq '1014850') and Perioden ge '2023JJ00'&$select=RegioS,KenmerkenVanHuishoudens,Perioden,ParticuliereHuishoudens_1`), voorlopig('86380NED')]);
+    const uit = { gm: {}, nl: {}, vl };
+    rows.forEach(r => { const w = isNL(r) ? uit.nl : uit.gm, p = tr(r.Perioden); (w[p] ??= {})[tr(r.KenmerkenVanHuishoudens) === '1014900' ? 'ht' : 'huur'] = num(r.ParticuliereHuishoudens_1); });
+    const per = Object.keys(uit.gm).filter(p => uit.gm[p].ht != null).sort().pop();
+    return { per, gm: per && uit.gm[per], nl: per && uit.nl[per], vl: per && vl.has(per) };
+  }
+  async function laadWoonlasten(c) {
+    const [rows, vl] = await Promise.all([odata('85950NED', `TypedDataSet?$filter=${regio(c)} and HuishoudensEnWoningkenmerken eq 'T001139' and (EigenaarHuurder eq 'A047047' or EigenaarHuurder eq 'A047048') and Perioden ge '2022JJ00'&$select=RegioS,EigenaarHuurder,Perioden,AantalHuishoudens_1,TotaleWoonlasten_6,Woonquote_9`), voorlopig('85950NED')]);
+    const uit = { gm: {}, nl: {} };
+    rows.forEach(r => { const w = isNL(r) ? uit.nl : uit.gm, p = tr(r.Perioden); (w[p] ??= {})[tr(r.EigenaarHuurder) === 'A047047' ? 'corp' : 'ander'] = { n: num(r.AantalHuishoudens_1), wl: num(r.TotaleWoonlasten_6), wq: num(r.Woonquote_9) }; });
+    const per = Object.keys(uit.gm).filter(p => uit.gm[p].corp && uit.gm[p].corp.wq != null).sort().pop();
+    return { per, gm: per && uit.gm[per], nl: per && uit.nl[per], vl: per && vl.has(per) };
+  }
+
+  // ---------- toestand ----------
+  let S = null;
+  async function kies(g) {
+    S = { g, V: null, P: null, H: null, W: null, fout: [] };
+    $('#gmInput').value = g.n;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    history.replaceState(null, '', '#gm=' + g.c);
+    $('#intro').hidden = true; $('#result').hidden = false; $('#melding').hidden = true;
+    render();
+    const mijn = S;
+    const stap = (k, p, naam) => p.then(v => { if (S !== mijn) return; S[k] = v; render(); })
+      .catch(() => { if (S !== mijn) return; S.fout.push(naam); S[k] = false; render(); });
+    await Promise.all([
+      stap('V', laadVoorraad(g.c), 'woningvoorraad (86286NED)'),
+      stap('P', laadPijp(g.c), 'bouwvergunningen (83671NED)'),
+      stap('H', laadHuurtoeslag(g.c), 'huurtoeslag (86380NED)'),
+      stap('W', laadWoonlasten(g.c), 'woonlasten (85950NED)')]);
+    if (S === mijn && S.fout.length) {
+      $('#meldingTekst').textContent = `Niet alles kon bij het CBS worden opgehaald: ${S.fout.join(', ')}. De cijfers die in de pagina staan (sociale huur en de veranderingen), staan er wel.`;
+      $('#melding').hidden = false;
+    }
+  }
+
+  const laadt = '<span class="small muted">wordt opgehaald bij het CBS…</span>';
+  const mis = '<span class="small muted">niet beschikbaar</span>';
+
+  function render() {
+    const g = S.g, d = D.get(g.c), V = S.V;
+    const vj = V ? Math.max(...Object.keys(V.gm).map(Number).filter(j => V.gm[j].corp != null)) : null;
+    const v = V && V.gm[vj], vn = V && V.nl[vj];
+    // lead
+    if (v) {
+      $('#leadBig').textContent = `${g.n}: ${nf.format(v.corp)} corporatiewoningen`;
+      $('#leadSub').textContent = `${pct1(v.corp, v.tot)} van alle ${nf.format(v.tot)} woningen op 1 januari ${vj} (Nederland ${pct1(vn.corp, vn.tot)})`
+        + (WB.has(g.c) ? '. Hier verhuurt een gemeentelijk woningbedrijf; dat telt het CBS niet als woningcorporatie.' : '');
+    } else {
+      $('#leadBig').textContent = g.n;
+      $('#leadSub').textContent = V === false ? 'De woningvoorraad kon niet bij het CBS worden opgehaald.' : 'Woningvoorraad wordt opgehaald bij het CBS…';
+    }
+    // kerncijfers
+    const dTxt = x => x == null ? 'minder dan 100' : nf.format(x);
+    const daebUnit = !d ? `<div class="unit"><span class="eyebrow">Sociale huur (DAEB)</span><span class="u-val">0</span><span class="u-sub">geen woningen van een corporatie op 1 januari 2025</span></div>`
+      : d.t == null ? `<div class="unit"><span class="eyebrow">Sociale huur (DAEB)</span><span class="u-val">&lt; 100</span><span class="u-sub">minder dan 100 corporatiewoningen op 1 januari 2025; het CBS geeft dan geen splitsing</span></div>`
+      : `<div class="unit"><span class="eyebrow">Sociale huur (DAEB)</span><span class="u-val">${d.d == null ? '&lt; 100' : nf.format(d.d)}</span>
+        <span class="u-sub">${d.d != null ? pct1(d.d, d.t) + ' van de corporatiewoningen' : ''}${d.d != null && V && V.gm[2025] ? ', ' + pct1(d.d, V.gm[2025].tot) + ' van alle woningen' : ''} · 1 januari 2025, voorlopig (Nederland ${pct1(NLD.d, NLD.t)} van de corporatiewoningen)</span>
+        <span class="u-sub">niet-DAEB ${dTxt(d.nd)} · onbekend ${dTxt(d.o)}</span></div>`;
+    const leeg = v && v.leeg != null ? v.leeg + (v.ander || 0) : null;
+    $('#kern').innerHTML = `
+      <div class="unit"><span class="eyebrow">Alle woningen</span><span class="u-val">${v ? nf.format(v.tot) : '…'}</span><span class="u-sub">${v ? '1 januari ' + vj : (V === false ? 'niet opgehaald' : 'wordt opgehaald')}</span></div>
+      <div class="unit"><span class="eyebrow">Corporatiewoningen</span><span class="u-val">${v ? nf.format(v.corp) : (d && d.t ? nf.format(d.t) : '…')}</span><span class="u-sub">${v ? pct1(v.corp, v.tot) + ' van alle woningen, 1 januari ' + vj : (d && d.t ? '1 januari 2025' : '')}</span></div>
+      ${daebUnit}
+      <div class="unit"><span class="eyebrow">Leeg of ander gebruik</span><span class="u-val">${leeg != null ? nf.format(leeg) : '…'}</span><span class="u-sub">${leeg != null ? `corporatiewoningen zonder ingeschreven bewoner, ${pct1(leeg, v.corp)} (Nederland ${pct1((vn.leeg || 0) + (vn.ander || 0), vn.corp)}) · 1 januari ${vj}` : (V === false ? 'niet opgehaald' : '')}</span></div>`;
+    renderReeks(); renderBrug(); renderPijp(); renderVoorWie(); renderVoet();
+  }
+
+  function renderReeks() {
+    const V = S.V;
+    if (!V) { $('#reeksWrap').innerHTML = `<p class="small" style="padding:10px 12px">${V === false ? mis : laadt}</p>`; return; }
+    const js = Object.keys(V.gm).map(Number).sort();
+    const rij = j => { const a = V.gm[j], n = V.nl[j] || {}; return `<tr><td>1 januari ${j}</td><td class="r">${nf.format(a.tot)}</td><td class="r">${nf.format(a.corp)}</td><td class="r">${pct1(a.corp, a.tot)}</td><td class="r">${pct1(n.corp, n.tot)}</td></tr>`; };
+    $('#reeksWrap').innerHTML = `<table><thead><tr><th style="cursor:default">Peildatum</th><th class="r" style="cursor:default">Alle woningen</th><th class="r" style="cursor:default">Corporatiewoningen</th><th class="r" style="cursor:default">Aandeel</th><th class="r" style="cursor:default">Aandeel Nederland</th></tr></thead><tbody>${js.map(rij).join('')}</tbody></table>`;
+  }
+
+  // ---------- brug ----------
+  const RIJEN = [
+    ['nb', 'Nieuwbouw', 1, 'Nieuw gebouwde woningen in eigendom van een corporatie.'],
+    ['ot', 'Overige toevoeging', 1, 'Zoals splitsing van een woning of verbouw van een kantoor tot woningen.'],
+    ['inK', 'Gekocht: van koop naar corporatie', 1, 'Woningen die eerst een koopwoning waren.'],
+    ['inV', 'Overgenomen van een andere verhuurder', 1, 'Woningen die eerst van een andere verhuurder waren (of waarvan de eigenaar onbekend was).'],
+    ['sl', 'Sloop', -1, 'Gesloopte corporatiewoningen.'],
+    ['oo', 'Overige onttrekking', -1, 'Zoals samenvoegen van woningen of een andere functie.'],
+    ['verk', 'Verkocht: van corporatie naar koop', -1, 'Corporatiewoningen die een koopwoning werden.'],
+    ['uitV', 'Naar een andere verhuurder', -1, 'Corporatiewoningen die naar een andere verhuurder gingen (of waarvan de eigenaar daarna onbekend is).'],
+    ['corr', 'Correcties', 0, 'Correcties van het CBS op eerdere jaren, per saldo.']];
+
+  function renderBrug() {
+    const g = S.g, m = M.get(g.c);
+    const ks = m.map(comp), som = ks.reduce((s, k) => { Object.keys(k).forEach(x => s[x] = (s[x] || 0) + k[x]); return s; }, {});
+    const nlk = NLM.map(comp);
+    const V = S.V;
+    const begin = j => V && V.gm[j] ? V.gm[j].corp : null, beginNL = j => V && V.nl[j] ? V.nl[j].corp : null;
+    // balken
+    const max = Math.max(1, ...RIJEN.filter(r => r[2]).map(r => som[r[0]]));
+    $('#brugBalk').innerHTML = RIJEN.filter(r => r[2]).map(([k, t, tk]) =>
+      `<div class="rij"><span>${esc(t)}</span><span class="t"><i style="width:${100 * som[k] / max}%;background:${tk > 0 ? 'var(--seq-4)' : 'var(--dn-2)'}"></i></span><span class="v">${som[k] ? (tk > 0 ? '+' : '−') : ''}${nf.format(som[k])}</span></div>`).join('')
+      + `<div class="rij"><span><b>Netto</b>${som.corr ? ' <span class="small muted">(met correcties)</span>' : ''}</span><span></span><span class="v"><b>${tek(netto(som))}</b></span></div>`;
+    $('#brugSomKop').textContent = `Samen over vier jaar (2022–2025)`;
+    const fys = som.nb + som.ot - som.sl - som.oo, eig = som.inK + som.inV - som.verk - som.uitV;
+    $('#brugZin').innerHTML = (som.nb + som.ot + som.sl + som.oo + som.verk + som.uitV + som.inK + som.inV === 0)
+      ? 'Geen veranderingen van de corporatievoorraad in deze vier jaar.'
+      : `Door bouwen en slopen ${fys >= 0 ? 'kwamen er per saldo' : 'gingen er per saldo'} ${nf.format(Math.abs(fys))} corporatiewoningen ${fys >= 0 ? 'bij' : 'af'}; door wisseling van eigenaar ${eig >= 0 ? 'kwamen er' : 'gingen er'} ${nf.format(Math.abs(eig))} ${eig >= 0 ? 'bij' : 'af'}.`;
+    // per jaar naast NL
+    const per1000 = (x, b) => b ? nf1.format(1000 * x / b) : '–';
+    $('#perJaar').innerHTML = `<table><thead><tr><th style="cursor:default">Jaar</th><th class="r" style="cursor:default">Netto</th><th class="r" style="cursor:default" data-tip="Netto verandering per 1.000 corporatiewoningen op 1 januari van dat jaar">Per 1.000</th><th class="r" style="cursor:default">Nederland per 1.000</th></tr></thead><tbody>${JAREN.map((j, i) =>
+      `<tr><td>${j}</td><td class="r">${tek(netto(ks[i]))}</td><td class="r">${V ? per1000(netto(ks[i]), begin(j)) : '…'}</td><td class="r">${V ? per1000(netto(nlk[i]), beginNL(j)) : '…'}</td></tr>`).join('')}</tbody></table>
+      <p class="small muted">Per 1.000 corporatiewoningen op 1 januari van dat jaar. Nederland is de optelling van alle gemeenten.</p>`;
+    bindTips($('#perJaar'));
+    // tabel
+    const cel = (x, tk) => `<td class="r">${x ? (tk < 0 ? '−' : tk > 0 ? '+' : (x > 0 ? '+' : '−')) + nf.format(Math.abs(x)) : '<span class="muted">0</span>'}</td>`;
+    const rijen = RIJEN.map(([k, t, tk, u]) => `<tr><td><span data-tip="${esc(u)}">${esc(t)}</span></td>${ks.map(x => cel(x[k], tk)).join('')}${cel(som[k], tk)}</tr>`).join('');
+    const nettoRij = `<tr><td><b>Netto</b></td>${ks.map(x => `<td class="r"><b>${tek(netto(x))}</b></td>`).join('')}<td class="r"><b>${tek(netto(som))}</b></td></tr>`;
+    const standRij = V ? `<tr><td><span data-tip="De verandering van 1 januari tot 1 januari volgens de voorraadtabel 86286NED. Wijkt af van Netto doordat de tabellen deels andere bronnen en momenten gebruiken.">Ter vergelijking: verandering in de voorraadtabel</span></td>${JAREN.map(j => { const a = begin(j), b = begin(j + 1); return `<td class="r muted">${a != null && b != null ? tek(b - a) : '–'}</td>`; }).join('')}<td class="r muted">${begin(2022) != null && begin(2026) != null ? tek(begin(2026) - begin(2022)) : '–'}</td></tr>` : '';
+    $('#tblWrap').innerHTML = `<table><thead><tr><th style="cursor:default">Corporatiewoningen</th>${JAREN.map(j => `<th class="r" style="cursor:default">${j}</th>`).join('')}<th class="r" style="cursor:default">Samen</th></tr></thead><tbody>${rijen}${nettoRij}${standRij}</tbody></table>`;
+    $('#rowCount').textContent = `${g.n} · per kalenderjaar · 2022 en 2023 niet afgerond, 2024 en 2025 afgerond op vijftallen`;
+    bindTips($('#tblWrap'));
+  }
+
+  function renderPijp() {
+    const P = S.P, m = M.get(S.g.c);
+    if (!P) { $('#pijp').innerHTML = P === false ? `<p>${mis}</p>` : `<p>${laadt}</p>`; return; }
+    const kw = P.laatste ? P.laatste.replace(/^(\d{4})KW0?(\d)$/, '$2e kwartaal') : '';
+    const js = Object.keys(P.j).map(Number).sort();
+    $('#pijp').innerHTML = `<p class="small">Vergunde huurwoningen per jaar: met een corporatie of de overheid als opdrachtgever, en alle vergunde huurwoningen. Daarnaast de nieuwbouw van corporaties in hetzelfde jaar.</p>
+      <table><thead><tr><th style="cursor:default">Jaar</th><th class="r" style="cursor:default">Vergund, corporatie of overheid</th><th class="r" style="cursor:default">Vergund, alle huur</th><th class="r" style="cursor:default">Nieuwbouw corporaties</th></tr></thead><tbody>${js.map(j => { const i = JAREN.indexOf(j); return `<tr><td>${j}${j === +String(P.laatste).slice(0, 4) && !/KW04$/.test(P.laatste) ? ' <span class="small muted">t/m ' + esc(kw) + '</span>' : ''}</td><td class="r">${nf.format(P.j[j] || 0)}</td><td class="r">${nf.format(P.alle[j] || 0)}</td><td class="r">${i >= 0 ? nf.format(m[i][0]) : '<span class="muted">–</span>'}</td></tr>`; }).join('')}</tbody></table>
+      <p class="small muted">Een corporatie die woningen kant-en-klaar koopt van een ontwikkelaar, staat niet als opdrachtgever in de vergunning; die woningen zitten alleen in "alle huur". Vergund in het ene jaar wordt meestal pas jaren later opgeleverd. Bron: CBS ${LNK('83671NED')} (vergund) en het CBS-maatwerk voor BZK (nieuwbouw).</p>`;
+  }
+
+  function renderVoorWie() {
+    const H = S.H, W = S.W, d = D.get(S.g.c);
+    let h = '';
+    if (!H) h += `<p>${H === false ? mis : laadt}</p>`;
+    else if (!H.gm) h += '<p class="small muted">Geen cijfer over huurtoeslag voor deze gemeente.</p>';
+    else {
+      const ht = H.gm.ht * 1000, htN = H.nl.ht * 1000;
+      h += `<div class="focus"><span class="fl">Huishoudens met huurtoeslag, ${H.per.slice(0, 4)}${H.vl ? ' (voorlopig)' : ''}</span><span class="fv">${nf.format(ht)}</span>
+        <span class="fc">${pct1(H.gm.ht, H.gm.huur)} van de huishoudens in een huurwoning (Nederland ${pct1(H.nl.ht, H.nl.huur)})${d && d.d ? ` · ${nf.format(Math.round(100 * ht / d.d))} per 100 DAEB-woningen (Nederland ${nf.format(Math.round(100 * htN / NLD.d))})` : ''}</span></div>
+        <p class="small muted">Huurtoeslag krijgen ook huurders van andere verhuurders; het CBS geeft dit cijfer in duizenden met één decimaal. Bron: CBS ${LNK('86380NED')}.</p>`;
+    }
+    if (!W) h += `<p>${W === false ? mis : laadt}</p>`;
+    else if (!W.gm) h += '<p class="small muted">Geen cijfer over woonlasten voor deze gemeente.</p>';
+    else {
+      const c = W.gm.corp || {}, a = W.gm.ander || {}, nc = (W.nl && W.nl.corp) || {}, na = (W.nl && W.nl.ander) || {};
+      const q = x => x != null ? nf1.format(x) + '%' : '–', e = x => x != null ? '€ ' + nf.format(x) : '–';
+      h += `<table><thead><tr><th style="cursor:default">Mediaan, ${W.per.slice(0, 4)}${W.vl ? ' (voorlopig)' : ''}</th><th class="r" style="cursor:default">Huurder corporatie</th><th class="r" style="cursor:default">Huurder andere verhuurder</th></tr></thead><tbody>
+        <tr><td>Woonquote ${esc(S.g.n)}</td><td class="r">${q(c.wq)}</td><td class="r">${q(a.wq)}</td></tr>
+        <tr><td>Woonlasten per maand</td><td class="r">${e(c.wl)}</td><td class="r">${e(a.wl)}</td></tr>
+        <tr><td class="muted">Woonquote Nederland</td><td class="r muted">${q(nc.wq)}</td><td class="r muted">${q(na.wq)}</td></tr></tbody></table>
+        <p class="small muted">Woonquote: woonlasten (huur na huurtoeslag, plus energie, water en lokale lasten) als deel van het besteedbaar inkomen. Bron: CBS ${LNK('85950NED')}.</p>`;
+    }
+    $('#voorwie').innerHTML = h;
+  }
+
+  // ---------- CSV ----------
+  function csvDownload(naam, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const slug = n => n.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  const bron = () => `${PRODUCT}, Open Data Atelier, ${location.href.split('#')[0]}, versie ${VERSIE}; ${MUT_BRON}; CBS-maatwerk DAEB en niet-DAEB corporatiewoningen 2025 (voorlopig); CC BY 4.0`;
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S) return;
+    const m = M.get(S.g.c).map(comp);
+    csvDownload(`open-data-atelier-sociale-huur-${slug(S.g.n)}.csv`,
+      ['gemeentecode', 'gemeente', 'jaar', 'nieuwbouw', 'overige_toevoeging', 'van_koop_naar_corporatie', 'van_andere_verhuurder_naar_corporatie', 'sloop', 'overige_onttrekking', 'van_corporatie_naar_koop', 'van_corporatie_naar_andere_verhuurder', 'correcties_saldo', 'netto', 'bron'],
+      m.map((k, i) => ['GM' + S.g.c, S.g.n, JAREN[i], k.nb, k.ot, k.inK, k.inV, k.sl, k.oo, k.verk, k.uitV, k.corr, netto(k), bron()]));
+  });
+  $('#csvAlleBtn').addEventListener('click', () => {
+    const naam = new Map(GM.map(g => [g.c, g.n]));
+    csvDownload('open-data-atelier-sociale-huur-alle-gemeenten.csv',
+      ['gemeentecode', 'gemeente', 'daeb_2025', 'niet_daeb_2025', 'daeb_onbekend_2025', 'corporatie_2025', 'nieuwbouw_2022_2025', 'sloop_2022_2025', 'verkocht_2022_2025', 'naar_andere_verhuurder_2022_2025', 'gekocht_of_overgenomen_2022_2025', 'netto_2022_2025', 'bron'],
+      GM.slice().sort((a, b) => a.c.localeCompare(b.c)).map(g => {
+        const d = D.get(g.c) || {}, s = (M.get(g.c) || []).map(comp).reduce((t, k) => { Object.keys(k).forEach(x => t[x] = (t[x] || 0) + k[x]); return t; }, {});
+        return ['GM' + g.c, naam.get(g.c), d.d ?? '', d.nd ?? '', d.o ?? '', d.t ?? '', s.nb || 0, s.sl || 0, s.verk || 0, s.uitV || 0, (s.inK || 0) + (s.inV || 0), netto({ nb: 0, ot: 0, sl: 0, oo: 0, corr: 0, verk: 0, uitV: 0, inK: 0, inV: 0, ...s }), bron()];
+      }));
+  });
+
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + location.href + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer te vinden is:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  // ---------- voet ----------
+  function renderVoet() {
+    renderHerken();
+    const nu = new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    $('#foot').innerHTML = `Bron: CBS, CC BY 4.0. Live opgehaald op ${nu}: ${LNK('86286NED')}, ${LNK('83671NED')}, ${LNK('86380NED')}, ${LNK('85950NED')}. In de pagina: CBS-maatwerk voor BZK, DAEB en niet-DAEB corporatiewoningen 2025 (voorlopig, 25 maart 2026) en Woningvoorraad, mutaties en statusontwikkelingen 2022–2025 (laatste editie 30 oktober 2026).<br>Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  $('#retryBtn').addEventListener('click', () => S && kies(S.g));
+
+  // ---------- links met de gemeente ----------
+  function zetLinks() {
+    const c = S && S.g.c; if (!c) return;
+    [['#naarWon', 'woningen.html#gm=' + c], ['#naarBouw', 'bouwstroom.html#gm=' + c], ['#naarHh', 'huishoudens.html#gm=' + c], ['#naarEa', 'energiearmoede.html#gm=' + c],
+     ['#naarInd', 'indicatoren.html#domein=wonen&gm=' + c], ['#naarInd2', 'indicatoren.html#domein=wonen&gm=' + c]]
+      .forEach(([s, h]) => { const a = $(s); if (a) a.href = h; });
+  }
+
+  // ---------- start ----------
+  const kiesEnLink = g => { kies(g); zetLinks(); };
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kiesEnLink(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kiesEnLink(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kiesEnLink(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kiesEnLink(g0);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+<script>
+/* Toegankelijkheid: tabel bedienbaar met toetsenbord, kaartvlakken geen tabstops (de tabel is de toetsenbordroute). */
+(function () {
+  var RIJ = 'tbody tr.klik';
+  var w = document.getElementById('tblWrap'), m = null;
+  var laatst = null;
+  function verrijk() {
+    w.querySelectorAll('th').forEach(function (th) {
+      var s = th.getAttribute('style') || '';
+      if (th.querySelector('.kolomknop') || !(th.dataset.k || th.dataset.sort) || /cursor:\s*default/.test(s)) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'kolomknop';
+      while (th.firstChild) b.appendChild(th.firstChild);
+      th.appendChild(b);
+    });
+    w.querySelectorAll(RIJ).forEach(function (tr) {
+      if (tr.classList.contains('gm') || tr.querySelector('.rijknop')) return;
+      var td = Array.prototype.find.call(tr.cells, function (c) { return c.textContent.trim() && !c.querySelector('a,button,input,select'); });
+      if (!td) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'rijknop';
+      while (td.firstChild) b.appendChild(td.firstChild);
+      td.appendChild(b);
+    });
+    if (laatst && document.activeElement === document.body) {
+      if (laatst === 'rij') { var r = w.querySelector('.rijknop'); if (r) r.focus(); }
+      else { var d = w.querySelector(laatst); var k = d && d.querySelector('.kolomknop'); if (k) k.focus(); }
+    }
+    laatst = null;
+  }
+  if (w) {
+    w.addEventListener('focusin', function (e) {
+      var th = e.target.closest && e.target.closest('th');
+      laatst = th ? (th.dataset.k ? 'th[data-k="' + th.dataset.k + '"]' : 'th[data-sort="' + th.dataset.sort + '"]') : (e.target.classList.contains('rijknop') ? 'rij' : null);
+    });
+    new MutationObserver(verrijk).observe(w, { childList: true });
+    verrijk();
+  }
+  if (m) {
+    var uit = function () { m.querySelectorAll('path.leaflet-interactive').forEach(function (p) { if (p.getAttribute('tabindex') !== '-1') p.setAttribute('tabindex', '-1'); }); };
+    new MutationObserver(uit).observe(m, { childList: true, subtree: true, attributes: true, attributeFilter: ['tabindex'] });
+    uit();
+    if (m.getAttribute('aria-label')) m.setAttribute('aria-label', m.getAttribute('aria-label') + '; dezelfde gegevens staan in de tabel');
+  }
+})();
+</script>
+</body>
+</html>
