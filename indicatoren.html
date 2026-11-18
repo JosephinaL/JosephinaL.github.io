@@ -355,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.28';
+  const VERSIE = '0.29';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1729,6 +1729,8 @@ main > * { min-width: 0; }
       scope: 'Bedrijven, banen en de ruimte om te werken: hoeveel bedrijvigheid er is, hoeveel werkruimte er staat en bijkomt, en wat de gemeente zelf doet met grond, vergunningen en het contact met ondernemers. Werk en inkomen van inwoners staat in het sociaal domein; hier gaat het om de bedrijven en de werkplekken in de gemeente.',
       lees: 'Een vestiging is geen bedrijfspand: de meeste vestigingen zijn zelfstandigen aan huis. Een baan in de gemeente is niet hetzelfde als een werkende inwoner. Wat open is, telt aantallen; de vierkante meters werkruimte, de leegstand en de uitgifte van grond staan bij de provincie, bij marktpartijen of in de eigen administratie.',
       atelier: 'bedrijvigheid.html', atelierNaam: 'Bedrijvigheid per buurt', tvkort: '3.1 · 3.2 · 3.3 · 3.4',
+      naast: [['bedrijvigheid.html', 'Bedrijvigheid per buurt', 'hoe gemengd wonen en werken per buurt zijn, waar ondernemers vanuit huis werken en wat bedrijfsruimte aan OZB oplevert'],
+        ['gebied.html', 'Gebied in beeld', 'wat er staat en wat er verandert op een bedrijventerrein of in een innovatiedistrict: gebruik en vierkante meters, bouwen en slopen, energielabels']],
       tegel: 'Economie', oms: 'Bedrijven, banen en werkruimte, en wat de gemeente doet met grond, vergunningen en ondernemers.',
       kaarten: [
         { k: 'context', b: 'open', naam: 'Vestigingen van bedrijven',
@@ -1764,8 +1766,9 @@ main > * { min-width: 0; }
           niet: 'Of de ruimte benut wordt. Een terrein kan vol zijn uitgegeven en toch half leeg staan.',
           niveau: 'Bedrijventerrein, gemeente. Jaarlijks, door de gemeente aangeleverd.',
           norm: 'Regionale programmering van de provincie.', vgl: 'Ja (één landelijke definitie).',
-          bron: () => 'IBIS, het landelijke bestand van de provincies; elke provincie publiceert haar deel, vaak als open data op <a href="https://data.overheid.nl" target="_blank" rel="noopener">data.overheid.nl</a>. Licentie verschilt per provincie.',
-          herkomst: 'Landelijke monitor (IBIS).' },
+          bron: () => 'IBIS, het landelijke bestand van de provincies. De ligging en kenmerken van de terreinen staan landelijk als open data op <a href="https://data.overheid.nl" target="_blank" rel="noopener">data.overheid.nl</a> (IPO, CC0; peiljaar per terrein 2022 of 2024). Provincies publiceren daarnaast hun eigen, soms rijkere deel.',
+          herkomst: 'Landelijke monitor (IBIS).',
+          inst: ['gebied.html', 'Gebied in beeld'] },
         { k: 'bereik', b: 'open', naam: 'Voorraad werkruimte: niet-woningen naar functie',
           def: 'Aantal verblijfsobjecten zonder woonfunctie in de BAG, naar functie: kantoor, industrie, winkel, logies, bijeenkomst, onderwijs, zorg, sport.',
           zegt: 'Of er werkruimte bijkomt of verdwijnt, per maand, en waardoor: nieuwbouw, sloop of ombouw naar wonen.',
@@ -1774,7 +1777,7 @@ main > * { min-width: 0; }
           norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (gemeenten splitsen bedrijfspanden verschillend in verblijfsobjecten).',
           bron: () => `${cbs('86098NED')}. Oppervlakte per object: de BAG zelf.`,
           herkomst: 'Voorstel atelier.',
-          inst: ['bagwerkbank.html', 'BAG-werkbank'],
+          inst: [['bagwerkbank.html', 'BAG-werkbank'], ['gebied.html', 'Gebied in beeld']],
           uit: { b: 'nietw', w: x => x.EindstandVoorraad_22, f: 'n', dec: 1, geenNl: 1, l: 'verblijfsobjecten zonder woonfunctie (eind van de maand)' } },
         { k: 'bereik', b: 'open', naam: 'Werkruimte in aanbouw',
           def: 'Aantal niet-woningen met een vergunning of in aanbouw, naar functie, en hoe lang ze al in de pijplijn zitten.',
