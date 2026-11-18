@@ -1,0 +1,1194 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gebied in beeld · Open Data Atelier</title>
+<link rel="icon" type="image/svg+xml" href="beeldmerk/beeldmerk-stil.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
+<link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Gebied in beeld. Wat er staat en wat er verandert op een bedrijventerrein of in een zelf getekend gebied, in elke Nederlandse gemeente: woningen, bedrijfsruimte en kantoren in vierkante meters, bouwjaar, bouwen en slopen en energielabels, uit open data.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
+<script src="vendor/leaflet-1.9.4/leaflet.js"></script>
+<style>
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --dn-1: #b4492a; --dn-2: #de8b5c; --dn-3: #f0c4a3; --ov: #aab6b8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .ax0 { stroke: var(--muted); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart .noot { font-size: .82rem; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.streep { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; width: 16px; vertical-align: 3px; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 320px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.eig { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; font-size: .88rem; }
+.eig .t { position: relative; height: 14px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.eig .t i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.eig .t b { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px solid var(--fg); }
+.eig .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.eig .rij { display: contents; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 540px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.kruimel { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.kruimel .sep { color: var(--muted); font-size: .72rem; }
+.kruimel button.eyebrow { background: none; border: 0; padding: 0; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.kruimel button.eyebrow:hover { color: var(--fg); }
+.focus { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 1px; }
+.focus .fl { font-size: .82rem; color: var(--muted); }
+.focus .fv { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.focus .fc { font-size: .82rem; color: var(--muted); }
+.focus .fv small { font-size: 1rem; font-weight: 700; margin-left: 6px; }
+.dossier dl .uit { color: var(--fg); font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier dl dt.uit { box-shadow: -6px 0 0 color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier .legend span.uit { color: var(--fg); font-weight: 700; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+tbody tr.voorl td { color: var(--muted); }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 140px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
+th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td .rijknop { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+/* Gebied in beeld */
+.ondertitel { margin: 0; font-family: var(--f-display); font-stretch: 85%; font-size: 1.05rem; font-weight: 600; color: var(--muted); }
+.opv { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+.opv .card h3 { font-size: .95rem; }
+.opv .card p { margin: 0; font-size: .92rem; }
+.opv .card .kant { font-size: .82rem; color: var(--muted); }
+.duo2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.balk { display: flex; height: 22px; border-radius: 3px; overflow: hidden; background: var(--sunk); gap: 2px; }
+.balk i { display: block; height: 100%; min-width: 2px; }
+.balkrij { display: grid; gap: 3px; }
+.balkrij .wie { font-size: .82rem; color: var(--muted); }
+.cijfers { display: flex; flex-wrap: wrap; gap: 2px 16px; font-size: .86rem; font-variant-numeric: tabular-nums; }
+.cijfers .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; }
+#kiezer { max-height: 620px; overflow: auto; }
+#kiezer input[type="text"], #kiezer input[type="search"] { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: 100%; }
+.terrlijst { display: grid; gap: 2px; font-size: .9rem; }
+.terrlijst label { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 8px; align-items: baseline; padding: 3px 4px; border-radius: 4px; cursor: pointer; }
+.terrlijst label:hover { background: var(--sunk); }
+.terrlijst .ha { font-family: var(--f-mono); font-size: .8rem; color: var(--muted); white-space: nowrap; }
+#delen { display: grid; gap: 4px; font-size: .9rem; }
+#delen .deel { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; padding: 4px 8px; background: color-mix(in srgb, var(--accent) 10%, transparent); border-radius: 4px; }
+#delen .deel button { all: unset; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; font-size: .82rem; white-space: nowrap; }
+#delen .deel button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.deelrij { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border-top: 1px solid var(--line); padding-top: 8px; }
+#map.tekent { cursor: crosshair; }
+#map.tekent .leaflet-interactive { cursor: crosshair; }
+:root { --f-woon: #2a78d6; --f-ind: #b4492a; --f-kant: #eda100; --f-ond: #1baf7a; --f-wink: #8a5fbf; --f-ov: #aab6b8; --f-mix: #6fb3bc;
+  --l-a: #0f5c66; --l-b: #3a8f9a; --l-c: #6fb3bc; --l-d: #e0a070; --l-efg: #b4492a; --l-geen: #aab6b8; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --f-woon: #3987e5; --f-ind: #e2734f; --f-kant: #c98500; --f-ond: #199e70; --f-wink: #a584d6; --f-ov: #4f5f62; --f-mix: #3f8790;
+  --l-a: #a6dde3; --l-b: #62b0ba; --l-c: #3f8790; --l-d: #b9793f; --l-efg: #e2734f; --l-geen: #4f5f62; } }
+:root[data-theme="dark"] { --f-woon: #3987e5; --f-ind: #e2734f; --f-kant: #c98500; --f-ond: #199e70; --f-wink: #a584d6; --f-ov: #4f5f62; --f-mix: #3f8790;
+  --l-a: #a6dde3; --l-b: #62b0ba; --l-c: #3f8790; --l-d: #b9793f; --l-efg: #e2734f; --l-geen: #4f5f62; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+<script src="zoeken/zoeken.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Economie · open data</span>
+      <h1 id="title">Gebied in beeld</h1>
+      <p class="ondertitel">Wat er staat en wat er verandert op een bedrijventerrein of in een zelf getekend gebied</p>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Een gebiedsontwikkeling, een bedrijventerrein of een campus houdt zich niet aan buurtgrenzen. Kies een gemeente en stel zelf een gebied samen: uit de bedrijventerreinen van het landelijke register, uit vlakken die je zelf op de kaart tekent, of uit beide.</p>
+    <p>Je ziet wat er in dat gebied staat (woningen, kantoren, bedrijfsruimte, in aantallen en vierkante meters), hoe oud het is, wat er gebouwd en gesloopt wordt en welke energielabels de gebouwen hebben. Steeds met de hele gemeente ernaast. Het gebied zit in de link: wie de link opent, ziet hetzelfde gebied.</p>
+    <p class="muted small">Adressen en gebouwen uit de BAG (maandstand), bedrijventerreinen uit IBIS van de provincies, energielabels uit de open laag van het RIVM. Banen en bedrijven per gebied staan niet in open data en dus niet op deze pagina.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <!-- gebied kiezen -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Stap 1</span><h2 id="kiesKop">Stel het gebied samen</h2></div>
+        <p class="small muted">Klik een bedrijventerrein aan op de kaart of in de lijst, of teken een eigen vlak. Meerdere delen tellen samen als één gebied; wat in twee delen ligt, telt één keer.</p>
+      </div>
+      <div class="split">
+        <div class="mapwrap">
+          <div class="maten" id="tekenbalk" role="group" aria-label="Eigen vlak tekenen">
+            <button class="btn" type="button" id="tekenBtn">Teken een eigen vlak</button>
+            <button class="btn" type="button" id="tekenTerug" hidden>Laatste punt weg</button>
+            <button class="btn primary" type="button" id="tekenKlaar" hidden>Vlak sluiten</button>
+            <button class="btn" type="button" id="tekenStop" hidden>Annuleer</button>
+            <span class="small muted" id="tekenTxt" role="status"></span>
+          </div>
+          <div id="map" role="region" aria-label="Kaart met bedrijventerreinen en het gekozen gebied"></div>
+          <div class="maplegend" id="mapLegend"></div>
+        </div>
+        <aside class="dossier" id="kiezer">
+          <div class="field">
+            <label for="naamInput">Naam van het gebied (komt in de link en boven de cijfers)</label>
+            <input id="naamInput" type="text" maxlength="60" autocomplete="off" placeholder="Bijvoorbeeld: Stationsgebied">
+          </div>
+          <div id="delen"></div>
+          <h3 id="terrKop">Bedrijventerreinen</h3>
+          <input id="terrZoek" type="search" placeholder="Zoek een terrein…" aria-label="Zoek een bedrijventerrein">
+          <div class="terrlijst" id="terrLijst"></div>
+          <div class="deelrij">
+            <button class="btn" type="button" id="linkBtn">Kopieer de link naar dit gebied</button>
+            <button class="btn linkish" type="button" id="wisBtn">Gebied leegmaken</button>
+          </div>
+        </aside>
+      </div>
+
+      <div id="uitkomst" hidden>
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="top4" id="top4"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je het gebied niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Een ander begrip.</b> De pagina telt verblijfsobjecten uit de BAG: een woning, een winkel, een kantoor of een bedrijfshal met een eigen adres. Een woning is een verblijfsobject met een woonfunctie. De oppervlakte is de gebruiksoppervlakte uit de BAG, niet het perceel en niet het bruto vloeroppervlak uit een bouwplan. Een gebouw zonder adres (een schuur, een fietsenstalling, een trafo) telt niet mee.</li>
+          <li><b>Een andere grens of peildatum.</b> Een object telt mee als het punt van het adres binnen het gebied ligt; een gebouw op de rand kan er net buiten vallen. De grens van een bedrijventerrein is die van het register, met het peiljaar erbij; een gebiedsvisie of bestemmingsplan trekt de grens vaak anders. De BAG-stand staat onder de cijfers.</li>
+          <li><b>Registratie bij de bron.</b> Het gebruiksdoel en de oppervlakte zijn wat de gemeente in de BAG heeft vastgelegd. Een kantoor dat als industriefunctie staat, telt hier als bedrijfsruimte. Een oppervlakte van 1 of 999.999 m² is een opvulwaarde en telt niet mee in de vierkante meters. Een label ontbreekt vaak: het is alleen verplicht bij verkoop, verhuur en oplevering.</li>
+          <li><b>Een fout in deze bewerking.</b> Een adres of pand kun je nakijken in de <a href="https://bagviewer.kadaster.nl/" target="_blank" rel="noopener">BAG-viewer</a>, alle adressen van de gemeente in de <a href="bagwerkbank.html" class="naarWerkbank">BAG-werkbank</a>. Wijkt de pagina daarvan af zonder dat grens of peildatum het verklaart, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van het Kadaster, de provincies (IBIS) en het RIVM door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente en geen cijfers van een gebiedsontwikkeling of programma.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Wat valt op</span><h2>Het gebied naast de gemeente</h2></div>
+        <p class="small muted">Beschrijvend, met vaste regels. Geen oordeel over het gebied en geen toets aan een plan of doel.</p>
+      </div>
+      <div class="opv" id="opv"></div>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Wat er staat</span><h2 id="staatKop">Naar gebruik</h2></div>
+        <p class="small muted">Verblijfsobjecten in gebruik, in aantallen en vierkante meters. Rechts het aandeel dat het gebied heeft in de hele gemeente.</p>
+      </div>
+      <div class="duo2">
+        <div class="chart" id="mix"></div>
+        <div class="chart" id="leeftijd"></div>
+      </div>
+      <div class="panel">
+        <div class="tools">
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvBtn" type="button">CSV samenvatting</button>
+          <button class="btn" id="csvObj" type="button" title="BAG-ID's, gebruiksdoel, oppervlakte en bouwjaar; zonder adres">CSV objecten in het gebied</button>
+        </div>
+        <div class="scroll" id="tblWrap" tabindex="0" role="region" aria-label="Tabel naar gebruik; scroll met de pijltjestoetsen"></div>
+      </div>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Wat er verandert</span><h2 id="bouwKop">Bouwen en slopen</h2></div>
+        <p class="small muted">Panden en adressen die volgens de BAG vergund, in aanbouw, pas opgeleverd of voor sloop vergund zijn. De panden staan op de kaart hierboven.</p>
+      </div>
+      <div class="top4" id="bouw4"></div>
+      <details class="tabelview" id="bouwDetails">
+        <summary id="bouwSum">Toon de panden</summary>
+        <div class="scroll" id="bouwTbl" tabindex="0" role="region" aria-label="Tabel met panden in de bouwstroom"></div>
+      </details>
+
+      <div class="sectiekop">
+        <div><span class="eyebrow">Verduurzaming</span><h2 id="labelKop">Energielabels van utiliteitspanden</h2></div>
+        <p class="small muted">Panden zonder woningen met een kantoor-, winkel-, onderwijs-, zorg-, bijeenkomst-, logies-, sport- of celfunctie. Woningen staan hier niet: hun labels staan per buurt in de Energielabelkalender.</p>
+      </div>
+      <div class="chart" id="labels"></div>
+
+      <div class="sectiekop" id="ibisKopWrap">
+        <div><span class="eyebrow">Het register</span><h2 id="ibisKop">De gekozen bedrijventerreinen volgens IBIS</h2></div>
+        <p class="small muted">Wat gemeenten en provincies zelf over het terrein hebben opgegeven. Het peiljaar verschilt per terrein.</p>
+      </div>
+      <div class="panel" id="ibisPanel"><div class="scroll" id="ibisTbl" tabindex="0" role="region" aria-label="Tabel met bedrijventerreinen"></div></div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>In het gebied</b>: een adresseerbaar object telt mee als zijn punt uit de BAG binnen een van de delen van het gebied ligt. Bij een verblijfsobject is dat het punt van het object, bij een ligplaats of standplaats een punt binnen het vlak. Een object in twee overlappende delen telt één keer.</li>
+            <li><b>Wat er staat</b>: verblijfsobjecten met de status in gebruik, in gebruik (niet ingemeten), verbouwing of buiten gebruik. Een object dat alleen "gevormd" is, bestaat nog niet en staat bij Bouwen en slopen.</li>
+            <li><b>Gebruik</b>: een verblijfsobject met een woonfunctie telt als woning, ook als het daarnaast een andere functie heeft. De andere objecten staan bij hun functie; met meer dan één functie bij "meer functies samen".</li>
+            <li><b>Vierkante meters</b>: de gebruiksoppervlakte uit de BAG, opgeteld. Opvulwaarden (1 m² en 999.999 m²) tellen niet mee; de pagina noemt het aantal.</li>
+            <li><b>Bouwjaar</b>: het bouwjaar van het pand waarin het object ligt, gewogen naar vierkante meters. Een bouwjaar vóór 1200 is een opvulwaarde en staat bij onbekend.</li>
+            <li><b>Bouwen en slopen</b>: dezelfde regels als <a href="bouwstroom.html" class="naarBouw">Bouwstroom</a>. Vergund, in aanbouw en sloop naar de status van het pand; opgeleverd is een pand in gebruik met een bouwjaar van dit of vorig jaar, of een pand "in gebruik (niet ingemeten)". Een nieuw adres in een bestaand pand (splitsing, ombouw van kantoor of bedrijf naar wonen) staat apart. Een pand telt mee als zijn middelpunt in het gebied ligt.</li>
+            <li><b>Utiliteitspand en label</b>: dezelfde regels als de <a href="energielabelkalender.html" class="naarKal">Energielabelkalender</a>: een pand zonder woningen met minstens één van de acht utiliteitsfuncties, 50 m² of groter. Het label is het label dat in het pand het meest voorkomt. A tot en met A+++++ telt als A.</li>
+            <li><b>Oppervlakte van het gebied</b>: uit de grenzen berekend, de delen opgeteld. Overlappen twee delen, dan telt de overlap dubbel in de hectares, niet in de objecten.</li>
+            <li><b>Naast de gemeente</b>: dezelfde telling voor alle objecten van de gemeente (gemeente is de bronhouder in de BAG).</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Geen banen, geen bedrijven.</b> Hoeveel mensen er werken en welke bedrijven er zitten, staat niet in open data per gebied. Vierkante meters bedrijfsruimte zijn geen arbeidsplaatsen: een distributiehal en een laboratorium van dezelfde omvang verschillen een factor tien of meer. Bedrijfsvestigingen per buurt staan in <a href="bedrijvigheid.html" class="naarBedr">Bedrijvigheid per buurt</a>.</li>
+            <li><b>Geen toets aan een plan.</b> De aantallen woningen en vierkante meters uit een gebiedsvisie, ontwikkelplan of bestemmingsplan staan niet in open data. De pagina laat zien wat er nu staat en wat er in de BAG onderweg is, niet hoe ver een programma is.</li>
+            <li><b>De BAG ziet een plan laat.</b> Een pand komt pas in de BAG als de vergunning is verleend. Wat nog in voorbereiding is, ontbreekt. Sloop zonder vergunde nieuwbouw laat een gebied tijdelijk krimpen.</li>
+            <li><b>Leegstand is niet te zien.</b> "In gebruik" is een status in de registratie, geen vaststelling dat er iemand zit.</li>
+            <li><b>Onderwijs en onderzoek</b>: een universiteit of hogeschool staat in de BAG meestal met een onderwijsfunctie, soms als kantoor of bijeenkomstfunctie. Een campus bestaat uit weinig, zeer grote objecten; één verkeerd geregistreerd gebouw verschuift de verdeling.</li>
+            <li><b>Kassen en schuren</b> zonder adres tellen niet mee; in een glastuinbouwgebied mist daardoor het grootste deel van de bebouwing.</li>
+            <li><b>Bedrijventerreinen</b>: IBIS bevat terreinen vanaf één hectare, zoals gemeenten ze aan de provincie hebben opgegeven. Kantoorlocaties, winkelgebieden en campussen staan er meestal niet in; teken die zelf. Een deel van de terreinen in het register heeft geen gemeente en ontbreekt in de lijst.</li>
+            <li><b>Tekenen</b> gaat met de muis of een vinger. Met het toetsenbord kies je terreinen uit de lijst; een eigen vlak kan dan alleen via een link die iemand anders heeft gemaakt.</li>
+            <li><b>Een klein gebied</b> is een paar adressen. De pagina toont geen namen en geen eigenaren; het CSV-bestand bevat BAG-ID's, geen adressen.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><a href="bouwstroom.html" class="naarBouw">Bouwstroom</a>: alle woningen die in de gemeente vergund, in aanbouw of opgeleverd zijn, met de bekendmakingen erbij.</li>
+            <li><a href="labelc.html" class="naarLabelC">Label C-kantoren</a>: de labelplicht voor kantoren, per pand uitgezocht.</li>
+            <li><a href="energielabelkalender.html" class="naarKal">Energielabelkalender</a>: de eisen van 2029, 2030 en 2033, per buurt.</li>
+            <li><a href="bedrijvigheid.html" class="naarBedr">Bedrijvigheid per buurt</a>: bedrijfsvestigingen naar sector, per buurt.</li>
+            <li><a href="bagwerkbank.html" class="naarWerkbank">BAG-werkbank</a>: alle adressen van de gemeente, om zelf te koppelen.</li>
+            <li><a href="indicatoren.html#domein=economie">Indicatoren belicht, Economie</a>: wat je over werklocaties kunt meten en wat alleen de gemeente weet.</li>
+          </ul>
+        </div>
+      </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Adressen en gebouwen: Basisregistratie Adressen en Gebouwen (Kadaster, via PDOK), maandstand zoals in de BAG-werkbank en Bouwstroom; de stand staat na de gemeentekeuze onder de cijfers. Bedrijventerreinen: IBIS, het Integraal Bedrijventerreinen Informatie Systeem van de provincies (Interprovinciaal Overleg), opgevraagd bij de kaartdienst van de WarmteAtlas van RVO op het moment dat je de gemeente kiest; het peiljaar staat per terrein in de tabel. Energielabels: RIVM, laag <i>rvo_energielabels</i> (afgeleid uit EP-Online van RVO), opgevraagd op het moment dat het gebied verandert.</p>
+    <p><b>Licentie.</b> BAG: zonder gebruiksbeperkingen. IBIS bedrijventerreinen: CC0. Energielabels RIVM: Public Domain Mark 1.0. Achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+    <p><b>Methode.</b> Alles wat een punt in de BAG heeft en binnen het gekozen gebied ligt, telt mee, ingedeeld naar gebruik, oppervlakte, bouwjaar en status; dezelfde telling voor de hele gemeente staat ernaast. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen monitor van een gebiedsontwikkeling of programma, geen toets aan een plan, geen telling van banen of bedrijven, geen vaststelling van leegstand en geen vergelijking of ranglijst van gebieden of gemeenten. De grens van een zelf getekend gebied is een keuze van wie het tekende, geen officiële begrenzing.</p>
+    <p><b>Bekende beperkingen.</b> Gebouwen zonder adres tellen niet mee. Gebruiksdoel en oppervlakte zijn zo goed als de registratie. Objecten op de rand van het gebied kunnen er net binnen of buiten vallen. De bedrijventerreinen komen van een kaartdienst die niet van de bronhouder zelf is; valt die weg, dan werkt alleen nog het zelf tekenen. Labels ontbreken bij veel utiliteitspanden.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente, een provincie of een samenwerkingsverband.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de keuze van een gebied staat onder de kerncijfers het blok "Herken je het gebied niet?", met een melding per e-mail waarin gemeente, gebied en versie al zijn ingevuld. <a href="colofon.html">Colofon en privacy</a>. Eigenaar van een gebouw op deze pagina? Zie <a href="colofon.html#gebouwen">Gegevens over gebouwen: een fout melden of bezwaar maken</a>.</p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>
+(function () {
+  'use strict';
+  const VERSIE = '1.0';
+  const PRODUCT = 'Gebied in beeld';
+  // BAG-maandstand per gemeente uit de data van de BAG-werkbank (gm/) en Bouwstroom (bouw/).
+  const WB = '/bag-werkbank/gm/';
+  const BOUW = '/bag-werkbank/bouw/';
+  // IBIS bedrijventerreinen (IPO, CC0), kaartdienst van de WarmteAtlas (RVO). CORS open (getoetst 18 nov 2026).
+  const IBIS = 'https://www.warmteatlas.nl/geoserver/WarmteAtlas/wfs';
+  const IBIS_VELDEN = 'RIN_NUMMER,JAAR,PLAN_NAAM,KERN_NAAM,HA_BRUTO,HA_NETTO,HA_UITGEG,HA_UITGEM,HA_UITPAR,START_JAAR,VEROUDERD,the_geom';
+  const RIVM = 'https://data.rivm.nl/geo/nl/wfs';
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const nf1 = new Intl.NumberFormat('nl-NL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmt = v => v == null ? '–' : nf.format(Math.round(v));
+  const f1 = v => v == null ? '–' : nf1.format(v);
+  const fP0 = v => v == null ? '–' : (v > 0 && v < 1 ? 'minder dan 1%' : nf.format(Math.round(v)) + '%');
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const pct = (a, b) => b ? 100 * a / b : null;
+  const mv = (n, een, meer) => n === 1 ? een : meer;
+  const datum = s => { const d = new Date(s); return isNaN(d) ? s : d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' }); };
+  const naamNet = s => String(s || '').toLowerCase().replace(/(^|[\s\-(\/])([a-zà-ÿ])/g, (m, a, b) => a + b.toUpperCase()).replace(/\b(Ii|Iii|Iv|Tu|Dsm|Abc)\b/g, m => m.toUpperCase());
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+    if (S && S.wb) { renderKaart(); renderUitkomst(); }
+  });
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  let tipBron = null;
+  function toonTip(e, html) {
+    tipBron = e.currentTarget || e.target; tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+  document.addEventListener('pointermove', ev => { if (!tip.hidden && !(tipBron && tipBron.isConnected && tipBron.contains(ev.target))) verbergTip(); }, { passive: true });
+  addEventListener('scroll', verbergTip, { passive: true, capture: true });
+  function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, i.dataset.tip)); i.addEventListener('pointerleave', verbergTip); }); }
+
+  // ---------- RD (EPSG:28992) <-> WGS84, benaderingsformules (afwijking onder een meter) ----------
+  function rd2wgs(x, y) {
+    const dx = (x - 155000) * 1e-5, dy = (y - 463000) * 1e-5;
+    const lat = 52.15517440 + (3235.65389 * dy - 32.58297 * dx * dx - 0.2475 * dy * dy - 0.84978 * dx * dx * dy - 0.0655 * dy * dy * dy - 0.01709 * dx * dx * dy * dy - 0.00738 * dx + 0.0053 * dx ** 4 - 0.00039 * dx * dx * dy ** 3 + 0.00033 * dx ** 4 * dy - 0.00012 * dx * dy) / 3600;
+    const lon = 5.38720621 + (5260.52916 * dx + 105.94684 * dx * dy + 2.45656 * dx * dy * dy - 0.81885 * dx ** 3 + 0.05594 * dx * dy ** 3 - 0.05607 * dx ** 3 * dy + 0.01199 * dy - 0.00256 * dx ** 3 * dy * dy + 0.00128 * dx * dy ** 4 + 0.00022 * dy * dy - 0.00022 * dx * dx + 0.00026 * dx ** 5) / 3600;
+    return [lat, lon];
+  }
+  function wgs2rd(lat, lon) {
+    const dl = 0.36 * (lat - 52.15517440), dm = 0.36 * (lon - 5.38720621);
+    const x = 155000 + 190094.945 * dm - 11832.228 * dl * dm - 114.221 * dl * dl * dm - 32.391 * dm ** 3 - 0.705 * dl - 2.34 * dl ** 3 * dm - 0.608 * dl * dm ** 3 - 0.008 * dm * dm + 0.148 * dl * dl * dm ** 3;
+    const y = 463000 + 309056.544 * dl + 3638.893 * dm * dm + 73.077 * dl * dl - 157.984 * dl * dm * dm + 59.788 * dl ** 3 + 0.433 * dm - 6.439 * dl * dl * dm * dm - 0.032 * dl * dm + 0.092 * dm ** 4 - 0.054 * dl * dm ** 4;
+    return [x, y];
+  }
+
+  // ---------- ophalen ----------
+  async function getJSON(u, pogingen = 2, ms = 45000) {
+    let last;
+    for (let i = 0; i < pogingen; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), ms);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return await r.json();
+      } catch (e) { last = e; if (i < pogingen - 1) await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  async function haalGzTekst(url) {
+    const r = await fetch(url, { cache: 'no-cache' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf[0] === 0x1f && buf[1] === 0x8b) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('deze browser kan het bestand niet uitpakken');
+      const st = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return await new Response(st).text();
+    }
+    return new TextDecoder().decode(buf);
+  }
+
+  // ---------- indeling naar gebruik ----------
+  const FUN = [
+    { k: 'woon', n: 'Wonen', kl: '--f-woon' },
+    { k: 'industrie', n: 'Bedrijfsruimte (industriefunctie)', kort: 'Bedrijfsruimte', kl: '--f-ind' },
+    { k: 'kantoor', n: 'Kantoor', kl: '--f-kant' },
+    { k: 'onderwijs', n: 'Onderwijs', kl: '--f-ond' },
+    { k: 'winkel', n: 'Winkel', kl: '--f-wink' },
+    { k: 'zorg', n: 'Gezondheidszorg', kl: '--f-mix' },
+    { k: 'bijeenkomst', n: 'Bijeenkomst (horeca, cultuur, kerk)', kort: 'Bijeenkomst', kl: '--f-mix' },
+    { k: 'logies', n: 'Logies', kl: '--f-mix' },
+    { k: 'sport', n: 'Sport', kl: '--f-mix' },
+    { k: 'cel', n: 'Cel', kl: '--f-mix' },
+    { k: 'meer', n: 'Meer functies samen (zonder wonen)', kort: 'Meer functies samen', kl: '--f-mix' },
+    { k: 'overig', n: 'Overige gebruiksfunctie', kort: 'Overig', kl: '--f-ov' }
+  ];
+  const FIX = new Map(FUN.map((f, i) => [f.k, i]));
+  const ENKEL = { industriefunctie: 'industrie', kantoorfunctie: 'kantoor', onderwijsfunctie: 'onderwijs', winkelfunctie: 'winkel', gezondheidszorgfunctie: 'zorg', bijeenkomstfunctie: 'bijeenkomst', logiesfunctie: 'logies', sportfunctie: 'sport', celfunctie: 'cel', 'overige gebruiksfunctie': 'overig' };
+  const UTIL = /kantoor|winkel|onderwijs|gezondheidszorg|bijeenkomst|logies|sport|celfunctie/;
+  function funVan(doel) {
+    if (/woonfunctie/.test(doel)) return 'woon';
+    const d = doel.split(',').filter(Boolean);
+    if (d.length === 1) return ENKEL[d[0]] || 'overig';
+    return d.length ? 'meer' : 'overig';
+  }
+  const BESTAAT = /^(Verblijfsobject in gebruik|Verblijfsobject in gebruik \(niet ingemeten\)|Verbouwing verblijfsobject|Verblijfsobject buiten gebruik)$/;
+  const PERIODEN = [[0, 1944, 'vóór 1945'], [1945, 1974, '1945–1974'], [1975, 1994, '1975–1994'], [1995, 2009, '1995–2009'], [2010, 9999, '2010 en later']];
+  const PKL = ['--seq-5', '--seq-4', '--seq-3', '--seq-2', '--seq-1'];
+
+  // ---------- werkbankbestand lezen ----------
+  function leesWerkbank(txt, gc) {
+    const nl = txt.indexOf('\n');
+    const kop = JSON.parse(txt.slice(0, nl));
+    const regels = txt.slice(nl + 1).split('\n'); if (!regels[regels.length - 1]) regels.pop();
+    const n = regels.length;
+    const X = new Int32Array(n), Y = new Int32Array(n), OPP = new Int32Array(n), BJ = new Int16Array(n), FN = new Uint8Array(n), SRT = new Uint8Array(n), BST = new Uint8Array(n), DOEL = new Uint16Array(n);
+    const PAND = new Array(n);
+    const funIx = kop.w.doel.map(d => FIX.get(funVan(d)));
+    const stOk = kop.w.st.map(s => BESTAAT.test(s) ? 1 : (/Plaats aangewezen/.test(s) ? 2 : 0));
+    for (let i = 0; i < n; i++) {
+      const c = regels[i].split('\t');
+      SRT[i] = c[0] === 'V' ? 0 : c[0] === 'L' ? 1 : 2;
+      PAND[i] = c[3];
+      BST[i] = stOk[+c[10]] || 0;
+      DOEL[i] = +c[11]; FN[i] = funIx[+c[11]];
+      OPP[i] = c[12] === '' ? -1 : +c[12];
+      BJ[i] = c[13] === '' ? 0 : +c[13];
+      X[i] = +c[16]; Y[i] = +c[17];
+    }
+    return { kop, regels, n, X, Y, OPP, BJ, FN, SRT, BST, DOEL, PAND, gc };
+  }
+  const volId = (k, gc, t) => k && k.length === 10 ? gc + t + k : (k || '');
+
+  // ---------- tellen ----------
+  function leegTel() {
+    return { vbo: 0, opp: 0, opvul: 0, lig: 0, stand: 0, onderweg: 0, f: FUN.map(() => ({ n: 0, m: 0 })), per: PERIODEN.map(() => 0), perOnb: 0, perM: 0 };
+  }
+  function telIn(wb, t, i) {
+    if (wb.SRT[i] === 1) { if (wb.BST[i] === 2) t.lig++; return; }
+    if (wb.SRT[i] === 2) { if (wb.BST[i] === 2) t.stand++; return; }
+    if (wb.BST[i] !== 1) { t.onderweg++; return; }
+    const o = wb.OPP[i], ok = o > 1 && o < 999999;
+    t.vbo++; const f = t.f[wb.FN[i]]; f.n++;
+    if (ok) { f.m += o; t.opp += o; } else t.opvul++;
+    if (ok) {
+      const bj = wb.BJ[i];
+      if (bj < 1200) t.perOnb += o; else { for (let p = 0; p < PERIODEN.length; p++) if (bj <= PERIODEN[p][1]) { t.per[p] += o; break; } }
+      t.perM += o;
+    }
+  }
+  function telGemeente(wb) { const t = leegTel(); for (let i = 0; i < wb.n; i++) telIn(wb, t, i); return t; }
+
+  // punt in veelhoek (even-oneven over alle ringen van alle delen), RD in meters
+  function inRing(x, y, r) {
+    let inn = false;
+    for (let i = 0, j = r.length - 1; i < r.length; j = i++) {
+      const xi = r[i][0], yi = r[i][1], xj = r[j][0], yj = r[j][1];
+      if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inn = !inn;
+    }
+    return inn;
+  }
+  function inDeel(x, y, d) {
+    if (x < d.bb[0] || x > d.bb[2] || y < d.bb[1] || y > d.bb[3]) return false;
+    for (const poly of d.polys) { let inn = false; for (const r of poly) if (inRing(x, y, r)) inn = !inn; if (inn) return true; }
+    return false;
+  }
+  function bbVan(polys) {
+    const b = [Infinity, Infinity, -Infinity, -Infinity];
+    polys.forEach(p => p.forEach(r => r.forEach(c => { if (c[0] < b[0]) b[0] = c[0]; if (c[1] < b[1]) b[1] = c[1]; if (c[0] > b[2]) b[2] = c[0]; if (c[1] > b[3]) b[3] = c[1]; })));
+    return b;
+  }
+  function haVan(polys) {
+    let a = 0;
+    polys.forEach(p => p.forEach((r, ri) => { let s = 0; for (let i = 0, j = r.length - 1; i < r.length; j = i++) s += (r[j][0] * r[i][1] - r[i][0] * r[j][1]); a += (ri === 0 ? 1 : -1) * Math.abs(s) / 2; }));
+    return a / 10000;
+  }
+
+  // ---------- staat ----------
+  let S = null;            // { g, wb, bouw, ibis: [..], gmTel }
+  let gekozen = new Set(); // RIN-nummers
+  let eigen = [];          // [{ ring: [[x,y]..] }] in RD
+  let naam = '';
+  let R = null;            // uitkomst voor het gebied
+  let map = null, lagen = null, tekenLaag = null, tekent = null;
+  const fouten = new Set();
+  let labelVraag = 0;
+
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = !txt; $('#progTxt').textContent = txt || '';
+    $('#barFill').style.width = (totaal ? 100 * stap / totaal : 0) + '%';
+  }
+  function toonMelding() {
+    const m = $('#melding');
+    if (!fouten.size) { m.hidden = true; return; }
+    $('#meldingTekst').textContent = 'Niet opgehaald: ' + [...fouten].join('; ') + '. De rest van de pagina klopt; dit deel ontbreekt.';
+    m.hidden = false;
+  }
+
+  function delen() {
+    const out = [];
+    if (S && S.ibis) S.ibis.forEach(t => { if (gekozen.has(t.rin)) out.push({ soort: 'ibis', id: t.rin, naam: t.naam, polys: t.polys, bb: t.bb, ha: t.haGeo, t }); });
+    eigen.forEach((e, i) => { const polys = [[e.ring]]; out.push({ soort: 'eigen', id: i, naam: 'Eigen vlak ' + (i + 1), polys, bb: bbVan(polys), ha: haVan(polys) }); });
+    return out;
+  }
+  function gebiedNaam() {
+    if (naam) return naam;
+    const d = delen();
+    if (d.length === 1) return d[0].naam;
+    return d.length ? `Gebied van ${d.length} delen` : '';
+  }
+
+  // ---------- link ----------
+  function encRing(r) { let px = 0, py = 0; return r.map(c => { const x = Math.round(c[0]), y = Math.round(c[1]); const s = (x - px) + '.' + (y - py); px = x; py = y; return s; }).join('_'); }
+  function decRing(s) { let px = 0, py = 0; const out = []; s.split('_').forEach(p => { const m = p.match(/^(-?\d+)\.(-?\d+)$/); if (!m) return; px += +m[1]; py += +m[2]; out.push([px, py]); }); return out; }
+  function hashTekst() {
+    if (!S) return '';
+    let h = '#gm=' + S.g.c;
+    if (gekozen.size) h += '&t=' + [...gekozen].join(',');
+    if (eigen.length) h += '&v=' + eigen.map(e => encRing(e.ring)).join('~');
+    if (naam) h += '&naam=' + encodeURIComponent(naam);
+    return h;
+  }
+  function zetHash() { try { history.replaceState(null, '', hashTekst()); } catch (e) {} window.dispatchEvent(new HashChangeEvent('hashchange')); }
+  function leesHash() {
+    const h = location.hash;
+    const t = (h.match(/[#&]t=([\w,]+)/) || [])[1];
+    const v = (h.match(/[#&]v=([\d._~-]+)/) || [])[1];
+    const n = (h.match(/[#&]naam=([^&]*)/) || [])[1];
+    return { t: t ? t.split(',').filter(Boolean) : [], v: v ? v.split('~').map(decRing).filter(r => r.length >= 3) : [], naam: n ? decodeURIComponent(n).slice(0, 60) : '' };
+  }
+
+  // ---------- gemeente kiezen ----------
+  async function kies(g, uitLink) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = `${PRODUCT} ${g.n} · Open Data Atelier`;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    S = { g, wb: null, bouw: null, ibis: null, gmTel: null };
+    const wens = uitLink ? leesHash() : { t: [], v: [], naam: '' };
+    gekozen = new Set(wens.t); eigen = wens.v.map(r => ({ ring: r })); naam = wens.naam; $('#naamInput').value = naam;
+    R = null; fouten.clear(); toonMelding(); stopTekenen();
+    $('#uitkomst').hidden = true; $('#terrLijst').innerHTML = ''; $('#delen').innerHTML = ''; $('#foot').innerHTML = '';
+    $('#kiesKop').textContent = `Stel het gebied samen in ${g.n}`;
+    voortgang(0, 3, 'Adressen en gebouwen van de gemeente ophalen…');
+    renderKaart();
+    const pIbis = getJSON(`${IBIS}?service=WFS&version=2.0.0&request=GetFeature&typeNames=WarmteAtlas:IBISbedrijventerreinen&outputFormat=application/json&srsName=EPSG:28992&propertyName=${IBIS_VELDEN}&cql_filter=${encodeURIComponent(`GEM_CODES LIKE '%GM${g.c}%'`)}`).catch(() => null);
+    const pBouw = haalGzTekst(BOUW + g.c + '.json.gz').then(JSON.parse).catch(() => null);
+    let wb = null;
+    try { wb = leesWerkbank(await haalGzTekst(WB + g.c + '.txt.gz'), g.c); } catch (e) { wb = null; }
+    if (S.g !== g) return;
+    if (!wb) { fouten.add('de adressen en gebouwen van deze gemeente (BAG-maandstand, Open Data Atelier)'); toonMelding(); voortgang(3, 3, ''); renderVoet(); return; }
+    S.wb = wb; S.gmTel = telGemeente(wb);
+    voortgang(1, 3, 'Bedrijventerreinen ophalen (IBIS)…');
+    const gj = await pIbis;
+    if (S.g !== g) return;
+    if (!gj || !gj.features) { fouten.add('de bedrijventerreinen (IBIS, kaartdienst WarmteAtlas); een eigen vlak tekenen werkt wel'); S.ibis = []; }
+    else S.ibis = gj.features.filter(f => f.geometry).map(f => {
+      const p = f.properties;
+      const polys = (f.geometry.type === 'Polygon' ? [f.geometry.coordinates] : f.geometry.coordinates).map(pl => pl.map(r => r.map(c => [c[0], c[1]])));
+      return { rin: String(p.RIN_NUMMER), naam: naamNet(p.PLAN_NAAM), kern: naamNet(p.KERN_NAAM), jaar: p.JAAR, bruto: p.HA_BRUTO, netto: p.HA_NETTO, uitgeg: p.HA_UITGEG,
+        uitgeefbaar: (p.HA_UITGEM || 0) + (p.HA_UITPAR || 0), start: /^\d{4}$/.test(String(p.START_JAAR || '')) ? +p.START_JAAR : null, verouderd: p.VEROUDERD || '', polys, bb: bbVan(polys), haGeo: haVan(polys) };
+    }).sort((a, b) => a.naam.localeCompare(b.naam, 'nl'));
+    const bekend = new Set(S.ibis.map(t => t.rin));
+    const weg = [...gekozen].filter(r => !bekend.has(r));
+    if (weg.length && S.ibis.length) { weg.forEach(r => gekozen.delete(r)); }
+    else if (weg.length) { /* register niet opgehaald: de keuze blijft in de link staan */ }
+    voortgang(2, 3, 'Bouwen en slopen ophalen…');
+    S.bouw = await pBouw;
+    if (S.g !== g) return;
+    if (!S.bouw) fouten.add('bouwen en slopen (BAG-maandstand, Open Data Atelier)');
+    toonMelding(); voortgang(3, 3, '');
+    renderLijst(); S.bounded = false; renderKaart(); reken();
+  }
+
+  // ---------- rekenen voor het gebied ----------
+  function reken() {
+    const D = delen();
+    renderDelen(D);
+    zetHash();
+    if (!S || !S.wb || !D.length) { R = null; $('#uitkomst').hidden = true; renderVoet(); renderKaartGebied(); return; }
+    const wb = S.wb, t = leegTel(), idx = [];
+    const bb = [Infinity, Infinity, -Infinity, -Infinity];
+    D.forEach(d => { bb[0] = Math.min(bb[0], d.bb[0]); bb[1] = Math.min(bb[1], d.bb[1]); bb[2] = Math.max(bb[2], d.bb[2]); bb[3] = Math.max(bb[3], d.bb[3]); });
+    const x0 = bb[0] * 10, y0 = bb[1] * 10, x1 = bb[2] * 10, y1 = bb[3] * 10;
+    const binnen = (x, y) => { for (const d of D) if (inDeel(x, y, d)) return true; return false; };
+    for (let i = 0; i < wb.n; i++) {
+      const X = wb.X[i], Y = wb.Y[i];
+      if (X < x0 || X > x1 || Y < y0 || Y > y1) continue;
+      if (!binnen(X / 10, Y / 10)) continue;
+      idx.push(i); telIn(wb, t, i);
+    }
+    // panden in het gebied: woningen en utiliteit per pand
+    const panden = new Map();
+    idx.forEach(i => {
+      if (wb.SRT[i] !== 0 || wb.BST[i] !== 1 || !wb.PAND[i]) return;
+      const id = volId(wb.PAND[i], wb.gc, '10');
+      let p = panden.get(id); if (!p) { p = { id, woon: 0, util: 0, opp: 0, n: 0, bj: wb.BJ[i] }; panden.set(id, p); }
+      const doel = wb.kop.w.doel[wb.DOEL[i]] || '';
+      p.n++; if (wb.FN[i] === 0) p.woon++; else if (UTIL.test(doel)) p.util++;
+      const o = wb.OPP[i]; if (o > 1 && o < 999999) p.opp += o;
+    });
+    const util = [...panden.values()].filter(p => !p.woon && p.util && p.opp >= 50);
+    R = { D, t, idx, bb, ha: D.reduce((s, d) => s + d.ha, 0), panden, util, bouw: rekenBouw(D, binnen), labels: null, labelFout: false };
+    $('#uitkomst').hidden = false;
+    renderUitkomst(); renderKaartGebied(); renderVoet();
+    haalLabels();
+  }
+
+  // Bouwen en slopen: dezelfde faseregels als Bouwstroom, voor panden met hun middelpunt in het gebied
+  const PAND_FASE = { 'Bouwvergunning verleend': 'vergund', 'Bouw gestart': 'bouw', 'Pand in gebruik (niet ingemeten)': 'klaar', 'Sloopvergunning verleend': 'sloop' };
+  const VBO_NIEUW = { 'Verblijfsobject gevormd': false, 'Verblijfsobject in gebruik (niet ingemeten)': true };
+  function ringen(enc) { return enc.map(r => { let x = 0, y = 0; const o = []; for (let i = 0; i < r.length; i += 2) { x += r[i]; y += r[i + 1]; o.push([y / 1e6, x / 1e6]); } return o; }); }
+  function rekenBouw(D, binnen) {
+    const d = S.bouw; if (!d) return null;
+    const gc = S.g.c, W = d.w, JAAR = +String(d.peil).slice(0, 4);
+    const panden = new Map(), losse = new Map();
+    d.p.forEach(([pk, ps, bj, enc]) => {
+      const status = W.pst[ps];
+      const fase = PAND_FASE[status] || (status === 'Pand in gebruik' && bj >= JAAR - 1 ? 'opgeleverd' : null);
+      if (!fase || !enc || !enc.length) return;
+      const ll = ringen(enc); const r0 = ll[0];
+      let la = 0, lo = 0; r0.forEach(c => { la += c[0]; lo += c[1]; }); la /= r0.length; lo /= r0.length;
+      const xy = wgs2rd(la, lo);
+      if (!binnen(xy[0], xy[1])) return;
+      panden.set(volId(pk, gc, '10'), { id: volId(pk, gc, '10'), status, fase, bouwjaar: bj || null, ll, vbo: [], alle: [] });
+    });
+    d.v.forEach(([vk, pk, vs, dl, opp, str, nr, lt, toe, pc, wp, x, y]) => {
+      const status = W.vst[vs], doel = W.doel[dl] || '';
+      const v = { status, doel, woon: /woonfunctie/.test(doel), opp: opp > 1 && opp < 999999 ? opp : 0, nieuw: status in VBO_NIEUW, klaar: VBO_NIEUW[status] === true };
+      const pid = volId(pk, gc, '10');
+      let pd = panden.get(pid);
+      if (pd) { pd.alle.push(v); if (v.nieuw) pd.vbo.push(v); return; }
+      if (!v.nieuw || x == null) return;
+      pd = losse.get(pid);
+      if (!pd) {
+        const xy = wgs2rd(y / 1e6, x / 1e6);
+        if (!binnen(xy[0], xy[1])) return;
+        pd = { id: pid, status: null, fase: 'bestaand', bouwjaar: null, ll: null, pt: [y / 1e6, x / 1e6], vbo: [], alle: [] }; losse.set(pid, pd);
+      }
+      pd.vbo.push(v); pd.alle.push(v);
+    });
+    const proj = [...panden.values(), ...losse.values()].filter(pd => pd.fase !== 'opgeleverd' || pd.alle.length);
+    proj.forEach(pd => {
+      let tel = pd.vbo;
+      if (pd.fase === 'opgeleverd' || pd.fase === 'sloop') tel = pd.alle;
+      else if (!pd.vbo.length && pd.alle.length) tel = pd.alle;
+      pd.woon = tel.filter(v => v.woon).length; pd.ander = tel.length - pd.woon;
+      pd.mAnder = tel.filter(v => !v.woon).reduce((s, v) => s + v.opp, 0);
+      pd.doel = [...new Set(pd.alle.flatMap(v => v.doel.split(',')).filter(Boolean))].map(x => x.replace('functie', '').replace('overige gebruiks', 'overig')).join(', ');
+      if (pd.fase === 'klaar') pd.fase = 'opgeleverd';
+    });
+    const F = {}; ['vergund', 'bouw', 'opgeleverd', 'sloop', 'bestaand'].forEach(k => { F[k] = { p: 0, woon: 0, ander: 0, m: 0 }; });
+    proj.forEach(pd => { const f = F[pd.fase]; f.p++; f.woon += pd.woon; f.ander += pd.ander; f.m += pd.mAnder; });
+    proj.sort((a, b) => (b.woon + b.ander) - (a.woon + a.ander));
+    return { proj, F, peil: d.peil, jaar: JAAR };
+  }
+
+  // ---------- energielabels van utiliteitspanden (RIVM, live) ----------
+  async function haalLabels() {
+    const mijn = ++labelVraag, r = R;
+    if (!r || !r.util.length) { if (r) { r.labels = new Map(); renderLabels(); } return; }
+    renderLabels();
+    const b = r.bb.map((v, i) => Math.round(i < 2 ? v - 5 : v + 5));
+    const flt = encodeURIComponent(`BBOX(geom,${b[0]},${b[1]},${b[2]},${b[3]}) AND dominant_label IS NOT NULL`);
+    try {
+      const d = await getJSON(`${RIVM}?service=WFS&version=2.0.0&request=GetFeature&typeNames=nl:rvo_energielabels&outputFormat=application/json&count=60000&propertyName=identificatie,dominant_label&CQL_FILTER=${flt}`, 2, 60000);
+      if (mijn !== labelVraag || R !== r) return;
+      const m = new Map(); d.features.forEach(f => m.set(f.properties.identificatie, f.properties.dominant_label));
+      r.labels = m; r.labelVol = d.features.length >= 60000;
+    } catch (e) { if (mijn !== labelVraag || R !== r) return; r.labelFout = true; }
+    renderLabels(); renderOpv();
+  }
+  function labelGroep(l) { if (!l) return 'geen'; if (/^A/.test(l)) return 'a'; if (l === 'B') return 'b'; if (l === 'C') return 'c'; if (l === 'D') return 'd'; return 'efg'; }
+  const LGR = [['a', 'A', '--l-a'], ['b', 'B', '--l-b'], ['c', 'C', '--l-c'], ['d', 'D', '--l-d'], ['efg', 'E, F, G', '--l-efg'], ['geen', 'geen label', '--l-geen']];
+
+  // ---------- tekenen: lijst en delen ----------
+  function renderLijst() {
+    const q = $('#terrZoek').value.trim().toLowerCase();
+    const L = (S.ibis || []).filter(t => !q || (t.naam + ' ' + t.kern).toLowerCase().includes(q));
+    $('#terrKop').textContent = S.ibis && S.ibis.length ? `Bedrijventerreinen (${S.ibis.length})` : 'Bedrijventerreinen';
+    $('#terrZoek').hidden = !(S.ibis && S.ibis.length > 8);
+    $('#terrLijst').innerHTML = !S.ibis ? '<span class="small muted">Ophalen…</span>' : !S.ibis.length ? '<span class="small muted">Geen bedrijventerreinen gevonden voor deze gemeente. Teken zelf een vlak op de kaart.</span>'
+      : L.map(t => `<label><input type="checkbox" data-rin="${esc(t.rin)}"${gekozen.has(t.rin) ? ' checked' : ''}><span>${esc(t.naam)}${t.kern && t.kern.toLowerCase() !== S.g.n.toLowerCase() ? ` <span class="muted small">${esc(t.kern)}</span>` : ''}</span><span class="ha">${f1(t.bruto)} ha</span></label>`).join('') || '<span class="small muted">Geen terrein met die naam.</span>';
+    $('#terrLijst').querySelectorAll('input').forEach(i => i.addEventListener('change', () => { if (i.checked) gekozen.add(i.dataset.rin); else gekozen.delete(i.dataset.rin); reken(); }));
+  }
+  function renderDelen(D) {
+    $('#delen').innerHTML = D.length ? D.map(d => `<div class="deel"><span>${esc(d.naam)} <span class="muted small">${f1(d.ha)} ha</span></span><button type="button" data-s="${d.soort}" data-id="${esc(d.id)}" aria-label="Haal ${esc(d.naam)} uit het gebied">weghalen</button></div>`).join('')
+      : '<p class="small muted" style="margin:0">Nog geen gebied. Kies een terrein of teken een vlak.</p>';
+    $('#delen').querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.s === 'ibis') gekozen.delete(b.dataset.id); else eigen.splice(+b.dataset.id, 1);
+      renderLijst(); reken();
+    }));
+    $('#wisBtn').hidden = !D.length; $('#linkBtn').hidden = !D.length;
+  }
+  $('#terrZoek').addEventListener('input', renderLijst);
+  $('#naamInput').addEventListener('input', () => { naam = $('#naamInput').value.trim().slice(0, 60); zetHash(); if (R) { renderKern(); renderVoet(); } });
+  $('#wisBtn').addEventListener('click', () => { gekozen.clear(); eigen = []; renderLijst(); reken(); });
+  $('#linkBtn').addEventListener('click', () => {
+    const v = location.href, b = $('#linkBtn');
+    const ok = () => { b.textContent = 'Link gekopieerd'; setTimeout(() => { b.textContent = 'Kopieer de link naar dit gebied'; }, 1800); };
+    try { if (navigator.clipboard) navigator.clipboard.writeText(v).then(ok, () => window.prompt('Kopieer de link:', v)); else window.prompt('Kopieer de link:', v); } catch (e) { window.prompt('Kopieer de link:', v); }
+  });
+
+  // ---------- kaart ----------
+  const llRing = r => r.map(c => rd2wgs(c[0], c[1]));
+  function renderKaart() {
+    if (typeof L === 'undefined') { $('#map').innerHTML = '<p class="small muted" style="padding:12px">De kaartbibliotheek kon niet laden. Kies terreinen uit de lijst.</p>'; return; }
+    if (!map) {
+      map = L.map('map', { scrollWheelZoom: false, doubleClickZoom: false });
+      L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT · Terreinen: IBIS' }).addTo(map);
+      map.on('focus', () => map.scrollWheelZoom.enable());
+      map.setView([52.1, 5.3], 7);
+      map.on('click', e => { if (tekent) { tekent.push([e.latlng.lat, e.latlng.lng]); tekenStaat(); } });
+    }
+    if (lagen) lagen.remove();
+    lagen = L.featureGroup().addTo(map);
+    if (!S || !S.wb) return;
+    if (!S.bounded) {
+      const wb = S.wb; let a = Infinity, b = Infinity, c = -Infinity, d = -Infinity;
+      for (let i = 0; i < wb.n; i += 7) { const x = wb.X[i], y = wb.Y[i]; if (x < a) a = x; if (x > c) c = x; if (y < b) b = y; if (y > d) d = y; }
+      const D = delen();
+      if (D.length) { a = b = Infinity; c = d = -Infinity; D.forEach(q => { a = Math.min(a, q.bb[0] * 10); b = Math.min(b, q.bb[1] * 10); c = Math.max(c, q.bb[2] * 10); d = Math.max(d, q.bb[3] * 10); }); }
+      if (isFinite(a)) { map.fitBounds([rd2wgs(a / 10, b / 10), rd2wgs(c / 10, d / 10)], { padding: [20, 20] }); S.bounded = true; }
+    }
+    renderKaartGebied();
+  }
+  const FASEKL = { vergund: '--hh-2', bouw: '--hh-1', opgeleverd: '--hh-3', sloop: '--warn', bestaand: '--seq-4' };
+  const FASENAAM = { vergund: 'vergund', bouw: 'in aanbouw', opgeleverd: 'opgeleverd', sloop: 'sloop vergund', bestaand: 'nieuw adres in bestaand pand' };
+  function renderKaartGebied() {
+    if (!map || !lagen) return;
+    lagen.clearLayers();
+    if (!S || !S.wb) return;
+    const acc = css('--accent') || '#0f5c66', muted = css('--muted') || '#5a6b6e';
+    (S.ibis || []).forEach(t => {
+      const sel = gekozen.has(t.rin);
+      const ly = L.polygon(t.polys.map(p => p.map(llRing)), { color: sel ? acc : muted, weight: sel ? 2.5 : 1.2, fillColor: sel ? acc : muted, fillOpacity: sel ? 0.22 : 0.08, dashArray: sel ? null : '4 3' });
+      ly.bindTooltip(`<b>${esc(t.naam)}</b><br>${f1(t.bruto)} ha bruto · peiljaar ${esc(t.jaar)}<br>${sel ? 'klik om weg te halen' : 'klik om toe te voegen'}`, { sticky: true });
+      ly.on('click', ev => { if (tekent) return; L.DomEvent.stopPropagation(ev); if (sel) gekozen.delete(t.rin); else gekozen.add(t.rin); renderLijst(); reken(); });
+      ly.addTo(lagen);
+    });
+    eigen.forEach((e, i) => {
+      L.polygon(llRing(e.ring), { color: acc, weight: 2.5, fillColor: acc, fillOpacity: 0.22 }).bindTooltip(`<b>Eigen vlak ${i + 1}</b>`, { sticky: true }).addTo(lagen);
+    });
+    if (R && R.bouw) R.bouw.proj.forEach(pd => {
+      const kl = css(FASEKL[pd.fase]) || acc;
+      const tt = `<b>${esc(FASENAAM[pd.fase])}</b><br>${pd.woon ? fmt(pd.woon) + mv(pd.woon, ' woning', ' woningen') : ''}${pd.woon && pd.ander ? ' · ' : ''}${pd.ander ? fmt(pd.ander) + mv(pd.ander, ' ander object', ' andere objecten') : ''}${!pd.woon && !pd.ander ? 'nog geen adressen' : ''}${pd.bouwjaar ? '<br>bouwjaar ' + pd.bouwjaar : ''}`;
+      const ly = pd.ll ? L.polygon(pd.ll, { color: kl, weight: 2, fillColor: kl, fillOpacity: 0.7 }) : L.circleMarker(pd.pt, { radius: 5, color: kl, weight: 2, fillColor: kl, fillOpacity: 0.7 });
+      ly.bindTooltip(tt, { sticky: true }).addTo(lagen);
+    });
+    $('#map').querySelectorAll('.leaflet-interactive').forEach(el => el.setAttribute('tabindex', '-1'));
+    const leg = [`<span><span class="sw" style="background:${acc};opacity:.5"></span>in het gebied</span>`];
+    if (S.ibis && S.ibis.length) leg.push(`<span><span class="sw" style="border:1px dashed ${muted}"></span>bedrijventerrein (IBIS), niet gekozen</span>`);
+    if (R && R.bouw && R.bouw.proj.length) Object.keys(FASENAAM).forEach(k => { if (R.bouw.F[k].p) leg.push(`<span><span class="sw" style="background:${css(FASEKL[k])}"></span>${FASENAAM[k]}</span>`); });
+    $('#mapLegend').innerHTML = leg.join('');
+  }
+  // eigen vlak tekenen
+  function tekenStaat() {
+    if (tekenLaag) { tekenLaag.remove(); tekenLaag = null; }
+    const aan = !!tekent;
+    $('#map').classList.toggle('tekent', aan);
+    $('#tekenBtn').hidden = aan; $('#tekenStop').hidden = !aan;
+    $('#tekenTerug').hidden = !aan || !tekent.length; $('#tekenKlaar').hidden = !aan || tekent.length < 3;
+    $('#tekenTxt').textContent = !aan ? '' : tekent.length < 3 ? `Klik de hoekpunten aan op de kaart (${tekent.length} gezet, minstens 3).` : `${tekent.length} punten. Klik verder, of sluit het vlak.`;
+    if (!aan || !map) return;
+    const acc = css('--accent') || '#0f5c66';
+    tekenLaag = L.featureGroup().addTo(map);
+    if (tekent.length >= 2) L.polyline(tekent.concat(tekent.length >= 3 ? [tekent[0]] : []), { color: acc, weight: 2, dashArray: '5 4', interactive: false }).addTo(tekenLaag);
+    tekent.forEach(p => L.circleMarker(p, { radius: 4, color: acc, fillColor: '#fff', fillOpacity: 1, weight: 2, interactive: false }).addTo(tekenLaag));
+  }
+  function stopTekenen() { tekent = null; tekenStaat(); }
+  $('#tekenBtn').addEventListener('click', () => { if (!S || !S.wb) return; tekent = []; tekenStaat(); });
+  $('#tekenStop').addEventListener('click', stopTekenen);
+  $('#tekenTerug').addEventListener('click', () => { if (tekent) { tekent.pop(); tekenStaat(); } });
+  $('#tekenKlaar').addEventListener('click', () => {
+    if (!tekent || tekent.length < 3) return;
+    eigen.push({ ring: tekent.map(p => wgs2rd(p[0], p[1]).map(Math.round)) });
+    stopTekenen(); reken();
+  });
+
+  // ---------- uitkomst ----------
+  function renderUitkomst() { if (!R) return; renderKern(); renderOpv(); renderMix(); renderLeeftijd(); renderTabel(); renderBouw(); renderLabels(); renderIbis(); }
+  const fm = k => R.t.f[FIX.get(k)], gf = k => S.gmTel.f[FIX.get(k)];
+  function renderKern() {
+    const t = R.t, G = S.gmTel;
+    $('#leadBig').textContent = `${gebiedNaam()}, ${S.g.n}`;
+    $('#leadSub').textContent = `${f1(R.ha)} hectare · BAG-stand ${datum(S.wb.kop.peil)}`;
+    const werk = t.opp - fm('woon').m, werkG = G.opp - gf('woon').m;
+    const b = R.bouw, pijp = b ? b.F.vergund.woon + b.F.bouw.woon : null;
+    const u = [
+      ['Woningen', fmt(fm('woon').n), `${fP0(pct(fm('woon').n, gf('woon').n))} van de ${fmt(gf('woon').n)} woningen in ${esc(S.g.n)}`],
+      ['Vloeroppervlak zonder wonen', fmt(werk) + ' m²', `${fP0(pct(werk, werkG))} van ${esc(S.g.n)} · ${fmt(t.vbo - fm('woon').n)} ${mv(t.vbo - fm('woon').n, 'object', 'objecten')}`],
+      ['Aandeel wonen in de vierkante meters', fP0(pct(fm('woon').m, t.opp)), `hele gemeente ${fP0(pct(gf('woon').m, G.opp))}`],
+      ['Woningen vergund of in aanbouw', b ? fmt(pijp) : '–', b ? `opgeleverd ${fmt(b.F.opgeleverd.woon)} · sloop vergund ${fmt(b.F.sloop.woon)} · in bestaand pand ${fmt(b.F.bestaand.woon)}` : 'niet opgehaald']
+    ];
+    $('#top4').innerHTML = u.map(x => `<div class="unit"><span class="eyebrow">${x[0]}</span><span class="u-val">${x[1]}</span><span class="u-sub">${x[2]}</span></div>`).join('');
+  }
+  function renderOpv() {
+    if (!R) return;
+    const t = R.t, G = S.gmTel, K = [];
+    if (t.vbo === 0) { $('#opv').innerHTML = '<div class="card"><p>In dit gebied liggen geen verblijfsobjecten die in gebruik zijn.</p></div>'; return; }
+    // 1 mengverhouding
+    const aw = pct(fm('woon').m, t.opp), awG = pct(gf('woon').m, G.opp);
+    if (aw != null) K.push(['Wonen en werken', `Van de ${fmt(t.opp)} m² in het gebied is <b>${fP0(aw)}</b> wonen en ${fP0(100 - aw)} iets anders. In heel ${esc(S.g.n)} is ${fP0(awG)} wonen.`, 'Vierkante meters zijn geen banen en geen inwoners.']);
+    // 2 grootste functie buiten wonen, en het aandeel in de gemeente
+    const nw = FUN.map((f, i) => ({ f, m: t.f[i].m, g: G.f[i].m })).filter(x => x.f.k !== 'woon' && x.m > 0).sort((a, b) => b.m - a.m);
+    if (nw.length) {
+      const x = nw[0], a = pct(x.m, x.g);
+      K.push(['Grootste gebruik buiten wonen', `<b>${esc(x.f.kort || x.f.n)}</b>: ${fmt(x.m)} m². Dat is ${fP0(a)} van alle vierkante meters met dat gebruik in ${esc(S.g.n)}.`, nw[1] ? `Daarna: ${esc((nw[1].f.kort || nw[1].f.n).toLowerCase())}, ${fmt(nw[1].m)} m².` : '']);
+    }
+    // 3 leeftijd
+    if (t.perM) {
+      const oud = pct(t.per[0] + t.per[1], t.perM), oudG = pct(G.per[0] + G.per[1], G.perM), nieuw = pct(t.per[4], t.perM), nieuwG = pct(G.per[4], G.perM);
+      K.push(['Leeftijd van de gebouwen', `<b>${fP0(oud)}</b> van de vierkante meters staat in een pand van vóór 1975 (gemeente ${fP0(oudG)}); ${fP0(nieuw)} in een pand van 2010 of later (gemeente ${fP0(nieuwG)}).`, 'Naar het bouwjaar van het pand; een latere verbouwing is niet te zien.']);
+    }
+    // 4 bouwen en slopen
+    const b = R.bouw;
+    if (b) {
+      const erbij = b.F.vergund.woon + b.F.bouw.woon + b.F.bestaand.woon, nu = fm('woon').n;
+      if (erbij || b.F.sloop.woon || b.F.opgeleverd.woon) K.push(['Woningen onderweg', `<b>${fmt(erbij)}</b> ${mv(erbij, 'woning is', 'woningen zijn')} vergund, in aanbouw of als nieuw adres in een bestaand pand gevormd${nu ? `; dat is ${fP0(pct(erbij, nu))} van de ${fmt(nu)} woningen die er nu staan` : '; er staan nu geen woningen'}. Voor sloop vergund: ${fmt(b.F.sloop.woon)}.`, 'Alleen wat al een vergunning heeft; plannen in voorbereiding staan niet in de BAG.']);
+      const mErbij = b.F.vergund.m + b.F.bouw.m, mSloop = b.F.sloop.m;
+      if (mErbij || mSloop) K.push(['Ruimte om te werken onderweg', `Vergund of in aanbouw: <b>${fmt(mErbij)} m²</b> zonder woonfunctie in ${fmt(b.F.vergund.p + b.F.bouw.p)} ${mv(b.F.vergund.p + b.F.bouw.p, 'pand', 'panden')}. Voor sloop vergund: ${fmt(mSloop)} m².`, 'Een pand in aanbouw heeft vaak nog geen adressen; dan ontbreken de vierkante meters.']);
+      if (!erbij && !b.F.sloop.p && !b.F.opgeleverd.p && !mErbij) K.push(['Bouwen en slopen', 'In dit gebied staat in de BAG geen pand dat vergund, in aanbouw, pas opgeleverd of voor sloop vergund is.', 'Plannen in voorbereiding staan niet in de BAG.']);
+    }
+    // 5 labels
+    if (R.labels && R.util.length) {
+      const g = { a: 0, b: 0, c: 0, d: 0, efg: 0, geen: 0 }; R.util.forEach(p => g[labelGroep(R.labels.get(p.id))]++);
+      K.push(['Energielabels', `Van de ${fmt(R.util.length)} utiliteitspanden ${mv(g.geen, 'heeft', 'hebben')} <b>${fmt(g.geen)}</b> geen label. Label D of slechter: ${fmt(g.d + g.efg)}.`, 'Geen label is geen overtreding: een label is alleen verplicht bij verkoop, verhuur en oplevering.']);
+    }
+    // 6 register
+    const T = R.D.filter(d => d.soort === 'ibis').map(d => d.t);
+    if (T.length) {
+      const uit = T.reduce((s, x) => s + (x.uitgeefbaar || 0), 0), oud = T.filter(x => x.verouderd === 'JA');
+      K.push(['Volgens het register', `Nog uit te geven: <b>${f1(uit)} hectare</b> op ${fmt(T.length)} ${mv(T.length, 'terrein', 'terreinen')}. Als verouderd opgegeven: ${oud.length ? oud.map(x => esc(x.naam)).join(', ') : 'geen'}.`, 'Opgave van gemeente en provincie in IBIS; het peiljaar staat in de tabel.']);
+    }
+    $('#opv').innerHTML = K.map(k => `<div class="card"><h3>${k[0]}</h3><p>${k[1]}</p>${k[2] ? `<p class="kant">${k[2]}</p>` : ''}</div>`).join('');
+  }
+  function balkRij(wie, delenArr, totaal, eenheid) {
+    const segs = delenArr.filter(d => d.v > 0);
+    return `<div class="balkrij"><span class="wie">${wie}</span><div class="balk" role="img" aria-label="${esc(segs.map(d => d.n + ' ' + fP0(pct(d.v, totaal))).join(', '))}">${segs.map(d => `<i style="flex:${d.v};background:${css(d.kl)}" data-tip="<b>${esc(d.n)}</b><br>${fmt(d.v)} ${eenheid} · ${fP0(pct(d.v, totaal))}"></i>`).join('')}</div></div>`;
+  }
+  function mixDelen(t) {
+    const groot = ['woon', 'industrie', 'kantoor', 'onderwijs', 'winkel'];
+    const d = groot.map(k => { const f = FUN[FIX.get(k)]; return { n: f.kort || f.n, v: t.f[FIX.get(k)].m, kl: f.kl }; });
+    const rest = FUN.filter(f => !groot.includes(f.k) && f.k !== 'overig').reduce((s, f) => s + t.f[FIX.get(f.k)].m, 0);
+    d.push({ n: 'Andere functies', v: rest, kl: '--f-mix' }, { n: 'Overig', v: t.f[FIX.get('overig')].m, kl: '--f-ov' });
+    return d;
+  }
+  function renderMix() {
+    const a = mixDelen(R.t), g = mixDelen(S.gmTel);
+    $('#mix').innerHTML = `<div class="chart-kop"><h3>Gebruik, in vierkante meters</h3><span class="noemer">${fmt(R.t.opp)} m² in het gebied</span></div>
+      ${balkRij(esc(gebiedNaam()), a, R.t.opp, 'm²')}${balkRij('Heel ' + esc(S.g.n), g, S.gmTel.opp, 'm²')}
+      <div class="cijfers">${a.map((d, i) => d.v || g[i].v ? `<span><span class="sw" style="background:${css(d.kl)}"></span>${esc(d.n)} <b>${fP0(pct(d.v, R.t.opp))}</b> <span class="muted">(gemeente ${fP0(pct(g[i].v, S.gmTel.opp))})</span></span>` : '').join('')}</div>`;
+    bindTips($('#mix'));
+  }
+  function renderLeeftijd() {
+    const mk = t => PERIODEN.map((p, i) => ({ n: p[2], v: t.per[i], kl: PKL[i] })).concat([{ n: 'onbekend', v: t.perOnb, kl: '--f-ov' }]);
+    const a = mk(R.t), g = mk(S.gmTel);
+    $('#leeftijd').innerHTML = `<div class="chart-kop"><h3>Bouwjaar van het pand, in vierkante meters</h3></div>
+      ${R.t.perM ? balkRij(esc(gebiedNaam()), a, R.t.perM, 'm²') + balkRij('Heel ' + esc(S.g.n), g, S.gmTel.perM, 'm²') : '<p class="noot muted">Geen vierkante meters om in te delen.</p>'}
+      <div class="cijfers">${a.map((d, i) => d.v || g[i].v ? `<span><span class="sw" style="background:${css(d.kl)}"></span>${esc(d.n)} <b>${fP0(pct(d.v, R.t.perM))}</b> <span class="muted">(gemeente ${fP0(pct(g[i].v, S.gmTel.perM))})</span></span>` : '').join('')}</div>`;
+    bindTips($('#leeftijd'));
+  }
+  function renderTabel() {
+    const t = R.t, G = S.gmTel;
+    const rij = (n, a, g, vet) => `<tr${vet ? ' class="gm"' : ''}><td>${esc(n)}</td><td class="r">${fmt(a.n)}</td><td class="r">${fmt(a.m)}</td><td class="r">${fP0(pct(a.m, t.opp))}</td><td class="r">${fmt(g.n)}</td><td class="r">${fmt(g.m)}</td><td class="r">${fP0(pct(a.m, g.m))}</td></tr>`;
+    const rows = FUN.map((f, i) => t.f[i].n || G.f[i].n ? rij(f.n, t.f[i], G.f[i]) : '').join('');
+    $('#tblWrap').innerHTML = `<table><thead><tr><th style="cursor:default">Gebruik</th><th class="r" style="cursor:default">Objecten in het gebied</th><th class="r" style="cursor:default">m² in het gebied</th><th class="r" style="cursor:default">Aandeel in het gebied</th><th class="r" style="cursor:default">Objecten in ${esc(S.g.n)}</th><th class="r" style="cursor:default">m² in ${esc(S.g.n)}</th><th class="r" style="cursor:default">Gebied als deel van de gemeente</th></tr></thead>
+      <tbody>${rows}${rij('Totaal', { n: t.vbo, m: t.opp }, { n: G.vbo, m: G.opp }, true)}</tbody></table>`;
+    const extra = [];
+    if (t.opvul) extra.push(`${fmt(t.opvul)} ${mv(t.opvul, 'object', 'objecten')} zonder bruikbare oppervlakte (niet in de m²)`);
+    if (t.onderweg) extra.push(`${fmt(t.onderweg)} ${mv(t.onderweg, 'object', 'objecten')} nog niet in gebruik (gevormd)`);
+    if (t.lig || t.stand) extra.push(`${fmt(t.lig)} ${mv(t.lig, 'ligplaats', 'ligplaatsen')} en ${fmt(t.stand)} ${mv(t.stand, 'standplaats', 'standplaatsen')}`);
+    $('#rowCount').textContent = `${fmt(t.vbo)} verblijfsobjecten in gebruik in ${fmt(R.panden.size)} panden` + (extra.length ? ' · ' + extra.join(' · ') : '');
+  }
+  function renderBouw() {
+    const b = R.bouw;
+    if (!b) { $('#bouw4').innerHTML = '<p class="small muted">Bouwen en slopen kon niet worden opgehaald.</p>'; $('#bouwDetails').hidden = true; return; }
+    const K = [['vergund', 'Vergund'], ['bouw', 'In aanbouw'], ['opgeleverd', `Opgeleverd (bouwjaar ${b.jaar - 1} of ${b.jaar})`], ['sloop', 'Sloop vergund']];
+    $('#bouw4').innerHTML = K.map(([k, n]) => { const f = b.F[k]; return `<div class="unit"><span class="eyebrow">${n}</span><span class="u-val">${fmt(f.woon)} <small style="font-size:.9rem;font-weight:600">${mv(f.woon, 'woning', 'woningen')}</small></span><span class="u-sub">${fmt(f.p)} ${mv(f.p, 'pand', 'panden')} · ${fmt(f.ander)} ${mv(f.ander, 'ander object', 'andere objecten')}${f.m ? ', ' + fmt(f.m) + ' m²' : ''}</span></div>`; }).join('');
+    const bs = b.F.bestaand;
+    $('#bouwKop').textContent = 'Bouwen en slopen';
+    $('#bouwDetails').hidden = !b.proj.length;
+    $('#bouwSum').textContent = `Toon de ${fmt(b.proj.length)} ${mv(b.proj.length, 'regel', 'regels')} per pand` + (bs.p ? ` · daarnaast ${fmt(bs.woon)} ${mv(bs.woon, 'woning', 'woningen')} en ${fmt(bs.ander)} ${mv(bs.ander, 'ander object', 'andere objecten')} als nieuw adres in ${fmt(bs.p)} ${mv(bs.p, 'bestaand pand', 'bestaande panden')}` : '');
+    $('#bouwTbl').innerHTML = `<table><thead><tr><th style="cursor:default">Fase</th><th style="cursor:default">Pand</th><th class="r" style="cursor:default">Bouwjaar</th><th class="r" style="cursor:default">Woningen</th><th class="r" style="cursor:default">Andere objecten</th><th class="r" style="cursor:default">m² zonder wonen</th><th style="cursor:default">Gebruik</th></tr></thead><tbody>${b.proj.slice(0, 400).map(pd =>
+      `<tr><td>${esc(FASENAAM[pd.fase])}</td><td><a href="https://bagviewer.kadaster.nl/?objectId=${esc(pd.id)}" target="_blank" rel="noopener" class="mono">${esc(pd.id)}</a></td><td class="r">${pd.bouwjaar || '–'}</td><td class="r">${fmt(pd.woon)}</td><td class="r">${fmt(pd.ander)}</td><td class="r">${fmt(pd.mAnder)}</td><td>${esc(pd.doel || '–')}</td></tr>`).join('')}</tbody></table>`;
+  }
+  function renderLabels() {
+    if (!R) return;
+    const el = $('#labels'), U = R.util;
+    const ind = [...R.panden.values()].filter(p => !p.woon && !p.util).length;
+    const voet = `<p class="noot muted">${fmt(ind)} ${mv(ind, 'pand', 'panden')} in het gebied ${mv(ind, 'heeft', 'hebben')} alleen een industriefunctie of overige gebruiksfunctie; daarvoor geldt geen labelplicht en ze staan hier niet. De label C-plicht voor kantoren, per pand uitgezocht: <a href="labelc.html#gm=${S.g.c}">Label C-kantoren</a>.</p>`;
+    if (!U.length) { el.innerHTML = `<p class="noot">In dit gebied staan geen utiliteitspanden van 50 m² of groter.</p>${voet}`; return; }
+    if (R.labelFout) { el.innerHTML = `<p class="noot">De energielabels konden niet worden opgehaald bij het RIVM. Het gebied telt ${fmt(U.length)} utiliteitspanden.</p>${voet}`; return; }
+    if (!R.labels) { el.innerHTML = `<p class="noot muted">Energielabels van ${fmt(U.length)} utiliteitspanden ophalen bij het RIVM…</p>`; return; }
+    const g = {}; LGR.forEach(x => { g[x[0]] = { n: 0, m: 0 }; });
+    let mTot = 0; U.forEach(p => { const k = labelGroep(R.labels.get(p.id)); g[k].n++; g[k].m += p.opp; mTot += p.opp; });
+    const dn = LGR.map(x => ({ n: 'Label ' + x[1], v: g[x[0]].n, kl: x[2] })).map(d => (d.n = d.n.replace('Label geen label', 'Geen label'), d));
+    const dm = LGR.map((x, i) => ({ n: dn[i].n, v: g[x[0]].m, kl: x[2] }));
+    el.innerHTML = `<div class="chart-kop"><h3>${fmt(U.length)} utiliteitspanden, ${fmt(mTot)} m²</h3><span class="noemer">label dat in het pand het meest voorkomt</span></div>
+      ${balkRij('Naar aantal panden', dn, U.length, mv(2, 'pand', 'panden'))}${balkRij('Naar vierkante meters', dm, mTot, 'm²')}
+      <div class="cijfers">${dn.map((d, i) => `<span><span class="sw" style="background:${css(d.kl)}"></span>${esc(d.n)} <b>${fmt(d.v)}</b> <span class="muted">(${fmt(dm[i].v)} m²)</span></span>`).join('')}</div>${R.labelVol ? '<p class="noot muted">Het gebied is te groot om alle labels in één keer op te halen; de verdeling kan onvolledig zijn.</p>' : ''}${voet}`;
+    bindTips(el);
+  }
+  function renderIbis() {
+    const T = R.D.filter(d => d.soort === 'ibis').map(d => d.t);
+    $('#ibisKopWrap').hidden = $('#ibisPanel').hidden = !T.length;
+    if (!T.length) return;
+    const ver = v => v === 'JA' ? 'ja' : v === 'NEE' ? 'nee' : 'onbekend';
+    $('#ibisTbl').innerHTML = `<table><thead><tr><th style="cursor:default">Terrein</th><th class="r" style="cursor:default">Peiljaar</th><th class="r" style="cursor:default">Bruto ha</th><th class="r" style="cursor:default">Netto ha</th><th class="r" style="cursor:default">Uitgegeven ha</th><th class="r" style="cursor:default">Nog uit te geven ha</th><th class="r" style="cursor:default">Startjaar</th><th style="cursor:default">Verouderd</th><th class="r" style="cursor:default">Ha volgens de grens</th></tr></thead><tbody>${T.map(t =>
+      `<tr><td>${esc(t.naam)}</td><td class="r">${esc(t.jaar)}</td><td class="r">${f1(t.bruto)}</td><td class="r">${f1(t.netto)}</td><td class="r">${f1(t.uitgeg)}</td><td class="r">${f1(t.uitgeefbaar)}</td><td class="r">${t.start || '–'}</td><td>${ver(t.verouderd)}</td><td class="r">${f1(t.haGeo)}</td></tr>`).join('')}</tbody></table>`;
+  }
+
+  // ---------- export ----------
+  function csvDownload(bestand, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = bestand; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const slug = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  const bronTxt = () => `${PRODUCT}, Open Data Atelier, ${location.href}, versie ${VERSIE}; BAG ${S.wb.kop.peil} (Kadaster), bedrijventerreinen IBIS (IPO, CC0)`;
+  $('#csvBtn').addEventListener('click', () => {
+    if (!R) return;
+    const t = R.t, G = S.gmTel, bron = bronTxt(), gn = gebiedNaam();
+    const kop = ['gemeentecode', 'gemeente', 'gebied', 'hectare', 'gebruik', 'objecten_gebied', 'm2_gebied', 'objecten_gemeente', 'm2_gemeente', 'bron'];
+    const rows = FUN.map((f, i) => ['GM' + S.g.c, S.g.n, gn, Math.round(R.ha * 10) / 10, f.n, t.f[i].n, t.f[i].m, G.f[i].n, G.f[i].m, bron]);
+    rows.push(['GM' + S.g.c, S.g.n, gn, Math.round(R.ha * 10) / 10, 'Totaal', t.vbo, t.opp, G.vbo, G.opp, bron]);
+    csvDownload(`open-data-atelier-gebied-in-beeld-${slug(S.g.n)}-${slug(gn) || 'gebied'}.csv`, kop, rows);
+  });
+  $('#csvObj').addEventListener('click', () => {
+    if (!R) return;
+    const wb = S.wb, bron = bronTxt(), gn = gebiedNaam(), W = wb.kop.w;
+    const kop = ['gemeentecode', 'gebied', 'soort', 'object_identificatie', 'pand_identificatie', 'status', 'gebruiksdoel', 'oppervlakte_m2', 'bouwjaar_pand', 'buurtcode', 'x_rd', 'y_rd', 'bron'];
+    const tc = { V: '01', L: '02', S: '03' };
+    const rows = R.idx.map(i => { const c = wb.regels[i].split('\t'); const bu = W.bu[+c[15]] || [];
+      return ['GM' + S.g.c, gn, c[0], volId(c[1], wb.gc, tc[c[0]]), volId(c[3], wb.gc, '10'), W.st[+c[10]], W.doel[+c[11]], c[12], c[13], bu[0] || '', (+c[16] / 10).toFixed(1), (+c[17] / 10).toFixed(1), bron]; });
+    csvDownload(`open-data-atelier-gebied-in-beeld-objecten-${slug(S.g.n)}-${slug(gn) || 'gebied'}.csv`, kop, rows);
+  });
+
+  // ---------- herken en voet ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g, url = location.href;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') + '\nGebied: ' + gebiedNaam() +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  function renderVoet() {
+    renderHerken();
+    document.querySelectorAll('a.naarBouw, a.naarLabelC, a.naarKal, a.naarBedr, a.naarWerkbank').forEach(a => { if (S) a.href = a.getAttribute('href').split('#')[0] + '#gm=' + S.g.c; });
+    const wb = S && S.wb;
+    const jaren = S && S.ibis && S.ibis.length ? [...new Set(S.ibis.map(t => t.jaar))].sort().join(' en ') : '';
+    $('#foot').innerHTML = wb ? `Bronnen: BAG (Kadaster, via PDOK), stand ${datum(wb.kop.peil)}${S.bouw ? '; bouwen en slopen uit dezelfde maandstand' : ''}. Bedrijventerreinen: IBIS (Interprovinciaal Overleg, CC0), via de kaartdienst van de WarmteAtlas (RVO)${jaren ? ', peiljaar ' + jaren : ''}. Energielabels: RIVM, laag rvo_energielabels (afgeleid uit EP-Online van RVO), live opgevraagd. Achtergrondkaart: BRT (Kadaster, CC BY 4.0). Opgehaald op ${new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}. Josephine Linders · ${PRODUCT} · versie ${VERSIE}`
+      : `Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- start ----------
+  $('#retryBtn').addEventListener('click', () => kies(S.g, true));
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const hg = (location.hash.match(/gm=?(\d{4})/i) || [])[1];
+  const g0 = GM.find(g => g.c === (hg || bewaard));
+  if (g0) kies(g0, !!hg);
+})();
+</script>
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+</body>
+</html>
