@@ -454,7 +454,7 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
     return gj;
   }
 
-  const VERSIE = '1.2';
+  const VERSIE = '1.2.1';
   const PRODUCT = 'Energiearmoede per buurt';
   // Monitor Energiearmoede (CBS, tabel 3), per gemeente vooraf samengevat: recepten/energiearmoede/bouw_ea.py.
   // Labels per buurt: dezelfde bestanden als de Energielabelkalender (recepten/energielabelkalender/).
@@ -685,7 +685,10 @@ th.sep, td.sep { border-left: 1px solid var(--line); }
     let zw = '';
     if (x.heeftLab && x.w_tot) zw = `In ${esc(waar)} staan <b>${fmt(x.w_tot)}</b> woningen in panden met alleen woningen. <b>${fmt(x.w_lab)}</b> daarvan hebben een geregistreerd energielabel, <b>${fmt(x.w_efg)}</b> label E, F of G; <b>${fmt(x.w_geen)}</b> hebben geen label.`;
     else zw = 'Voor dit gebied zijn geen labels geteld (andere buurtindeling).';
-    $('#telZin').innerHTML = `<p>${z}</p><p>${zw}</p>`;
+    // regel Actualiteit (19 nov 2026): de kern toont minstens het vorige jaar; zo niet, dan zeggen we dat
+    const vorig = new Date().getFullYear() - 1;
+    const oud = S.ea.jaar < vorig ? `<p class="small muted"><b>Ouder dan het vorige jaar.</b> De nieuwste cijfers van de monitor gaan over ${S.ea.jaar}. Het CBS publiceert de Monitor Energiearmoede één keer per jaar, in de zomer, over het jaar van twee jaar eerder; de editie over ${S.ea.jaar + 1} volgt naar verwachting in de zomer van ${S.ea.jaar + 3}. De labels hieronder zijn van nu.</p>` : '';
+    $('#telZin').innerHTML = `<p>${z}</p>${oud}<p>${zw}</p>`;
     $('#hKop').textContent = `Huishoudens · CBS, verslagjaar ${S.ea.jaar}`;
     $('#wKop').textContent = 'Woningen · BAG en energielabels, nu';
     const metTot = !fo && S.cbs && x.hh;
