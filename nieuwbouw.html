@@ -416,7 +416,7 @@ td.nw { white-space: nowrap; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1';
+  const VERSIE = '1.1.1';
   const PRODUCT = 'Nieuwbouw per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const NB = '/bag-werkbank/nb/';
@@ -606,8 +606,8 @@ td.nw { white-space: nowrap; }
     if (modus1 === 'w') {
       const max = Math.max(1, ...js.map(j => jr(J, 'gm', j, FW, 'nb') || 0));
       const rij = (lab, nb, vr, vrN, nbN, t, af) => `<tr><td class="nw">${lab}</td><td>${balk(nb, max)}</td><td class="r">${vr != null ? per1000(nb, vr) : '–'}</td><td class="r muted">${vrN != null ? per1000(nbN, vrN) : '–'}</td><td>${balk(t, max, 'tr')}</td><td>${balk(af, max, 'af')}</td></tr>`;
-      const rows = js.map(j => rij(j, jr(J, 'gm', j, FW, 'nb'), jr(J, 'gm', j, FW, 'vr'), jr(J, 'nl', j, FW, 'vr'), jr(J, 'nl', j, FW, 'nb'), jr(J, 'gm', j, FW, 'tr'), jr(J, 'gm', j, FW, 'af'))).join('')
-        + (k ? `<tr><td class="nw">${kwLabel}</td><td>${balk(kwSom(J, 'gm', kj, k, FW, 'nb'), max)}</td><td class="r">–</td><td class="r muted">–</td><td>${balk(kwSom(J, 'gm', kj, k, FW, 'tr'), max, 'tr')}</td><td>${balk(kwSom(J, 'gm', kj, k, FW, 'af'), max, 'af')}</td></tr>` : '');
+      const rows = (k ? `<tr><td class="nw">${kwLabel}</td><td>${balk(kwSom(J, 'gm', kj, k, FW, 'nb'), max)}</td><td class="r">–</td><td class="r muted">–</td><td>${balk(kwSom(J, 'gm', kj, k, FW, 'tr'), max, 'tr')}</td><td>${balk(kwSom(J, 'gm', kj, k, FW, 'af'), max, 'af')}</td></tr>` : '')
+        + js.slice().reverse().map(j => rij(j, jr(J, 'gm', j, FW, 'nb'), jr(J, 'gm', j, FW, 'vr'), jr(J, 'nl', j, FW, 'vr'), jr(J, 'nl', j, FW, 'nb'), jr(J, 'gm', j, FW, 'tr'), jr(J, 'gm', j, FW, 'af'))).join('');
       $('#jaarWrap').innerHTML = `<table><thead><tr><th style="cursor:default">Jaar</th><th style="cursor:default">Nieuwbouw</th><th class="r" style="cursor:default" data-tip="Nieuwbouwwoningen per 1.000 woningen aan het begin van het jaar">Per 1.000</th><th class="r" style="cursor:default">Nederland</th><th style="cursor:default">Transformatie</th><th style="cursor:default">Afgeblazen</th></tr></thead><tbody>${rows}</tbody></table>`;
       const zg = jr(J, 'gm', J.vj, FW, 'zg'), nb = jr(J, 'gm', J.vj, FW, 'nb'), zgN = jr(J, 'nl', J.vj, FW, 'zg'), nbN = jr(J, 'nl', J.vj, FW, 'nb');
       $('#jaarNoot').innerHTML = `Woningen, aantal per kalenderjaar. ${nb ? `Van de nieuwbouwwoningen van ${J.vj} kreeg ${pct(zg, nb)} in de BAG nooit de status "bouw gestart" (Nederland ${pct(zgN, nbN)}). Dat is een kwestie van registratie, geen bouw zonder start; zie <a href="levensloop.html#gm=${S.g.c}">Levensloop van de bouw</a>. ` : ''}Bron: CBS ${LNK('86098NED')}.`;
@@ -615,7 +615,7 @@ td.nw { white-space: nowrap; }
       const f = FUNC.filter(([c]) => js.some(j => jr(J, 'gm', j, c, 'nb')) || (k && kwSom(J, 'gm', kj, k, c, 'nb')));
       const max = Math.max(1, ...js.map(j => jr(J, 'gm', j, FNW, 'nb') || 0));
       const rij = (lab, get) => `<tr><td class="nw">${lab}</td><td>${balk(get(FNW), max)}</td>${f.map(([c]) => `<td class="r">${get(c) ? nf.format(get(c)) : '<span class="muted">0</span>'}</td>`).join('')}</tr>`;
-      const rows = js.map(j => rij(j, c => jr(J, 'gm', j, c, 'nb'))).join('') + (k ? rij(kwLabel, c => kwSom(J, 'gm', kj, k, c, 'nb')) : '');
+      const rows = (k ? rij(kwLabel, c => kwSom(J, 'gm', kj, k, c, 'nb')) : '') + js.slice().reverse().map(j => rij(j, c => jr(J, 'gm', j, c, 'nb'))).join('');
       $('#jaarWrap').innerHTML = `<table><thead><tr><th style="cursor:default">Jaar</th><th style="cursor:default">Niet-woningen</th>${f.map(([, t]) => `<th class="r" style="cursor:default">${t}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
       $('#jaarNoot').innerHTML = `Niet-woningen, aantal objecten (een winkel, kantoor of bedrijfsruimte telt als één object, ongeacht de grootte; de oppervlakte staat in blok 3). Bron: CBS ${LNK('86098NED')}.`;
     }
@@ -630,7 +630,7 @@ td.nw { white-space: nowrap; }
   function renderEig() {
     const e = E.get(S.g.c) || NBE_JAREN.map(() => [0, 0, 0, 0]);
     const leg = `<div class="leg">${EIG.map(([t, c]) => `<span class="${c}">${t}</span>`).join('')}</div>`;
-    const rows = e.map((a, i) => { const t = a.reduce((x, y) => x + y, 0); return `<tr><td>${NBE_JAREN[i]}</td><td>${t ? stapel(a) : ''}</td>${a.map(x => `<td class="r">${x ? nf.format(x) : '<span class="muted">0</span>'}</td>`).join('')}<td class="r"><b>${nf.format(t)}</b></td></tr>`; }).join('');
+    const rows = e.map((a, i) => [a, i]).reverse().map(([a, i]) => { const t = a.reduce((x, y) => x + y, 0); return `<tr><td>${NBE_JAREN[i]}</td><td>${t ? stapel(a) : ''}</td>${a.map(x => `<td class="r">${x ? nf.format(x) : '<span class="muted">0</span>'}</td>`).join('')}<td class="r"><b>${nf.format(t)}</b></td></tr>`; }).join('');
     $('#eigWrap').innerHTML = `${leg}<div class="scroll"><table><thead><tr><th style="cursor:default">Jaar</th><th style="cursor:default"></th>${EIG.map(([t]) => `<th class="r" style="cursor:default">${t}</th>`).join('')}<th class="r" style="cursor:default">Totaal</th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="small muted">Nieuwbouwwoningen per kalenderjaar naar eigenaar bij oplevering; 2024 en 2025 afgerond op vijftallen, daardoor wijkt het totaal soms een paar woningen af van blok 1. Bron: ${NBE_BRON}.</p>`;
     const som = [0, 0, 0, 0], somN = [0, 0, 0, 0];
@@ -649,12 +649,12 @@ td.nw { white-space: nowrap; }
     const B = S.B;
     $('#bagW').setAttribute('aria-pressed', modus3 === 'w'); $('#bagNW').setAttribute('aria-pressed', modus3 === 'nw');
     if (!B) { $('#bagWrap').innerHTML = `<p class="small" style="padding:10px 12px">${B === false ? mis : laadt}</p>`; $('#bagNoot').innerHTML = ''; return; }
-    const g = B.g, js = g.jaren.filter(j => j >= +g.peil.slice(0, 4) - TERUG - 1), off = g.jaren.indexOf(js[0]), peil = new Date(g.peil).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    const g = B.g, js = g.jaren.filter(j => j >= +g.peil.slice(0, 4) - TERUG - 1), peil = new Date(g.peil).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
     const lab = j => j === +g.peil.slice(0, 4) ? `${j} (tot ${peil})` : j;
     $('#bagSub').textContent = `Woningen en andere gebouwen in de BAG op ${peil}, naar het bouwjaar van het pand. Het bouwjaar is niet het opleverjaar; daarom wijken de aantallen af van blok 1.`;
     if (modus3 === 'w') {
-      const rows = js.map((j, k) => {
-        const i = k + off, w = g.w[i], wn = B.nl.nl.w[B.nl.jaren.indexOf(j)], opp = w.slice(3, 9);
+      const rows = js.slice().reverse().map(j => {
+        const i = g.jaren.indexOf(j), w = g.w[i], wn = B.nl.nl.w[B.nl.jaren.indexOf(j)], opp = w.slice(3, 9);
         const t = opp.map((x, k) => `${OPP[k][0]}: ${nf.format(x)} (${pct(x, w[0])})`).join('<br>');
         return `<tr><td class="nw">${lab(j)}</td><td class="r">${nf.format(w[0])}</td><td class="r">${w[0] ? pct(w[2], w[0]) : '–'}</td><td class="r muted">${pct(wn[2], wn[0])}</td><td>${w[0] ? `<span data-tip="${esc(t)}">${stapelO(opp)}</span>` : ''}</td><td class="r">${w[0] ? pct(w[3], w[0]) : '–'}</td><td class="r">${w[0] ? pct(w[7], w[0]) : '–'}</td></tr>`;
       }).join('');
@@ -663,7 +663,7 @@ td.nw { white-space: nowrap; }
     } else {
       const fs = Object.keys(g.nw).sort((a, b) => (a === 'meerdere') - (b === 'meerdere') || NWF[a].localeCompare(NWF[b], 'nl'));
       if (!fs.length) { $('#bagWrap').innerHTML = '<p class="small" style="padding:10px 12px">Geen niet-woningen met een bouwjaar in deze jaren.</p>'; $('#bagNoot').innerHTML = ''; return; }
-      const rows = js.map((j, k) => { const i = k + off; const tot = fs.reduce((s, f) => s + g.nw[f][i][1], 0); return `<tr><td class="nw">${lab(j)}</td><td class="r"><b>${nf.format(tot)}</b></td>${fs.map(f => `<td class="r">${g.nw[f][i][1] ? nf.format(g.nw[f][i][1]) : '<span class="muted">0</span>'}</td>`).join('')}</tr>`; }).join('');
+      const rows = js.slice().reverse().map(j => { const i = g.jaren.indexOf(j); const tot = fs.reduce((s, f) => s + g.nw[f][i][1], 0); return `<tr><td class="nw">${lab(j)}</td><td class="r"><b>${nf.format(tot)}</b></td>${fs.map(f => `<td class="r">${g.nw[f][i][1] ? nf.format(g.nw[f][i][1]) : '<span class="muted">0</span>'}</td>`).join('')}</tr>`; }).join('');
       $('#bagWrap').innerHTML = `<table><thead><tr><th style="cursor:default">Bouwjaar</th><th class="r" style="cursor:default">Totaal m²</th>${fs.map(f => `<th class="r" style="cursor:default">${NWF[f]}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table>`;
       $('#bagNoot').innerHTML = `Gebruiksoppervlakte in m² per gebruiksfunctie. Een object met meer dan één functie staat bij "meerdere functies". Bron: BAG (Kadaster), samengevat in de <a href="bagwerkbank.html">BAG-werkbank</a>.`;
     }
