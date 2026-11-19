@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verkeersongevallen per wijk · Open Data Atelier</title>
+<link rel="icon" type="image/svg+xml" href="beeldmerk/beeldmerk-stil.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
+<link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
+<meta name="author" content="Josephine Linders">
+<meta name="description" content="Verkeersongevallen per wijk: waar in de gemeente de geregistreerde ongevallen met letsel gebeuren, wie erbij betrokken is en op wat voor weg. Voor elke Nederlandse gemeente, live uit de dienst Verkeersongevallen Nederland van Rijkswaterstaat. Geen ranglijst, geen losse ongevallen, geen cijfer per inwoner.">
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="vendor/leaflet-1.9.4/leaflet.css">
+<script src="vendor/leaflet-1.9.4/leaflet.js"></script>
+<style>
+.focusbar { position: sticky; top: 0; z-index: 1001; display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r); padding: 8px 12px; font-size: .9rem; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+.focusbar label { margin: 0; }
+.focusbar select { padding: 4px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); max-width: 100%; font-weight: 600; }
+.focusbar #focusTxt { flex: 1 1 260px; }
+@media (max-width: 640px) { .focusbar #focusTxt { display: none; } .focusbar select { flex: 1 1 140px; } }
+.focusinfo, .reeksnoot { margin: 0 0 10px; }
+:root {
+  --bg: #f3f5f5; --surface: #ffffff; --sunk: #e8eded; --line: #d3dcdc;
+  --fg: #172426; --muted: #5a6b6e; --accent: #0f5c66; --accent-fg: #ffffff; --warn: #d2462c;
+  --seq-1: #d6ecee; --seq-2: #a7d3d8; --seq-3: #6fb3bc; --seq-4: #3a8f9a; --seq-5: #0f5c66;
+  --hh-1: #2a78d6; --hh-2: #eda100; --hh-3: #1baf7a;
+  --dn-1: #b4492a; --dn-2: #de8b5c; --dn-3: #f0c4a3; --ov: #aab6b8;
+  --f-display: "Archivo", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1719; --surface: #162123; --sunk: #1d2a2d; --line: #2b3b3e;
+  --fg: #e4ecec; --muted: #93a6a9; --accent: #5fb7c2; --accent-fg: #0b1416; --warn: #ef6a4f;
+  --seq-1: #1f3a3e; --seq-2: #2c5d63; --seq-3: #3f8790; --seq-4: #62b0ba; --seq-5: #a6dde3;
+  --hh-1: #3987e5; --hh-2: #c98500; --hh-3: #199e70;
+  --dn-1: #e2734f; --dn-2: #b9673f; --dn-3: #7a4a33; --ov: #4f5f62; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 15px/1.5 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 48px; }
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.wrap > *, .split > *, .panel { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); font-stretch: 85%; text-wrap: balance; margin: 0; letter-spacing: .005em; }
+h1 { font-size: 1.6rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: .85rem; }
+.eyebrow { font-family: var(--f-display); font-stretch: 80%; font-size: .72rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--muted); }
+a { color: var(--accent); }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; padding-top: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.brand { display: grid; gap: 4px; min-width: 0; }
+.byline { font-size: .82rem; color: var(--muted); }
+.picker { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.field { display: grid; gap: 4px; }
+.field label { font-size: .8rem; color: var(--muted); }
+#gmInput { width: min(280px, 100%); padding: 8px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+.btn { border: 1px solid var(--line); background: var(--surface); padding: 8px 14px; border-radius: var(--r); cursor: pointer; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); font-weight: 600; }
+.btn.linkish { padding: 2px 10px; font-size: .82rem; color: var(--accent); }
+.btn.linkish.primary { color: var(--accent-fg); }
+
+.intro { max-width: 70ch; }
+.intro p { margin: 0 0 8px; }
+.snel { display: flex; flex-wrap: wrap; gap: 6px 8px; align-items: center; margin: 10px 0 0; }
+.snel .btn { font-size: .9rem; padding: 4px 12px; }
+.melding { background: var(--surface); border: 1px solid var(--warn); border-left-width: 4px; border-radius: var(--r); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.melding p { margin: 0; flex: 1 1 320px; }
+.bar { height: 4px; background: var(--sunk); border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
+
+.lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
+.top4 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 560px) { .top4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1000px) { .top4 { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.unit { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 4px; min-width: 0; align-content: start; }
+.unit .u-val { font-family: var(--f-display); font-stretch: 85%; font-size: 1.5rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.unit .u-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+.sectiekop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 6px 16px; padding-top: 8px; }
+.sectiekop p { margin: 0; max-width: 75ch; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: none; padding: 6px 12px; cursor: pointer; color: var(--muted); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); font-weight: 600; }
+
+.trio { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 760px) { .trio { grid-template-columns: repeat(2, minmax(0, 1fr)); } .trio > :last-child { grid-column: 1 / -1; } }
+@media (min-width: 1180px) { .trio { grid-template-columns: repeat(3, minmax(0, 1fr)); } .trio > :last-child { grid-column: auto; } }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .duo { grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); } }
+.chart { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 6px; align-content: start; position: relative; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.chart .ax { stroke: var(--line); }
+.chart .ax0 { stroke: var(--muted); }
+.chart .lbl { fill: var(--muted); font: 11px var(--f-mono); }
+.chart .dl { fill: var(--fg); font: 600 11px var(--f-body); }
+.chart .noemer { font-size: .78rem; color: var(--muted); }
+.chart-kop { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 4px 12px; }
+.chart .noot { font-size: .82rem; margin: 0; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: .8rem; color: var(--muted); align-items: center; }
+.legend .sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; margin-right: 6px; }
+.legend .sw.streep { height: 0; border-top: 2px dashed var(--muted); border-radius: 0; width: 16px; vertical-align: 3px; }
+
+#tip { position: fixed; z-index: 1000; pointer-events: none; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: var(--r); padding: 6px 10px; font-size: .82rem; box-shadow: 0 4px 14px rgba(0,0,0,.15); max-width: 320px; }
+#tip b { font-weight: 600; }
+#tip .num { font-family: var(--f-mono); }
+#tip .sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+
+details.tabelview { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }
+details.tabelview summary { cursor: pointer; padding: 10px 14px; font-size: .9rem; color: var(--accent); }
+details.tabelview .scroll { max-height: 420px; }
+
+.eig { display: grid; grid-template-columns: minmax(110px, auto) minmax(0, 1fr) auto; gap: 8px 12px; align-items: center; font-size: .88rem; }
+.eig .t { position: relative; height: 14px; background: var(--sunk); border-radius: 0 3px 3px 0; }
+.eig .t i { display: block; height: 100%; background: var(--seq-4); border-radius: 0 3px 3px 0; }
+.eig .t b { position: absolute; top: -4px; bottom: -4px; width: 0; border-left: 2px solid var(--fg); }
+.eig .v { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.eig .rij { display: contents; }
+
+.maten { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 12px; }
+#map { height: 540px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunk); }
+.mapwrap { display: grid; gap: 6px; }
+.dossier { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.dossier dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+.dossier dt { color: var(--muted); }
+.dossier dd { margin: 0; font-variant-numeric: tabular-nums; }
+.kruimel { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.kruimel .sep { color: var(--muted); font-size: .72rem; }
+.kruimel button.eyebrow { background: none; border: 0; padding: 0; cursor: pointer; color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.kruimel button.eyebrow:hover { color: var(--fg); }
+.focus { border-left: 3px solid var(--accent); padding: 4px 0 4px 10px; display: grid; gap: 1px; }
+.focus .fl { font-size: .82rem; color: var(--muted); }
+.focus .fv { font-family: var(--f-display); font-size: 1.6rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.focus .fc { font-size: .82rem; color: var(--muted); }
+.focus .fv small { font-size: 1rem; font-weight: 700; margin-left: 6px; }
+.dossier dl .uit { color: var(--fg); font-weight: 700; background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier dl dt.uit { box-shadow: -6px 0 0 color-mix(in srgb, var(--accent) 12%, transparent); }
+.dossier .legend span.uit { color: var(--fg); font-weight: 700; }
+@media (max-width: 860px) { .split { grid-template-columns: minmax(0, 1fr); } #map { height: 400px; } }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; }
+.tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--line); padding: 0 8px; overflow-x: auto; }
+.tab { border: 0; background: none; padding: 10px 12px; cursor: pointer; border-bottom: 2px solid transparent; color: var(--muted); white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; }
+#search { padding: 6px 10px; border: 1px solid var(--line); border-radius: var(--r); background: var(--bg); width: min(320px, 100%); }
+.scroll { overflow: auto; max-height: 560px; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { padding: 6px 10px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+th { position: sticky; top: 0; background: var(--surface); font-weight: 600; cursor: pointer; white-space: nowrap; user-select: none; z-index: 1; }
+th[aria-sort="ascending"]::after { content: " ▲"; font-size: .7em; }
+th[aria-sort="descending"]::after { content: " ▼"; font-size: .7em; }
+td.r, th.r { text-align: right; }
+td.r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+tbody tr.klik { cursor: pointer; }
+tbody tr.klik:hover { background: var(--sunk); }
+tbody tr.sel { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+tbody tr.gm td { font-weight: 600; }
+tbody tr.voorl td { color: var(--muted); }
+.stack { display: flex; gap: 2px; height: 14px; min-width: 140px; border-radius: 3px; overflow: hidden; }
+.stack i { display: block; height: 100%; }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.card ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+footer { font-size: .8rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+.leaflet-container { font: inherit; }
+.leaflet-tooltip { font: 13px var(--f-body); }
+.maplegend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .8rem; color: var(--muted); align-items: center; }
+.maplegend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; border: 1px solid var(--line); }
+
+/* Terug naar het productoverzicht op de homepage */
+.terug { justify-self: start; font-size: .85rem; color: var(--muted); text-decoration: none; }
+.terug:hover, .terug:focus-visible { color: var(--fg); text-decoration: underline; }
+.terug-onder { margin: 16px 0 0; }
+.herken { max-width: 84ch; justify-self: start; box-sizing: border-box; width: 100%; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: var(--r, 8px); padding: 10px 16px; }
+.herken > summary { cursor: pointer; font-weight: 600; list-style-position: outside; }
+.herken > summary .muted { font-weight: 400; }
+.herken[open] > summary { margin-bottom: 10px; }
+.herken ol { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 76ch; }
+.herken .status { margin: 12px 0 0; max-width: 76ch; }
+.herken .meld { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.herken .meld > span:first-child { flex-basis: 100%; }
+.herken .meld a.btn { text-decoration: none; color: inherit; }
+.herken .meld a.btn.primary { background: var(--accent); color: var(--accent-fg, var(--accent-ink, #fff)); border-color: var(--accent); }
+.verantwoording { font-size: .82rem; color: var(--muted); display: grid; gap: 7px; margin: 28px 0 0; padding-top: 14px; border-top: 1px solid var(--line); max-width: 92ch; }
+.verantwoording h2 { font-size: .95rem; margin: 0 0 2px; }
+.verantwoording p { margin: 0; overflow-wrap: anywhere; }
+.verantwoording a { color: inherit; }
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+
+th .kolomknop, td .rijknop { all: unset; cursor: pointer; }
+th .kolomknop:focus-visible, td .rijknop:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+td .rijknop { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+/* Verkeersongevallen per wijk */
+.ondertitel { margin: 0; font-family: var(--f-display); font-stretch: 85%; font-size: 1.05rem; font-weight: 600; color: var(--muted); }
+.leesregel { margin: 0; padding: 6px 12px; border-left: 3px solid var(--accent); background: var(--surface); border-radius: 0 var(--r) var(--r) 0; font-size: .88rem; max-width: 92ch; }
+.telzin { display: grid; gap: 4px; max-width: 92ch; font-size: 1rem; }
+.telzin p { margin: 0; }
+.telzin b { font-variant-numeric: tabular-nums; }
+.cols2 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .cols2 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cols3 { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+@media (min-width: 900px) { .cols3 { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.soorttab { width: 100%; border-collapse: collapse; font-size: .88rem; font-variant-numeric: tabular-nums; }
+.soorttab th, .soorttab td { padding: 4px 6px; text-align: right; border-bottom: 1px solid var(--line); }
+.soorttab th:first-child, .soorttab td:first-child { text-align: left; }
+.soorttab tr.tot td { font-weight: 700; }
+.soorttab th { font-weight: 600; color: var(--muted); font-size: .8rem; }
+.soorttab td.opv { font-weight: 700; color: var(--accent); }
+.dossier .soorttab { font-size: .82rem; }
+.chart .staaf { fill: var(--accent); }
+.straten { columns: 2 260px; column-gap: 24px; margin: 0; padding-left: 1.2em; font-size: .9rem; }
+.straten li { break-inside: avoid; margin: 0 0 3px; }
+.straten b { font-variant-numeric: tabular-nums; }
+.dossier .straten { columns: 1; font-size: .82rem; }
+.nieuw { display: grid; gap: 6px; }
+.nieuw p { margin: 0; max-width: 92ch; }
+#jaren .chart { max-width: 640px; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+<script src="zoeken/zoeken.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Naar de inhoud</a>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <a class="terug" href="./#producten">← Open Data Atelier · Gemeentebeeld</a>
+      <span class="eyebrow">Verkeer · open data</span>
+      <h1 id="title">Verkeersongevallen per wijk</h1>
+      <p class="ondertitel">Waar, wie en op welke weg</p>
+      <span class="byline"><a href="./">Josephine Linders</a> · open data voor gemeentelijke vraagstukken</span>
+    </div>
+    <form class="picker" id="pickForm">
+      <div class="field">
+        <label for="gmInput">Gemeente</label>
+        <input id="gmInput" list="gmList" autocomplete="off" placeholder="Typ een gemeente">
+        <datalist id="gmList"></datalist>
+      </div>
+      <button class="btn primary" type="submit">Toon</button>
+      <button class="btn" id="themeBtn" type="button" title="Licht of donker" aria-label="Wissel tussen licht en donker">◐</button>
+    </form>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="intro" id="intro">
+    <p>Politie en Rijkswaterstaat registreren verkeersongevallen met de plek waar ze gebeurden. Deze pagina deelt de ongevallen van de laatste drie jaren in naar de wijken van de gemeente: waar gebeuren de ongevallen met letsel of een dode, wie zijn erbij betrokken, en op wat voor weg.</p>
+    <p>De kaart toont aantallen, geen cijfer per inwoner: een wijk met een centrum of een doorgaande weg trekt verkeer van buiten aan. Losse ongevallen staan er niet op. Hoe volledig er wordt geregistreerd, verschilt per regio. Vergelijk daarom de wijken binnen de gemeente, niet gemeenten met elkaar.</p>
+    <p class="muted small">Dienst Verkeersongevallen Nederland van Rijkswaterstaat (afgeleid van BRON, CC0), live opgevraagd. Wijkgrenzen van het CBS via PDOK.</p>
+    <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
+  </section>
+
+  <section id="result" hidden>
+    <div class="wrap">
+      <div class="melding" id="melding" role="status" hidden>
+        <p id="meldingTekst"></p>
+        <button class="btn primary" id="retryBtn" type="button">Opnieuw proberen</button>
+      </div>
+      <div id="progress" hidden><div class="small muted" id="progTxt"></div><div class="bar"><i id="barFill"></i></div></div>
+
+      <div class="focusbar" id="focusbar" hidden>
+        <label class="eyebrow" for="focusSel">Kijk naar</label>
+        <select id="focusSel"></select>
+        <span class="muted small" id="focusTxt"></span>
+        <button class="btn linkish" type="button" id="focusTerug" hidden>← Hele gemeente</button>
+      </div>
+      <p class="small muted focusinfo" id="focusInfo" role="status" hidden></p>
+
+      <div class="lead"><span class="big" id="leadBig"></span><span class="muted" id="leadSub"></span></div>
+      <div class="telzin" id="telZin"></div>
+      <div class="top4" id="top4"></div>
+      <details class="herken" id="herken">
+        <summary>Herken je je gemeente niet in deze cijfers? <span class="muted">Vier mogelijke oorzaken, en waar je een fout meldt</span></summary>
+        <ol>
+          <li><b>Registratie bij de bron.</b> Dit zijn de ongevallen die politie of Rijkswaterstaat heeft vastgelegd, niet alles wat er gebeurt. Een val van de fiets zonder ander voertuig ontbreekt meestal, en ongevallen met alleen schade worden per regio heel verschillend vastgelegd. Eigen tellingen van de gemeente of van een ziekenhuis kunnen hoger uitkomen.</li>
+          <li><b>De plek is benaderd.</b> Ongeveer één op de zes ongevallen is alleen aan een straat gekoppeld, niet aan een precies punt. Aan de rand van een wijk kan zo'n ongeval in de buurwijk vallen. Een paar ongevallen zijn alleen aan de gemeente gekoppeld; die tellen voor de gemeente, niet voor een wijk.</li>
+          <li><b>Een andere indeling of periode.</b> De pagina telt per kalenderjaar en gebruikt de wijkindeling 2025 van het CBS. Een wijk die in eigen stukken anders is begrensd, telt anders. Ongevallen tellen in de gemeente waar ze gebeurden, ook op rijkswegen en provinciale wegen.</li>
+          <li><b>Een fout in deze bewerking.</b> De ongevallen staan ook in BRON, op <a href="https://data.overheid.nl/dataset/9841-verkeersongevallen---bestand-geregistreerde-ongevallen-nederland" target="_blank" rel="noopener">data.overheid.nl</a>. Wijkt de pagina daarvan af zonder dat de plek of de indeling het verklaart, dan zit de fout hier. Meld het hieronder.</li>
+        </ol>
+        <p class="small muted status">Deze pagina is een bewerking van open data van Rijkswaterstaat door Josephine Linders, op eigen titel. Het zijn geen officiële cijfers van een gemeente en geen oordeel over hoe veilig een wijk of weg is.</p>
+        <div class="meld">
+          <span>Fout gezien, of een verschil dat je niet kunt verklaren?</span>
+          <a class="btn primary" id="herkenMail" href="./#samenwerken">Meld het per e-mail</a>
+          <a class="btn" id="herkenGh" href="https://github.com/josephinal/josephinal.github.io/issues/new" target="_blank" rel="noopener">Of openbaar op GitHub</a>
+          <span class="small muted">Een melding op GitHub is voor iedereen zichtbaar en vraagt een gratis GitHub-account. Zet er geen persoonsgegevens in.</span>
+        </div>
+      </details>
+
+      <!-- door de jaren -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Door de jaren</span><h2 id="jarenKop">Door de jaren</h2></div>
+        <p class="small muted">Per jaar de ongevallen met letsel of een dode. Hoeveel er met alleen schade waren, staat alleen als totaal in de kerncijfers.</p>
+      </div>
+      <div id="jaren"></div>
+
+      <!-- wie en welke weg -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Wie</span><h2 id="wieKop">Wie erbij betrokken is</h2></div>
+        <p class="small muted">Ongevallen met letsel of dodelijk, naar de verkeersdeelnemers die als eerste of tweede partij zijn vastgelegd. Een ongeval tussen een fiets en een auto telt bij allebei. Bij meer dan twee partijen ontbreken de overige.</p>
+      </div>
+      <div id="wie"></div>
+      <div class="sectiekop">
+        <div><span class="eyebrow">Welke weg</span><h2 id="wegKop">Op welke weg</h2></div>
+        <p class="small muted">Ongevallen met letsel of dodelijk, naar de maximumsnelheid ter plekke, wie de weg beheert, en binnen of buiten de bebouwde kom. Geen oordeel over 30 km/u of over de inrichting van een weg: een weg met veel verkeer heeft meer ongevallen.</p>
+      </div>
+      <div class="cols3" id="weg"></div>
+
+      <!-- per wijk -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Per wijk</span><h2 id="wijkKop">Per wijk</h2></div>
+      </div>
+      <p class="leesregel">De kaart kleurt op het aantal ongevallen met letsel of dodelijk in drie jaar, in vijf groepen van ongeveer even veel wijken. Een wijk met een centrum, station of doorgaande weg heeft meer ongevallen door verkeer van buiten. De kaart is geen ranglijst.</p>
+      <div class="split">
+        <div class="mapwrap">
+          <div id="map" role="region" aria-label="Kaart van de wijken"></div>
+          <div class="maplegend" id="mapLegend"></div>
+        </div>
+        <aside class="dossier" id="dossier" aria-live="polite"></aside>
+      </div>
+      <div class="panel">
+        <div class="tools">
+          <span class="muted small" id="rowCount"></span>
+          <span style="flex:1"></span>
+          <button class="btn" id="csvBtn" type="button">CSV gemeente en wijken</button>
+        </div>
+        <div class="scroll" id="tblWrap" tabindex="0" role="region" aria-label="Tabel met cijfers per wijk; scroll met de pijltjestoetsen"></div>
+      </div>
+
+      <!-- straten -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Straten</span><h2 id="stratenKop">Straten</h2></div>
+        <p class="small muted">Straten met 5 of meer ongevallen met letsel of dodelijk in drie jaar, zoals de registratie de straatnaam schrijft. Een lange straat of een rijksweg telt als één regel, een kort plein ook: het aantal zegt niets over hoe gevaarlijk een stuk weg is.</p>
+      </div>
+      <div class="panel">
+        <div id="stratenLijst"></div>
+        <div class="tools"><span style="flex:1"></span><button class="btn" id="csvStr" type="button">CSV straten</button></div>
+      </div>
+
+      <!-- nieuwere vervoermiddelen -->
+      <div class="sectiekop">
+        <div><span class="eyebrow">Fatbike en e-bike</span><h2>Genoemd in de registratie</h2></div>
+      </div>
+      <div class="card nieuw" id="nieuw"></div>
+
+      <div class="cols">
+        <div class="card">
+          <h2>Zo is gerekend</h2>
+          <ul class="small">
+            <li><b>Jaren</b>: de drie nieuwste jaren in de dienst Verkeersongevallen Nederland. Komt er een jaar bij, dan schuift de pagina vanzelf op.</li>
+            <li><b>Letsel of dodelijk</b>: de afloop van het ongeval zoals vastgelegd. De rest is "alleen schade". Dodelijk staat alleen voor de hele gemeente apart; per wijk telt het mee in letsel of dodelijk.</li>
+            <li><b>Wijk</b>: de wijk waarin het punt van het ongeval ligt, in de wijkindeling 2025 van het CBS. Ongevallen die alleen aan de gemeente zijn gekoppeld, tellen niet voor een wijk.</li>
+            <li><b>Kaartkleuren</b>: vijf groepen met ongeveer even veel wijken, steeds opnieuw bepaald voor de gekozen gemeente. Dezelfde kleur betekent in een andere gemeente dus een ander aantal.</li>
+            <li><b>Wie</b>: partij 1 of 2 van het ongeval. Fiets of e-bike samen; personen- en bestelauto samen. <b>Opvallend</b>: een groep heeft in de wijk een aandeel dat minstens 10 procentpunt boven de hele gemeente ligt, bij minstens 10 ongevallen met letsel in de wijk.</li>
+            <li><b>Straten</b>: vanaf 5 ongevallen met letsel of dodelijk in drie jaar. Heeft de gemeente meer woonplaatsen, dan staat de woonplaats erbij.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Let op bij het lezen</h2>
+          <ul class="small">
+            <li><b>Registratie is niet alles.</b> Een val van de fiets zonder ander voertuig ontbreekt meestal. Ongevallen met alleen schade worden per regio heel verschillend vastgelegd: landelijk heeft een op de vijf geregistreerde ongevallen letsel, in sommige regio's bijna de helft.</li>
+            <li><b>Verkeer van buiten telt mee.</b> Ongevallen tellen waar ze gebeuren. Een wijk met een doorgaande weg of een centrum heeft meer ongevallen zonder dat de bewoners onveiliger wonen. Daarom staat er geen cijfer per inwoner.</li>
+            <li><b>Geen losse ongevallen.</b> Elk ongeval staat met plek en afloop in de open data, maar een punt met een jaartal en "dodelijk" wijst in een kleine kern naar een persoon. Daarom alleen tellingen per wijk en per straat.</li>
+            <li><b>Kleine aantallen schommelen.</b> Per wijk zijn drie jaren samengenomen. Een verschil van een paar ongevallen tussen twee jaren zegt weinig.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h2>Naast deze pagina</h2>
+          <ul class="small">
+            <li><a href="indicatoren.html#domein=verkeer" id="naarInd">Indicatoren belicht, Wegen en verkeersveiligheid</a>: welke cijfers er over wegen en verkeersveiligheid zijn, waaronder de ongevallen per gemeente en het aandeel wegen met 30 km/u.</li>
+            <li><a href="https://data.overheid.nl/dataset/9841-verkeersongevallen---bestand-geregistreerde-ongevallen-nederland" target="_blank" rel="noopener">BRON op data.overheid.nl</a>: het volledige bestand van Rijkswaterstaat, ook met recentere jaren dan de dienst.</li>
+          </ul>
+        </div>
+      </div>
+      <footer id="foot"></footer>
+    </div>
+  </section>
+
+  <section class="verantwoording" aria-labelledby="vh">
+    <h2 id="vh">Verantwoording</h2>
+    <p><b>Bron en peildatum.</b> Verkeersongevallen: Rijkswaterstaat, dienst Verkeersongevallen Nederland (WFS), afgeleid van het Bestand geRegistreerde Ongevallen Nederland (BRON), de lagen per jaar, live opgevraagd. Op 19 november 2026 zijn dat 2022, 2023 en 2024; 2025 staat al wel in de downloads van BRON, nog niet in de dienst. Wijkgrenzen: CBS-wijkkaart 2025 via PDOK. De standen staan na de gemeentekeuze onder de cijfers.</p>
+    <p><b>Licentie.</b> Dienst Verkeersongevallen Nederland: CC0. Wijkgrenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+    <p><b>Methode.</b> Elk ongeval van de gemeente wordt aan de wijk toegewezen waarin het punt ligt. Per wijk en voor de hele gemeente: ongevallen met letsel of dodelijk per jaar en over drie jaar, naar betrokken verkeersdeelnemers, maximumsnelheid ter plekke, wegbeheerder en bebouwde kom; straten vanaf 5. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
+    <p><b>Wat dit niet is.</b> Geen maat voor hoe veilig een wijk of weg is; geen ranglijst tussen wijken, straten of gemeenten; geen cijfer per inwoner of per voertuigkilometer; geen losse ongevallen; geen oordeel over 30 km/u of over de inrichting van een weg.</p>
+    <p><b>Bekende beperkingen.</b> Lang niet elk ongeval wordt geregistreerd, en de registratiegraad verschilt per regio. Ongeveer 15% van de ongevallen is alleen op straatniveau gekoppeld. De dienst kent alleen partij 1 en 2. Fatbike, speed pedelec en e-step staan alleen in een vrij tekstveld. Bebouwde kom is bij ongeveer een derde niet ingevuld. Straatnamen zijn soms afgekort.</p>
+    <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente, de politie of Rijkswaterstaat.</p>
+    <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
+    <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. Over wat deze pagina toont en waar je bezwaar maakt: <a href="colofon.html#registraties">Cijfers per wijk uit registraties</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
+    <p class="terug-onder"><a class="terug" href="indicatoren.html#domein=verkeer" id="naarInd2">Welke cijfers er over wegen en verkeersveiligheid zijn. Indicatoren belicht, Wegen en verkeersveiligheid →</a></p>
+    <p class="terug-onder"><a class="terug" href="./#producten">← Terug naar alle instrumenten</a></p>
+  </section>
+</main>
+</div>
+<div id="tip" role="tooltip" hidden></div>
+<script>
+(function () {
+  'use strict';
+  // Wijkkaart (PDOK): tot en met 2025 de velden gemeentecode, wijkcode en filteren op gemeentecode; vanaf 2026 gm_code, wk_code.
+  const WB_VELD = { gm_code: 'gemeentecode', gm_naam: 'gemeentenaam', wk_code: 'wijkcode', wk_naam: 'wijknaam', bu_code: 'buurtcode', bu_naam: 'buurtnaam' };
+  function wbUrl(j, laag, c, limit) {
+    const u = `https://api.pdok.nl/cbs/wijken-en-buurten-${j}/ogc/v1/collections/${laag}/items?f=json&limit=${limit}`;
+    if (j < 2026) return u + `&gemeentecode=GM${c}`;
+    return laag === 'buurten' ? u + '&filter=' + encodeURIComponent(`bu_code LIKE 'BU${c}%'`) : u + `&gm_code=GM${c}`;
+  }
+  function wbOud(gj) {
+    ((gj && gj.features) || []).forEach(f => { const p = f.properties || {}; for (const k in WB_VELD) if (p[k] != null && p[WB_VELD[k]] == null) p[WB_VELD[k]] = p[k]; });
+    return gj;
+  }
+
+  const VERSIE = '1.0';
+  const PRODUCT = 'Verkeersongevallen per wijk';
+  // Rijkswaterstaat, dienst Verkeersongevallen Nederland (WFS, CC0), afgeleid van BRON. Live, CORS open.
+  const RWS = 'https://geo.rijkswaterstaat.nl/services/ogc/gdr/verkeersongevallen_nederland/ows';
+  const VELDEN = 'shape,jaar_ongeval,verkeersongeval_afloop,partij_1_objecttype,partij_1_objecttype_overig,partij_2_objecttype,partij_2_objecttype_overig,niveau_koppelen,bebouwde_kom,maximum_snelheid,wegbeheerder,straatnaam,woonplaats';
+  const WIJKJAAR = 2025;   // wijkindeling van de kaart
+  const VENSTER = 3;       // de drie nieuwste jaren samen
+  const MIN_STRAAT = 5;    // een straat staat er pas vanaf 5 ongevallen met letsel of dodelijk in drie jaar
+  const OPV_PP = 10, OPV_MIN = 10; // "opvallend": wijk minstens 10 procentpunt boven de gemeente, bij minstens 10 ongevallen met letsel
+  // Gemeentenamen die Rijkswaterstaat anders schrijft dan het CBS (stand 15 nov 2026).
+  const RWS_NAAM = { 'Beek (L.)': 'Beek', 'Bergen (L.)': 'Bergen (L)', 'Bergen (NH.)': 'Bergen (NH)', 'Hengelo (O.)': 'Hengelo (O)',
+    'Laren (NH.)': 'Laren', 'Middelburg (Z.)': 'Middelburg', 'Rijswijk (ZH.)': 'Rijswijk', 'Stein (L.)': 'Stein' };
+
+  // Wie erbij betrokken is: partij 1 of 2 (de dienst kent alleen die twee). Een ongeval kan in meer groepen vallen.
+  const WIE = [
+    { k: 'voet', t: 'Voetganger', m: p => p === 'Voetganger' },
+    { k: 'fiets', t: 'Fiets of e-bike', m: p => p === 'Fiets' || p === 'e-bike' },
+    { k: 'brom', t: 'Brom- of snorfiets', m: p => p === 'Bromfiets' || p === 'Snorfiets' },
+    { k: 'scoot', t: 'Scootmobiel of brommobiel', m: p => p === 'Scootmobiel' || p === 'Brommobiel' },
+    { k: 'motor', t: 'Motor', m: p => p === 'Motor' },
+    { k: 'auto', t: 'Personen- of bestelauto', m: p => p === 'Personenauto' || p === 'Bestelauto' },
+    { k: 'zwaar', t: 'Vrachtauto, bus of landbouwvoertuig', m: p => /^(Vrachtauto|Bus|Trekker|Landbouwvoertuig)$/.test(p) }];
+  const SNEL = [
+    { k: 's15', t: '15 km/u of minder', m: v => v != null && v <= 15 },
+    { k: 's30', t: '30 km/u', m: v => v === 30 },
+    { k: 's50', t: '50 km/u', m: v => v === 50 },
+    { k: 's60', t: '60 of 70 km/u', m: v => v === 60 || v === 70 },
+    { k: 's80', t: '80 km/u of meer', m: v => v != null && v >= 80 },
+    { k: 'sonb', t: 'onbekend', m: v => v == null }];
+  const BEH = [
+    { k: 'Gemeente', t: 'gemeente' }, { k: 'Provincie', t: 'provincie' }, { k: 'Rijk', t: 'Rijk' }, { k: 'overig', t: 'waterschap of overig' }];
+  const KOM = [{ k: 'Binnen', t: 'binnen de bebouwde kom' }, { k: 'Buiten', t: 'buiten de bebouwde kom' }, { k: 'onb', t: 'onbekend' }];
+  // Nieuwere vervoermiddelen: alleen in het vrije tekstveld (fatbike, speed pedelec, e-step) of als eigen type (e-bike).
+  const NIEUW = [
+    { k: 'fat', t: 'fatbike', m: s => /FATBIKE/.test(s) },
+    { k: 'ebike', t: 'e-bike', m: s => /(^|\|)e-bike(\||$)/.test(s) },
+    { k: 'sped', t: 'speed pedelec', m: s => /SPEED PEDELEC/.test(s) },
+    { k: 'step', t: 'e-step', m: s => /E-STEP|ELEKTRISCHE STEP/.test(s) }];
+
+  const $ = s => document.querySelector(s);
+  const nf = new Intl.NumberFormat('nl-NL');
+  const fmt = v => v == null ? '–' : nf.format(Math.round(v));
+  const pct = (a, b) => b ? 100 * a / b : null;
+  const fPct = v => v == null ? '–' : nf.format(Math.round(v)) + '%';
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  // ---------- gemeenten (indeling 2025, officiële CBS-namen) ----------
+  const GMRAW = "0014:Groningen|0034:Almere|0037:Stadskanaal|0047:Veendam|0050:Zeewolde|0059:Achtkarspelen|0060:Ameland|0072:Harlingen|0074:Heerenveen|0080:Leeuwarden|0085:Ooststellingwerf|0086:Opsterland|0088:Schiermonnikoog|0090:Smallingerland|0093:Terschelling|0096:Vlieland|0098:Weststellingwerf|0106:Assen|0109:Coevorden|0114:Emmen|0118:Hoogeveen|0119:Meppel|0141:Almelo|0147:Borne|0148:Dalfsen|0150:Deventer|0153:Enschede|0158:Haaksbergen|0160:Hardenberg|0163:Hellendoorn|0164:Hengelo (O.)|0166:Kampen|0168:Losser|0171:Noordoostpolder|0173:Oldenzaal|0175:Ommen|0177:Raalte|0180:Staphorst|0183:Tubbergen|0184:Urk|0189:Wierden|0193:Zwolle|0197:Aalten|0200:Apeldoorn|0202:Arnhem|0203:Barneveld|0209:Beuningen|0213:Brummen|0214:Buren|0216:Culemborg|0221:Doesburg|0222:Doetinchem|0225:Druten|0226:Duiven|0228:Ede|0230:Elburg|0232:Epe|0233:Ermelo|0243:Harderwijk|0244:Hattem|0246:Heerde|0252:Heumen|0262:Lochem|0263:Maasdriel|0267:Nijkerk|0268:Nijmegen|0269:Oldebroek|0273:Putten|0274:Renkum|0275:Rheden|0277:Rozendaal|0279:Scherpenzeel|0281:Tiel|0285:Voorst|0289:Wageningen|0293:Westervoort|0294:Winterswijk|0296:Wijchen|0297:Zaltbommel|0299:Zevenaar|0301:Zutphen|0302:Nunspeet|0303:Dronten|0307:Amersfoort|0308:Baarn|0310:De Bilt|0312:Bunnik|0313:Bunschoten|0317:Eemnes|0321:Houten|0327:Leusden|0331:Lopik|0335:Montfoort|0339:Renswoude|0340:Rhenen|0342:Soest|0344:Utrecht|0345:Veenendaal|0351:Woudenberg|0352:Wijk bij Duurstede|0353:IJsselstein|0355:Zeist|0356:Nieuwegein|0358:Aalsmeer|0361:Alkmaar|0362:Amstelveen|0363:Amsterdam|0373:Bergen (NH.)|0375:Beverwijk|0376:Blaricum|0377:Bloemendaal|0383:Castricum|0384:Diemen|0385:Edam-Volendam|0388:Enkhuizen|0392:Haarlem|0394:Haarlemmermeer|0396:Heemskerk|0397:Heemstede|0399:Heiloo|0400:Den Helder|0402:Hilversum|0405:Hoorn|0406:Huizen|0415:Landsmeer|0417:Laren (NH.)|0420:Medemblik|0431:Oostzaan|0432:Opmeer|0437:Ouder-Amstel|0439:Purmerend|0441:Schagen|0448:Texel|0450:Uitgeest|0451:Uithoorn|0453:Velsen|0473:Zandvoort|0479:Zaanstad|0482:Alblasserdam|0484:Alphen aan den Rijn|0489:Barendrecht|0498:Drechterland|0502:Capelle aan den IJssel|0503:Delft|0505:Dordrecht|0512:Gorinchem|0513:Gouda|0518:'s-Gravenhage|0523:Hardinxveld-Giessendam|0531:Hendrik-Ido-Ambacht|0532:Stede Broec|0534:Hillegom|0537:Katwijk|0542:Krimpen aan den IJssel|0546:Leiden|0547:Leiderdorp|0553:Lisse|0556:Maassluis|0569:Nieuwkoop|0575:Noordwijk|0579:Oegstgeest|0589:Oudewater|0590:Papendrecht|0597:Ridderkerk|0599:Rotterdam|0603:Rijswijk (ZH.)|0606:Schiedam|0610:Sliedrecht|0613:Albrandswaard|0622:Vlaardingen|0626:Voorschoten|0627:Waddinxveen|0629:Wassenaar|0632:Woerden|0637:Zoetermeer|0638:Zoeterwoude|0642:Zwijndrecht|0654:Borsele|0664:Goes|0668:West Maas en Waal|0677:Hulst|0678:Kapelle|0687:Middelburg (Z.)|0703:Reimerswaal|0715:Terneuzen|0716:Tholen|0717:Veere|0718:Vlissingen|0736:De Ronde Venen|0737:Tytsjerksteradiel|0743:Asten|0744:Baarle-Nassau|0748:Bergen op Zoom|0753:Best|0755:Boekel|0757:Boxtel|0758:Breda|0762:Deurne|0765:Pekela|0766:Dongen|0770:Eersel|0772:Eindhoven|0777:Etten-Leur|0779:Geertruidenberg|0784:Gilze en Rijen|0785:Goirle|0794:Helmond|0796:'s-Hertogenbosch|0797:Heusden|0798:Hilvarenbeek|0809:Loon op Zand|0820:Nuenen, Gerwen en Nederwetten|0823:Oirschot|0824:Oisterwijk|0826:Oosterhout|0828:Oss|0840:Rucphen|0845:Sint-Michielsgestel|0847:Someren|0848:Son en Breugel|0851:Steenbergen|0852:Waterland|0855:Tilburg|0858:Valkenswaard|0861:Veldhoven|0865:Vught|0866:Waalre|0867:Waalwijk|0873:Woensdrecht|0879:Zundert|0880:Wormerland|0882:Landgraaf|0888:Beek (L.)|0889:Beesel|0893:Bergen (L.)|0899:Brunssum|0907:Gennep|0917:Heerlen|0928:Kerkrade|0935:Maastricht|0938:Meerssen|0944:Mook en Middelaar|0946:Nederweert|0957:Roermond|0965:Simpelveld|0971:Stein (L.)|0981:Vaals|0983:Venlo|0984:Venray|0986:Voerendaal|0988:Weert|0994:Valkenburg aan de Geul|0995:Lelystad|1507:Horst aan de Maas|1509:Oude IJsselstreek|1525:Teylingen|1581:Utrechtse Heuvelrug|1586:Oost Gelre|1598:Koggenland|1621:Lansingerland|1640:Leudal|1641:Maasgouw|1652:Gemert-Bakel|1655:Halderberge|1658:Heeze-Leende|1659:Laarbeek|1667:Reusel-De Mierden|1669:Roerdalen|1674:Roosendaal|1676:Schouwen-Duiveland|1680:Aa en Hunze|1681:Borger-Odoorn|1690:De Wolden|1695:Noord-Beveland|1696:Wijdemeren|1699:Noordenveld|1700:Twenterand|1701:Westerveld|1705:Lingewaard|1706:Cranendonck|1708:Steenwijkerland|1709:Moerdijk|1711:Echt-Susteren|1714:Sluis|1719:Drimmelen|1721:Bernheze|1723:Alphen-Chaam|1724:Bergeijk|1728:Bladel|1729:Gulpen-Wittem|1730:Tynaarlo|1731:Midden-Drenthe|1734:Overbetuwe|1735:Hof van Twente|1740:Neder-Betuwe|1742:Rijssen-Holten|1771:Geldrop-Mierlo|1773:Olst-Wijhe|1774:Dinkelland|1783:Westland|1842:Midden-Delfland|1859:Berkelland|1876:Bronckhorst|1883:Sittard-Geleen|1884:Kaag en Braassem|1891:Dantumadiel|1892:Zuidplas|1894:Peel en Maas|1895:Oldambt|1896:Zwartewaterland|1900:Súdwest-Fryslân|1901:Bodegraven-Reeuwijk|1903:Eijsden-Margraten|1904:Stichtse Vecht|1911:Hollands Kroon|1916:Leidschendam-Voorburg|1924:Goeree-Overflakkee|1926:Pijnacker-Nootdorp|1930:Nissewaard|1931:Krimpenerwaard|1940:De Fryske Marren|1942:Gooise Meren|1945:Berg en Dal|1948:Meierijstad|1949:Waadhoeke|1950:Westerwolde|1952:Midden-Groningen|1954:Beekdaelen|1955:Montferland|1959:Altena|1960:West Betuwe|1961:Vijfheerenlanden|1963:Hoeksche Waard|1966:Het Hogeland|1969:Westerkwartier|1970:Noardeast-Fryslân|1978:Molenlanden|1979:Eemsdelta|1980:Dijk en Waard|1982:Land van Cuijk|1991:Maashorst|1992:Voorne aan Zee";
+  const ALIAS = { 'Den Haag': '0518', 'Den Bosch': '0796' };
+  const GM = GMRAW.split('|').map(x => { const i = x.indexOf(':'); return { c: x.slice(0, i), n: x.slice(i + 1) }; })
+    .sort((a, b) => a.n.replace(/^'s-/, '').localeCompare(b.n.replace(/^'s-/, ''), 'nl'));
+  const byName = new Map(GM.map(g => [g.n.toLowerCase(), g]));
+  Object.entries(ALIAS).forEach(([a, c]) => byName.set(a.toLowerCase(), GM.find(g => g.c === c)));
+  $('#gmList').innerHTML = GM.map(g => `<option value="${esc(g.n)}"></option>`).join('') + Object.keys(ALIAS).map(a => `<option value="${esc(a)}"></option>`).join('');
+
+  // ---------- thema ----------
+  try { const t = localStorage.getItem('jl-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $('#themeBtn').addEventListener('click', () => {
+    const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    document.documentElement.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', document.documentElement.dataset.theme); } catch (e) {}
+    if (S && S.r) { renderKaart(); renderJaren(); }
+  });
+  const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+  // ---------- tooltip ----------
+  const tip = $('#tip');
+  let tipBron = null;
+  function toonTip(e, html) {
+    tipBron = e.currentTarget || e.target; tip.innerHTML = html; tip.hidden = false;
+    const r = tip.getBoundingClientRect();
+    let x = e.clientX + 14, y = e.clientY + 14;
+    if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 14;
+    if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+    tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, y) + 'px';
+  }
+  const verbergTip = () => { tip.hidden = true; };
+  document.addEventListener('pointermove', ev => { if (!tip.hidden && !(tipBron && tipBron.isConnected && tipBron.contains(ev.target))) verbergTip(); }, { passive: true });
+  addEventListener('scroll', verbergTip, { passive: true, capture: true });
+  function bindTips(root) { root.querySelectorAll('[data-tip]').forEach(i => { i.addEventListener('pointermove', e => toonTip(e, i.dataset.tip)); i.addEventListener('pointerleave', verbergTip); }); }
+
+  // ---------- ophalen ----------
+  async function haal(u, soort, pogingen = 3) {
+    let last;
+    for (let i = 0; i < pogingen; i++) {
+      const ac = new AbortController(); const to = setTimeout(() => ac.abort(), 45000);
+      try {
+        const r = await fetch(u, { signal: ac.signal });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return soort === 'text' ? await r.text() : await r.json();
+      } catch (e) { last = e; if (i < pogingen - 1) await new Promise(res => setTimeout(res, 700 * (i + 1))); }
+      finally { clearTimeout(to); }
+    }
+    throw last;
+  }
+  // Welke jaren de dienst heeft: lagen ongevallen_<jaar>. Een nieuw jaar komt zo vanzelf mee.
+  async function rwsJaren() {
+    const cap = await haal(RWS + '?service=WFS&version=2.0.0&request=GetCapabilities', 'text');
+    const js = [...new Set([...cap.matchAll(/ongevallen_(\d{4})(?![_\d])/g)].map(m => +m[1]))].sort((a, b) => a - b);
+    if (!js.length) throw new Error('geen jaren');
+    return js.slice(-VENSTER);
+  }
+  async function rwsJaar(j, naam) {
+    const f = `gemeente='${naam.replace(/'/g, "''")}'`;
+    const u = `${RWS}?service=WFS&version=2.0.0&request=GetFeature&outputFormat=application/json&srsName=EPSG:4326&count=200000&typeNames=verkeersongevallen_nederland:ongevallen_${j}&propertyName=${VELDEN}&CQL_FILTER=${encodeURIComponent(f)}`;
+    const gj = await haal(u, 'json');
+    return (gj.features || []).map(ft => {
+      const p = ft.properties, c = ft.geometry && ft.geometry.coordinates;
+      const ms = p.maximum_snelheid == null || p.maximum_snelheid === '' ? null : +p.maximum_snelheid;
+      return {
+        j: +p.jaar_ongeval || j, a: p.verkeersongeval_afloop, x: c ? c[0] : null, y: c ? c[1] : null,
+        p1: p.partij_1_objecttype || '', p2: p.partij_2_objecttype || '',
+        ov: [p.partij_1_objecttype || '', p.partij_1_objecttype_overig || '', p.partij_2_objecttype || '', p.partij_2_objecttype_overig || ''].join('|'),
+        gemNiv: /gemeente niveau/i.test(p.niveau_koppelen || ''), kom: p.bebouwde_kom || '', ms, beh: p.wegbeheerder || '',
+        st: (p.straatnaam || '').trim(), wp: (p.woonplaats || '').trim()
+      };
+    });
+  }
+
+  // ---------- punt in wijk ----------
+  function inRing(x, y, ring) { let c = false; for (let i = 0, k = ring.length - 1; i < ring.length; k = i++) { const [xi, yi] = ring[i], [xk, yk] = ring[k]; if (((yi > y) !== (yk > y)) && (x < (xk - xi) * (y - yi) / (yk - yi) + xi)) c = !c; } return c; }
+  function inVlak(x, y, g) { const ps = g.type === 'Polygon' ? [g.coordinates] : g.type === 'MultiPolygon' ? g.coordinates : []; return ps.some(p => inRing(x, y, p[0]) && !p.slice(1).some(h => inRing(x, y, h))); }
+  function bbox(g) { const ps = g.type === 'Polygon' ? [g.coordinates] : g.coordinates; let a = [Infinity, Infinity, -Infinity, -Infinity]; ps.forEach(p => p[0].forEach(([x, y]) => { a = [Math.min(a[0], x), Math.min(a[1], y), Math.max(a[2], x), Math.max(a[3], y)]; })); return a; }
+
+  // ---------- staat ----------
+  let S = null;
+  let selCode = null;
+  let map = null, layer = null, gjLayer = null;
+  const fouten = new Set();
+  function voortgang(stap, totaal, txt) {
+    $('#progress').hidden = stap >= totaal;
+    $('#barFill').style.width = Math.round(100 * stap / totaal) + '%';
+    $('#progTxt').textContent = txt;
+  }
+  function toonMelding() {
+    if (!fouten.size) { $('#melding').hidden = true; return; }
+    const t = new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+    $('#meldingTekst').textContent = `Om ${t} kwam er geen antwoord van: ${[...fouten].join(', ')}. ${S && S.r ? 'De rest van de pagina werkt wel.' : ''}`;
+    $('#melding').hidden = false;
+  }
+
+  // ---------- rekenen ----------
+  const ernstig = o => o.a === 'Letsel' || o.a === 'Dodelijk';
+  function telGebied(lijst, js) {
+    const t = { n: lijst.length, perJaar: {}, wie: {}, snel: {}, beh: {}, kom: {} };
+    js.forEach(j => { t.perJaar[j] = { tot: 0, ern: 0, dood: 0 }; });
+    let ern = 0, dood = 0;
+    lijst.forEach(o => {
+      const pj = t.perJaar[o.j]; if (!pj) return;
+      pj.tot++;
+      if (!ernstig(o)) return;
+      ern++; pj.ern++; if (o.a === 'Dodelijk') { dood++; pj.dood++; }
+      WIE.forEach(w => { if (w.m(o.p1) || w.m(o.p2)) t.wie[w.k] = (t.wie[w.k] || 0) + 1; });
+      const s = SNEL.find(x => x.m(o.ms)); if (s) t.snel[s.k] = (t.snel[s.k] || 0) + 1;
+      const b = BEH.some(x => x.k === o.beh) ? o.beh : 'overig'; t.beh[b] = (t.beh[b] || 0) + 1;
+      const k = o.kom === 'Binnen' || o.kom === 'Buiten' ? o.kom : 'onb'; t.kom[k] = (t.kom[k] || 0) + 1;
+    });
+    t.ern = ern; t.dood = dood; t.schade = t.n - ern;
+    return t;
+  }
+  function straten(lijst, metPlaats) {
+    const m = new Map();
+    lijst.filter(ernstig).forEach(o => {
+      if (!o.st || o.gemNiv) return;
+      const k = metPlaats ? o.st + '|' + o.wp : o.st;
+      m.set(k, (m.get(k) || 0) + 1);
+    });
+    return [...m.entries()].filter(([, n]) => n >= MIN_STRAAT)
+      .map(([k, n]) => { const [st, wp] = k.split('|'); return { naam: st, wp: metPlaats ? wp : '', n }; })
+      .sort((a, b) => b.n - a.n || a.naam.localeCompare(b.naam, 'nl'));
+  }
+  function bouw(ong, wijkGeo, namen, js) {
+    const W = wijkGeo.map(f => ({ code: f.properties.wijkcode, naam: f.properties.wijknaam, g: f.geometry, bb: bbox(f.geometry), o: [] }));
+    let buiten = 0, gemNiv = 0, zonderPunt = 0;
+    ong.forEach(o => {
+      if (o.gemNiv) { gemNiv++; return; }
+      if (o.x == null) { zonderPunt++; return; }
+      const w = W.find(w => o.x >= w.bb[0] && o.x <= w.bb[2] && o.y >= w.bb[1] && o.y <= w.bb[3] && inVlak(o.x, o.y, w.g));
+      if (w) w.o.push(o); else buiten++;
+    });
+    const plaatsen = new Set(ong.map(o => o.wp).filter(Boolean));
+    const metPlaats = plaatsen.size > 1;
+    const wijken = W.filter(w => w.o.length || !wijkGeo.find(f => f.properties.wijkcode === w.code && f.properties.water === 'JA')).map(w => ({ code: w.code, naam: namen.get(w.code) || w.naam, isGm: false, t: telGebied(w.o, js), str: straten(w.o, metPlaats) }))
+      .sort((a, b) => a.code.localeCompare(b.code));
+    const gm = { code: 'GM' + S.g.c, naam: S.g.n, isGm: true, t: telGebied(ong, js), str: straten(ong, metPlaats) };
+    const nieuw = {};
+    const Y = js[js.length - 1];
+    ong.filter(o => o.j === Y).forEach(o => NIEUW.forEach(n => { if (n.m(o.ov)) { const x = nieuw[n.k] = nieuw[n.k] || { tot: 0, ern: 0 }; x.tot++; if (ernstig(o)) x.ern++; } }));
+    return { gm, wijken, buiten, gemNiv, zonderPunt, metPlaats, nieuw };
+  }
+
+  // ---------- kiezen ----------
+  async function kies(g) {
+    $('#intro').hidden = true; $('#result').hidden = false;
+    $('#gmInput').value = g.n;
+    document.title = `${PRODUCT} ${g.n} · Open Data Atelier`;
+    try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
+    S = { g, r: null, geo: null };
+    selCode = null; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo('');
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'ongevallen ophalen bij Rijkswaterstaat…';
+    ['#telZin', '#top4', '#jaren', '#wie', '#weg', '#tblWrap', '#dossier', '#mapLegend', '#rowCount', '#stratenLijst', '#nieuw'].forEach(s => { $(s).innerHTML = ''; });
+    voortgang(0, 3, 'Jaren en wijkgrenzen ophalen…');
+    let js, ong, geo;
+    try {
+      const [jr, wk] = await Promise.all([rwsJaren(), haal(wbUrl(WIJKJAAR, 'wijken', g.c, 500), 'json').then(wbOud)]);
+      if (S.g !== g) return;
+      js = jr; geo = wk;
+      voortgang(1, 3, `Ongevallen ${js[0]}–${js[js.length - 1]} ophalen…`);
+      const naam = RWS_NAAM[g.n] || g.n;
+      const delen = await Promise.all(js.map(j => rwsJaar(j, naam)));
+      if (S.g !== g) return;
+      ong = [].concat(...delen);
+    } catch (e) {
+      if (S.g !== g) return;
+      fouten.add(js ? 'de dienst Verkeersongevallen Nederland (Rijkswaterstaat)' : 'Rijkswaterstaat of de wijkgrenzen (PDOK)'); toonMelding();
+      $('#leadSub').textContent = 'de cijfers konden niet worden opgehaald'; renderVoet(); voortgang(3, 3, ''); return;
+    }
+    voortgang(2, 3, 'Ongevallen aan wijken toewijzen…');
+    const feats = (geo.features || []);
+    const namen = new Map(feats.map(f => [f.properties.wijkcode, f.properties.wijknaam]));
+    S.js = js; S.Y = js[js.length - 1];
+    S.r = bouw(ong, feats, namen, js);
+    S.geo = { type: 'FeatureCollection', features: feats.filter(f => f.properties.water !== 'JA') };
+    const hk = location.hash.match(/[#&]wijk=(WK\w+)/);
+    const wens = hk && hk[1].slice(2, 6) === g.c ? hk[1] : null;
+    if (wens && S.r.wijken.some(x => x.code === wens)) selCode = wens;
+    else if (wens) toonInfo(`Deze wijk staat niet in de wijkindeling ${WIJKJAAR}. De pagina toont daarom de hele gemeente.`);
+    S.bounded = false;
+    renderAlles(); toonMelding();
+    voortgang(3, 3, '');
+  }
+  function renderAlles() {
+    zetHash(); renderFocus(); renderKern(); renderJaren(); renderWie(); renderWeg();
+    renderKaart(); renderDossier(); renderTabel(); renderStraten(); renderNieuw(); renderVoet();
+  }
+  const huidig = () => (S && S.r && selCode) ? S.r.wijken.find(x => x.code === selCode) || null : null;
+  const periode = () => `${S.js[0]}–${S.Y}`;
+
+  // ---------- kerncijfers ----------
+  function renderKern() {
+    const fo = huidig(), x = fo || S.r.gm, t = x.t;
+    $('#leadBig').textContent = `${x.naam}: verkeersongevallen`;
+    $('#leadSub').textContent = [fo ? `wijk in ${S.g.n}` : `${S.r.wijken.length} ${S.r.wijken.length === 1 ? 'wijk' : 'wijken'}`, `geregistreerd ${periode()}`].join(' · ');
+    let z = `Van de <b>${fmt(t.n)}</b> geregistreerde verkeersongevallen in ${esc(x.naam)} in ${periode()} hadden er <b>${fmt(t.ern)}</b> letsel of een dode${t.n ? ` (${fPct(pct(t.ern, t.n))})` : ''}. De andere <b>${fmt(t.schade)}</b> hadden alleen schade.`;
+    if (!fo) z += ` Bij <b>${fmt(t.dood)}</b> ${t.dood === 1 ? 'ongeval viel' : 'ongevallen vielen'} een of meer doden.`;
+    let z2 = '';
+    if (!fo) {
+      const r = S.r, toeg = r.wijken.reduce((a, w) => a + w.t.n, 0);
+      z2 = `${fmt(toeg)} van de ${fmt(t.n)} ongevallen ${toeg === 1 ? 'ligt' : 'liggen'} in een wijk${r.gemNiv ? `; ${fmt(r.gemNiv)} ${r.gemNiv === 1 ? 'is' : 'zijn'} alleen aan de gemeente gekoppeld, zonder plek` : ''}${r.buiten ? `; ${fmt(r.buiten)} ${r.buiten === 1 ? 'valt' : 'vallen'} net buiten de wijkgrenzen` : ''}. Hoeveel er wordt geregistreerd, verschilt per regio: vergelijk daarom de wijken binnen de gemeente, niet gemeenten met elkaar.`;
+    } else {
+      z2 = `Ongevallen tellen in de wijk waar ze gebeurden, ook als de betrokkenen ergens anders wonen.`;
+    }
+    $('#telZin').innerHTML = `<p>${z}</p><p class="small muted">${z2}</p>`;
+    const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
+    const pjY = t.perJaar[S.Y] || { ern: 0, tot: 0, dood: 0 };
+    const gemT = S.r.gm.t;
+    const fietsAand = pct(t.wie.fiets || 0, t.ern), gemFiets = pct(gemT.wie.fiets || 0, gemT.ern);
+    const gemPost = fo ? ` ${esc(S.g.n)}: ${fPct(gemFiets)}.` : '';
+    $('#top4').innerHTML =
+      unit(`Letsel of dodelijk ${periode()}`, fmt(t.ern), `Drie jaar samen. Per jaar: ${S.js.map(j => fmt((t.perJaar[j] || {}).ern)).join(', ')}.`) +
+      unit(`Letsel of dodelijk ${S.Y}`, fmt(pjY.ern), `Het laatste jaar in de dienst van Rijkswaterstaat.`) +
+      unit('Met een fiets of e-bike erbij', fPct(fietsAand), `Van de ongevallen met letsel of dodelijk, partij 1 of 2.${gemPost}`) +
+      (fo ? unit(`Alleen schade ${periode()}`, fmt(t.schade), 'Hoe volledig die worden vastgelegd, verschilt sterk per regio.')
+          : unit(`Dodelijk ${periode()}`, fmt(t.dood), `Ongevallen met een of meer doden, alleen voor de hele gemeente. Per jaar: ${S.js.map(j => fmt((t.perJaar[j] || {}).dood)).join(', ')}.`));
+  }
+
+  // ---------- door de jaren ----------
+  function renderJaren() {
+    const x = huidig() || S.r.gm, t = x.t;
+    $('#jarenKop').textContent = `Door de jaren · ${x.naam}`;
+    const W = 520, H = 210, l0 = 48, r0 = 10, t0 = 14, b0 = 30;
+    const rij = S.js.map(j => ({ j, e: (t.perJaar[j] || {}).ern || 0 }));
+    const mx = Math.max(10, ...rij.map(r => r.e));
+    const st = mx > 20000 ? 5000 : mx > 10000 ? 2000 : mx > 4000 ? 1000 : mx > 2000 ? 500 : mx > 400 ? 100 : mx > 100 ? 50 : mx > 40 ? 20 : 10;
+    const top = Math.ceil(mx / st) * st, n = rij.length, bw = (W - l0 - r0) / n;
+    const Yp = v => H - b0 - (H - t0 - b0) * v / top;
+    let h = '';
+    for (let v = 0; v <= top; v += st) h += `<line x1="${l0}" x2="${W - r0}" y1="${Yp(v)}" y2="${Yp(v)}" class="${v ? 'ax' : 'ax0'}"/><text x="${l0 - 6}" y="${Yp(v) + 4}" text-anchor="end" class="lbl">${nf.format(v)}</text>`;
+    rij.forEach((r, i) => {
+      const cx = l0 + bw * i + bw / 2, w = Math.max(6, bw * 0.5);
+      const tp = `<b>${esc(x.naam)}, ${r.j}</b><br>letsel of dodelijk: ${fmt(r.e)}`;
+      h += `<rect class="staaf" x="${(cx - w / 2).toFixed(1)}" y="${Yp(r.e).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H - b0 - Yp(r.e)).toFixed(1)}" data-tip="${tp}"/>`;
+      h += `<text x="${cx}" y="${Yp(r.e) - 4}" text-anchor="middle" class="lbl">${r.e > 0 ? fmt(r.e) : ''}</text>`;
+      h += `<text x="${cx}" y="${H - b0 + 16}" text-anchor="middle" class="lbl">${r.j}</text>`;
+    });
+    $('#jaren').innerHTML = `<div class="chart"><div class="chart-kop"><b>Ongevallen met letsel of dodelijk</b><span class="noemer">${esc(x.naam)} · ${periode()}</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Verkeersongevallen per jaar in ${esc(x.naam)}">${h}</svg><p class="noot">Ongevallen met letsel of een dode per jaar. Ongevallen met alleen schade staan alleen als totaal in de kerncijfers: hoe volledig die worden vastgelegd, verschilt per regio.</p></div>`;
+    bindTips($('#jaren'));
+  }
+
+  // ---------- wie erbij betrokken is ----------
+  function renderWie() {
+    const o = huidig(), x = o || S.r.gm, t = x.t, g = S.r.gm.t;
+    $('#wieKop').textContent = `Wie erbij betrokken is · ${x.naam}`;
+    const rijen = WIE.map(w => {
+      const n = t.wie[w.k] || 0, a = pct(n, t.ern), ga = pct(g.wie[w.k] || 0, g.ern);
+      const opv = o && t.ern >= OPV_MIN && a != null && ga != null && a - ga >= OPV_PP;
+      return `<tr><td>${esc(w.t)}</td><td>${fmt(n)}</td><td class="${opv ? 'opv' : ''}" ${opv ? `title="minstens ${OPV_PP} procentpunt boven de gemeente"` : ''}>${fPct(a)}</td>${o ? `<td>${fPct(ga)}</td>` : ''}</tr>`;
+    }).join('');
+    const opvN = o ? WIE.filter(w => { const a = pct(t.wie[w.k] || 0, t.ern), ga = pct(g.wie[w.k] || 0, g.ern); return t.ern >= OPV_MIN && a - ga >= OPV_PP; }) : [];
+    const opvTxt = o ? (t.ern < OPV_MIN ? `<p class="small muted">Te weinig ongevallen met letsel in deze wijk (minder dan ${OPV_MIN}) om aandelen te vergelijken.</p>`
+      : opvN.length ? `<p class="small"><b>Opvallend</b> in deze wijk tegenover de hele gemeente: ${opvN.map(w => esc(w.t.toLowerCase())).join(', ')} (minstens ${OPV_PP} procentpunt meer).</p>`
+      : `<p class="small muted">Geen groep ligt ${OPV_PP} procentpunt of meer boven de hele gemeente.</p>`) : '';
+    $('#wie').innerHTML = `<div class="card"><table class="soorttab"><thead><tr><th>Betrokken</th><th>aantal</th><th>aandeel</th>${o ? `<th>${esc(S.g.n)}</th>` : ''}</tr></thead><tbody>${rijen}</tbody></table>${opvTxt}</div>`;
+  }
+
+  // ---------- op welke weg ----------
+  function renderWeg() {
+    const x = huidig() || S.r.gm, t = x.t;
+    $('#wegKop').textContent = `Op welke weg · ${x.naam}`;
+    const tab = (kop, lijst, bron) => `<div class="card"><h3>${kop}</h3><table class="soorttab"><thead><tr><th></th><th>aantal</th><th>aandeel</th></tr></thead><tbody>${lijst.map(l => `<tr><td>${esc(l.t)}</td><td>${fmt(bron[l.k] || 0)}</td><td>${fPct(pct(bron[l.k] || 0, t.ern))}</td></tr>`).join('')}</tbody></table></div>`;
+    $('#weg').innerHTML = tab('Maximumsnelheid ter plekke', SNEL, t.snel) + tab('Wegbeheerder', BEH, t.beh) + tab('Bebouwde kom', KOM, t.kom);
+  }
+
+  // ---------- kaart ----------
+  function klassen() {
+    const v = S.r.wijken.map(w => w.t.ern).filter(n => n > 0).sort((a, b) => a - b);
+    if (!v.length) return [];
+    const q = p => v[Math.min(v.length - 1, Math.floor(p * v.length))];
+    const grens = [...new Set([q(0.2), q(0.4), q(0.6), q(0.8)])].filter(g => g > 0);
+    return grens;
+  }
+  // Klasse i (0 = laagste) naar een kleur van de reeks; bij minder dan vijf klassen verspreid over de reeks.
+  const kleurKl = (i, C) => css('--seq-' + (C > 1 ? Math.round(1 + i * 4 / (C - 1)) : 3));
+  function kleur(n, gr) {
+    if (!n) return null;
+    let i = 0; while (i < gr.length && n > gr[i]) i++;
+    return kleurKl(i, gr.length + 1);
+  }
+  function renderKaart() {
+    if (typeof L === 'undefined') { $('#map').innerHTML = '<p class="small muted" style="padding:12px">De kaartbibliotheek kon niet laden. De tabel werkt wel.</p>'; return; }
+    if (!map) {
+      map = L.map('map', { scrollWheelZoom: false });
+      L.tileLayer('https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0/grijs/EPSG:3857/{z}/{x}/{y}.png', { maxZoom: 19, attribution: 'Kaart: <a href="https://www.pdok.nl">PDOK</a> BRT · Wijkgrenzen: CBS · Ongevallen: Rijkswaterstaat' }).addTo(map);
+      map.on('focus', () => map.scrollWheelZoom.enable());
+      map.setView([52.1, 5.3], 7);
+    }
+    if (layer) layer.remove(); layer = null; gjLayer = null;
+    if (!S || !S.r) return;
+    const gr = klassen();
+    const byCode = new Map(S.r.wijken.map(o => [o.code, o]));
+    const lijn = css('--surface') || '#fff';
+    layer = L.featureGroup().addTo(map);
+    gjLayer = L.geoJSON(S.geo, {
+      style: f => {
+        const o = byCode.get(f.properties.wijkcode), sel = o && o.code === selCode;
+        const fill = o ? kleur(o.t.ern, gr) : null;
+        return { color: sel ? css('--fg') : lijn, weight: sel ? 3 : 1.2, fillColor: fill || css('--sunk'), fillOpacity: 0.85, dashArray: fill ? null : '3 3' };
+      },
+      onEachFeature: (f, ly) => {
+        const o = byCode.get(f.properties.wijkcode);
+        ly.bindTooltip(`<b>${esc(o ? o.naam : f.properties.wijknaam)}</b><br>${o ? `letsel of dodelijk ${periode()}: ${fmt(o.t.ern)}` : 'geen ongevallen'}`, { sticky: true });
+        ly.on('click', () => kiesWijk(f.properties.wijkcode, false));
+      }
+    }).addTo(layer);
+    if (selCode) gjLayer.getLayers().forEach(l => { if (l.feature.properties.wijkcode === selCode) l.bringToFront(); });
+    let h = `<span>Ongevallen met letsel of dodelijk, ${periode()} samen:</span>`;
+    const C = gr.length + 1, mx = Math.max(0, ...S.r.wijken.map(w => w.t.ern));
+    for (let i = 0; i < C; i++) {
+      const van = i ? gr[i - 1] + 1 : 1, tot = i < gr.length ? gr[i] : mx;
+      if (van > tot) continue;
+      h += `<span><i class="sw" style="background:${kleurKl(i, C)}"></i>${van === tot ? fmt(van) : `${fmt(van)}–${fmt(tot)}`}</span>`;
+    }
+    h += `<span><i class="sw" style="background:${css('--sunk')};border-style:dashed"></i>geen</span>`;
+    $('#mapLegend').innerHTML = h;
+    const passen = !S.bounded; S.bounded = true;
+    setTimeout(() => { map.invalidateSize(); if (passen) { if (selCode) zoomSel(); else if (gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); } }, 60);
+  }
+
+  // ---------- dossier ----------
+  function renderDossier() {
+    const o = huidig(), x = o || S.r.gm, t = x.t;
+    const sep = '<span class="sep" aria-hidden="true">›</span>';
+    const kr = o ? '<button type="button" class="eyebrow" data-naar="gm">Hele gemeente</button>' + sep + '<span class="eyebrow">Wijk</span>' : '<span class="eyebrow">Hele gemeente</span>';
+    const focus = `<div class="focus"><span class="fl">Letsel of dodelijk, ${periode()}</span><span class="fv">${fmt(t.ern)}</span><span class="fc">per jaar ${S.js.map(j => fmt((t.perJaar[j] || {}).ern)).join(', ')}</span>${o ? `<span class="fc">${esc(S.g.n)}: ${fmt(S.r.gm.t.ern)}</span>` : ''}</div>`;
+    const str = x.str.slice(0, 8);
+    const strH = str.length ? `<p class="small" style="margin:0"><b>Straten met de meeste</b> (vanaf ${MIN_STRAAT})</p><ol class="straten">${str.map(s => `<li>${esc(s.naam)}${s.wp ? ` <span class="muted">(${esc(s.wp)})</span>` : ''} <b>${fmt(s.n)}</b></li>`).join('')}</ol>`
+      : `<p class="small muted" style="margin:0">Geen straat met ${MIN_STRAAT} of meer ongevallen met letsel of dodelijk${o ? ' in deze wijk' : ''}.</p>`;
+    $('#dossier').innerHTML = `<nav class="kruimel" aria-label="Niveau">${kr}</nav><h2>${esc(x.naam)}</h2>${focus}${strH}
+      <p class="small muted" style="margin:0">${o ? 'Wie erbij betrokken is en op welke weg, staat hierboven voor deze wijk.' : 'Klik een wijk op de kaart of een rij in de tabel. Losse ongevallen staan niet op de kaart.'}</p>`;
+    $('#dossier').querySelectorAll('[data-naar]').forEach(k => k.addEventListener('click', () => kiesWijk(null, true)));
+  }
+  function zetLinks() {
+    if (!S) return;
+    ['naarInd', 'naarInd2'].forEach(id => { const a = document.getElementById(id); if (a) a.href = 'indicatoren.html#domein=verkeer&gm=' + S.g.c; });
+  }
+  function zetHash() {
+    if (!S) return;
+    const h = '#gm=' + S.g.c + (selCode ? '&wijk=' + selCode : '');
+    try { if (location.hash !== h) { history.replaceState(null, '', h); dispatchEvent(new HashChangeEvent('hashchange')); } } catch (e) {}
+    zetLinks();
+  }
+  function toonInfo(t) { $('#focusInfo').textContent = t; $('#focusInfo').hidden = !t; }
+  function renderFocus() {
+    const bar = $('#focusbar');
+    if (!S || !S.r || S.r.wijken.length < 2) { bar.hidden = true; return; }
+    bar.hidden = false;
+    const fo = huidig();
+    $('#focusSel').innerHTML = `<option value="">Hele gemeente: ${esc(S.g.n)}</option>` + S.r.wijken.map(o => `<option value="${esc(o.code)}">${esc(o.naam)}</option>`).join('');
+    $('#focusSel').value = fo ? fo.code : '';
+    $('#focusTerug').hidden = !fo;
+    $('#focusTxt').textContent = fo ? 'De pagina volgt deze wijk: kerncijfers, jaren, wie, welke weg en straten.' : 'Kies een wijk hier, op de kaart of in de tabel. De rest van de pagina volgt dan die keuze.';
+  }
+  function zoomSel() {
+    if (!gjLayer) return;
+    const ls = gjLayer.getLayers().filter(l => l.feature.properties.wijkcode === selCode);
+    if (ls.length) map.fitBounds(L.featureGroup(ls).getBounds(), { maxZoom: 15, padding: [24, 24] });
+  }
+  function kiesWijk(code, vanTabel) {
+    if (code && !S.r.wijken.some(w => w.code === code)) code = null;
+    selCode = code || null;
+    toonInfo(''); zetHash();
+    renderFocus(); renderKern(); renderJaren(); renderWie(); renderWeg(); renderDossier(); renderStraten();
+    if (gjLayer) {
+      gjLayer.setStyle(gjLayer.options.style);
+      gjLayer.getLayers().forEach(l => { if (selCode && l.feature.properties.wijkcode === selCode) l.bringToFront(); });
+      if (vanTabel) { if (code) zoomSel(); else if (gjLayer.getLayers().length) map.fitBounds(gjLayer.getBounds(), { padding: [16, 16] }); }
+    }
+    document.querySelectorAll('#tblWrap tbody tr').forEach(tr => tr.classList.toggle('sel', !!code && tr.dataset.code === code));
+  }
+  $('#focusSel').addEventListener('change', e => kiesWijk(e.target.value || null, true));
+  $('#focusTerug').addEventListener('click', () => kiesWijk(null, true));
+
+  // ---------- tabel (in volgorde van wijkcode) ----------
+  function renderTabel() {
+    if (!S || !S.r) { $('#tblWrap').innerHTML = ''; $('#rowCount').textContent = ''; return; }
+    const rs = [S.r.gm].concat(S.r.wijken);
+    $('#tblWrap').innerHTML = `<table><thead><tr><th>Naam</th>${S.js.map(j => `<th class="r">${j}</th>`).join('')}<th class="r">${periode()} samen</th><th class="r sep">fiets of e-bike</th><th class="r">voetganger</th></tr></thead>
+      <tbody>${rs.map(r => `<tr class="${r.isGm ? 'gm' : 'klik'} ${r.code === selCode ? 'sel' : ''}" data-code="${esc(r.code)}"><td>${r.isGm ? esc(r.naam) : `<button type="button" class="rijknop">${esc(r.naam)}</button>`}</td>${S.js.map(j => `<td class="r">${fmt((r.t.perJaar[j] || {}).ern)}</td>`).join('')}<td class="r"><b>${fmt(r.t.ern)}</b></td><td class="r sep">${fmt(r.t.wie.fiets || 0)}</td><td class="r">${fmt(r.t.wie.voet || 0)}</td></tr>`).join('')}</tbody></table>`;
+    $('#rowCount').textContent = `${S.r.wijken.length} ${S.r.wijken.length === 1 ? 'wijk' : 'wijken'}, in volgorde van wijkcode · ongevallen met letsel of dodelijk`;
+    $('#tblWrap').querySelectorAll('tbody tr.klik').forEach(tr => tr.addEventListener('click', () => kiesWijk(tr.dataset.code, true)));
+  }
+
+  // ---------- straten ----------
+  const STR_EERST = 40;
+  let alleStraten = false;
+  function renderStraten() {
+    const o = huidig(), x = o || S.r.gm;
+    $('#stratenKop').textContent = `Straten · ${x.naam}`;
+    const lijst = alleStraten ? x.str : x.str.slice(0, STR_EERST);
+    $('#stratenLijst').innerHTML = x.str.length
+      ? `<p class="small muted" style="margin:0 0 6px">${fmt(x.str.length)} ${x.str.length === 1 ? 'straat' : 'straten'} met ${MIN_STRAAT} of meer, van veel naar weinig.</p><ol class="straten">${lijst.map(s => `<li>${esc(s.naam)}${s.wp ? ` <span class="muted">(${esc(s.wp)})</span>` : ''} <b>${fmt(s.n)}</b></li>`).join('')}</ol>${x.str.length > STR_EERST ? `<button class="btn linkish" type="button" id="strMeer">${alleStraten ? `Toon alleen de eerste ${STR_EERST}` : `Toon alle ${fmt(x.str.length)}`}</button>` : ''}`
+      : `<p class="small muted">Geen straat met ${MIN_STRAAT} of meer ongevallen met letsel of dodelijk in ${periode()}${o ? ' in deze wijk' : ''}.</p>`;
+    const b = $('#strMeer'); if (b) b.addEventListener('click', () => { alleStraten = !alleStraten; renderStraten(); });
+  }
+
+  // ---------- nieuwere vervoermiddelen ----------
+  function renderNieuw() {
+    const n = S.r.nieuw;
+    const delen = NIEUW.map(x => n[x.k] ? `<b>${fmt(n[x.k].tot)}</b> met een ${x.t} (${fmt(n[x.k].ern)} met letsel of dodelijk)` : null).filter(Boolean);
+    $('#nieuw').innerHTML = `<p>${delen.length ? `In ${S.Y} noemt de registratie in ${esc(S.g.n)}: ${delen.join('; ')}.` : `In ${S.Y} noemt de registratie in ${esc(S.g.n)} geen fatbike, e-bike, speed pedelec of e-step.`}</p>
+      <p class="small muted">Alleen het laatste jaar en alleen voor de hele gemeente. Fatbike, speed pedelec en e-step staan alleen in een vrij tekstveld van de registratie. Landelijk ging het aantal met een fatbike van 1 (2022) via 108 (2023) naar 618 (2024), terwijl het type e-bike in dezelfde jaren daalde. Dat is vooral een andere manier van vastleggen. Daarom staat hier geen reeks en geen vergelijking.</p>`;
+  }
+
+  // ---------- CSV (gemeente en wijken, straten apart) ----------
+  function csvDownload(naam, kop, rows) {
+    const q = v => { const s = v == null ? '' : String(v); return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+    const csv = '﻿' + [kop].concat(rows).map(r => r.map(q).join(';')).join('\r\n');
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    a.download = naam; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  const slug = () => S.g.n.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+  const bronTxt = () => `${PRODUCT}, Open Data Atelier, ${location.href}, versie ${VERSIE}; Rijkswaterstaat, dienst Verkeersongevallen Nederland (CC0), opgehaald ${new Date().toLocaleDateString('nl-NL')}`;
+  $('#csvBtn').addEventListener('click', () => {
+    if (!S || !S.r) return;
+    const kop = ['gemeentecode', 'gemeente', 'niveau', 'code', 'naam'].concat(S.js.map(j => `letsel_of_dodelijk_${j}`), [`letsel_of_dodelijk_${S.js[0]}_${S.Y}`, `alleen_schade_${S.js[0]}_${S.Y}`, `alle_ongevallen_${S.js[0]}_${S.Y}`],
+      WIE.map(w => 'met_' + w.k), SNEL.map(s => 'snelheid_' + s.k), BEH.map(b => 'beheerder_' + b.k.toLowerCase()), ['bron']);
+    const rij = g => ['GM' + S.g.c, S.g.n, g.isGm ? 'gemeente' : 'wijk', g.code, g.naam].concat(S.js.map(j => (g.t.perJaar[j] || {}).ern || 0), [g.t.ern, g.t.schade, g.t.n],
+      WIE.map(w => g.t.wie[w.k] || 0), SNEL.map(s => g.t.snel[s.k] || 0), BEH.map(b => g.t.beh[b.k] || 0), [bronTxt()]);
+    csvDownload(`open-data-atelier-verkeersongevallen-${slug()}.csv`, kop, [rij(S.r.gm)].concat(S.r.wijken.map(rij)));
+  });
+  $('#csvStr').addEventListener('click', () => {
+    if (!S || !S.r) return;
+    const rows = [];
+    [S.r.gm].concat(S.r.wijken).forEach(g => g.str.forEach(s => rows.push(['GM' + S.g.c, S.g.n, g.isGm ? 'gemeente' : 'wijk', g.code, g.naam, s.naam, s.wp, s.n, bronTxt()])));
+    csvDownload(`open-data-atelier-verkeersongevallen-straten-${slug()}.csv`, ['gemeentecode', 'gemeente', 'niveau', 'code', 'naam', 'straat', 'woonplaats', `letsel_of_dodelijk_${S.js[0]}_${S.Y}`, 'bron'], rows);
+  });
+
+  // ---------- herken je je gemeente niet? ----------
+  function renderHerken() {
+    const m = document.getElementById('herkenMail'), gh = document.getElementById('herkenGh'); if (!m || !gh) return;
+    const g = S && S.g;
+    const url = location.href;
+    const titel = PRODUCT + (g ? ' – ' + g.n : '');
+    const body = 'Pagina: ' + url + '\nVersie: ' + VERSIE + '\nGemeente: ' + (g ? g.n + ' (' + g.c + ')' : '') +
+      '\n\nWelk cijfer of welk deel van de pagina:\n\nWat de pagina laat zien:\n\nWat je verwacht, en waar dat cijfer vandaan komt:\n';
+    m.href = 'mailto:' + ['joselin', 'live.nl'].join('@') + '?subject=' + encodeURIComponent('Melding ' + titel) + '&body=' + encodeURIComponent(body);
+    gh.href = 'https://github.com/josephinal/josephinal.github.io/issues/new?title=' + encodeURIComponent(titel + ': ') + '&body=' + encodeURIComponent(body);
+  }
+  // ---------- voet ----------
+  function renderVoet() {
+    renderHerken();
+    const nu = new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    $('#foot').innerHTML = S && S.r ? `Bron: Rijkswaterstaat, dienst <a href="${RWS}?service=WFS&amp;request=GetCapabilities">Verkeersongevallen Nederland</a> (afgeleid van BRON, CC0), lagen ${S.js.map(j => 'ongevallen_' + j).join(', ')}, opgevraagd ${nu}. Wijkgrenzen ${WIJKJAAR}: CBS via PDOK. Achtergrondkaart: PDOK BRT. Josephine Linders · ${PRODUCT} · versie ${VERSIE}.`
+      : `Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
+  }
+
+  // ---------- opnieuw proberen ----------
+  $('#retryBtn').addEventListener('click', () => kies(S.g));
+
+  // ---------- start ----------
+  $('#pickForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g) kies(g); else { $('#gmInput').setCustomValidity('Kies een gemeente uit de lijst'); $('#gmInput').reportValidity(); }
+  });
+  $('#gmInput').addEventListener('input', () => {
+    $('#gmInput').setCustomValidity('');
+    const g = byName.get($('#gmInput').value.trim().toLowerCase());
+    if (g && (!S || S.g !== g)) kies(g);
+  });
+  document.querySelectorAll('#snel [data-gm]').forEach(b => b.addEventListener('click', () => { const g = GM.find(x => x.c === b.dataset.gm); if (g) kies(g); }));
+  let bewaard = null; try { bewaard = localStorage.getItem('jl-gemeente'); } catch (e) {}
+  const h = (location.hash.match(/gm=?(\d{4})/i) || [])[1] || bewaard;
+  const g0 = h && GM.find(g => g.c === h);
+  if (g0) kies(g0);
+})();
+</script>
+<!-- Bronvermelding: kant-en-klare verwijzing naar deze pagina -->
+<script>
+(function () {
+  function tekst() {
+    var d = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    var t = document.title.replace(/\s*[·|–-]\s*Josephine Linders\s*$/, '');
+    return 'Josephine Linders (2026). ' + t + '. ' + location.href + ' (geraadpleegd op ' + d + ').';
+  }
+  function bouw() {
+    var anker = document.querySelector('footer') || document.body.lastElementChild;
+    if (!anker || document.getElementById('citeer')) return;
+    var p = document.createElement('p');
+    p.id = 'citeer';
+    p.style.cssText = 'font-size:.82em;opacity:.8;margin:1.2em 0 2em;line-height:1.5;overflow-wrap:anywhere';
+    var s = document.createElement('span');
+    var k = document.createElement('button');
+    k.type = 'button';
+    k.textContent = 'Kopieer bronvermelding';
+    k.style.cssText = 'margin-left:.6em;font:inherit;font-size:.95em;padding:.15em .6em;cursor:pointer;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit';
+    function vul() { s.textContent = 'Citeer deze pagina: ' + tekst(); }
+    k.addEventListener('click', function () {
+      var v = tekst();
+      function ok() { k.textContent = 'Gekopieerd'; setTimeout(function () { k.textContent = 'Kopieer bronvermelding'; }, 1800); }
+      try {
+        if (navigator.clipboard) { navigator.clipboard.writeText(v).then(ok, function () { window.prompt('Kopieer de bronvermelding:', v); }); }
+        else { window.prompt('Kopieer de bronvermelding:', v); }
+      } catch (e) { window.prompt('Kopieer de bronvermelding:', v); }
+    });
+    vul();
+    window.addEventListener('hashchange', vul);
+    p.appendChild(s); p.appendChild(k);
+    anker.after(p);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bouw); else bouw();
+})();
+</script>
+<script>
+/* Toegankelijkheid: tabel bedienbaar met toetsenbord, kaartvlakken geen tabstops (de tabel is de toetsenbordroute). */
+(function () {
+  var RIJ = 'tbody tr.klik';
+  var w = document.getElementById('tblWrap'), m = document.getElementById('map');
+  var laatst = null;
+  function verrijk() {
+    w.querySelectorAll('th').forEach(function (th) {
+      var s = th.getAttribute('style') || '';
+      if (th.querySelector('.kolomknop') || !(th.dataset.k || th.dataset.sort) || /cursor:\s*default/.test(s)) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'kolomknop';
+      while (th.firstChild) b.appendChild(th.firstChild);
+      th.appendChild(b);
+    });
+    w.querySelectorAll(RIJ).forEach(function (tr) {
+      if (tr.classList.contains('gm') || tr.querySelector('.rijknop')) return;
+      var td = Array.prototype.find.call(tr.cells, function (c) { return c.textContent.trim() && !c.querySelector('a,button,input,select'); });
+      if (!td) return;
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'rijknop';
+      while (td.firstChild) b.appendChild(td.firstChild);
+      td.appendChild(b);
+    });
+    if (laatst && document.activeElement === document.body) {
+      if (laatst === 'rij') { var r = w.querySelector('.rijknop'); if (r) r.focus(); }
+      else { var d = w.querySelector(laatst); var k = d && d.querySelector('.kolomknop'); if (k) k.focus(); }
+    }
+    laatst = null;
+  }
+  if (w) {
+    w.addEventListener('focusin', function (e) {
+      var th = e.target.closest && e.target.closest('th');
+      laatst = th ? (th.dataset.k ? 'th[data-k="' + th.dataset.k + '"]' : 'th[data-sort="' + th.dataset.sort + '"]') : (e.target.classList.contains('rijknop') ? 'rij' : null);
+    });
+    new MutationObserver(verrijk).observe(w, { childList: true });
+    verrijk();
+  }
+  if (m) {
+    var uit = function () { m.querySelectorAll('path.leaflet-interactive').forEach(function (p) { if (p.getAttribute('tabindex') !== '-1') p.setAttribute('tabindex', '-1'); }); };
+    new MutationObserver(uit).observe(m, { childList: true, subtree: true, attributes: true, attributeFilter: ['tabindex'] });
+    uit();
+    if (m.getAttribute('aria-label')) m.setAttribute('aria-label', m.getAttribute('aria-label') + '; dezelfde gegevens staan in de tabel');
+  }
+})();
+</script>
+</body>
+</html>

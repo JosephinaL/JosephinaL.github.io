@@ -355,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.29';
+  const VERSIE = '0.30';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1854,7 +1854,8 @@ main > * { min-width: 0; }
       taakvelden: '2.1 verkeer en vervoer: wegen, fiets- en voetpaden, bruggen en tunnels, verkeersregelinstallaties, openbare verlichting, openbare laadpalen, gladheidbestrijding en straatreiniging',
       scope: 'Het wegennet dat de gemeente beheert: hoeveel er ligt, hoe het erbij ligt, wat het kost en hoe veilig het is. Parkeren staat op 2.2 en het openbaar vervoer op 2.5 (thema Parkeren en openbaar vervoer). Wegen in een grondexploitatie staan op 8.2 of 3.2, parkeerhandhaving op 1.2.',
       lees: 'Voor verkeer zijn er sinds 2018 geen BBV-indicatoren meer: de twee indicatoren over ziekenhuisopnamen na een verkeersongeval vervielen omdat de bron ze niet meer per gemeente leverde. Ongevallen per gemeente staan wel open, in het BRON-bestand van Rijkswaterstaat (de uitkomstregel bij Geregistreerde verkeersongevallen), maar dat bevat alleen wat politie en weginspecteurs vastleggen; een val van de fiets zonder ander voertuig ontbreekt meestal, en hoe volledig er geregistreerd wordt, verschilt per regio.',
-      atelier: 'iv3spiegel.html', atelierNaam: 'Iv3-spiegel', tvkort: '2.1',
+      atelier: 'verkeersongevallen.html', atelierNaam: 'Verkeersongevallen per wijk', tvkort: '2.1',
+      naast: [['verkeersongevallen.html', 'Verkeersongevallen per wijk', 'waar in de gemeente de geregistreerde ongevallen met letsel gebeuren, wie erbij betrokken is en op wat voor weg'], ['iv3spiegel.html', 'Iv3-spiegel', 'wat de gemeente uitgeeft aan wegen en verkeer, taakveld 2.1']],
       tegel: 'Wegen en verkeersveiligheid', oms: 'Wegennet, fietsroutes, onderhoud en ongevallen: wat er ligt, hoe het erbij ligt en hoe veilig het is.',
       kaarten: [
         { k: 'context', b: 'open', naam: 'Lengte van gemeentelijke wegen',
@@ -1946,7 +1947,8 @@ main > * { min-width: 0; }
           norm: 'Strategisch Plan Verkeersveiligheid 2030: risicogestuurd werken.', vgl: 'Beperkt: hoe volledig de politie registreert, verschilt per regio. Vergelijk vooral de eigen gemeente door de jaren.',
           bron: () => 'Rijkswaterstaat, Bestand geRegistreerde Ongevallen Nederland (BRON), publiek domein, via <a href="https://data.overheid.nl/dataset/9841-verkeersongevallen---bestand-geregistreerde-ongevallen-nederland" target="_blank" rel="noopener">data.overheid.nl</a>; de cijfers per gemeente uit de dienst Verkeersongevallen Nederland van Rijkswaterstaat (2022–2024, CC0), opgehaald op 15 november 2026, geteld naar de gemeente waar het ongeval gebeurde.',
           herkomst: 'Landelijk kader (Strategisch Plan Verkeersveiligheid 2030).',
-          uit: { lok: 'bron' } },
+          uit: { lok: 'bron' },
+          inst: ['verkeersongevallen.html', 'Verkeersongevallen per wijk'] },
         { k: 'uitkomst', b: 'open', naam: 'Verkeersdoden',
           def: 'Aantal mensen dat in Nederland overleed door een verkeersongeval, naar vervoerwijze.',
           zegt: 'De zwaarste uitkomst van verkeersonveiligheid. Het CBS telt verkeersdoden uit de doodsoorzakenstatistiek, aangevuld met gegevens van politie en justitie, en daardoor vollediger dan BRON.',
