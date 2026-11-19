@@ -34,7 +34,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | **1 · Veiligheid** | | | |
 | Misdrijven en overlast per wijk | [misdrijven.html](https://josephinelinders.nl/misdrijven.html) | Wat registreert de politie per wijk aan misdrijven en overlast, en gaat het omhoog of omlaag tegenover de drie jaren ervoor? Geen ranglijst, geen buurten, geen cijfer per inwoner. | Politie (misdrijven per wijk 47018NED, overlast per wijk 47024NED, via de dataset voor derden van het CBS), PDOK |
 | **2 · Verkeer en vervoer** | | | |
-| Verkeersongevallen per wijk | [verkeersongevallen.html](https://josephinelinders.nl/verkeersongevallen.html) | Waar in de gemeente gebeuren de geregistreerde ongevallen met letsel, wie is erbij betrokken en op wat voor weg? Geen ranglijst, geen losse ongevallen, geen cijfer per inwoner. | Rijkswaterstaat (dienst Verkeersongevallen Nederland, afgeleid van BRON), PDOK |
+| Verkeersongevallen per wijk | [verkeersongevallen.html](https://josephinelinders.nl/verkeersongevallen.html) | Waar in de gemeente gebeuren de geregistreerde ongevallen met letsel, wie is erbij betrokken en op wat voor weg? Geen ranglijst, geen losse ongevallen, geen cijfer per inwoner. | Rijkswaterstaat (BRON, jaarbestanden; per gemeente in de data-repository, map `vo/`), PDOK |
 | **3 · Economie** | | | |
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
 | Gebied in beeld | [gebied.html](https://josephinelinders.nl/gebied.html) | Wat staat er op een bedrijventerrein of in een innovatiedistrict, en wat verandert er? | BAG, IBIS, CBS-buurten, RIVM |

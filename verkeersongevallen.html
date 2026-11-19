@@ -276,7 +276,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   <section class="intro" id="intro">
     <p>Politie en Rijkswaterstaat registreren verkeersongevallen met de plek waar ze gebeurden. Deze pagina deelt de ongevallen van de laatste drie jaren in naar de wijken van de gemeente: waar gebeuren de ongevallen met letsel of een dode, wie zijn erbij betrokken, en op wat voor weg.</p>
     <p>De kaart toont aantallen, geen cijfer per inwoner: een wijk met een centrum of een doorgaande weg trekt verkeer van buiten aan. Losse ongevallen staan er niet op. Hoe volledig er wordt geregistreerd, verschilt per regio. Vergelijk daarom de wijken binnen de gemeente, niet gemeenten met elkaar.</p>
-    <p class="muted small">Dienst Verkeersongevallen Nederland van Rijkswaterstaat (afgeleid van BRON, CC0), live opgevraagd. Wijkgrenzen van het CBS via PDOK.</p>
+    <p class="muted small">Bestand geRegistreerde Ongevallen Nederland (BRON) van Rijkswaterstaat, de jaarbestanden (publiek domein), per gemeente klaargezet. Het nieuwste jaar kan nog voorlopig zijn. Wijkgrenzen van het CBS via PDOK.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
   </section>
 
@@ -376,12 +376,12 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
         <div class="card">
           <h2>Zo is gerekend</h2>
           <ul class="small">
-            <li><b>Jaren</b>: de drie nieuwste jaren in de dienst Verkeersongevallen Nederland. Komt er een jaar bij, dan schuift de pagina vanzelf op.</li>
+            <li><b>Jaren</b>: de drie nieuwste jaarbestanden van BRON. Rijkswaterstaat publiceert een jaar in de zomer daarna als voorlopig, en maakt het later definitief; de pagina zegt welk jaar nog voorlopig is. Een nieuw of bijgewerkt jaarbestand wordt elk jaar opnieuw verwerkt.</li>
             <li><b>Letsel of dodelijk</b>: de afloop van het ongeval zoals vastgelegd. De rest is "alleen schade". Dodelijk staat alleen voor de hele gemeente apart; per wijk telt het mee in letsel of dodelijk.</li>
-            <li><b>Wijk</b>: de wijk waarin het punt van het ongeval ligt, in de wijkindeling 2025 van het CBS. Ongevallen die alleen aan de gemeente zijn gekoppeld, tellen niet voor een wijk.</li>
+            <li><b>Wijk</b>: de wijk waarin het punt van het ongeval ligt, in de wijkindeling 2025 van het CBS. Het punt is dat van BRON (wegvak, kruispunt of hectometerpaal). Ongevallen die alleen aan de gemeente zijn gekoppeld, tellen niet voor een wijk.</li>
             <li><b>Kaartkleuren</b>: vijf groepen met ongeveer even veel wijken, steeds opnieuw bepaald voor de gekozen gemeente. Dezelfde kleur betekent in een andere gemeente dus een ander aantal.</li>
             <li><b>Wie</b>: partij 1 of 2 van het ongeval. Fiets of e-bike samen; personen- en bestelauto samen. <b>Opvallend</b>: een groep heeft in de wijk een aandeel dat minstens 10 procentpunt boven de hele gemeente ligt, bij minstens 10 ongevallen met letsel in de wijk.</li>
-            <li><b>Straten</b>: vanaf 5 ongevallen met letsel of dodelijk in drie jaar. Heeft de gemeente meer woonplaatsen, dan staat de woonplaats erbij.</li>
+            <li><b>Straten</b>: vanaf 5 ongevallen met letsel of dodelijk in drie jaar, met de straatnaam van het wegvak in het wegenbestand van BRON. Een ongeval op een kruispunt telt bij één van de kruisende straten: eerst een rijbaan boven een fietspad, dan de weg met de hoogste wegbeheerder. Heeft de gemeente meer woonplaatsen, dan staat de woonplaats erbij.</li>
           </ul>
         </div>
         <div class="card">
@@ -397,7 +397,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
           <h2>Naast deze pagina</h2>
           <ul class="small">
             <li><a href="indicatoren.html#domein=verkeer" id="naarInd">Indicatoren belicht, Wegen en verkeersveiligheid</a>: welke cijfers er over wegen en verkeersveiligheid zijn, waaronder de ongevallen per gemeente en het aandeel wegen met 30 km/u.</li>
-            <li><a href="https://data.overheid.nl/dataset/9841-verkeersongevallen---bestand-geregistreerde-ongevallen-nederland" target="_blank" rel="noopener">BRON op data.overheid.nl</a>: het volledige bestand van Rijkswaterstaat, ook met recentere jaren dan de dienst.</li>
+            <li><a href="https://data.overheid.nl/dataset/9841-verkeersongevallen---bestand-geregistreerde-ongevallen-nederland" target="_blank" rel="noopener">BRON op data.overheid.nl</a>: de jaarbestanden van Rijkswaterstaat, met alle partijen en meer kenmerken per ongeval.</li>
           </ul>
         </div>
       </div>
@@ -407,11 +407,11 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
 
   <section class="verantwoording" aria-labelledby="vh">
     <h2 id="vh">Verantwoording</h2>
-    <p><b>Bron en peildatum.</b> Verkeersongevallen: Rijkswaterstaat, dienst Verkeersongevallen Nederland (WFS), afgeleid van het Bestand geRegistreerde Ongevallen Nederland (BRON), de lagen per jaar, live opgevraagd. Op 19 november 2026 zijn dat 2022, 2023 en 2024; 2025 staat al wel in de downloads van BRON, nog niet in de dienst. Wijkgrenzen: CBS-wijkkaart 2025 via PDOK. De standen staan na de gemeentekeuze onder de cijfers.</p>
-    <p><b>Licentie.</b> Dienst Verkeersongevallen Nederland: CC0. Wijkgrenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
+    <p><b>Bron en peildatum.</b> Verkeersongevallen: Rijkswaterstaat, Bestand geRegistreerde Ongevallen Nederland (BRON), de jaarbestanden op downloads.rijkswaterstaatdata.nl. Op 19 november 2026: 2023 (bestand van 10 december 2024), 2024 (2 oktober 2026) en 2025 (27 juli 2026, nog voorlopig). Per gemeente klaargezet in de data-repository van deze site; elk jaar opnieuw verwerkt. Wijkgrenzen: CBS-wijkkaart 2025 via PDOK. De standen staan na de gemeentekeuze onder de cijfers.</p>
+    <p><b>Licentie.</b> BRON: publiek domein (data.overheid.nl). Wijkgrenzen en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
     <p><b>Methode.</b> Elk ongeval van de gemeente wordt aan de wijk toegewezen waarin het punt ligt. Per wijk en voor de hele gemeente: ongevallen met letsel of dodelijk per jaar en over drie jaar, naar betrokken verkeersdeelnemers, maximumsnelheid ter plekke, wegbeheerder en bebouwde kom; straten vanaf 5. De volledige uitleg staat na de gemeentekeuze onder "Zo is gerekend".</p>
     <p><b>Wat dit niet is.</b> Geen maat voor hoe veilig een wijk of weg is; geen ranglijst tussen wijken, straten of gemeenten; geen cijfer per inwoner of per voertuigkilometer; geen losse ongevallen; geen oordeel over 30 km/u of over de inrichting van een weg.</p>
-    <p><b>Bekende beperkingen.</b> Lang niet elk ongeval wordt geregistreerd, en de registratiegraad verschilt per regio. Ongeveer 15% van de ongevallen is alleen op straatniveau gekoppeld. De dienst kent alleen partij 1 en 2. Fatbike, speed pedelec en e-step staan alleen in een vrij tekstveld. Bebouwde kom is bij ongeveer een derde niet ingevuld. Straatnamen zijn soms afgekort.</p>
+    <p><b>Bekende beperkingen.</b> Lang niet elk ongeval wordt geregistreerd, en de registratiegraad verschilt per regio. Het nieuwste jaar is vaak nog voorlopig. Ongeveer 15% van de ongevallen is alleen op straatniveau gekoppeld. Alleen partij 1 en 2 tellen mee. Bij een kruispunt telt een ongeval bij één van de kruisende straten. Fatbike, speed pedelec en e-step staan alleen in een vrij tekstveld. Bebouwde kom is bij ongeveer een derde niet ingevuld. Straatnamen zijn soms afgekort.</p>
     <p><b>Maker en status.</b> Gemaakt door Josephine Linders, op eigen titel. Een bewerking van open data, geen officiële publicatie van een gemeente, de politie of Rijkswaterstaat.</p>
     <p><b>Gebruik.</b> © Josephine Linders. Linken, citeren en screenshots gebruiken mag, met vermelding van de pagina en de bron van de cijfers. De pagina kopiëren, aanpassen of elders publiceren alleen na overleg, via <a href="./#samenwerken">Samenwerken</a>.</p>
     <p><b>Contact en correcties.</b> Fout gezien in een cijfer of een tekst? Meld het openbaar via een <a href="https://github.com/josephinal/josephinal.github.io/issues/new">GitHub-issue</a> (gratis account nodig, geen persoonsgegevens) of bekijk <a href="https://github.com/josephinal/josephinal.github.io/issues">eerdere meldingen</a>. Na de gemeentekeuze staat onder de kerncijfers het blok "Herken je je gemeente niet?", met een melding per e-mail waarin gemeente en versie al zijn ingevuld. Over wat deze pagina toont en waar je bezwaar maakt: <a href="colofon.html#registraties">Cijfers per wijk uit registraties</a>. <a href="colofon.html">Colofon en privacy</a>.</p>
@@ -436,20 +436,24 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     return gj;
   }
 
-  const VERSIE = '1.0';
+  const VERSIE = '1.1';
   const PRODUCT = 'Verkeersongevallen per wijk';
-  // Rijkswaterstaat, dienst Verkeersongevallen Nederland (WFS, CC0), afgeleid van BRON. Live, CORS open.
-  const RWS = 'https://geo.rijkswaterstaat.nl/services/ogc/gdr/verkeersongevallen_nederland/ows';
-  const VELDEN = 'shape,jaar_ongeval,verkeersongeval_afloop,partij_1_objecttype,partij_1_objecttype_overig,partij_2_objecttype,partij_2_objecttype_overig,niveau_koppelen,bebouwde_kom,maximum_snelheid,wegbeheerder,straatnaam,woonplaats';
+  // Rijkswaterstaat, Bestand geRegistreerde Ongevallen Nederland (BRON), jaarbestanden (publiek domein),
+  // per gemeente klaargezet in de data-repository (recepten/verkeersongevallen/vo_bouw.py, jaartaak).
+  const VO = 'bag-werkbank/vo/';
+  const BRON_URL = 'https://downloads.rijkswaterstaatdata.nl/bron/';
   const WIJKJAAR = 2025;   // wijkindeling van de kaart
-  const VENSTER = 3;       // de drie nieuwste jaren samen
   const MIN_STRAAT = 5;    // een straat staat er pas vanaf 5 ongevallen met letsel of dodelijk in drie jaar
   const OPV_PP = 10, OPV_MIN = 10; // "opvallend": wijk minstens 10 procentpunt boven de gemeente, bij minstens 10 ongevallen met letsel
-  // Gemeentenamen die Rijkswaterstaat anders schrijft dan het CBS (stand 15 nov 2026).
-  const RWS_NAAM = { 'Beek (L.)': 'Beek', 'Bergen (L.)': 'Bergen (L)', 'Bergen (NH.)': 'Bergen (NH)', 'Hengelo (O.)': 'Hengelo (O)',
-    'Laren (NH.)': 'Laren', 'Middelburg (Z.)': 'Middelburg', 'Rijswijk (ZH.)': 'Rijswijk', 'Stein (L.)': 'Stein' };
+  // Objecttypes van BRON (objecttypes.txt).
+  const OTE = { 1: 'Personenauto', 11: 'Bestelauto', 21: 'Vrachtauto', 22: 'Trekker', 23: 'Trekker met oplegger', 24: 'Bus', 31: 'Motor',
+    41: 'Landbouwvoertuig', 51: 'Trein/tram', 61: 'Bromfiets', 62: 'Snorfiets', 63: 'Brommobiel', 64: 'Fiets', 65: 'Scootmobiel', 66: 'e-bike',
+    71: 'Voetganger', 81: 'Boom', 82: 'Lichtmast', 83: 'Overig vast object', 84: 'Los voorwerp', 85: 'Overig wegmeubilair', 91: 'Dier', 95: 'Onbekend voertuig i.g.v. doorrijder' };
+  const AFLOOP = ['Uitsluitend materiele schade', 'Letsel', 'Dodelijk'];
+  const KOMN = ['', 'Binnen', 'Buiten'];
+  const BEHN = ['', 'Gemeente', 'Provincie', 'Rijk', 'Waterschap', 'Overig'];
 
-  // Wie erbij betrokken is: partij 1 of 2 (de dienst kent alleen die twee). Een ongeval kan in meer groepen vallen.
+  // Wie erbij betrokken is: partij 1 of 2 (de overige partijen tellen niet mee, zoals in de dienst van Rijkswaterstaat). Een ongeval kan in meer groepen vallen.
   const WIE = [
     { k: 'voet', t: 'Voetganger', m: p => p === 'Voetganger' },
     { k: 'fiets', t: 'Fiets of e-bike', m: p => p === 'Fiets' || p === 'e-bike' },
@@ -457,7 +461,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     { k: 'scoot', t: 'Scootmobiel of brommobiel', m: p => p === 'Scootmobiel' || p === 'Brommobiel' },
     { k: 'motor', t: 'Motor', m: p => p === 'Motor' },
     { k: 'auto', t: 'Personen- of bestelauto', m: p => p === 'Personenauto' || p === 'Bestelauto' },
-    { k: 'zwaar', t: 'Vrachtauto, bus of landbouwvoertuig', m: p => /^(Vrachtauto|Bus|Trekker|Landbouwvoertuig)$/.test(p) }];
+    { k: 'zwaar', t: 'Vrachtauto, bus of landbouwvoertuig', m: p => /^(Vrachtauto|Bus|Trekker|Trekker met oplegger|Landbouwvoertuig)$/.test(p) }];
   const SNEL = [
     { k: 's15', t: '15 km/u of minder', m: v => v != null && v <= 15 },
     { k: 's30', t: '30 km/u', m: v => v === 30 },
@@ -531,28 +535,21 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     }
     throw last;
   }
-  // Welke jaren de dienst heeft: lagen ongevallen_<jaar>. Een nieuw jaar komt zo vanzelf mee.
-  async function rwsJaren() {
-    const cap = await haal(RWS + '?service=WFS&version=2.0.0&request=GetCapabilities', 'text');
-    const js = [...new Set([...cap.matchAll(/ongevallen_(\d{4})(?![_\d])/g)].map(m => +m[1]))].sort((a, b) => a - b);
-    if (!js.length) throw new Error('geen jaren');
-    return js.slice(-VENSTER);
-  }
-  async function rwsJaar(j, naam) {
-    const f = `gemeente='${naam.replace(/'/g, "''")}'`;
-    const u = `${RWS}?service=WFS&version=2.0.0&request=GetFeature&outputFormat=application/json&srsName=EPSG:4326&count=200000&typeNames=verkeersongevallen_nederland:ongevallen_${j}&propertyName=${VELDEN}&CQL_FILTER=${encodeURIComponent(f)}`;
-    const gj = await haal(u, 'json');
-    return (gj.features || []).map(ft => {
-      const p = ft.properties, c = ft.geometry && ft.geometry.coordinates;
-      const ms = p.maximum_snelheid == null || p.maximum_snelheid === '' ? null : +p.maximum_snelheid;
+  // Per gemeente één bestand met alle jaren (formaat 1, zie vo_bouw.py); index.json zegt welke jaren voorlopig zijn.
+  async function voLaad(c) {
+    const [idx, d] = await Promise.all([haal(VO + 'index.json', 'json'), haal(VO + c + '.json', 'json')]);
+    if (d.formaat !== 1) throw new Error('onbekend formaat');
+    const js = d.jaren;
+    const ong = d.o.map(r => {
+      const p1 = OTE[r[4]] || '', p2 = OTE[r[5]] || '', nw = r[6];
       return {
-        j: +p.jaar_ongeval || j, a: p.verkeersongeval_afloop, x: c ? c[0] : null, y: c ? c[1] : null,
-        p1: p.partij_1_objecttype || '', p2: p.partij_2_objecttype || '',
-        ov: [p.partij_1_objecttype || '', p.partij_1_objecttype_overig || '', p.partij_2_objecttype || '', p.partij_2_objecttype_overig || ''].join('|'),
-        gemNiv: /gemeente niveau/i.test(p.niveau_koppelen || ''), kom: p.bebouwde_kom || '', ms, beh: p.wegbeheerder || '',
-        st: (p.straatnaam || '').trim(), wp: (p.woonplaats || '').trim()
+        j: js[r[0]], a: AFLOOP[r[1]], x: r[2] ? r[2] / 1e5 : null, y: r[3] ? r[3] / 1e5 : null, p1, p2,
+        ov: [p1, nw & 1 ? 'FATBIKE' : '', p2, nw & 2 ? 'SPEED PEDELEC' : '', nw & 4 ? 'E-STEP' : ''].join('|'),
+        gemNiv: !r[2], kom: KOMN[r[8]], ms: r[7] || null, beh: BEHN[r[9]],
+        st: r[10] >= 0 ? d.s[r[10]] : '', wp: r[11] >= 0 ? d.w[r[11]] : ''
       };
     });
+    return { js, ong, meta: idx.meta || {} };
   }
 
   // ---------- punt in wijk ----------
@@ -635,28 +632,24 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     try { localStorage.setItem('jl-gemeente', g.c); } catch (e) {}
     S = { g, r: null, geo: null };
     selCode = null; fouten.clear(); toonMelding(); $('#focusbar').hidden = true; toonInfo('');
-    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'ongevallen ophalen bij Rijkswaterstaat…';
+    $('#leadBig').textContent = g.n; $('#leadSub').textContent = 'ongevallen ophalen…';
     ['#telZin', '#top4', '#jaren', '#wie', '#weg', '#tblWrap', '#dossier', '#mapLegend', '#rowCount', '#stratenLijst', '#nieuw'].forEach(s => { $(s).innerHTML = ''; });
-    voortgang(0, 3, 'Jaren en wijkgrenzen ophalen…');
-    let js, ong, geo;
+    voortgang(0, 3, 'Ongevallen en wijkgrenzen ophalen…');
+    let js, ong, geo, meta;
     try {
-      const [jr, wk] = await Promise.all([rwsJaren(), haal(wbUrl(WIJKJAAR, 'wijken', g.c, 500), 'json').then(wbOud)]);
+      const [vo, wk] = await Promise.all([voLaad(g.c), haal(wbUrl(WIJKJAAR, 'wijken', g.c, 500), 'json').then(wbOud)]);
       if (S.g !== g) return;
-      js = jr; geo = wk;
-      voortgang(1, 3, `Ongevallen ${js[0]}–${js[js.length - 1]} ophalen…`);
-      const naam = RWS_NAAM[g.n] || g.n;
-      const delen = await Promise.all(js.map(j => rwsJaar(j, naam)));
-      if (S.g !== g) return;
-      ong = [].concat(...delen);
+      js = vo.js; ong = vo.ong; meta = vo.meta; geo = wk;
     } catch (e) {
       if (S.g !== g) return;
-      fouten.add(js ? 'de dienst Verkeersongevallen Nederland (Rijkswaterstaat)' : 'Rijkswaterstaat of de wijkgrenzen (PDOK)'); toonMelding();
+      fouten.add('de ongevallenbestanden of de wijkgrenzen (PDOK)'); toonMelding();
       $('#leadSub').textContent = 'de cijfers konden niet worden opgehaald'; renderVoet(); voortgang(3, 3, ''); return;
     }
     voortgang(2, 3, 'Ongevallen aan wijken toewijzen…');
     const feats = (geo.features || []);
     const namen = new Map(feats.map(f => [f.properties.wijkcode, f.properties.wijknaam]));
-    S.js = js; S.Y = js[js.length - 1];
+    S.js = js; S.Y = js[js.length - 1]; S.meta = meta;
+    S.voorlopig = js.filter(j => meta[j] && meta[j].voorlopig);
     S.r = bouw(ong, feats, namen, js);
     S.geo = { type: 'FeatureCollection', features: feats.filter(f => f.properties.water !== 'JA') };
     const hk = location.hash.match(/[#&]wijk=(WK\w+)/);
@@ -680,7 +673,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     $('#leadBig').textContent = `${x.naam}: verkeersongevallen`;
     $('#leadSub').textContent = [fo ? `wijk in ${S.g.n}` : `${S.r.wijken.length} ${S.r.wijken.length === 1 ? 'wijk' : 'wijken'}`, `geregistreerd ${periode()}`].join(' · ');
     let z = `Van de <b>${fmt(t.n)}</b> geregistreerde verkeersongevallen in ${esc(x.naam)} in ${periode()} hadden er <b>${fmt(t.ern)}</b> letsel of een dode${t.n ? ` (${fPct(pct(t.ern, t.n))})` : ''}. De andere <b>${fmt(t.schade)}</b> hadden alleen schade.`;
-    if (!fo) z += ` Bij <b>${fmt(t.dood)}</b> ${t.dood === 1 ? 'ongeval viel' : 'ongevallen vielen'} een of meer doden.`;
+    if (!fo) z += t.dood ? ` Bij <b>${fmt(t.dood)}</b> ${t.dood === 1 ? 'ongeval viel' : 'ongevallen vielen'} een of meer doden.` : ' Er was geen ongeval met een dode.';
     let z2 = '';
     if (!fo) {
       const r = S.r, toeg = r.wijken.reduce((a, w) => a + w.t.n, 0);
@@ -688,7 +681,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     } else {
       z2 = `Ongevallen tellen in de wijk waar ze gebeurden, ook als de betrokkenen ergens anders wonen.`;
     }
-    $('#telZin').innerHTML = `<p>${z}</p><p class="small muted">${z2}</p>`;
+    const vl = S.voorlopig.length ? `<p class="small"><b>${S.voorlopig.join(' en ')} ${S.voorlopig.length === 1 ? 'is' : 'zijn'} nog voorlopig.</b> Rijkswaterstaat kan de cijfers van dat jaar nog aanpassen; de jaren ervoor zijn definitief.</p>` : '';
+    $('#telZin').innerHTML = `<p>${z}</p>${vl}<p class="small muted">${z2}</p>`;
     const unit = (titel, val, sub) => `<div class="unit"><span class="eyebrow">${titel}</span><span class="u-val">${val}</span><span class="u-sub">${sub}</span></div>`;
     const pjY = t.perJaar[S.Y] || { ern: 0, tot: 0, dood: 0 };
     const gemT = S.r.gm.t;
@@ -696,7 +690,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const gemPost = fo ? ` ${esc(S.g.n)}: ${fPct(gemFiets)}.` : '';
     $('#top4').innerHTML =
       unit(`Letsel of dodelijk ${periode()}`, fmt(t.ern), `Drie jaar samen. Per jaar: ${S.js.map(j => fmt((t.perJaar[j] || {}).ern)).join(', ')}.`) +
-      unit(`Letsel of dodelijk ${S.Y}`, fmt(pjY.ern), `Het laatste jaar in de dienst van Rijkswaterstaat.`) +
+      unit(`Letsel of dodelijk ${S.Y}`, fmt(pjY.ern), S.voorlopig.includes(S.Y) ? 'Het nieuwste jaar van BRON, nog voorlopig.' : 'Het nieuwste jaar van BRON.') +
       unit('Met een fiets of e-bike erbij', fPct(fietsAand), `Van de ongevallen met letsel of dodelijk, partij 1 of 2.${gemPost}`) +
       (fo ? unit(`Alleen schade ${periode()}`, fmt(t.schade), 'Hoe volledig die worden vastgelegd, verschilt sterk per regio.')
           : unit(`Dodelijk ${periode()}`, fmt(t.dood), `Ongevallen met een of meer doden, alleen voor de hele gemeente. Per jaar: ${S.js.map(j => fmt((t.perJaar[j] || {}).dood)).join(', ')}.`));
@@ -719,9 +713,9 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
       const tp = `<b>${esc(x.naam)}, ${r.j}</b><br>letsel of dodelijk: ${fmt(r.e)}`;
       h += `<rect class="staaf" x="${(cx - w / 2).toFixed(1)}" y="${Yp(r.e).toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, H - b0 - Yp(r.e)).toFixed(1)}" data-tip="${tp}"/>`;
       h += `<text x="${cx}" y="${Yp(r.e) - 4}" text-anchor="middle" class="lbl">${r.e > 0 ? fmt(r.e) : ''}</text>`;
-      h += `<text x="${cx}" y="${H - b0 + 16}" text-anchor="middle" class="lbl">${r.j}</text>`;
+      h += `<text x="${cx}" y="${H - b0 + 16}" text-anchor="middle" class="lbl">${r.j}${S.voorlopig.includes(r.j) ? '*' : ''}</text>`;
     });
-    $('#jaren').innerHTML = `<div class="chart"><div class="chart-kop"><b>Ongevallen met letsel of dodelijk</b><span class="noemer">${esc(x.naam)} · ${periode()}</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Verkeersongevallen per jaar in ${esc(x.naam)}">${h}</svg><p class="noot">Ongevallen met letsel of een dode per jaar. Ongevallen met alleen schade staan alleen als totaal in de kerncijfers: hoe volledig die worden vastgelegd, verschilt per regio.</p></div>`;
+    $('#jaren').innerHTML = `<div class="chart"><div class="chart-kop"><b>Ongevallen met letsel of dodelijk</b><span class="noemer">${esc(x.naam)} · ${periode()}</span></div><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Verkeersongevallen per jaar in ${esc(x.naam)}">${h}</svg><p class="noot">${S.voorlopig.length ? `* voorlopig. ` : ''}Ongevallen met letsel of een dode per jaar. Ongevallen met alleen schade staan alleen als totaal in de kerncijfers: hoe volledig die worden vastgelegd, verschilt per regio.</p></div>`;
     bindTips($('#jaren'));
   }
 
@@ -886,7 +880,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     const n = S.r.nieuw;
     const delen = NIEUW.map(x => n[x.k] ? `<b>${fmt(n[x.k].tot)}</b> met een ${x.t} (${fmt(n[x.k].ern)} met letsel of dodelijk)` : null).filter(Boolean);
     $('#nieuw').innerHTML = `<p>${delen.length ? `In ${S.Y} noemt de registratie in ${esc(S.g.n)}: ${delen.join('; ')}.` : `In ${S.Y} noemt de registratie in ${esc(S.g.n)} geen fatbike, e-bike, speed pedelec of e-step.`}</p>
-      <p class="small muted">Alleen het laatste jaar en alleen voor de hele gemeente. Fatbike, speed pedelec en e-step staan alleen in een vrij tekstveld van de registratie. Landelijk ging het aantal met een fatbike van 1 (2022) via 108 (2023) naar 618 (2024), terwijl het type e-bike in dezelfde jaren daalde. Dat is vooral een andere manier van vastleggen. Daarom staat hier geen reeks en geen vergelijking.</p>`;
+      <p class="small muted">Alleen het laatste jaar en alleen voor de hele gemeente${S.voorlopig.includes(S.Y) ? `, en ${S.Y} is nog voorlopig` : ''}. Fatbike, speed pedelec en e-step staan alleen in een vrij tekstveld van de registratie, en ook het type e-bike wordt niet altijd gekozen. Hoe vaak dat gebeurt, veranderde de laatste jaren sterk: landelijk sprong het aantal ongevallen met een fatbike of een e-bike van jaar tot jaar op en neer. Daarom staat hier geen reeks en geen vergelijking.</p>`;
   }
 
   // ---------- CSV (gemeente en wijken, straten apart) ----------
@@ -899,7 +893,7 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
     setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
   const slug = () => S.g.n.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\w-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
-  const bronTxt = () => `${PRODUCT}, Open Data Atelier, ${location.href}, versie ${VERSIE}; Rijkswaterstaat, dienst Verkeersongevallen Nederland (CC0), opgehaald ${new Date().toLocaleDateString('nl-NL')}`;
+  const bronTxt = () => `${PRODUCT}, Open Data Atelier, ${location.href}, versie ${VERSIE}; Rijkswaterstaat, BRON ${periode()}${S.voorlopig.length ? ' (' + S.voorlopig.join(', ') + ' voorlopig)' : ''}, publiek domein`;
   $('#csvBtn').addEventListener('click', () => {
     if (!S || !S.r) return;
     const kop = ['gemeentecode', 'gemeente', 'niveau', 'code', 'naam'].concat(S.js.map(j => `letsel_of_dodelijk_${j}`), [`letsel_of_dodelijk_${S.js[0]}_${S.Y}`, `alleen_schade_${S.js[0]}_${S.Y}`, `alle_ongevallen_${S.js[0]}_${S.Y}`],
@@ -930,7 +924,8 @@ td .rijknop { color: var(--accent); text-decoration: underline; text-underline-o
   function renderVoet() {
     renderHerken();
     const nu = new Date().toLocaleString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-    $('#foot').innerHTML = S && S.r ? `Bron: Rijkswaterstaat, dienst <a href="${RWS}?service=WFS&amp;request=GetCapabilities">Verkeersongevallen Nederland</a> (afgeleid van BRON, CC0), lagen ${S.js.map(j => 'ongevallen_' + j).join(', ')}, opgevraagd ${nu}. Wijkgrenzen ${WIJKJAAR}: CBS via PDOK. Achtergrondkaart: PDOK BRT. Josephine Linders · ${PRODUCT} · versie ${VERSIE}.`
+    const st = j => S.meta[j] ? `${j}: bestand van ${new Date(S.meta[j].zip).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}${S.meta[j].voorlopig ? ', voorlopig' : ''}` : String(j);
+    $('#foot').innerHTML = S && S.r ? `Bron: Rijkswaterstaat, <a href="${BRON_URL}">Bestand geRegistreerde Ongevallen Nederland (BRON)</a>, jaarbestanden (publiek domein); ${S.js.map(st).join('; ')}. Per gemeente klaargezet door Josephine Linders. Wijkgrenzen ${WIJKJAAR}: CBS via PDOK. Achtergrondkaart: PDOK BRT. ${PRODUCT} · versie ${VERSIE}.`
       : `Josephine Linders · ${PRODUCT} · versie ${VERSIE}`;
   }
 
