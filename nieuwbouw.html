@@ -343,8 +343,8 @@ td.nw { white-space: nowrap; }
       </div>
 
       <div class="sectiekop">
-        <div><span class="eyebrow">3 · Wat voor gebouwen</span><h2>Naar bouwjaar van het pand</h2></div>
-        <p class="small muted" id="bagSub">Woningen en andere gebouwen in de BAG, naar het bouwjaar van het pand.</p>
+        <div><span class="eyebrow">3 · Wat voor gebouwen</span><h2>Wat voor woningen, naar bouwjaar</h2></div>
+        <p class="small muted" id="bagSub">Hoe de nieuwe woningen en andere gebouwen eruitzien, naar het bouwjaar van het pand. De aantallen staan in blok 1.</p>
       </div>
       <div class="panel">
         <div class="tools">
@@ -375,7 +375,7 @@ td.nw { white-space: nowrap; }
         <div class="card">
           <h2>Let op bij het lezen</h2>
           <ul class="small">
-            <li><b>Bouwjaar is niet het opleverjaar.</b> Blok 3 telt naar bouwjaar van het pand en wijkt daarom af van blok 1. Een woning die in een oud pand is gemaakt (transformatie), heeft het oude bouwjaar en valt buiten blok 3.</li>
+            <li><b>Bouwjaar is niet het opleverjaar.</b> Blok 3 rekent naar bouwjaar van het pand, blok 1 naar het jaar van oplevering; daarom staan in blok 3 alleen aandelen. Een woning die in een oud pand is gemaakt (transformatie), heeft het oude bouwjaar en valt buiten blok 3.</li>
             <li><b>Pand is niet hetzelfde als woningtype.</b> Een rij eengezinswoningen kan in de BAG één pand zijn; die woningen tellen dan als "pand met meer woningen".</li>
             <li><b>Kleine aantallen springen.</b> In een kleine gemeente bepaalt één project een jaar. Kijk naar meerdere jaren samen.</li>
             <li><b>Registratie.</b> Niet elke opgeleverde woning heeft eerst de status "bouw gestart" gehad; dat is een kwestie van registratie in de BAG, geen bouw zonder start.</li>
@@ -416,7 +416,7 @@ td.nw { white-space: nowrap; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '1.1.1';
+  const VERSIE = '1.2';
   const PRODUCT = 'Nieuwbouw per gemeente';
   const CBS = 'https://opendata.cbs.nl/ODataApi/OData/';
   const NB = '/bag-werkbank/nb/';
@@ -651,14 +651,14 @@ td.nw { white-space: nowrap; }
     if (!B) { $('#bagWrap').innerHTML = `<p class="small" style="padding:10px 12px">${B === false ? mis : laadt}</p>`; $('#bagNoot').innerHTML = ''; return; }
     const g = B.g, js = g.jaren.filter(j => j >= +g.peil.slice(0, 4) - TERUG - 1), peil = new Date(g.peil).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
     const lab = j => j === +g.peil.slice(0, 4) ? `${j} (tot ${peil})` : j;
-    $('#bagSub').textContent = `Woningen en andere gebouwen in de BAG op ${peil}, naar het bouwjaar van het pand. Het bouwjaar is niet het opleverjaar; daarom wijken de aantallen af van blok 1.`;
+    $('#bagSub').textContent = `Hoe de nieuwe woningen en andere gebouwen eruitzien, uit de BAG op ${peil}, naar het bouwjaar van het pand. De aantallen staan in blok 1.`;
     if (modus3 === 'w') {
       const rows = js.slice().reverse().map(j => {
         const i = g.jaren.indexOf(j), w = g.w[i], wn = B.nl.nl.w[B.nl.jaren.indexOf(j)], opp = w.slice(3, 9);
-        const t = opp.map((x, k) => `${OPP[k][0]}: ${nf.format(x)} (${pct(x, w[0])})`).join('<br>');
-        return `<tr><td class="nw">${lab(j)}</td><td class="r">${nf.format(w[0])}</td><td class="r">${w[0] ? pct(w[2], w[0]) : '–'}</td><td class="r muted">${pct(wn[2], wn[0])}</td><td>${w[0] ? `<span data-tip="${esc(t)}">${stapelO(opp)}</span>` : ''}</td><td class="r">${w[0] ? pct(w[3], w[0]) : '–'}</td><td class="r">${w[0] ? pct(w[7], w[0]) : '–'}</td></tr>`;
+        const t = opp.map((x, k) => `${OPP[k][0]}: ${pct(x, w[0])}`).join('<br>');
+        return `<tr><td class="nw">${lab(j)}</td><td class="r">${w[0] ? pct(w[2], w[0]) : '–'}</td><td class="r muted">${pct(wn[2], wn[0])}</td><td>${w[0] ? `<span data-tip="${esc(t)}">${stapelO(opp)}</span>` : ''}</td><td class="r">${w[0] ? pct(w[3], w[0]) : '–'}</td><td class="r">${w[0] ? pct(w[7], w[0]) : '–'}</td></tr>`;
       }).join('');
-      $('#bagWrap').innerHTML = `<div class="leg" style="padding:8px 12px 0">${OPP.map(([t, c]) => `<span class="${c}">${t}</span>`).join('')}</div><table><thead><tr><th style="cursor:default">Bouwjaar</th><th class="r" style="cursor:default">Woningen</th><th class="r" style="cursor:default" data-tip="Woningen in een pand met meer dan één woning, zoals een appartementengebouw">In pand met meer woningen</th><th class="r" style="cursor:default">Nederland</th><th style="cursor:default">Oppervlakte</th><th class="r" style="cursor:default">Onder 50 m²</th><th class="r" style="cursor:default">150 m² en meer</th></tr></thead><tbody>${rows}</tbody></table>`;
+      $('#bagWrap').innerHTML = `<div class="leg" style="padding:8px 12px 0">${OPP.map(([t, c]) => `<span class="${c}">${t}</span>`).join('')}</div><table><thead><tr><th style="cursor:default">Bouwjaar</th><th class="r" style="cursor:default" data-tip="Woningen in een pand met meer dan één woning, zoals een appartementengebouw">In pand met meer woningen</th><th class="r" style="cursor:default">Nederland</th><th style="cursor:default">Oppervlakte</th><th class="r" style="cursor:default">Onder 50 m²</th><th class="r" style="cursor:default">150 m² en meer</th></tr></thead><tbody>${rows}</tbody></table>`;
       $('#bagNoot').innerHTML = `Woningen in een pand dat er staat (in gebruik, ook niet ingemeten, verbouwing of buiten gebruik). Een rij eengezinswoningen kan in de BAG één pand zijn en telt dan als "pand met meer woningen". Bron: BAG (Kadaster), samengevat in de <a href="bagwerkbank.html">BAG-werkbank</a>.`;
     } else {
       const fs = Object.keys(g.nw).sort((a, b) => (a === 'meerdere') - (b === 'meerdere') || NWF[a].localeCompare(NWF[b], 'nl'));
