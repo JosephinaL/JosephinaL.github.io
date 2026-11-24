@@ -1,0 +1,1397 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Open Data Atelier · Josephine Linders</title>
+<meta name="description" content="Open Data Atelier by Josephine Linders: cross-domain information analysis for Dutch municipalities. Open data, layer by layer, to an answer that can be used.">
+<meta name="author" content="Josephine Linders">
+<link rel="alternate" hreflang="nl" href="https://josephinelinders.nl/">
+<link rel="alternate" hreflang="en" href="https://josephinelinders.nl/en/">
+<link rel="stylesheet" href="../fonts/fonts.css">
+<link rel="icon" type="image/svg+xml" href="../beeldmerk/beeldmerk-stil.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="../beeldmerk/favicon-32.png">
+<link rel="apple-touch-icon" href="../beeldmerk/apple-touch-icon.png">
+<style>
+/* Persoonlijke site: smalle leeskolom, één gelaagd beeld in de opening, producten als dossierkaarten. */
+:root {
+  --bg: #f5f6f5;        /* marmerwit, koel */
+  --surface: #ffffff;
+  --ink: #15201f;
+  --muted: #5b6866;
+  --line: #d6dcdb;
+  --accent: #0f5c66;    /* petrol, gedeeld met Label C-kantoren */
+  --accent-soft: #d7e8ea;
+  --layer-1: #c9d2d1;   /* skelet: BAG en CBS-gebieden */
+  --layer-2: #abc3c5;   /* open domeindata */
+  --layer-3: #86aeb3;   /* verrijking: lokale kennis */
+  --layer-4: #0f5c66;   /* antwoord */
+  --ok: #2f8f46;
+  --f-display: "Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --f-body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+  --r: 6px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1617; --surface: #152022; --ink: #e5eded; --muted: #95a7a8; --line: #2a393b;
+  --accent: #62b9c4; --accent-soft: #17343a; --layer-1: #2c3b3d; --layer-2: #34525a; --layer-3: #3e6f76; --layer-4: #62b9c4; --ok: #4cb865;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0f1617; --surface: #152022; --ink: #e5eded; --muted: #95a7a8; --line: #2a393b;
+  --accent: #62b9c4; --accent-soft: #17343a; --layer-1: #2c3b3d; --layer-2: #34525a; --layer-3: #3e6f76; --layer-4: #62b9c4; --ok: #4cb865;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 17px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 56px; }
+.page { max-width: 1440px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 72px; }
+.page > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--f-display); text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: clamp(2.1rem, 5.2vw, 3.6rem); line-height: 1.04; font-weight: 750; }
+h2 { font-size: clamp(1.45rem, 2.6vw, 1.9rem); line-height: 1.15; font-weight: 700; }
+h3 { font-size: 1.15rem; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+.eyebrow { font-family: var(--f-mono); font-size: .75rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+.lead { font-size: 1.15rem; color: var(--muted); max-width: 58ch; }
+
+/* kop */
+header.top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px 24px; padding-block: 22px 18px; border-bottom: 1px solid var(--line); }
+.name { font-family: var(--f-display); font-weight: 750; font-size: 1.15rem; color: var(--accent); text-decoration: none; line-height: 1.15; }
+.name .sig { display: block; font-family: var(--f-body); font-weight: 400; font-size: .82rem; color: var(--muted); letter-spacing: .01em; }
+.name { display: inline-flex; align-items: center; gap: 12px; }
+.name .merk { width: 46px; height: 46px; flex: none; display: block; position: relative; top: -6px; } /* onderkant merk op de grondlijn van de signatuur */
+.name .merk img { width: 100%; height: 100%; display: block; }
+.name .tekst { display: block; }
+.name .merk.beweegt { position: relative; }
+/* het bewegende merk: beginstand valt precies op het stilstaande merk, de beweging mag buiten het vak */
+.name .merk.beweegt img { position: absolute; left: -2.95px; top: 0; width: 52px; height: 61.2px; }
+@media (prefers-reduced-motion: reduce) { .name .merk.beweegt img { position: static; width: 100%; height: 100%; } }
+nav { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; font-size: .95rem; }
+nav a { color: var(--muted); text-decoration: none; }
+nav a:hover { color: var(--accent); }
+.theme { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--r); padding: 4px 10px; cursor: pointer; font: inherit; }
+.taal { border: 1px solid var(--line); border-radius: var(--r); padding: 3px 9px; font: 600 .78rem/1.4 var(--f-mono); letter-spacing: .06em; }
+nav a.taal { color: var(--ink); }
+nav a.taal:hover { color: var(--accent); border-color: var(--accent); }
+
+/* opening */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; padding-top: 16px; }
+.hero-text { display: grid; gap: 16px; }
+.hero h1 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); line-height: 1.1; }
+.hero .lead { max-width: 72ch; }
+/* Drie ingangen: de drie onderdelen van het atelier als tekstregels onder de kop; naam is de link */
+.hero-onder { display: grid; grid-template-columns: minmax(0, 558px) minmax(0, 1fr); gap: 32px 64px; align-items: center; }
+.hero-onder .strata { order: -1; margin-left: 38px; }
+@media (max-width: 900px) { .hero-onder { grid-template-columns: minmax(0, 1fr); } .hero-onder .strata { order: 0; margin-left: 0; } }
+.ingangen { display: grid; gap: 14px; font-size: 1.05rem; }
+.ingangen a { display: grid; gap: 2px; justify-self: start; color: inherit; text-decoration: none; }
+.ingangen .naam { font-weight: 700; color: var(--accent); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+.ingangen .naam span { display: inline-block; margin-left: 6px; text-decoration: none; transition: transform .15s ease; }
+.ingangen .vraag { color: var(--ink); }
+.ingangen a:hover .naam, .ingangen a:focus-visible .naam { text-decoration-thickness: 2px; }
+.ingangen a:hover .naam span { transform: translateX(3px); }
+.strata { width: 100%; max-width: 520px; justify-self: center; }
+.strata text { font-family: var(--f-body); font-size: 14px; fill: var(--muted); }
+.strata .t-strong { fill: var(--accent); font-weight: 700; }
+.strata .t-src { font-size: 12.5px; }
+
+/* werkwijze */
+.principles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px 36px; }
+@media (max-width: 680px) { .principles { grid-template-columns: minmax(0, 1fr); } }
+.principle { display: grid; gap: 8px; align-content: start; border-top: 2px solid var(--ink); padding-top: 14px; }
+.principle p { color: var(--muted); }
+
+/* producten */
+.section { display: grid; gap: 28px; }
+.section-head { display: grid; gap: 8px; max-width: 62ch; }
+.manifest { display: grid; gap: 12px; max-width: 62ch; border-left: 3px solid var(--accent); padding-left: 20px; }
+.manifest h2 { font-size: 1.25rem; color: var(--accent); }
+.manifest p { color: var(--ink); }
+.manifest p.slot { font-style: italic; color: var(--muted); }
+.product { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); overflow: hidden; }
+@media (max-width: 820px) { .product { grid-template-columns: minmax(0, 1fr); } }
+.product-body { padding: 28px; display: grid; gap: 16px; align-content: start; }
+.product-body p { color: var(--muted); max-width: 56ch; }
+.ladder { display: flex; gap: 2px; }
+.ladder span { font: 500 .7rem/1 var(--f-mono); color: #fff; width: 28px; padding: 4px 0; text-align: center; clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 0 100%); }
+.ladder .cut { width: 2px; background: var(--ink); margin: 0 4px 0 2px; }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; border-top: 1px solid var(--line); padding-top: 16px; }
+.facts div { display: grid; gap: 2px; }
+.facts b { font-family: var(--f-display); font-size: 1.5rem; font-weight: 750; font-variant-numeric: tabular-nums; }
+.facts span { font-size: .82rem; color: var(--muted); }
+.btn { display: inline-flex; align-items: center; gap: 8px; justify-self: start; background: var(--accent); color: var(--bg); text-decoration: none; font-weight: 700; padding: 10px 18px; border-radius: var(--r); }
+.btn:hover { filter: brightness(1.08); }
+/* Instrumenten: planken per Iv3-hoofdtaakveld, zoals Indicatoren belicht.
+   Vanaf 1100 px heeft elk hoofdtaakveld een eigen plank over de volle breedte, vier tegels per rij;
+   meer dan vier tegels lopen door op een rij eronder, onder dezelfde kop. Geen horizontaal scrollen. */
+.shelves { display: grid; grid-template-columns: minmax(0, 1fr); gap: 36px; }
+.shelf { display: grid; gap: 12px; min-width: 0; align-content: start; }
+.shelf-head { display: flex; flex-direction: column; justify-content: end; gap: 2px; border-bottom: 1px solid var(--line); padding-bottom: 8px; min-width: 0; }
+.shelf-head h3 { font-size: 1.05rem; }
+.shelf-head span { font-size: .88rem; color: var(--muted); }
+.rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 640px) { .rail { grid-template-columns: minmax(0, 1fr); } }
+@media (min-width: 1100px) {
+  .shelves { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0 16px; margin-top: -32px; }
+  .shelf { grid-column: 1 / -1; grid-template-columns: subgrid; row-gap: 0; }
+  .shelf-head { grid-column: 1 / -1; margin: 32px 0 12px; }
+  .rail { grid-column: 1 / -1; grid-template-columns: subgrid; }
+}
+/* Thema-plank: een dwarsdoorsnede die de Iv3 zelf niet als taakveld kent; geen nummer, bovenaan, petrol lijn onder de kop */
+.shelf.thema .shelf-head { border-bottom: 2px solid var(--accent); }
+.shelf.thema .tile { border-color: var(--accent); }
+.tile h4 { font-family: var(--f-display); font-size: 1.15rem; font-weight: 700; margin: 4px 0 0; }
+.meta { font-family: var(--f-mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.tile { transition: border-color .15s ease, transform .15s ease; }
+.tile:hover { border-color: var(--accent); }
+@media (prefers-reduced-motion: no-preference) { .tile:hover { transform: translateY(-2px); } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 20px; display: grid; grid-template-rows: auto auto auto 1fr auto; gap: 10px; min-width: 0; }
+.tile h3 { margin-top: 4px; }
+.tile p { color: var(--muted); font-size: .95rem; }
+.vis { height: 28px; display: flex; flex-direction: column; justify-content: center; }
+.tile .spread { max-width: none; height: 12px; }
+.stackset { display: grid; gap: 2px; }
+.stackset .spread { height: 5px; border-radius: 2px; }
+.stackset .spread i { border-right-width: 1px; }
+/* wrap-reverse: past de knop met 'Meer weten' niet op één regel, dan schuift 'Meer weten' naar boven en blijft de knop op de onderste regel, gelijk met de andere tegels */
+.tile-links { display: flex; flex-wrap: wrap-reverse; align-items: center; gap: 6px 16px; padding-top: 4px; }
+.tile-links .btn { white-space: nowrap; }
+.btn-sm { padding: 7px 14px; font-size: .92rem; }
+.more { background: none; border: 0; padding: 4px 0; color: var(--accent); font: inherit; font-size: .92rem; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.more[aria-expanded="true"] { font-weight: 700; }
+.product.open { box-shadow: 0 0 0 2px var(--accent); }
+.close { justify-self: start; background: none; border: 1px solid var(--line); border-radius: var(--r); padding: 5px 12px; color: var(--ink); font: inherit; font-size: .9rem; cursor: pointer; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.btn-quiet { background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+.spread { display: flex; height: 14px; max-width: 320px; border-radius: 3px; overflow: hidden; }
+.spread i { display: block; height: 100%; border-right: 1.5px solid var(--surface); }
+.spread i:last-child { border-right: 0; }
+.product-aside { background: var(--accent-soft); padding: 28px; display: grid; gap: 12px; align-content: start; }
+.product-aside ol { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; font-size: .95rem; }
+.film { margin: 6px 0 0; display: grid; gap: 6px; }
+.film video { width: 100%; aspect-ratio: 16 / 9; border-radius: 6px; border: 1px solid var(--line); background: #f3f4f2; display: block; }
+.film figcaption { font-size: .82rem; color: var(--muted); }
+
+/* over */
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); gap: 32px 56px; }
+@media (max-width: 820px) { .about { grid-template-columns: minmax(0, 1fr); } }
+.about-text { display: grid; gap: 16px; max-width: 64ch; }
+dl.cv { margin: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 20px; align-content: start; font-size: .95rem; }
+dl.cv dt { font-family: var(--f-mono); font-size: .78rem; color: var(--muted); padding-top: 3px; }
+dl.cv dd { margin: 0; }
+
+/* samenwerken */
+.contact { border-top: 2px solid var(--ink); padding-top: 24px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px 40px; align-items: end; }
+@media (max-width: 720px) { .contact { grid-template-columns: minmax(0, 1fr); } }
+.contact p { color: var(--muted); max-width: 60ch; }
+.mail { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.knop { font: inherit; font-size: .95rem; line-height: 1.2; padding: 12px 20px; border-radius: var(--r); border: 1px solid var(--accent); cursor: pointer; text-decoration: none; display: inline-block; }
+.knop-primair { background: var(--accent); color: var(--bg); font-weight: 700; }
+.knop-primair:hover { filter: brightness(1.12); }
+.knop-secundair { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.knop-secundair:hover { border-color: var(--accent); }
+
+footer { font-size: .82rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 24px; border-top: 1px solid var(--line); padding-top: 18px; }
+@media (prefers-reduced-motion: no-preference) {
+  .strata .layer { transition: transform .5s ease; }
+  .strata:hover .l1 { transform: translateY(-6px); }
+  .strata:hover .l2 { transform: translateY(-2px); }
+  .strata:hover .l3 { transform: translateY(2px); }
+  .strata:hover .l4 { transform: translateY(6px); }
+}
+
+/* Koppen in de accentkleur (eenheid met de visietekst op de homepage) */
+:where(h1, h2, h3, h4) { color: var(--accent); }
+
+.skip { position: absolute; left: -9999px; top: 8px; z-index: 3000; padding: 8px 14px; background: #0f5c66; color: #fff; border-radius: 4px; }
+.skip:focus { left: 12px; }
+main { display: contents; }
+main > * { min-width: 0; }
+#inhoud { position: absolute; }
+#inhoud:focus { outline: none; }
+</style>
+<script data-goatcounter="https://josephinel.goatcounter.com/count"
+        async src="https://gc.zgo.at/count.js"></script>
+<style>/* Engelse versie: links naar pagina's die alleen in het Nederlands bestaan */
+.top nav a[hreflang="nl"]:not(.taal)::after, footer a[hreflang="nl"]::after, p a[hreflang="nl"]::after, li a[hreflang="nl"]::after, dd a[hreflang="nl"]::after { content: "NL"; font: 600 .62em var(--f-mono, monospace); letter-spacing: .05em; vertical-align: super; margin-left: .3em; color: var(--muted); }
+</style>
+</head>
+<body>
+<a class="skip" href="#inhoud" onclick="document.getElementById('inhoud').focus();return false">Skip to content</a>
+<div class="page">
+  <header class="top">
+    <a class="name" href="./"><picture class="merk beweegt"><source srcset="../beeldmerk/beeldmerk-stil.svg" media="(prefers-reduced-motion: reduce)"><img src="../beeldmerk/beeldmerk.svg" alt="" width="46" height="46"></picture><span class="tekst">Open Data Atelier<span class="sig">Josephine Linders</span></span></a>
+    <nav aria-label="Main menu">
+      <a href="#producten">Instruments</a>
+      <a href="../indicatoren.html" hreflang="nl">Indicators in focus</a>
+      <a href="../registraties.html" hreflang="nl">Registers in focus</a>
+      <a href="#over">About</a>
+      <a href="#samenwerken">Work together</a>
+      <a class="taal" href="../" hreflang="nl" lang="nl" aria-label="Nederlandse versie">NL</a>
+      <button class="theme" id="themeBtn" type="button" aria-label="Switch between light and dark">◐</button>
+    </nav>
+  </header>
+<main>
+<span id="inhoud" tabindex="-1"></span>
+
+  <section class="hero" aria-labelledby="h-hero">
+    <div class="hero-text">
+      <span class="eyebrow">Cross-domain information analysis</span>
+      <h1 id="h-hero">Open data, layer by layer, to an answer a municipality can use.</h1>
+      <p class="lead">Municipal issues cut across policy domains. The answer is often already in public registers, spread over sources that nobody puts side by side. That is where the work begins.</p>
+    </div>
+    <div class="hero-onder">
+      <nav class="ingangen" aria-label="Three parts of the atelier"><a href="#producten"><span class="naam">Instruments<span aria-hidden="true">↓</span></span><span class="vraag">Look for answers to policy questions for your municipality</span></a> <a href="../indicatoren.html" hreflang="nl"><span class="naam">Indicators in focus<span aria-hidden="true">→</span></span><span class="vraag">Discover what you can measure per policy domain</span></a> <a href="../registraties.html" hreflang="nl"><span class="naam">Registers in focus<span aria-hidden="true">→</span></span><span class="vraag">Test the register beneath the figures</span></a></nav>
+      <svg class="strata" viewBox="0 0 490 498" role="img" aria-labelledby="strata-t strata-d">
+        <title id="strata-t">Working method in four layers</title>
+        <desc id="strata-d">At the top, the BAG (national register of addresses and buildings) and CBS neighbourhoods and districts as the skeleton. Below that, open domain data: energy (EP-Online from RVO, via RIVM; consumption and heating per neighbourhood, CBS), heritage (RCE), education (DUO), finance (Iv3, central government finances), youth (CBS), Veilig Thuis (CBS), Wmo (CBS), debt (CBS), civic integration (DUO), population (CBS), housing (CBS), permits (KOOP) and work locations (IBIS, the provinces' register of business parks). Then what only the municipality and its implementing partners, such as the environmental service, know. At the bottom, a traceable answer per object.</desc>
+        <line x1="360" y1="82" x2="360" y2="426" stroke="var(--muted)" stroke-dasharray="3 4"/>
+        <g class="layer l1">
+          <polygon points="240,50 360,82 480,50 360,18" fill="var(--layer-1)"/>
+          <text x="4" y="47" class="t-strong">1 · skeleton</text>
+          <text x="4" y="64">BAG · CBS neighbourhoods, districts</text>
+        </g>
+        <g class="layer l2">
+          <polygon points="240,135 360,167 480,135 360,103" fill="var(--layer-2)"/>
+          <text x="4" y="105" class="t-strong">2 · open domain data</text>
+          <text x="4" y="122">energy</text><text x="112" y="122" class="t-src">RVO · RIVM · CBS</text>
+          <text x="4" y="139">heritage</text><text x="112" y="139" class="t-src">RCE</text>
+          <text x="4" y="156">education</text><text x="112" y="156" class="t-src">DUO</text>
+          <text x="4" y="173">finance</text><text x="112" y="173" class="t-src">Iv3 · State</text>
+          <text x="4" y="190">youth</text><text x="112" y="190" class="t-src">CBS</text>
+          <text x="4" y="207">safe at home</text><text x="112" y="207" class="t-src">CBS</text>
+          <text x="4" y="224">wmo</text><text x="112" y="224" class="t-src">CBS</text>
+          <text x="4" y="241">debt</text><text x="112" y="241" class="t-src">CBS</text>
+          <text x="4" y="258">integration</text><text x="112" y="258" class="t-src">DUO</text>
+          <text x="4" y="275">population</text><text x="112" y="275" class="t-src">CBS</text>
+          <text x="4" y="292">housing</text><text x="112" y="292" class="t-src">CBS</text>
+          <text x="4" y="309">permits</text><text x="112" y="309" class="t-src">KOOP</text>
+          <text x="4" y="326">work locations</text><text x="112" y="326" class="t-src">IBIS</text>
+        </g>
+        <g class="layer l3">
+          <polygon points="240,373 360,405 480,373 360,341" fill="var(--layer-3)"/>
+          <text x="4" y="370" class="t-strong">3 · enrichment</text>
+          <text x="4" y="387">what the municipality and</text>
+          <text x="4" y="404">its partners know</text>
+        </g>
+        <g class="layer l4">
+          <polygon points="240,458 360,490 480,458 360,426" fill="var(--layer-4)"/>
+          <circle cx="341" cy="457" r="4" fill="var(--bg)"/><circle cx="374" cy="466" r="4" fill="var(--bg)"/><circle cx="396" cy="452" r="4" fill="var(--bg)"/>
+          <text x="4" y="455" class="t-strong">4 · answer</text>
+          <text x="4" y="472">traceable per object</text>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="section" id="werkwijze" aria-labelledby="h-werk">
+    <div class="manifest">
+      <h2>Look differently. Discover connections. Make meaning visible.</h2>
+      <p>Every register tells its own story. Something new emerges in the connections between them. The Open Data Atelier is the place to make those connections. What becomes visible is also what is missing, what deviates and what turns out unexpectedly. That is often exactly where the next question begins.</p>
+      <p>Transparency and dialogue are the starting points. Transparency: source, calculation rule and uncertainty are open, so anyone can check how an outcome came about. Dialogue: an instrument does not say whether something is good, enough or fairly distributed. You have that conversation yourself, with colleagues, the council and residents. Anyone who does not recognise something, or knows more, makes the picture better.</p>
+      <p class="slot">Sometimes looking differently is enough to see what was there all along.</p>
+    </div>
+    <div class="section-head">
+      <span class="eyebrow">Working method</span>
+      <h2 id="h-werk">Three principles</h2>
+    </div>
+    <div class="principles">
+      <div class="principle">
+        <h3>Traceable</h3>
+        <p>Every outcome shows how it came about: which source, which threshold, which exception. Anyone who wants to check can do so per object.</p>
+      </div>
+      <div class="principle">
+        <h3>Uncertainty made visible</h3>
+        <p>Where open data falls short, the page says so. An honest category "uncertain" is more useful than a forced yes or no; it is a work list straight away.</p>
+      </div>
+      <div class="principle">
+        <h3>The code goes to the data</h3>
+        <p>Sensitive data stay where they belong. Local knowledge is added in the municipality's own environment, not sent anywhere.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="producten" aria-labelledby="h-prod">
+    <div class="section-head">
+      <span class="eyebrow">Instruments · Municipal view</span>
+      <h2 id="h-prod">From open data to a usable instrument, for every municipality</h2>
+      <p class="lead">A report records what was seen. A dashboard follows fixed figures over time. An instrument is made to investigate a question: you choose where to look, a municipality, a district, a year, a building. It calculates on the spot and shows where the answer comes from. The instruments themselves are in Dutch: they are built for the 342 Dutch municipalities and their open data.</p>
+    </div>
+    <div class="shelves">
+      <div class="shelf thema">
+        <div class="shelf-head"><h3>Theme · Energy transition</h3><span>Across the Iv3 task fields: building control (8.3), environmental service (7.4), the municipality's own property and the heat programme. Iv3, the municipal accounting scheme, has no task field of its own for energy.</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><div class="ladder"><span style="background:#1a8a3f">A</span><span style="background:#57a83a">B</span><span style="background:#b3c72a">C</span><i class="cut"></i><span style="background:#f2d01c;color:#222">D</span><span style="background:#f0a018">E</span><span style="background:#e4642a">F</span><span style="background:#d22a2a">G</span></div></div>
+        <h4>Offices and energy label C</h4>
+        <span class="meta">Map · per building · every municipality</span>
+        <p>Which offices meet the label C obligation? A map per municipality, building by building.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../labelc.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-labelc">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:81;background:#8a96a0"></i><i style="flex:12;background:#0f5c66"></i><i style="flex:7;background:#d3dcdc"></i></span></div>
+        <h4>Heat by neighbourhood</h4>
+        <span class="meta">Map · per neighbourhood · every municipality</span>
+        <p>Off natural gas: how each neighbourhood heats its homes today. Natural gas, gas-free, gas use and solar power per neighbourhood.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../warmte.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-warmte">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:43;background:#0f5c66"></i><i style="flex:36;background:#6fb3bc"></i><i style="flex:21;background:#eda100"></i></span></div>
+        <h4>Solar power by municipality</h4>
+        <span class="meta">Per municipality · since 2019 · RES region</span>
+        <p>Who generates, and where: home roofs, business roofs, greenhouses or fields.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../zonnestroom.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-zonnestroom">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:57;background:#3a8f9a"></i><i style="flex:6;background:#b4492a"></i><i style="flex:37;background:#aab6b8"></i></span></div>
+        <h4>Energy label calendar</h4>
+        <span class="meta">Per municipality and neighbourhood · 2023–2040</span>
+        <p>Which energy requirement applies to which building, and when: rental homes in 2029, non-residential buildings in 2030 and 2033.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../energielabelkalender.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-labelkalender">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>0 · Governance and support</h3><span>Finance and public services: what a municipality spends and receives, what central government pays, what residents pay for housing, what arrives at the service desk and what can be followed of a coalition agreement</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:43.9;background:#1d5f74"></i><i style="flex:16.2;background:#8a96a0"></i><i style="flex:6.2;background:#2a78d6"></i><i style="flex:8.7;background:#1baf7a"></i><i style="flex:8.3;background:#e87ba4"></i><i style="flex:3.5;background:#d23f3f"></i><i style="flex:4.1;background:#6250d6"></i><i style="flex:7.2;background:#eb6834"></i><i style="flex:1.8;background:#eda100"></i></span></div>
+        <h4>Iv3 mirror</h4>
+        <span class="meta">One municipality · 2025</span>
+        <p>The finances of one municipality in plain language: where the money goes, where it comes from, and plan against reality.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../iv3spiegel.html" hreflang="nl">Open the mirror <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-iv3">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="stackset"><span class="spread"><i style="flex:60;background:#1d5f74"></i><i style="flex:12;background:#8a96a0"></i><i style="flex:5;background:#2a78d6"></i><i style="flex:8;background:#1baf7a"></i><i style="flex:5;background:#e87ba4"></i><i style="flex:3;background:#d23f3f"></i><i style="flex:4;background:#6250d6"></i><i style="flex:2;background:#eb6834"></i><i style="flex:1;background:#eda100"></i></span><span class="spread"><i style="flex:44;background:#1d5f74"></i><i style="flex:16;background:#8a96a0"></i><i style="flex:6;background:#2a78d6"></i><i style="flex:9;background:#1baf7a"></i><i style="flex:8;background:#e87ba4"></i><i style="flex:4;background:#d23f3f"></i><i style="flex:4;background:#6250d6"></i><i style="flex:7;background:#eb6834"></i><i style="flex:2;background:#eda100"></i></span><span class="spread"><i style="flex:30;background:#1d5f74"></i><i style="flex:22;background:#8a96a0"></i><i style="flex:8;background:#2a78d6"></i><i style="flex:10;background:#1baf7a"></i><i style="flex:11;background:#e87ba4"></i><i style="flex:4;background:#d23f3f"></i><i style="flex:5;background:#6250d6"></i><i style="flex:8;background:#eb6834"></i><i style="flex:2;background:#eda100"></i></span><span class="spread"><i style="flex:38;background:#1d5f74"></i><i style="flex:18;background:#8a96a0"></i><i style="flex:6;background:#2a78d6"></i><i style="flex:8;background:#1baf7a"></i><i style="flex:9;background:#e87ba4"></i><i style="flex:3;background:#d23f3f"></i><i style="flex:5;background:#6250d6"></i><i style="flex:11;background:#eb6834"></i><i style="flex:2;background:#eda100"></i></span></span></div>
+        <h4>Iv3 panorama</h4>
+        <span class="meta">All municipalities · 2025</span>
+        <p>All 342 municipalities one below the other, in colour. See at a glance where a municipality deviates.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../iv3panorama.html" hreflang="nl">Open the panorama <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-iv3">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:89;background:#0f5c66"></i><i style="flex:6;background:#6fb3bc"></i><i style="flex:5;background:#c9dfe2"></i></span></div>
+        <h4>Central government funding by municipality</h4>
+        <span class="meta">One municipality · 2025</span>
+        <p>Which ministry pays what to your municipality: the municipal fund, the social assistance budget and other payments, next to the municipality's own Iv3 accounts.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../rijksgeld.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:87;background:#0f5c66"></i><i style="flex:9;background:#6fb3bc"></i><i style="flex:4;background:#c9dfe2"></i></span></div>
+        <h4>Municipal fund allocation by municipality</h4>
+        <span class="meta">One municipality · 2027, multi-year to 2030</span>
+        <p>How central government distributes the municipal fund: your municipality's general, integration and decentralisation payments, for 2026 and 2027 and multi-year up to and including 2030, the calculation down to each allocation measure, with your own figures to work through.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../rijksverdeling.html" hreflang="nl">Open the calculation <span aria-hidden="true">→</span></a></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:39;background:#0f5c66"></i><i style="flex:27;background:#6fb3bc"></i><i style="flex:34;background:#c9dfe2"></i></span></div>
+        <h4>Housing charges by municipality</h4>
+        <span class="meta">One municipality · since 2021</span>
+        <p>What the municipality charges for housing: property tax (OZB), sewerage and waste per home, and whether the council dampens the rise in WOZ values.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../woonlasten.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-woonlasten">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:91;background:#0f5c66"></i><i style="flex:91;background:#0f5c66"></i><i style="flex:99;background:#0f5c66"></i><i style="flex:113;background:#eda100"></i><i style="flex:100;background:#0f5c66"></i><i style="flex:51;background:#a7d3d8"></i><i style="flex:27;background:#a7d3d8"></i></span></div>
+        <h4>Civil affairs</h4>
+        <span class="meta">One municipality · 2014–2034</span>
+        <p>What arrives at the service desk: the peak in travel documents up to and including 2028, with your own numbers to work through, how many driving licences are renewed each year, and how many birth registrations the maternity wards in the municipality bring.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../balie.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-balie">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:46;background:#0f5c66"></i><i style="flex:9;background:#6fb3bc"></i><i style="flex:45;background:#c9dfe2"></i></span></div>
+        <h4>Coalition agreement tracker by municipality</h4>
+        <span class="meta">One municipality · from 1 January 2026</span>
+        <p>What open data shows of the goals in a coalition agreement: the baseline, what has changed since, and what is needed per year for a goal you enter yourself.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../akkoordvolger.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-akkoord">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>1 · Safety</h3><span>Public order and safety: what the police record per district</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:1;background:#2f64a8"></i><i style="flex:1;background:#9cbbe2"></i><i style="flex:1;background:#c9d1d3"></i><i style="flex:1;background:#f0b77a"></i><i style="flex:1;background:#c4651a"></i></span></div>
+        <h4>Crime and nuisance by district</h4>
+        <span class="meta">Map · per district · every municipality</span>
+        <p>What the police record per district in crime and nuisance, and whether it is going up or down compared with the three years before. No ranking and no neighbourhoods.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../misdrijven.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-misdrijven">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>2 · Traffic and transport</h3><span>Roads and road safety: where the recorded accidents happen</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:1;background:#d6ecee"></i><i style="flex:1;background:#a7d3d8"></i><i style="flex:1;background:#6fb3bc"></i><i style="flex:1;background:#3a8f9a"></i><i style="flex:1;background:#0f5c66"></i></span></div>
+        <h4>Road accidents by district</h4>
+        <span class="meta">Map · per district · every municipality</span>
+        <p>Where in the municipality the recorded injury accidents happen, who is involved and on what kind of road. No ranking and no individual accidents.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../verkeersongevallen.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-verkeer">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>3 · Economy</h3><span>Working, living and business space: per neighbourhood, per business park and per innovation district</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:1;background:#d6ecee"></i><i style="flex:1;background:#a7d3d8"></i><i style="flex:1;background:#6fb3bc"></i><i style="flex:1;background:#3a8f9a"></i><i style="flex:1;background:#0f5c66"></i><i style="flex:1;background:#08383e"></i></span></div>
+        <h4>Business activity by neighbourhood</h4>
+        <span class="meta">Map · per neighbourhood · every municipality</span>
+        <p>How mixed are living and working, where do entrepreneurs work from home, and what does business space yield in property tax (OZB)?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../bedrijvigheid.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-bedr">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:9;background:#2a78d6"></i><i style="flex:9;background:#b4492a"></i><i style="flex:16;background:#eda100"></i><i style="flex:33;background:#1baf7a"></i><i style="flex:9;background:#8a5fbf"></i><i style="flex:24;background:#6fb3bc"></i></span></div>
+        <h4>Area in view</h4>
+        <span class="meta">Map · per business park or innovation district · every municipality</span>
+        <p>What is on a business park or in an innovation district, and what is changing? Living and working in square metres, construction and demolition, energy labels. The area is in the link.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../gebied.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-gebied">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>4 · Education</h3><span>From primary school to higher education: schools, pupils and students</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:1940;background:#d2462c"></i><i style="flex:2957;background:#5f8f94"></i><i style="flex:1154;background:#3f74c4"></i></span></div>
+        <h4>Primary education by neighbourhood</h4>
+        <span class="meta">Map · per school and neighbourhood · every municipality</span>
+        <p>Where are the primary schools, how many pupils do they have and what does DUO expect up to 2035? Decline and growth per school and per neighbourhood.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../onderwijs.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-onderwijs">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:39.1;background:#0f5c66"></i><i style="flex:60.9;background:#a7d3d8"></i></span></div>
+        <h4>Higher education: students by municipality</h4>
+        <span class="meta">Map · per municipality · every municipality</span>
+        <p>Where do a city's students live, and where do the young people from your municipality study? With the nineteen student cities as a reference.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../studenten.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-studenten">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>6 · Social domain</h3><span>Support, youth, work and income, debt, energy poverty, low-income schemes, safety at home and civic integration</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:9.2;background:#d6ecee"></i><i style="flex:8.9;background:#a7d3d8"></i><i style="flex:12.5;background:#6fb3bc"></i><i style="flex:22.8;background:#3a8f9a"></i><i style="flex:28.1;background:#0f5c66"></i><i style="flex:18.4;background:#08383e"></i></span></div>
+        <h4>Wmo by district</h4>
+        <span class="meta">Map · per district · every municipality</span>
+        <p>How many residents receive support under the Wmo (Social Support Act), who are they by age and income, what does it cost, and how does it relate per district to population ageing?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../wmo.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-wmo">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:35.0;background:#2a78d6"></i><i style="flex:32.8;background:#eb6834"></i><i style="flex:8.3;background:#1baf7a"></i><i style="flex:8.6;background:#eda100"></i><i style="flex:15.3;background:#e87ba4"></i></span></div>
+        <h4>Youth care by district</h4>
+        <span class="meta">Map · per district · every municipality</span>
+        <p>How many young people receive youth care, how does the help start and end, what does it cost and who refers them? The municipality itself over the years and per district.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../jeugdzorg.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-jeugd">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:18.3;background:#0f5c66"></i><i style="flex:4.0;background:#3a8f9a"></i><i style="flex:14.9;background:#6fb3bc"></i><i style="flex:39.7;background:#a7d3d8"></i><i style="flex:14.2;background:#d6ecee"></i><i style="flex:8.9;background:#8aa3a7"></i></span></div>
+        <h4>Work and income by district</h4>
+        <span class="meta">Map · per month · every municipality</span>
+        <p>Who lives on social assistance, per month and per district, and what does the municipality do in reintegration and sheltered work? With unemployment and disability benefits from UWV as context, and the money without a deficit meter.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../werkeninkomen.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-werkeninkomen">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:56.4;background:#a7d3d8"></i><i style="flex:20.1;background:#6fb3bc"></i><i style="flex:11.2;background:#3a8f9a"></i><i style="flex:12.3;background:#0f5c66"></i></span></div>
+        <h4>Debt by district</h4>
+        <span class="meta">Map · per district · every municipality</span>
+        <p>How many households have problematic debts, with which creditors, who are they and in which districts? The municipality itself over the years.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../schulden.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-schulden">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:13.0;background:#6fb3bc"></i><i style="flex:67.1;background:#0f5c66"></i><i style="flex:19.9;background:#c0803f"></i></span></div>
+        <h4>Energy poverty by neighbourhood</h4>
+        <span class="meta">Map · per neighbourhood · every municipality</span>
+        <p>Where do a poor energy label and a low income come together, and who owns the home: the occupant, a housing association or another landlord?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../energiearmoede.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-energiearmoede">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:342;background:#0f5c66"></i><i style="flex:310;background:#3a8f9a"></i><i style="flex:266;background:#6fb3bc"></i><i style="flex:214;background:#a7d3d8"></i><i style="flex:189;background:#0f5c66"></i><i style="flex:144;background:#3a8f9a"></i><i style="flex:83;background:#6fb3bc"></i><i style="flex:59;background:#a7d3d8"></i><i style="flex:37;background:#0f5c66"></i></span></div>
+        <h4>Low-income schemes by municipality</h4>
+        <span class="meta">Per municipality · every municipality</span>
+        <p>Which schemes for low incomes does a municipality have according to its local regulations, and up to which income? What many municipalities have and was not found here, and what few municipalities have and this one does.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../minimaregelingen.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-minimaregelingen">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:65.2;background:#0f5c66"></i><i style="flex:26.5;background:#6fb3bc"></i><i style="flex:4.1;background:#a7d3d8"></i><i style="flex:3.7;background:#b9c4c5"></i></span></div>
+        <h4>Veilig Thuis by municipality</h4>
+        <span class="meta">Over the years · every municipality</span>
+        <p>How often do residents and professionals ask Veilig Thuis, the advice and reporting centre for domestic violence and child abuse, for advice or make a report? About what violence, who reports, and what happens next?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../veiligthuis.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-veiligthuis">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:37.1;background:#0f5c66"></i><i style="flex:15.7;background:#3a8f9a"></i><i style="flex:4.4;background:#a7d3d8"></i><i style="flex:32.5;background:#c98500"></i><i style="flex:2.7;background:#ecd08f"></i><i style="flex:7.6;background:#8aa3a7"></i></span></div>
+        <h4>Civic integration by municipality</h4>
+        <span class="meta">Per cohort · every municipality</span>
+        <p>Who became obliged to integrate, how far has each cohort got, and which learning route are they in? Since 2022 the municipality is in charge.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../inburgering.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-inburgering">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>8 · Housing</h3><span>Living and building: who lives there, in which homes, and what is being added</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:40.1;background:#2a78d6"></i><i style="flex:28.4;background:#eda100"></i><i style="flex:31.5;background:#1baf7a"></i></span></div>
+        <h4>Households and ageing</h4>
+        <span class="meta">Map · per neighbourhood · every municipality</span>
+        <p>How are households composed, how fast has the municipality been ageing since 1995, and in which neighbourhoods do older people and people living alone live?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../huishoudens.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-huish">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:166588;background:#0f5c66"></i><i style="flex:173494;background:#eda100"></i><i style="flex:308357;background:#1baf7a"></i><i style="flex:214821;background:#a7d3d8"></i></span></div>
+        <h4>Population change</h4>
+        <span class="meta">Over the years · per district · every municipality</span>
+        <p>Born, died, arrived and left: where does growth or decline come from, and does mortality fit the age structure?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../bevolking.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-bevolk">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:57.9;background:#0f5c66"></i><i style="flex:28.1;background:#3a8f9a"></i><i style="flex:13.9;background:#a7d3d8"></i></span></div>
+        <h4>Housing stock and vacancy</h4>
+        <span class="meta">Map · per neighbourhood · every municipality</span>
+        <p>How many homes does the municipality have, who owns them, what is added each year, and how many are vacant, with which owner?</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../woningen.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-woning">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:147775;background:#a7d3d8"></i><i style="flex:107440;background:#3a8f9a"></i><i style="flex:17701;background:#0f5c66"></i><i style="flex:42639;background:#eda100"></i></span></div>
+        <h4>Construction pipeline</h4>
+        <span class="meta">Map · per building · every municipality</span>
+        <p>Which homes are permitted, under construction or just completed, and where has the expected year of construction already passed? With the permits from the municipal gazette.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../bouwstroom.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-bouw">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:2161890;background:#0f5c66"></i><i style="flex:127500;background:#a7d3d8"></i><i style="flex:42870;background:#aab6b8"></i></span></div>
+        <h4>Social rent by municipality</h4>
+        <span class="meta">Over the years · per municipality · every municipality</span>
+        <p>How much social rent there is, what changes it and for whom: new construction, demolition and sale of housing association homes, next to housing benefit and housing costs.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../sociale-huur.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-socialehuur">Learn more</button></div>
+      </article>
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:29380;background:#0f5c66"></i><i style="flex:22045;background:#6fb3bc"></i><i style="flex:17365;background:#d6ecee"></i><i style="flex:345;background:#aab6b8"></i></span></div>
+        <h4>New construction by municipality</h4>
+        <span class="meta">Over the years · per municipality · every municipality</span>
+        <p>What was completed, and for whom: new homes and non-residential buildings per year, owner-occupied or rented, and what kind of buildings they are.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../nieuwbouw.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-nieuwbouw">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+      <div class="shelf">
+        <div class="shelf-head"><h3>Workbench</h3><span>Outside the Iv3 classification: your own list next to the open data</span></div>
+        <div class="rail">
+      <article class="tile">
+        <div class="vis" aria-hidden="true"><span class="spread"><i style="flex:3;background:#d98a12"></i><i style="flex:6;background:#7656b0"></i><i style="flex:30;background:#2a8a8a"></i></span></div>
+        <h4>Your own list on the map</h4>
+        <span class="meta">Map · per object · your own list</span>
+        <p>Paste your own list of addresses, such as the municipality's property portfolio. The page links it to the BAG and adds energy label, monument status and neighbourhood. Your list stays in your browser.</p>
+        <div class="tile-links"><a class="btn btn-sm" href="../eigenlijst.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a><button class="more" type="button" aria-expanded="false" aria-controls="info-eigenlijst">Learn more</button></div>
+      </article>
+        </div>
+      </div>
+    </div>
+    <article class="product" id="info-labelc" aria-labelledby="h-labelc">
+      <div class="product-body">
+        <h3 id="h-labelc">Offices and energy label C</h3>
+        <div class="ladder" aria-label="Energy labels A to G; from D an office does not comply">
+          <span style="background:#1a8a3f">A</span><span style="background:#57a83a">B</span><span style="background:#b3c72a">C</span><i class="cut"></i><span style="background:#f2d01c;color:#222">D</span><span style="background:#f0a018">E</span><span style="background:#e4642a">F</span><span style="background:#d22a2a">G</span>
+        </div>
+        <p>A map of the energy label C obligation for offices, for every Dutch municipality. Choose a municipality, and every building with an office function is classified: complies, does not comply, no label, uncertain, monument or outside the obligation. With the reasoning alongside.</p>
+        <div class="facts">
+          <div><b>342</b><span>municipalities</span></div>
+          <div><b>3</b><span>units: buildings, addresses, m²</span></div>
+          <div><b>0</b><span>installations or accounts</span></div>
+        </div>
+        <a class="btn" href="../labelc.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>The BAG supplies the offices and their floor area.</li>
+          <li>RCE supplies the national monuments, RIVM the labels.</li>
+          <li>The test: more than 100 m² and at least 50% office.</li>
+          <li>What only the municipality knows, you add yourself: municipal monuments, or which buildings have received a notice or are being dealt with. An extract from a data warehouse on the GGM (the Municipal Data Model), from a municipality or an environmental service, is recognised by its column names. It stays in your browser.</li>
+        </ol>
+        <figure class="film">
+          <video controls preload="none" playsinline poster="../film/labelc-poster.jpg" aria-label="Instruction film Offices and energy label C, 1 minute 18, with Dutch subtitles and without sound">
+            <source src="../film/labelc.mp4" type="video/mp4">
+          </video>
+          <figcaption>How it works, on screen · 1:18 · Dutch subtitles, no sound</figcaption>
+        </figure>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-warmte" aria-labelledby="h-warmte">
+      <div class="product-body">
+        <h3 id="h-warmte">Heat by neighbourhood</h3>
+        <div class="spread" role="img" aria-label="Homes in the Netherlands in 2025: 81 percent on natural gas, 12 percent gas-free, 7 percent mixed or unknown">
+          <i style="flex:81;background:#8a96a0"></i><i style="flex:12;background:#0f5c66"></i><i style="flex:7;background:#d3dcdc"></i>
+        </div>
+        <p>Off natural gas: how each neighbourhood heats its homes today. Per municipality, district and neighbourhood: how many homes are still on natural gas, how many are already gas-free, average gas and electricity consumption, district heating and solar power. For those working on the heat programme: no advice and no planning, but where each neighbourhood stands now.</p>
+        <div class="facts">
+          <div><b>12%</b><span>of homes gas-free in 2025</span></div>
+          <div><b>81%</b><span>still on natural gas</span></div>
+          <div><b>14,729</b><span>neighbourhoods, with a map</span></div>
+        </div>
+        <a class="btn" href="../warmte.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; the figures come live from CBS.</li>
+          <li>The grid operators supply consumption and heating method per neighbourhood via CBS.</li>
+          <li>Choose on the map what you want to see: gas-free, gas per home, district heating or solar power.</li>
+          <li>Click a neighbourhood: the file sets it next to the municipality and the year before.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-zonnestroom" aria-labelledby="h-zonnestroom">
+      <div class="product-body">
+        <h3 id="h-zonnestroom">Solar power by municipality</h3>
+        <div class="spread" role="img" aria-label="Solar panels in the Netherlands at the end of 2025: 43 percent small installations, 36 percent large on roofs, 21 percent large in fields">
+          <i style="flex:43;background:#0f5c66"></i><i style="flex:36;background:#6fb3bc"></i><i style="flex:21;background:#eda100"></i>
+        </div>
+        <p>Who generates, and where: home roofs, business roofs, greenhouses or fields. Per municipality the installed capacity since 2019, divided over homes, agriculture, energy companies and other businesses, and over small installations, large roofs and solar farms. With the municipality's own RES region (Regional Energy Strategy) on the map and onshore wind in that region. Capacity, not generated electricity: CBS does not publish that per municipality.</p>
+        <div class="facts">
+          <div><b>29.4 GWp</b><span>solar panels in the Netherlands at the end of 2025</span></div>
+          <div><b>×4.1</b><span>since 2019</span></div>
+          <div><b>1.6 kWp</b><span>per resident</span></div>
+        </div>
+        <a class="btn" href="../zonnestroom.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; the figures come live from CBS.</li>
+          <li>See how the capacity is divided by owner and by location, next to the Netherlands.</li>
+          <li>Follow the growth since 2019, in megawatt peak or per resident.</li>
+          <li>Look at the neighbouring municipalities in the same RES region; a click opens that municipality.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-labelkalender" aria-labelledby="h-labelkalender">
+      <div class="product-body">
+        <h3 id="h-labelkalender">Energy label calendar</h3>
+        <div class="spread" role="img" aria-label="Homes in the Netherlands against label D: 57 percent label D or better, 6 percent label E, F or G, 37 percent without a label">
+          <i style="flex:57;background:#3a8f9a"></i><i style="flex:6;background:#b4492a"></i><i style="flex:37;background:#aab6b8"></i>
+        </div>
+        <p>Which energy requirement applies to which building, and when. After the label C obligation for offices come requirements for rental homes (2029) and for schools, shops, care buildings and other non-residential buildings (2030 and 2033); the municipality supervises. Per municipality, district and neighbourhood: what meets each label threshold now, what does not, and where the label is missing. With the pace since July 2022 and the state of the regulations per requirement. Homes per neighbourhood, non-residential buildings per building.</p>
+        <div class="facts">
+          <div><b>443,000</b><span>homes with label E, F or G, owner-occupied and rented</span></div>
+          <div><b>15,100</b><span>non-residential buildings with E, F or G</span></div>
+          <div><b>54%</b><span>of non-residential buildings without a label</span></div>
+        </div>
+        <a class="btn" href="../energielabelkalender.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; the page fetches the summary from the BAG, energy labels and national monuments.</li>
+          <li>Read the calendar: five requirements from 2023 to 2040, each with what complies, what does not and what has no label.</li>
+          <li>See what happened to labels E, F and G since July 2022.</li>
+          <li>Find on the map the neighbourhoods and the non-residential buildings that matter; choosing a district or neighbourhood steers the whole page.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-woonlasten" aria-labelledby="h-woonlasten">
+      <div class="product-body">
+        <h3 id="h-woonlasten">Housing charges by municipality</h3>
+        <div class="spread" role="img" aria-label="Municipal housing charges per home in the Netherlands, budget 2026: 39 percent property tax (OZB), 27 percent sewerage, 34 percent waste">
+          <i style="flex:39;background:#0f5c66"></i><i style="flex:27;background:#6fb3bc"></i><i style="flex:34;background:#c9dfe2"></i>
+        </div>
+        <p>What the municipality charges for housing: property tax (OZB), sewerage charge and waste charge per home, since 2021, next to the Netherlands. With the OZB rate derived from open data, and per year which part of the change comes from the WOZ value (the housing market) and which part from the rate (a council decision). Calculate yourself what a home with a given WOZ value pays.</p>
+        <div class="facts">
+          <div><b>€ 950</b><span>per home in the Netherlands, budget 2026</span></div>
+          <div><b>0.088%</b><span>derived OZB rate, national</span></div>
+          <div><b>+10% / −5%</b><span>WOZ value and rate, 2025 → 2026</span></div>
+        </div>
+        <a class="btn" href="../woonlasten.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; the figures come live from CBS.</li>
+          <li>See property tax, sewerage and waste per home, next to the Netherlands.</li>
+          <li>Follow whether the OZB grows with the WOZ value or whether the council lowers the rate.</li>
+          <li>Enter a WOZ value and see roughly what an owner or tenant pays.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-balie" aria-labelledby="h-balie">
+      <div class="product-body">
+        <h3 id="h-balie">Civil affairs by municipality</h3>
+        <div class="spread" role="img" aria-label="NVVB index passports 2024 up to and including 2030: 91, 91, 99, 113, 100, 51, 27">
+          <i style="flex:91;background:#0f5c66"></i><i style="flex:91;background:#0f5c66"></i><i style="flex:99;background:#0f5c66"></i><i style="flex:113;background:#eda100"></i><i style="flex:100;background:#0f5c66"></i><i style="flex:51;background:#a7d3d8"></i><i style="flex:27;background:#a7d3d8"></i>
+        </div>
+        <p>What arrives at the service desk. The peak in travel documents according to the calculation model of the NVVB (the Dutch association of civil affairs), with your own numbers from 2014 to work through and corrected for the municipality's own growth. Next to that, an estimate of driving licence renewals and first licences per year since 2014, and the birth registrations: a birth is registered in the municipality where the child was born, so where the maternity wards are. An expectation model from open data, not a count. For public services, civil affairs and operations.</p>
+        <div class="facts">
+          <div><b>2027</b><span>peak year for passports (index 113); identity cards 2026 (129)</span></div>
+          <div><b>1.4 mln</b><span>driving licence renewals per year in the Netherlands, estimate 2026</span></div>
+          <div><b>37%</b><span>of those renewals come from people aged 65 and over</span></div>
+        </div>
+        <a class="btn" href="../balie.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; population and driving licences come live from CBS.</li>
+          <li>See the national peak in passports and identity cards, and enter your own numbers from 2014.</li>
+          <li>Driving licence ownership by age from the province is matched to the driving licence ownership of the municipality.</li>
+          <li>Renewals follow from the period of validity: 10 years, shorter from age 65.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-misdrijven" aria-labelledby="h-misdrijven">
+      <div class="product-body">
+        <h3 id="h-misdrijven">Crime and nuisance by district</h3>
+        <div class="spread" role="img" aria-label="Five classes of change: from much less (blue) via about the same (grey) to much more (orange)">
+          <i style="flex:1;background:#2f64a8"></i><i style="flex:1;background:#9cbbe2"></i><i style="flex:1;background:#c9d1d3"></i><i style="flex:1;background:#f0b77a"></i><i style="flex:1;background:#c4651a"></i>
+        </div>
+        <p>The police publish per district how many crimes and reports of nuisance they record. This page sets the latest year of each district next to the average of the three years before, for the total and for six types of crime (such as burglary, violence and shoplifting) and eight types of nuisance. The map colours by that change, not by the number: a district with a station or nightlife area has many records without residents living less safely. No ranking, no figure per resident and no neighbourhoods; numbers below 5 are shown as "fewer than 5". For advisers on public order and safety, team leaders in supervision and enforcement, council members and neighbourhood teams.</p>
+        <div class="facts">
+          <div><b>3 years</b><span>is the comparison: the latest year against the average of the three years before</span></div>
+          <div><b>6 + 8</b><span>types of crime and types of nuisance</span></div>
+          <div><b>&lt; 5</b><span>becomes "fewer than 5", at every level</span></div>
+        </div>
+        <a class="btn" href="../misdrijven.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; the figures come live from the police's open data.</li>
+          <li>See per district the latest year next to the three years before.</li>
+          <li>The map colours the change: blue less, orange more.</li>
+          <li>Click a district for the types of crime and nuisance.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-verkeer" aria-labelledby="h-verkeer">
+      <div class="product-body">
+        <h3 id="h-verkeer">Road accidents by district</h3>
+        <div class="spread" role="img" aria-label="Five groups of districts, from few (light) to many (dark) accidents with injury or death">
+          <i style="flex:1;background:#d6ecee"></i><i style="flex:1;background:#a7d3d8"></i><i style="flex:1;background:#6fb3bc"></i><i style="flex:1;background:#3a8f9a"></i><i style="flex:1;background:#0f5c66"></i>
+        </div>
+        <p>Police and Rijkswaterstaat (the national roads and waterways authority) record every road accident with the place where it happened. This page assigns the accidents of the three most recent years (now 2023–2025) to the districts of the municipality: how many involved injury or death, who was involved (bicycle, pedestrian, mobility scooter, car) and on what kind of road (speed limit at the spot, road authority, built-up area), with the streets where something happens most often. No ranking, no figure per resident and no individual accidents on the map. How completely accidents are recorded differs per region: compare districts within the municipality, not municipalities with each other. For traffic engineers, road safety policy officers, council members and neighbourhood teams.</p>
+        <div class="facts">
+          <div><b>3 years</b><span>together: the three most recent annual files of BRON (Rijkswaterstaat), the newest often still provisional</span></div>
+          <div><b>injury</b><span>or death is the measure; accidents with damage only are shown only as a total</span></div>
+          <div><b>5+</b><span>accidents in three years before a street appears in the list</span></div>
+        </div>
+        <a class="btn" href="../verkeersongevallen.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; the accidents come from BRON, the accident register of Rijkswaterstaat.</li>
+          <li>Each accident is assigned to the district in which it happened.</li>
+          <li>The map colours the districts by the number with injury or death.</li>
+          <li>Click a district for who was involved, on which road, and the streets.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-akkoord" aria-labelledby="h-akkoord">
+      <div class="product-body">
+        <h3 id="h-akkoord">Coalition agreement tracker by municipality</h3>
+        <div class="spread" role="img" aria-label="A bar from baseline to goal: one part measured, one part since the start, the rest still to go">
+          <i style="flex:46;background:#0f5c66"></i><i style="flex:9;background:#6fb3bc"></i><i style="flex:45;background:#c9dfe2"></i>
+        </div>
+        <p>After the 2026 elections every municipality has a new coalition agreement, with goals: so many more homes, charges not above inflation, fewer people on social assistance. This page shows what open data can follow of that. Per meter the position on 1 January 2026, the change since, and for a goal you enter yourself what is needed on average per year and when the source will show the target year. The page knows no agreements, extrapolates no line and gives no judgement. What open data cannot follow of an agreement, such as the split of new construction by price, is on the page too. For council members, council clerks, controllers and anyone working out an agreement.</p>
+        <div class="facts">
+          <div><b>1 January 2026</b><span>baseline for every meter</span></div>
+          <div><b>2 + 6</b><span>fixed meters (homes, local charges) and six to choose yourself</span></div>
+          <div><b>In the link</b><span>are your goals, not on a server</span></div>
+        </div>
+        <a class="btn" href="../akkoordvolger.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality; the figures come live from CBS.</li>
+          <li>See the baseline and what has changed since the start.</li>
+          <li>Enter a goal from the agreement: added since the start, or a level in a target year.</li>
+          <li>Share the link; whoever opens it sees the same goals.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-iv3" aria-labelledby="h-iv3">
+      <div class="product-body">
+        <h3 id="h-iv3">Iv3 mirror and Iv3 panorama</h3>
+        <div class="spread" role="img" aria-label="Distribution of the expenditure of all municipalities together over nine main groups; care, work and income is 44 percent">
+          <i style="flex:43.9;background:#1d5f74"></i><i style="flex:16.2;background:#8a96a0"></i><i style="flex:6.2;background:#2a78d6"></i><i style="flex:8.7;background:#1baf7a"></i><i style="flex:8.3;background:#e87ba4"></i><i style="flex:3.5;background:#d23f3f"></i><i style="flex:4.1;background:#6250d6"></i><i style="flex:7.2;background:#eb6834"></i><i style="flex:1.8;background:#eda100"></i>
+        </div>
+        <p>The finances of a municipality, in plain language. The mirror shows per municipality where the money goes, where it comes from and whether the municipality did what it planned. The panorama puts all municipalities one below the other, so you can see where a municipality deviates. Iv3 is the fixed scheme in which every Dutch municipality reports its budget and accounts to CBS.</p>
+        <div class="facts">
+          <div><b>342</b><span>municipalities</span></div>
+          <div><b>9</b><span>main groups, over 60 task fields</span></div>
+          <div><b>2025</b><span>budget and annual accounts</span></div>
+        </div>
+        <div class="btns"><a class="btn" href="../iv3spiegel.html" hreflang="nl">Open the mirror <span aria-hidden="true">→</span></a> <a class="btn btn-quiet" href="../iv3panorama.html" hreflang="nl">View the panorama <span aria-hidden="true">→</span></a></div>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Every municipality supplies its figures to CBS in the fixed Iv3 scheme.</li>
+          <li>CBS publishes them as open data.</li>
+          <li>Amounts are per resident, so that anyone can place them.</li>
+          <li>Plan (budget) and reality (annual accounts) are side by side.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-bedr" aria-labelledby="h-bedr">
+      <div class="product-body">
+        <h3 id="h-bedr">Business activity by neighbourhood</h3>
+        <span class="spread" aria-hidden="true"><i style="flex:1;background:#d6ecee"></i><i style="flex:1;background:#a7d3d8"></i><i style="flex:1;background:#6fb3bc"></i><i style="flex:1;background:#3a8f9a"></i><i style="flex:1;background:#0f5c66"></i><i style="flex:1;background:#08383e"></i></span>
+        <p>Three questions for policy officers in economy and spatial planning, answered per municipality and per neighbourhood. How mixed are living and working? Where do entrepreneurs work from home? And what does business space yield the municipality in property tax (OZB)?</p>
+        <div class="facts">
+          <div><b>14,729</b><span>neighbourhoods (2025 classification)</span></div>
+          <div><b>9.2 mln</b><span>addresses from the BAG</span></div>
+          <div><b>3</b><span>sources: CBS, BAG, Iv3</span></div>
+        </div>
+        <a class="btn" href="../bedrijvigheid.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS supplies the business establishments and the neighbourhood boundaries per neighbourhood.</li>
+          <li>The BAG supplies every address: home or work address, with function and floor area.</li>
+          <li>The Iv3 annual accounts supply the property tax revenue from non-residential buildings.</li>
+          <li>Per question first the answer, then the map and the neighbourhoods that stand out.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-gebied" aria-labelledby="h-gebied">
+      <div class="product-body">
+        <h3 id="h-gebied">Area in view</h3>
+        <span class="spread" aria-hidden="true"><i style="flex:9;background:#2a78d6"></i><i style="flex:9;background:#b4492a"></i><i style="flex:16;background:#eda100"></i><i style="flex:33;background:#1baf7a"></i><i style="flex:9;background:#8a5fbf"></i><i style="flex:24;background:#6fb3bc"></i></span>
+        <p>A business park does not follow neighbourhood boundaries, and an area development often covers more than one. For those working on work locations, area development or a programme: choose the parks that belong together, or open one of the innovation districts, and see what is there and what is changing, with the whole municipality alongside. Jobs and businesses per area are not in open data and so not on the page.</p>
+        <div class="facts">
+          <div><b>3,744</b><span>business parks in the national register (IBIS)</span></div>
+          <div><b>10.1 mln</b><span>addresses from the BAG, each with a point on the map</span></div>
+          <div><b>13</b><span>innovation districts with a delineation made of parks and neighbourhoods</span></div>
+        </div>
+        <a class="btn" href="../gebied.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Choose a municipality. The business parks from the provinces' register are on the map.</li>
+          <li>Click one park, or several parks that together form one area. Or choose an innovation district: the page says which parks and neighbourhoods it is made of.</li>
+          <li>Every address from the BAG within the area counts: homes, business space, offices and education, in numbers and square metres, by year of construction.</li>
+          <li>Plus what has been permitted, is under construction, has been completed or has a demolition permit, and the energy labels of non-residential buildings.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-onderwijs" aria-labelledby="h-onderwijs">
+      <div class="product-body">
+        <h3 id="h-onderwijs">Primary education by neighbourhood</h3>
+        <div class="spread" role="img" aria-label="Primary schools in the Netherlands by expected development up to 2030: 1,940 shrink by more than 10 percent, 2,957 remain stable, 1,154 grow by more than 10 percent">
+          <i style="flex:1940;background:#d2462c"></i><i style="flex:2957;background:#5f8f94"></i><i style="flex:1154;background:#3f74c4"></i>
+        </div>
+        <p>A map of all primary schools in a municipality, with the number of pupils since 2015 and the DUO forecast up to 2035. Per school, per neighbourhood and per district you see where decline and growth come together. A starting point for school accommodation and compulsory education.</p>
+        <div class="facts">
+          <div><b>6,088</b><span>primary school locations</span></div>
+          <div><b>1.35 mln</b><span>pupils on 1 October 2025</span></div>
+          <div><b>2035</b><span>forecast per school</span></div>
+        </div>
+        <a class="btn" href="../onderwijs.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>DUO supplies per school the pupils, the forecast and the address.</li>
+          <li>The address is linked to a CBS neighbourhood via the BAG.</li>
+          <li>Trend: forecast 2030 against the count of 2025.</li>
+          <li>Closed and new schools are shown separately.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-studenten" aria-labelledby="h-studenten">
+      <div class="product-body">
+        <h3 id="h-studenten">Higher education: students by municipality</h3>
+        <p>Where students live and where they study, for every municipality and per academic year. A student city sees where its students live; every other municipality sees where its residents study. With the number of international students, first-year students and newcomers, and the nineteen student cities as a reference, without ranking. For policy officers in housing, education and economy, and for educational institutions.</p>
+        <div class="facts">
+          <div><b>342</b><span>municipalities of residence</span></div>
+          <div><b>42</b><span>municipalities of study</span></div>
+          <div><b>2020–2024</b><span>five academic years</span></div>
+        </div>
+        <a class="btn" href="../studenten.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>DUO publishes per municipality of residence and municipality of study how many full-time and dual students there are.</li>
+          <li>Per municipality you see who lives there: Dutch or international, first-year or new.</li>
+          <li>Map and list show the flows; a click gives the course per year.</li>
+          <li>The source does not distinguish living at home from living away, and does not measure a room shortage.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-huish" aria-labelledby="h-huish">
+      <div class="product-body">
+        <h3 id="h-huish">Households and ageing</h3>
+        <div class="spread" role="img" aria-label="Households in the Netherlands on 1 January 2025: 40 percent living alone, 28 percent together without children, 32 percent with children">
+          <i style="flex:40.1;background:#2a78d6"></i><i style="flex:28.4;background:#eda100"></i><i style="flex:31.5;background:#1baf7a"></i>
+        </div>
+        <p>Who lives in a municipality, and how that changes. How households are composed, how fast the municipality has been ageing since 1995, and per neighbourhood where older people, people living alone and families live. The denominator beneath housing, care and youth. For policy officers in housing and the social domain.</p>
+        <div class="facts">
+          <div><b>40.1%</b><span>of households living alone (2025; 1995: 32.6%)</span></div>
+          <div><b>21.1%</b><span>of residents aged 65 or over (2026)</span></div>
+          <div><b>1995</b><span>first year of the series</span></div>
+        </div>
+        <a class="btn" href="../huishoudens.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS counts per municipality the residents by age and the households by composition, every year on 1 January.</li>
+          <li>Per neighbourhood the figures come together with the CBS neighbourhood boundaries, via PDOK.</li>
+          <li>The page fetches everything live as soon as you choose a municipality.</li>
+          <li>Who turns 65 in the next twenty years is shown. A forecast is not: it is not available as open data by age and municipality.</li>
+          <li>Choose a district and the page follows that choice. You open the same district with one click in Wmo, Youth care, Debt, Work and income, Households and Housing stock.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-bevolk" aria-labelledby="h-bevolk">
+      <div class="product-body">
+        <h3 id="h-bevolk">Population change by municipality</h3>
+        <div class="spread" role="img" aria-label="The Netherlands in 2025: 166,588 born, 173,494 died, 308,357 arrived from abroad, 214,821 left for abroad">
+          <i style="flex:166588;background:#0f5c66"></i><i style="flex:173494;background:#eda100"></i><i style="flex:308357;background:#1baf7a"></i><i style="flex:214821;background:#a7d3d8"></i>
+        </div>
+        <p>Born, died, arrived and left. Where the growth or decline of a municipality comes from: the natural increase, the balance with other municipalities and the balance with other countries, since 2002. With children per woman, the age of the mother, and mortality next to what you would expect from the municipality's age structure. No ranking. For policy officers in housing, spatial planning, the social domain and public health.</p>
+        <div class="facts">
+          <div><b>−6,906</b><span>natural increase in the Netherlands in 2025: more deaths than births</span></div>
+          <div><b>238</b><span>of the 342 municipalities with more deaths than births (2025)</span></div>
+          <div><b>+86,181</b><span>growth of the Netherlands in 2025, mainly from abroad</span></div>
+        </div>
+        <a class="btn" href="../bevolking.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS counts per municipality the births, deaths and moves, per year and per month, by place of residence.</li>
+          <li>Growth breaks down into three parts: births minus deaths, the balance with other municipalities and the balance with other countries.</li>
+          <li>Expected mortality applies the Dutch probability of death per year of age to the municipality's population. So you see whether mortality differs from what age predicts.</li>
+          <li>Per district births and deaths from the Key figures for districts and neighbourhoods, with the boundaries via PDOK. The page fetches everything live as soon as you choose a municipality.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-woning" aria-labelledby="h-woning">
+      <div class="product-body">
+        <h3 id="h-woning">Housing stock and vacancy</h3>
+        <div class="spread" role="img" aria-label="Homes in the Netherlands on 1 January 2026 by owner: 58 percent owner-occupied, 28 percent housing association, 14 percent private rental">
+          <i style="flex:57.9;background:#0f5c66"></i><i style="flex:28.1;background:#3a8f9a"></i><i style="flex:13.9;background:#a7d3d8"></i>
+        </div>
+        <p>The homes of a municipality: how many there are, who owns them, what is added each year through new construction, transformation and splitting, and what is lost through demolition. And how many are vacant, broken down by owner: owner-occupied, housing association, private landlord or investor. Per neighbourhood the composition of the stock. For policy officers in housing.</p>
+        <div class="facts">
+          <div><b>8.34 mln</b><span>homes on 1 January 2026</span></div>
+          <div><b>2.5%</b><span>vacant (206,580 homes)</span></div>
+          <div><b>28.1%</b><span>owned by housing associations</span></div>
+        </div>
+        <a class="btn" href="../woningen.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS sets the BAG next to the personal records database, the WOZ and the Trade Register: occupied, other use or vacant, every year on 1 January.</li>
+          <li>The BAG shows per year what is added and what is lost.</li>
+          <li>Per neighbourhood the figures come together with the CBS neighbourhood boundaries, via PDOK.</li>
+          <li>Vacancy per neighbourhood is not open data. The neighbourhood map therefore shows homes without registered occupants, and says so.</li>
+          <li>Choose a district and the page follows that choice. You open the same district with one click in Wmo, Youth care, Debt, Work and income, Households and Housing stock.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-bouw" aria-labelledby="h-bouw">
+      <div class="product-body">
+        <h3 id="h-bouw">Construction pipeline: from permit to front door</h3>
+        <div class="spread" role="img" aria-label="New homes in the BAG on 1 November 2026: 147,775 permitted, 107,440 under construction, 17,701 finished but not yet surveyed, 42,639 new in existing buildings">
+          <i style="flex:147775;background:#a7d3d8"></i><i style="flex:107440;background:#3a8f9a"></i><i style="flex:17701;background:#0f5c66"></i><i style="flex:42639;background:#eda100"></i>
+        </div>
+        <p>A municipality's housing construction per building, from the monthly BAG extract: what is permitted, what is under construction, what is finished but not yet surveyed, and what has just been completed. Next to that, the new homes created in existing buildings through splitting and transformation, and the permits for homes applied for and granted in the past year. Buildings whose expected year of construction has passed stand out: a delayed project, or a start or completion not yet in the BAG. For policy officers in housing and BAG administrators.</p>
+        <div class="facts">
+          <div><b>272,916</b><span>new homes permitted, under construction or finished (BAG as of 1 November 2026)</span></div>
+          <div><b>42,639</b><span>new homes in existing buildings: splitting and transformation</span></div>
+          <div><b>monthly</b><span>the BAG extract, the same as in BAG quality; the municipal gazette daily</span></div>
+        </div>
+        <a class="btn" href="../bouwstroom.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>The municipality records in the BAG for each building whether it is permitted, under construction or finished, and which year of construction it expects.</li>
+          <li>The municipal gazette publishes every application and every decision on an environmental permit, with the location.</li>
+          <li>The page fetches both live as soon as you choose a municipality, and sets them side by side per building and per neighbourhood.</li>
+          <li>What the page derives from the text of a permit is stated honestly, with a link to the publication itself.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-socialehuur" aria-labelledby="h-socialehuur">
+      <div class="product-body">
+        <h3 id="h-socialehuur">Social rent by municipality</h3>
+        <div class="spread" role="img" aria-label="Rental homes of housing associations on 1 January 2025: 2,161,890 DAEB (social rent), 127,500 non-DAEB, 42,870 unknown">
+          <i style="flex:2161890;background:#0f5c66"></i><i style="flex:127500;background:#a7d3d8"></i><i style="flex:42870;background:#aab6b8"></i>
+        </div>
+        <p>The homes of housing associations in a municipality, and which part of them is social rent (DAEB, the regulated social segment). Then the question that comes up at the table of the performance agreements between municipality, housing associations and tenants: are housing association homes being added or lost, and by which route? New construction, demolition, sale as owner-occupied homes and transfer to another landlord are set side by side per year, with the Netherlands alongside. Also the permitted rental homes, the households with housing benefit and the housing cost ratio of housing association tenants. For policy officers in housing, and for housing associations and tenant organisations.</p>
+        <div class="facts">
+          <div><b>2,161,890</b><span>social rental homes of housing associations (DAEB) on 1 January 2025, 93% of their homes</span></div>
+          <div><b>+70,908 / −18,063</b><span>new construction against sale as owner-occupied homes, 2022–2025</span></div>
+          <div><b>81</b><span>municipalities where the housing association stock shrank in 2022–2025, 47 of them while there was net construction</span></div>
+        </div>
+        <a class="btn" href="../sociale-huur.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS derives the ownership of every home from the Land Registry (Kadaster), the WOZ and the housing associations' own returns.</li>
+          <li>For the Ministry of the Interior (BZK), CBS counts per municipality what is added each year, what is lost and what changes owner.</li>
+          <li>The page sets those tables side by side per municipality and fetches the stock, permits, housing benefit and housing costs live.</li>
+          <li>Social rent here is the DAEB part of housing association homes; social rent from other landlords is not in open data.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-nieuwbouw" aria-labelledby="h-nieuwbouw">
+      <div class="product-body">
+        <h3 id="h-nieuwbouw">New construction by municipality</h3>
+        <div class="spread" role="img" aria-label="New-build homes in the Netherlands in 2025 by ownership at completion: 29,380 owner-occupied, 22,045 housing association, 17,365 other landlord, 345 unknown">
+          <i style="flex:29380;background:#0f5c66"></i><i style="flex:22045;background:#6fb3bc"></i><i style="flex:17365;background:#d6ecee"></i><i style="flex:345;background:#aab6b8"></i>
+        </div>
+        <p>What was completed in a municipality, and for whom. How many new homes and other buildings were added per year, including through transformation, and what has been reported so far in the current year. Who owns the new homes: owner-occupiers, a housing association or another landlord. What kind of buildings they are: in a building with several homes or not, small or large. And, per region, affordability and the occupants. Always the last three years and the current year. No ranking and no judgement on whether a municipality builds enough. For policy officers in housing and spatial planning.</p>
+        <div class="facts">
+          <div><b>69,189</b><span>new-build homes completed in 2025, 8.4 per 1,000 homes</span></div>
+          <div><b>42% / 32% / 25%</b><span>owner-occupied, housing association and other landlord in the new construction of 2025</span></div>
+          <div><b>56%</b><span>of new homes built in 2025 are in a building with several homes (2023: 53%)</span></div>
+        </div>
+        <a class="btn" href="../nieuwbouw.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS follows every home and non-residential building in the BAG from permit to completion; the page fetches those numbers per year live.</li>
+          <li>For the Ministry of the Interior (BZK), CBS counts per municipality who owns the new homes; that table is in the page.</li>
+          <li>The BAG workbench counts every month per municipality the homes and m² by the building's year of construction.</li>
+          <li>Affordability and occupants come from CBS, only per COROP region.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-jeugd" aria-labelledby="h-jeugd">
+      <div class="product-body">
+        <h3 id="h-jeugd">Youth care by district</h3>
+        <div class="spread" role="img" aria-label="Youth care trajectories in the Netherlands in 2025 by referrer: municipal access team 35 percent, GP 33 percent, youth doctor or medical specialist 8 percent, court or certified institution 9 percent, no referrer or unknown 15 percent">
+          <i style="flex:35.0;background:#2a78d6"></i><i style="flex:32.8;background:#eb6834"></i><i style="flex:8.3;background:#1baf7a"></i><i style="flex:8.6;background:#eda100"></i><i style="flex:15.3;background:#e87ba4"></i>
+        </div>
+        <p>Youth care in one municipality, as a mirror: how many young people receive youth help, child protection or juvenile probation, what does it cost per resident, and who refers them? Over the years and per district, without a ranking of municipalities. For youth policy officers.</p>
+        <div class="facts">
+          <div><b>473,710</b><span>young people with youth care in 2025</span></div>
+          <div><b>10.7%</b><span>of all young people up to 23</span></div>
+          <div><b>2015</b><span>first year of the series</span></div>
+        </div>
+        <a class="btn" href="../jeugdzorg.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Youth care providers and certified institutions supply their data to CBS, municipalities their costs.</li>
+          <li>CBS publishes use, costs and referrers per municipality and district.</li>
+          <li>The page fetches the figures live as soon as you choose a municipality.</li>
+          <li>Small numbers and the break in the series in 2021 are stated honestly.</li>
+          <li>Choose a district and the page follows that choice. You open the same district with one click in Wmo, Youth care, Debt, Work and income, Households and Housing stock.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-wmo" aria-labelledby="h-wmo">
+      <div class="product-body">
+        <h3 id="h-wmo">Wmo by district</h3>
+        <div class="spread" role="img" aria-label="Wmo clients in the Netherlands in 2025 by age: under 30 9 percent, 30 to 45 9 percent, 45 to 60 13 percent, 60 to 75 23 percent, 75 to 85 28 percent, 85 or older 18 percent">
+          <i style="flex:9.2;background:#d6ecee"></i><i style="flex:8.9;background:#a7d3d8"></i><i style="flex:12.5;background:#6fb3bc"></i><i style="flex:22.8;background:#3a8f9a"></i><i style="flex:28.1;background:#0f5c66"></i><i style="flex:18.4;background:#08383e"></i>
+        </div>
+        <p>The Wmo (Social Support Act) in one municipality, as a mirror: how many residents have a tailored provision, which one, who are they by age and income, and what does the municipality spend on it according to its annual accounts. Per district next to the share of people aged 65 and over, because age explains most. Without a ranking of municipalities. For policy officers in the Wmo and the social domain.</p>
+        <div class="facts">
+          <div><b>1.29 mln</b><span>residents with tailored Wmo support in 2025 (72 per 1,000)</span></div>
+          <div><b>47%</b><span>of clients are 75 or older</span></div>
+          <div><b>157 · 16</b><span>per 1,000 in the lowest and the highest income group</span></div>
+        </div>
+        <a class="btn" href="../wmo.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Municipalities supply their Wmo provisions to CBS every six months (Municipal Social Domain Monitor).</li>
+          <li>CBS links them to age, income and district of residence, and publishes them per municipality and district.</li>
+          <li>The expenditure comes from the municipality's Iv3 annual accounts, per task field.</li>
+          <li>Per district the Wmo clients are set next to the share of people aged 65 and over. Districts with as many older people and still much more Wmo then stand out, without a calculation model.</li>
+          <li>Choose a district and the page follows that choice. You open the same district with one click in Wmo, Youth care, Debt, Work and income, Households and Housing stock.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-schulden" aria-labelledby="h-schulden">
+      <div class="product-body">
+        <h3 id="h-schulden">Debt by district</h3>
+        <div class="spread" role="img" aria-label="Households with problematic debts in the Netherlands on 1 January 2025 by number of creditors: with one 56 percent, with two 20 percent, with three 11 percent, with four or more 12 percent">
+          <i style="flex:56.4;background:#a7d3d8"></i><i style="flex:20.1;background:#6fb3bc"></i><i style="flex:11.2;background:#3a8f9a"></i><i style="flex:12.3;background:#0f5c66"></i>
+        </div>
+        <p>Problematic debts in one municipality, as a mirror: how many households are in the registers, how many are added each year and how many have been in them for three years, with which creditors, which households they are, and how it is spread over the districts. The Netherlands is the only point of comparison; no ranking of municipalities. For policy officers in debt assistance, poverty and the social domain.</p>
+        <div class="facts">
+          <div><b>724,110</b><span>households with problematic debts on 1 January 2025 (8.6%)</span></div>
+          <div><b>66%</b><span>were in them three years in a row</span></div>
+          <div><b>48%</b><span>have an outstanding tax assessment</span></div>
+        </div>
+        <a class="btn" href="../schulden.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS sets registers from, among others, the Tax Administration, the BKR (credit registration office), the CAK, the CJIB, DUO and municipalities side by side (Debt problems in view, commissioned by the Ministry of Social Affairs).</li>
+          <li>Each register has its own threshold for a problematic debt; if one member of the household counts, the household counts.</li>
+          <li>The figures per municipality and district are in the page; the district boundaries come live from PDOK.</li>
+          <li>Only what is registered: debts to a landlord, energy company or family are missing. Who receives debt assistance is not included.</li>
+          <li>Choose a district and the page follows that choice. You open the same district with one click in Wmo, Youth care, Debt, Work and income, Households and Housing stock.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-energiearmoede" aria-labelledby="h-energiearmoede">
+      <div class="product-body">
+        <h3 id="h-energiearmoede">Energy poverty by neighbourhood</h3>
+        <div class="spread" role="img" aria-label="Households in energy poverty in the Netherlands in 2024 by ownership of the home: owner-occupied 13 percent, rented from a housing association 67 percent, rented from another landlord 20 percent">
+          <i style="flex:13.0;background:#6fb3bc"></i><i style="flex:67.1;background:#0f5c66"></i><i style="flex:19.9;background:#c0803f"></i>
+        </div>
+        <p>Energy poverty in one municipality, per district and neighbourhood, next to the energy labels actually registered, and split by who owns the home. Low incomes live more often in housing association homes, and those more often have a label and better labels; as a result, poor labels and low incomes hardly go together per neighbourhood. Ownership shows where it accumulates and who the partner is. A count of neighbourhoods where both are high, no list and no ranking. For policy officers in poverty and debt assistance, energy and housing.</p>
+        <div class="facts">
+          <div><b>445,000</b><span>households in energy poverty in 2024 (6.0%), according to CBS</span></div>
+          <div><b>87%</b><span>of them live in a rented home</span></div>
+          <div><b>45%</b><span>of homes of other landlords are of low energy quality; of housing association homes 19%</span></div>
+        </div>
+        <a class="btn" href="../energiearmoede.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>The Energy Poverty Monitor of CBS (with TNO) links per household income, energy costs and an estimate of the energy quality of the home; the page takes the figures per municipality, district and neighbourhood, also per type of ownership.</li>
+          <li>Next to that, the RIVM energy labels per neighbourhood, from the same files as the Energy label calendar: which share of homes has a label, and how many of those are E, F or G.</li>
+          <li>A neighbourhood figure says nothing about a household. CBS publishes no figure where there are too few households.</li>
+          <li>Choose a district and the page follows that choice. You open the same district with one click in Debt, Work and income and the Energy label calendar.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-minimaregelingen" aria-labelledby="h-minimaregelingen">
+      <div class="product-body">
+        <h3 id="h-minimaregelingen">Low-income schemes by municipality</h3>
+        <div class="spread" role="img" aria-label="Number of municipalities where the type of scheme was found in the local regulations, out of 342: individual income supplement 342, waiver of municipal taxes 310, collective health insurance 266, children's package or contribution for children 214, childcare on social grounds 189, participation scheme (city pass, participation contribution or claim fund) 144, computer or laptop 83, chronically ill or extra costs 59, public transport 37">
+          <i style="flex:342;background:#0f5c66"></i><i style="flex:310;background:#3a8f9a"></i><i style="flex:266;background:#6fb3bc"></i><i style="flex:214;background:#a7d3d8"></i><i style="flex:189;background:#0f5c66"></i><i style="flex:144;background:#3a8f9a"></i><i style="flex:83;background:#6fb3bc"></i><i style="flex:59;background:#a7d3d8"></i><i style="flex:37;background:#0f5c66"></i>
+        </div>
+        <p>Nine types of schemes for residents on a low income, searched in the local regulations of every municipality and of the social services and tax partnerships it takes part in. Per municipality: what many municipalities have and was not found here, and what few municipalities have and this one does, with a link to the scheme and the income threshold where the text states it clearly. No ranking: more schemes is not better. For policy officers in poverty and low-income policy, council members and local audit offices.</p>
+        <div class="facts">
+          <div><b>342</b><span>municipalities searched in the local regulations, reference date 17 November 2026</span></div>
+          <div><b>42%</b><span>of municipalities have a participation scheme (city pass, participation contribution or claim fund) in their regulations</span></div>
+          <div><b>110%</b><span>of the social assistance standard is the income threshold read most often for the individual income supplement (109 of the 267 municipalities with a threshold read)</span></div>
+        </div>
+        <a class="btn" href="../minimaregelingen.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Per municipality all current regulations on low incomes from the Central Repository of Local Regulations (CVDR), including those of a social service or tax partnership the municipality takes part in.</li>
+          <li>Each scheme is classified into nine types on fixed words in title and text, from income supplement to free public transport.</li>
+          <li>Per type you see whether it was found here, in which scheme, with which income threshold, and in how many of all municipalities. The threshold is read from the text and tested in two samples.</li>
+          <li>Not found is not absent: schemes through a contract, foundation or fund are often not in the regulations.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-werkeninkomen" aria-labelledby="h-werkeninkomen">
+      <div class="product-body">
+        <h3 id="h-werkeninkomen">Work and income by district</h3>
+        <div class="spread" role="img" aria-label="Ongoing reintegration provisions in the Netherlands at the end of March 2026 by type: wage cost subsidy and subsidised work 18 percent, sheltered work 4 percent, workplace and guidance 15 percent, coaching and training 40 percent, participation 14 percent, other 9 percent">
+          <i style="flex:18.3;background:#0f5c66"></i><i style="flex:4.0;background:#3a8f9a"></i><i style="flex:14.9;background:#6fb3bc"></i><i style="flex:39.7;background:#a7d3d8"></i><i style="flex:14.2;background:#d6ecee"></i><i style="flex:8.9;background:#8aa3a7"></i>
+        </div>
+        <p>Work and income in one municipality, in two layers you read separately. The municipality: social assistance per month, per household type and per district, the provisions for reintegration and sheltered work, and the money, with the central government budget and benefit expenditure as two amounts side by side, and what the municipality spends on sheltered employment (Wsw), sheltered work and reintegration. UWV as context: unemployment benefit (WW) and disability benefits, per month and per district. Per district also the share of residents in work. For policy officers in work and income, poverty and the social domain.</p>
+        <div class="facts">
+          <div><b>412,910</b><span>people on social assistance in May 2026 (36 per 1,000 residents aged 15 to 65)</span></div>
+          <div><b>263,790</b><span>ongoing reintegration provisions at the end of March 2026, of which 10,430 sheltered work</span></div>
+          <div><b>85</b><span>municipalities run social assistance through a joint arrangement (annual accounts 2025)</span></div>
+        </div>
+        <a class="btn" href="../werkeninkomen.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>CBS counts every month the people on social assistance, WW and a disability benefit per municipality, and in December per district.</li>
+          <li>Reintegration: the provisions the municipality grants, per month since 2023. Provisions, not people.</li>
+          <li>Municipality and UWV are separate: someone with WW and social assistance as well counts in both.</li>
+          <li>Per 1,000 residents aged 15 to 65: the same measure for municipality and district.</li>
+          <li>The money comes from the annual accounts the municipality supplies to CBS (Iv3, task field 6.3).</li>
+          <li>No deficit or surplus: the expenditure also includes special assistance, and through a joint arrangement it cannot be separated.</li>
+          <li>Everything fetched live when you choose a municipality; the district boundaries come from PDOK.</li>
+          <li>Choose a district on the map or in the table. You open the same district with one click in Wmo, Youth care, Debt, Households and Housing stock.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-inburgering" aria-labelledby="h-inburgering">
+      <div class="product-body">
+        <h3 id="h-inburgering">Civic integration by municipality</h3>
+        <div class="spread" role="img" aria-label="Cohort 2022 of the Civic Integration Act 2021 in the Netherlands, position at the end of October 2026: completed 37 percent, via the Z route 16 percent, exempted 4 percent, still obliged to integrate 33 percent, temporarily exempted 3 percent, lapsed 8 percent">
+          <i style="flex:37.1;background:#0f5c66"></i><i style="flex:15.7;background:#3a8f9a"></i><i style="flex:4.4;background:#a7d3d8"></i><i style="flex:32.5;background:#c98500"></i><i style="flex:2.7;background:#ecd08f"></i><i style="flex:7.6;background:#8aa3a7"></i>
+        </div>
+        <p>Civic integration under the Civic Integration Act 2021 in one municipality, as a mirror: how many residents became obliged to integrate each year, asylum permit holders and family migrants, how far each cohort has got, and which learning route they are in. The Netherlands is the only point of comparison; no ranking of municipalities. For policy officers in civic integration and participation.</p>
+        <div class="facts">
+          <div><b>158,389</b><span>became obliged to integrate since 2022 (position at the end of October 2026)</span></div>
+          <div><b>57%</b><span>of cohort 2022 has completed integration; 33% is still obliged</span></div>
+          <div><b>25%</b><span>of those with a learning route are in the self-reliance route</span></div>
+        </div>
+        <a class="btn" href="../inburgering.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>DUO publishes every month the inflow and outflow of all people integrating from the Civic Integration Information System, per municipality.</li>
+          <li>Per cohort (year of the decision) and target group: status, reason for outflow and learning route from the personal plan.</li>
+          <li>The figures are in the page; the number of residents comes live from CBS.</li>
+          <li>DUO does not publish groups of 1 to 4. In small municipalities part of the figures is therefore not broken down; the page shows how much.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-veiligthuis" aria-labelledby="h-veiligthuis">
+      <div class="product-body">
+        <h3 id="h-veiligthuis">Veilig Thuis by municipality</h3>
+        <div class="spread" role="img" aria-label="Reports to Veilig Thuis in the Netherlands in 2025 by outcome of the safety assessment: 65 percent handed over to local services, 26 percent follow-up at Veilig Thuis, 4 percent regional tailored approach, 4 percent no follow-up needed">
+          <i style="flex:65.2;background:#0f5c66"></i><i style="flex:26.5;background:#6fb3bc"></i><i style="flex:4.1;background:#a7d3d8"></i><i style="flex:3.7;background:#b9c4c5"></i>
+        </div>
+        <p>The work of Veilig Thuis, the advice and reporting centre for domestic violence and child abuse, in one municipality, as a mirror: how many requests for advice and reports come in each year, about what violence, who reports, what Veilig Thuis does after a report and how often it concerns a family that was already known. The Netherlands is the only point of comparison; no ranking of municipalities and deliberately no districts. The figures show the reach of Veilig Thuis, not the extent of domestic violence. For policy officers in domestic violence, youth, and care and safety.</p>
+        <div class="facts">
+          <div><b>138,825</b><span>reports to Veilig Thuis in 2025, 769 per 100,000 residents</span></div>
+          <div><b>65%</b><span>of reports come from the police</span></div>
+          <div><b>68%</b><span>concern someone already known to Veilig Thuis</span></div>
+        </div>
+        <a class="btn" href="../veiligthuis.html" hreflang="nl">Open the page <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>The 26 Veilig Thuis organisations supply their figures to CBS twice a year (Veilig Thuis policy information, commissioned by the Ministry of Health, Welfare and Sport).</li>
+          <li>CBS publishes them per municipality: requests for advice and reports, nature of the violence, the reporter, the safety assessment and earlier involvement.</li>
+          <li>The page fetches the figures live from CBS as soon as you choose a municipality.</li>
+          <li>All numbers are rounded to multiples of five. Below 100 reports the page shows no breakdown.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+    <article class="product" id="info-eigenlijst" aria-labelledby="h-eigenlijst">
+      <div class="product-body">
+        <h3 id="h-eigenlijst">Your own list on the map</h3>
+        <div class="spread" role="img" aria-label="Example list of 39 objects: 3 with a label C question, 6 to check, 30 in order">
+          <i style="flex:3;background:#d98a12"></i><i style="flex:6;background:#7656b0"></i><i style="flex:30;background:#2a8a8a"></i>
+        </div>
+        <p>Layer 3 of the site, to do yourself: what only the municipality knows, next to what open data already knows. Paste or open a list of addresses, BAG IDs or cadastral references, for example the property or land the municipality manages. The page recognises the columns, links each row to an address unit, building or parcel, and adds parcel, energy label, national monument and neighbourhood. What does not fit, such as an address that is not in the BAG or a floor area that differs considerably, is set apart. You take the map, the table or a GeoJSON into a policy document, per object or summarised per neighbourhood. For policy officers in property, sustainability and information management.</p>
+        <div class="facts">
+          <div><b>0</b><span>rows stored: your list disappears when you close the page</span></div>
+          <div><b>4</b><span>keys: BAG ID, postcode with house number, street with house number, cadastral reference</span></div>
+          <div><b>2</b><span>levels to share: per object or per neighbourhood</span></div>
+        </div>
+        <a class="btn" href="../eigenlijst.html" hreflang="nl">Open the map <span aria-hidden="true">→</span></a>
+      </div>
+      <div class="product-aside">
+        <span class="eyebrow">How it works</span>
+        <ol>
+          <li>Your list is read in your browser. Only addresses, BAG IDs and cadastral references go to PDOK as a query, to find them in the BAG and on the cadastral map.</li>
+          <li>A check stops lists with personal data, such as names, citizen service numbers (BSN) or clients, before anything is looked up.</li>
+          <li>BAG, cadastral map, RIVM, RCE and CBS add building, parcel, label, monument and neighbourhood. Owner and rights are not in open data; they come from your own list.</li>
+          <li>No list at hand? The example uses the open property register of Amsterdam.</li>
+        </ol>
+        <button class="close" type="button" hidden>Close</button>
+      </div>
+    </article>
+  </section>
+
+  <section class="section" id="over" aria-labelledby="h-over">
+    <div class="section-head">
+      <span class="eyebrow">About</span>
+      <h2 id="h-over">Josephine Linders</h2>
+    </div>
+    <div class="about">
+      <dl class="cv">
+        <dt>Since 2002</dt><dd>Municipality of Delft, in various roles; now BI specialist</dd>
+        <dt>Field</dt><dd>Cross-domain information analysis</dd>
+        <dt>Works with</dt><dd>Semantic models, Power BI, data warehouses, the Municipal Data Model (GGM)</dd>
+        <dt>Education</dt><dd>SPD, MBA and PD in business administration (Dutch accountancy qualifications); psychosocial worker</dd>
+        <dt>Atelier</dt><dd><a href="https://beeldhouwenindedelftsehout.nl" rel="noopener">Beeldhouwen in de Delftse Hout</a> (sculpture studio)</dd>
+      </dl>
+      <div class="about-text">
+        <p>Josephine Linders works at the intersection of data architecture, information policy and analysis across domains. She makes connections that are rarely made in the daily practice of a municipality: between finance and the physical living environment, between registers that are each correct on their own but only say something together.</p>
+        <p>A background in business administration gives her an eye for the accounting logic behind municipal figures. Training as a psychosocial worker keeps in view the person behind every record.</p>
+        <p>Next to the data work she has a sculpture studio, where she gives workshops in oloids and Möbius strips: forms that continue where you expect a boundary.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="samenwerken" aria-labelledby="h-samen">
+    <div style="display:grid;gap:10px">
+      <span class="eyebrow">Work together</span>
+      <h2 id="h-samen">An issue that cuts across domains?</h2>
+      <p>Municipalities, environmental services and knowledge institutions are welcome with a question, a dataset or an application that could be more widely useful.</p>
+    </div>
+    <div class="mail">
+      <a class="knop knop-primair" id="mailBtn" href="#samenwerken">Email your question</a>
+      <button class="knop knop-secundair" id="copyBtn" type="button">Copy email address</button>
+    </div>
+  </section>
+
+  <footer><span>© 2026 Josephine Linders</span> <span>No cookies. Anonymous visitor count with GoatCounter.</span> <span><a href="colofon.html">Colophon and privacy</a></span> <span><a href="methode.html">Method</a></span> <span><a href="../gegevensmodel.html" hreflang="nl">The data model as a way in</a></span></footer>
+</main>
+</div>
+<script>
+(function () {
+  var root = document.documentElement, btn = document.getElementById('themeBtn');
+  try { var t = localStorage.getItem('jl-theme'); if (t) root.dataset.theme = t; } catch (e) {}
+  btn.onclick = function () {
+    var dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+    try { localStorage.setItem('jl-theme', root.dataset.theme); } catch (e) {}
+  };
+  var adres = ['joselin', 'live.nl'].join('@');
+  document.getElementById('mailBtn').href = 'mailto:' + adres + '?subject=' + encodeURIComponent('Question via josephinelinders.nl');
+  var copy = document.getElementById('copyBtn'), copyLabel = copy.textContent;
+  copy.onclick = function () {
+    var toon = function () { copy.textContent = adres; };
+    var done = function () { copy.textContent = 'Copied: ' + adres; setTimeout(function () { copy.textContent = copyLabel; }, 2500); };
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(adres).then(done, toon);
+    else toon();
+  };
+  var infos = document.querySelectorAll('#producten .product'), mores = document.querySelectorAll('#producten .more');
+  function show(id) {
+    infos.forEach(function (a) { var on = a.id === id; a.hidden = !on; a.classList.toggle('open', on); });
+    mores.forEach(function (m) { m.setAttribute('aria-expanded', String(m.getAttribute('aria-controls') === id)); });
+    if (id) document.getElementById(id).scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+  infos.forEach(function (a) { a.hidden = true; var c = a.querySelector('.close'); c.hidden = false; c.onclick = function () { show(null); document.getElementById('producten').scrollIntoView({ block: 'start' }); }; });
+  mores.forEach(function (m) { m.onclick = function () { show(m.getAttribute('aria-expanded') === 'true' ? null : m.getAttribute('aria-controls')); }; });
+})();
+</script>
+</body>
+</html>

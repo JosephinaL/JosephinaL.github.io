@@ -6,6 +6,8 @@
 <title>Colofon en privacy · Open Data Atelier</title>
 <meta name="description" content="Wat het Open Data Atelier van bezoekers vastlegt, welke diensten de pagina's aanroepen, en onder welke licenties gegevens, lettertypen en scripts vallen.">
 <meta name="author" content="Josephine Linders">
+<link rel="alternate" hreflang="nl" href="https://josephinelinders.nl/colofon.html">
+<link rel="alternate" hreflang="en" href="https://josephinelinders.nl/en/colofon.html">
 <link rel="stylesheet" href="fonts/fonts.css">
 <link rel="icon" type="image/svg+xml" href="beeldmerk/beeldmerk-stil.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="beeldmerk/favicon-32.png">
@@ -70,6 +72,9 @@ nav { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; font-s
 nav a { color: var(--muted); text-decoration: none; }
 nav a:hover { color: var(--accent); }
 .theme { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--r); padding: 4px 10px; cursor: pointer; font: inherit; }
+.taal { border: 1px solid var(--line); border-radius: var(--r); padding: 3px 9px; font: 600 .78rem/1.4 var(--f-mono); letter-spacing: .06em; }
+nav a.taal { color: var(--ink); }
+nav a.taal:hover { color: var(--accent); border-color: var(--accent); }
 
 /* opening */
 .hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; padding-top: 16px; }
@@ -212,6 +217,7 @@ dl.cv.breed { grid-template-columns: minmax(9rem, auto) minmax(0, 1fr); }
       <a href="registraties.html">Registraties belicht</a>
       <a href="./#over">Over</a>
       <a href="./#samenwerken">Samenwerken</a>
+      <a class="taal" href="en/colofon.html" hreflang="en" lang="en" aria-label="English version">EN</a>
       <button class="theme" id="themeBtn" type="button" aria-label="Wissel licht en donker">◐</button>
     </nav>
   </header>

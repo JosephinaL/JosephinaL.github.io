@@ -9,6 +9,8 @@
 <link rel="apple-touch-icon" href="beeldmerk/apple-touch-icon.png">
 <meta name="description" content="Hoe de instrumenten van het Open Data Atelier zijn opgebouwd: open data, zonder stermodel of datawarehouse, verbonden op gedeelde sleutels.">
 <meta name="author" content="Josephine Linders">
+<link rel="alternate" hreflang="nl" href="https://josephinelinders.nl/methode.html">
+<link rel="alternate" hreflang="en" href="https://josephinelinders.nl/en/methode.html">
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 /* Persoonlijke site: smalle leeskolom, één gelaagd beeld in de opening, producten als dossierkaarten. */
@@ -66,6 +68,9 @@ nav { display: flex; flex-wrap: wrap; gap: 4px 20px; align-items: center; font-s
 nav a { color: var(--muted); text-decoration: none; }
 nav a:hover { color: var(--accent); }
 .theme { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: var(--r); padding: 4px 10px; cursor: pointer; font: inherit; }
+.taal { border: 1px solid var(--line); border-radius: var(--r); padding: 3px 9px; font: 600 .78rem/1.4 var(--f-mono); letter-spacing: .06em; }
+nav a.taal { color: var(--ink); }
+nav a.taal:hover { color: var(--accent); border-color: var(--accent); }
 
 /* opening */
 .hero { display: grid; grid-template-columns: minmax(0, 1fr); gap: 40px; padding-top: 16px; }
@@ -209,6 +214,7 @@ dl.cv.breed { grid-template-columns: minmax(9rem, auto) minmax(0, 1fr); }
       <a href="registraties.html">Registraties belicht</a>
       <a href="./#over">Over</a>
       <a href="./#samenwerken">Samenwerken</a>
+      <a class="taal" href="en/methode.html" hreflang="en" lang="en" aria-label="English version">EN</a>
       <button class="theme" id="themeBtn" type="button" aria-label="Wissel licht en donker">◐</button>
     </nav>
   </header>
