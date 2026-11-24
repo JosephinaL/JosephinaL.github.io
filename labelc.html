@@ -914,11 +914,11 @@ footer { font-size: .8rem; color: var(--muted); }
 <span id="inhoud" tabindex="-1"></span>
 
   <section class="intro" id="intro">
-    <p>Welke kantoren in je gemeente voldoen aan de energielabel C-plicht? Kies een gemeente. De pagina haalt dan elk kantoorpand op bij BAG, RCE en RIVM en deelt het in; dat duurt even. Wat open data niet weet, zoals gemeentelijke monumenten, voeg je daarna zelf toe. Die lijst blijft in je browser.</p>
+    <p>Welke kantoren in je gemeente voldoen aan de energielabel C-plicht? Kies een gemeente. De pagina laadt dan elk kantoorpand met zijn energielabel uit de maandstand van BAG en RIVM, haalt de rijksmonumenten op bij de RCE en deelt elk pand in; dat duurt enkele seconden. Wat open data niet weet, zoals gemeentelijke monumenten, voeg je daarna zelf toe. Die lijst blijft in je browser.</p>
     <p class="snel" id="snel"><span class="muted">Of begin met</span><button class="btn linkish" type="button" data-gm="0518">Den Haag</button><button class="btn linkish" type="button" data-gm="1783">Westland</button><button class="btn linkish" type="button" data-gm="1926">Pijnacker-Nootdorp</button></p>
     <details class="film">
-      <summary>Bekijk eerst hoe het werkt <span class="muted">· 1:18, ondertiteld, zonder geluid</span></summary>
-      <video controls preload="none" playsinline poster="film/labelc-poster.jpg" aria-label="Instructiefilm Label C-kantoren, 1 minuut 18, met ondertitels en zonder geluid">
+      <summary>Bekijk eerst hoe het werkt <span class="muted">· 1:17, ondertiteld, zonder geluid</span></summary>
+      <video controls preload="none" playsinline poster="film/labelc-poster.jpg" aria-label="Instructiefilm Label C-kantoren, 1 minuut 17, met ondertitels en zonder geluid">
         <source src="film/labelc.mp4" type="video/mp4">
       </video>
     </details>
@@ -935,7 +935,6 @@ footer { font-size: .8rem; color: var(--muted); }
     <div class="wrap">
       <div class="melding" id="labelMelding" role="status" hidden>
         <p id="labelMeldingTekst"></p>
-        <button class="btn primary" id="labelRetry" type="button">Labels opnieuw ophalen</button>
       </div>
       <ol class="werk" aria-label="Zo werkt deze kaart">
         <li><b>1</b><span>BAG levert de kantoren en hun oppervlakte.</span></li>
@@ -1046,6 +1045,7 @@ footer { font-size: .8rem; color: var(--muted); }
           <ul class="plain small">
             <li>Gemeentelijke en provinciale monumenten ontbreken, tenzij je ze toevoegt bij <a href="#eigenKaart">Eigen gegevens</a>. Dat geldt ook voor panden waarvan de aanwijzing als monument nog in procedure is; die zijn al uitgezonderd.</li>
             <li>Alleen een klein deel van de rijksmonumenten (in Delft circa 1 op 10) is in het register aan BAG-panden gekoppeld. Voor de rest geldt één punt per monument, zonder type. Een punt in een groot pand kan een onderdeel zijn (poort, gevel); het hele pand wordt dan uitgezonderd.</li>
+            <li>Maandstand: een kantoor of label dat na de stand in de voet in de BAG of bij het RIVM is gekomen, staat er nog niet in.</li>
             <li>Tijdelijk gebruik (maximaal 2 jaar) en de terugverdientijd-uitzondering staan niet in open data.</li>
             <li>Geen label betekent niet dat het pand niet voldoet; het label is alleen niet geregistreerd.</li>
             <li>Een BAG-pand is niet altijd een gebouw in de zin van het Bbl. Labels per pand zijn een benadering bij gemengde panden.</li>
@@ -1057,6 +1057,7 @@ footer { font-size: .8rem; color: var(--muted); }
     </div>
   </section>
   <div class="verantwoording" aria-label="Verantwoording">
+      <p><b>Bron en peildatum.</b> Kantoorpanden, verblijfsobjecten en oppervlakte uit de BAG (Kadaster, landelijke GeoPackage via PDOK) en energielabels per pand van het RIVM (afgeleid uit EP-Online van RVO). Beide worden elke maand per gemeente vooraf verwerkt in de <a href="bagwerkbank.html">BAG-werkbank</a>; de voet van de analyse noemt de stand van de BAG en de datum waarop de labels zijn opgehaald. Rijksmonumenten (RCE), wijk- en gemeentegrenzen (CBS) worden bij elke analyse live opgehaald. Tot en met versie 1.7.4 kwamen ook BAG en labels live; dat duurde bij een middelgrote gemeente ruim een minuut en hing af van de snelheid van de labeldienst.</p>
       <p><b>Wat dit niet is.</b> Een indicatie uit open data, geen juridische vaststelling en geen handhavingsbesluit. De status van een pand is een aanleiding om te controleren, geen oordeel over de eigenaar. Voor toezicht gelden de registratie in EP-Online en de situatie ter plaatse.</p>
       <p><b>Licenties van de brondata.</b> BAG (Kadaster): zonder gebruiksbeperkingen. Energielabels (RIVM, afgeleid uit EP-Online van RVO): Public Domain Mark 1.0. Rijksmonumenten (RCE): CC BY 4.0. Wijk- en gemeentegrenzen (CBS) en achtergrondkaart (BRT, Kadaster): CC BY 4.0.</p>
       <p><b>Eigen gegevens en GGM.</b> Wat je bij Eigen gegevens invoert, blijft in deze browser en is geen open data. Het GGM-invoercontract (sinds versie 1.7) neemt alleen kolomnamen over uit het Gemeentelijk Gegevensmodel v2.5.1 (Gemeente Delft, EUPL-1.2); het is geen toetsing aan het GGM. Een zaak wordt naar een status vertaald op de woorden in uitkomst en laatste stap; een tekst die de pagina niet herkent, wordt een aantekening, nooit een uitzondering.</p>
@@ -1296,79 +1297,64 @@ footer { font-size: .8rem; color: var(--muted); }
     return `${BAG}/${coll}/items?f=json&limit=1000&bbox=${bboxParam(t)}&filter-lang=cql2-text&filter=${flt}`;
   }
 
+  // ---------- BAG-werkbank (sinds 1.8) ----------
+  // Per gemeente vooraf samengesteld uit de maandstand van de BAG en de RIVM-labellaag. Formaat in recepten/labelc/lc_bouw.py.
+  const LC_DATA = (root.LC_DATA || '/bag-werkbank/lc/');
+  async function haalGz(url) {
+    const r = await fetchMetTimeout(url, 60000);
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' bij ' + url.split('?')[0]);
+    const buf = new Uint8Array(await r.arrayBuffer());
+    if (buf[0] === 0x1f && buf[1] === 0x8b) {
+      if (typeof DecompressionStream === 'undefined') throw new Error('deze browser kan het bestand niet uitpakken');
+      const st = new Blob([buf]).stream().pipeThrough(new DecompressionStream('gzip'));
+      return JSON.parse(await new Response(st).text());
+    }
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
+  function ringUit(a) {
+    const r = []; let x = 0, y = 0;
+    for (let i = 0; i < a.length; i += 2) { x += a[i]; y += a[i + 1]; r.push([x / 1e6, y / 1e6]); }
+    return r;
+  }
+  async function laadWerkbank(gm) {
+    const c = gm.code.replace('GM', '');
+    const d = await haalGz(LC_DATA + c + '.json.gz');
+    if (d.formaat !== 1) throw new Error('Onbekend formaat van het werkbankbestand');
+    const lang = (i, t) => String(i).length === 10 ? c + t + i : String(i);
+    const w = d.w, wps = new Set();
+    const panden = d.p.map(([id, bj, ringen, K, O, L]) => {
+      const polys = ringen.map(poly => poly.map(ringUit));
+      const kvbo = K.map(([vid, doel, opp, str, nr, lt, toe, pc, wp, x, y]) => {
+        wps.add(w.wp[wp]);
+        return { id: lang(vid, '01'), gd: w.doel[doel], opp: opp || 0, wp: w.wp[wp], adres: `${w.str[str] || ''} ${nr ?? ''}${lt || ''}${toe ? '-' + toe : ''}`.trim(), pc, xy: x == null ? null : [x / 1e6, y / 1e6] };
+      });
+      const pid = lang(id, '10');
+      const p = { uuid: pid, id: pid, bouwjaar: bj, geom: polys.length === 1 ? { type: 'Polygon', coordinates: polys[0] } : { type: 'MultiPolygon', coordinates: polys }, kvbo, overig: null,
+        label: L ? { dominant_label: L[0], hoogste_label: L[1], laagste_label: L[2], aant_labels: L[3] } : null, labelOnbekend: false };
+      p.offMin = sum(kvbo.filter(v => v.gd === 'kantoorfunctie').map(v => v.opp));
+      p.offMax = sum(kvbo.map(v => v.opp));
+      // tot 100 m² kantoor is het aandeel niet nodig (buiten de plicht); dan geen totaal, zoals tot en met 1.7.4
+      p.overig = p.offMax <= 100 ? null : O.map(([vid, doel, opp]) => ({ id: lang(vid, '01'), gd: w.doel[doel], opp: opp || 0 }));
+      return p;
+    });
+    return { peil: d.peil, labels: d.labels, panden, woonplaatsen: [...wps].filter(Boolean).sort().map(naam => ({ id: naam, naam })) };
+  }
+
   // ---------- hoofdanalyse ----------
   async function analyse(gm, opts = {}) {
     const log = opts.log || (() => {});
     const step = opts.step || (() => {});
     const conc = opts.concurrency || 6;
 
-    step('woonplaatsen', 'Woonplaatsen ophalen');
-    const wps = await woonplaatsen(gm);
-    const wpSet = new Map(wps.map(w => [w.id, w.naam]));
-    if (!wps.length) throw new Error('Geen woonplaatsen gevonden voor ' + gm.naam + ' in de BAG.');
-    log(`${wps.length} woonplaats(en): ${wps.map(w => w.naam).join(', ')}`);
-
-    const tl = tiles(gm.geom);
-    step('vbo', `Verblijfsobjecten met kantoorfunctie ophalen (${tl.length} kaartvakken)`);
-    const vboMap = new Map();
-    let done = 0;
-    await pool(tl, conc, async t => {
-      const f = await getAllPages(likeUrl('verblijfsobject', t));
-      for (const x of f) {
-        const p = x.properties;
-        if (!wpSet.has(p.woonplaats_identificatie) || !VBO_ACTIEF.has(p.status)) continue;
-        vboMap.set(p.identificatie, { id: p.identificatie, gd: p.gebruiksdoel, opp: p.oppervlakte || 0, wp: p.woonplaats_identificatie, adres: `${p.openbare_ruimte_naam || ''} ${p.huisnummer || ''}${p.huisletter || ''}${p.toevoeging ? '-' + p.toevoeging : ''}`.trim(), pc: p.postcode, xy: x.geometry && x.geometry.coordinates, panden: (p['pand.href'] || []).map(uuidOf) });
-      }
-      opts.progress && opts.progress(++done / tl.length);
-    });
-    const kvbo = [...vboMap.values()];
-    log(`${kvbo.length} actieve verblijfsobjecten met kantoorfunctie`);
-
-    const pandUuids = new Set(kvbo.flatMap(v => v.panden));
-    step('pand', `Panden ophalen (${pandUuids.size})`);
-    const panden = new Map();
-    done = 0;
-    await pool(tl, conc, async t => {
-      const f = await getAllPages(likeUrl('pand', t));
-      for (const x of f) if (pandUuids.has(x.id) && !panden.has(x.id)) panden.set(x.id, x);
-      opts.progress && opts.progress(++done / tl.length);
-    });
-    const missend = [...pandUuids].filter(u => !panden.has(u));
-    if (missend.length) {
-      await pool(missend, conc, async u => {
-        try { const x = await getJSON(`${BAG}/pand/items/${u}?f=json`); panden.set(u, x); } catch (e) { /* overslaan */ }
-      });
-    }
-
-    // groepeer kantoor-VBO's per pand
+    // Kantoorpanden, verblijfsobjecten en energielabels komen sinds 1.8 vooraf per gemeente uit de BAG-werkbank
+    // (maandstand van de BAG en de RIVM-labellaag; recept recepten/labelc/). Live blijven monumenten en wijkgrenzen.
+    step('bag', 'Kantoorpanden en energielabels laden (BAG-werkbank)');
+    const W = await laadWerkbank(gm);
+    const wps = W.woonplaatsen;
     const P = new Map();
-    for (const [u, x] of panden) {
-      const p = x.properties;
-      if (PAND_INACTIEF.has(p.status)) continue;
-      P.set(u, { uuid: u, id: p.identificatie, bouwjaar: p.bouwjaar, status: p.status, aantal: p.aantal_verblijfsobjecten, geom: x.geometry, kvbo: [], overig: null });
-    }
-    for (const v of kvbo) for (const u of v.panden) if (P.has(u)) P.get(u).kvbo.push(v);
-
-    // welke panden hebben de overige VBO's nodig?
-    const nodig = [];
-    for (const p of P.values()) {
-      p.offMin = sum(p.kvbo.filter(v => v.gd === 'kantoorfunctie').map(v => v.opp));
-      p.offMax = sum(p.kvbo.map(v => v.opp));
-      if (p.offMax <= 100) continue;
-      if (p.kvbo.length === p.aantal) { p.overig = []; continue; }
-      nodig.push(p);
-    }
-    step('overig', `Overige functies in gemengde panden ophalen (${nodig.length})`);
-    done = 0;
-    await pool(nodig, conc, async p => {
-      const bb = bboxOf(p.geom);
-      try {
-        const f = await getAllPages(`${BAG}/verblijfsobject/items?f=json&limit=1000&bbox=${bb.map(r6).join(',')}`);
-        p.overig = f.filter(x => VBO_ACTIEF.has(x.properties.status) && (x.properties['pand.href'] || []).map(uuidOf).includes(p.uuid) && !vboMap.has(x.properties.identificatie))
-          .map(x => ({ id: x.properties.identificatie, gd: x.properties.gebruiksdoel, opp: x.properties.oppervlakte || 0 }));
-      } catch (e) { p.overig = null; p.fout = 'Overige verblijfsobjecten niet op te halen'; }
-      opts.progress && opts.progress(++done / Math.max(1, nodig.length));
-    });
+    for (const p of W.panden) P.set(p.id, p);
+    log(`${P.size} panden met kantoorfunctie, ${sum(W.panden.map(p => p.kvbo.length))} verblijfsobjecten; BAG-stand ${W.peil}, labels ${W.labels}`);
+    opts.progress && opts.progress(1);
 
     step('monumenten', 'Rijksmonumenten ophalen');
     const bb = bboxOf(gm.geom).map(r6).join(',');
@@ -1421,7 +1407,7 @@ footer { font-size: .8rem; color: var(--muted); }
         // in geen enkel pand: koppel aan het dichtstbijzijnde kantoorpand binnen de tolerantie
         const [p, d] = v.dicht.reduce((a, b) => (b[1] < a[1] ? b : a));
         if (d <= MON_TOL_M && !p.monument) { p.monument = monRef(v.m, 'afstand', d); opAfstand++; }
-      } else if (!P.has(v.thuis.id)) {
+      } else if (!P.has(v.thuis.properties.identificatie)) {
         // monument in een pand zonder kantoorfunctie: buren markeren
         for (const [p] of v.dicht) if (distGeomGeom(p.geom, v.thuis.geometry) <= MON_RAAK_M) addGrens(p, monRef(v.m, 'pand'));
       }
@@ -1455,60 +1441,23 @@ footer { font-size: .8rem; color: var(--muted); }
     for (const p of PL) { delete p.bb; if (p.monument) p.grenst = []; }
     log(`Monumenten gekoppeld; ${opAfstand} op afstand, ${PL.filter(p => p.grenst.length).length} panden grenzen aan een rijksmonument` + (nietBekeken ? `; ${nietBekeken} punten niet te controleren` : '') + '. ' + bagInfo);
 
-    step('labels', 'Energielabels ophalen bij RIVM');
     const lijst = [...P.values()];
-    // valt RIVM uit, dan loopt de analyse door; panden onder de plicht krijgen 'Label onbekend'
-    let labelsFout = null;
-    try { zetLabels(lijst, await haalLabels(lijst, opts)); }
-    catch (e) {
-      labelsFout = { tijd: new Date().toISOString(), melding: e.message || String(e) };
-      for (const p of lijst) { p.label = null; p.labelOnbekend = true; }
-      log('Energielabels niet beschikbaar: ' + labelsFout.melding);
-    }
+    const labelsFout = null;
 
     step('wijken', 'Wijkgrenzen ophalen');
     let wk = { jaar: null, lijst: [] };
     try { wk = await wijken(gm, gm.geom); } catch (e) { log('Wijkgrenzen niet beschikbaar'); }
     for (const p of lijst) {
       const v = p.kvbo[0];
-      p.adres = v ? `${v.adres}, ${wpSet.get(v.wp) || ''}` : '';
-      p.wp = v ? wpSet.get(v.wp) : '';
+      p.adres = v ? `${v.adres}, ${v.wp || ''}` : '';
+      p.wp = v ? v.wp : '';
       p.xy = v && v.xy;
       p.wijk = '';
       if (p.xy) for (const w of wk.lijst) if (inGeom(p.xy[0], p.xy[1], w.geom)) { p.wijk = w.naam; break; }
       classify(p);
     }
     step('klaar', 'Klaar');
-    return { gm: { code: gm.code, naam: gm.naam }, wijkJaar: wk.jaar, woonplaatsen: wps, panden: lijst, opgehaald: new Date().toISOString(), labelsFout };
-  }
-
-  async function haalLabels(lijst, opts = {}) {
-    const batches = [];
-    for (let i = 0; i < lijst.length; i += 80) batches.push(lijst.slice(i, i + 80));
-    const labels = new Map();
-    let done = 0;
-    await pool(batches, 4, async b => {
-      const flt = encodeURIComponent(`identificatie IN (${b.map(p => `'${p.id}'`).join(',')})`);
-      const d = await getJSON(`${RIVM}?service=WFS&version=2.0.0&request=GetFeature&typeNames=nl:rvo_energielabels&outputFormat=application/json&propertyName=identificatie,dominant_label,hoogste_label,laagste_label,aant_labels,aant_verblijfsobj&CQL_FILTER=${flt}`);
-      for (const f of d.features || []) if (f.properties.dominant_label) labels.set(f.properties.identificatie, f.properties);
-      opts.progress && opts.progress(++done / batches.length);
-    });
-    return labels;
-  }
-  function zetLabels(lijst, labels) {
-    for (const p of lijst) { p.label = labels.get(p.id) || null; p.labelOnbekend = false; }
-  }
-  // alleen de labels opnieuw ophalen voor een eerder resultaat; gooit een fout als RIVM nog steeds niet antwoordt
-  async function labelsOpnieuw(res, opts = {}) {
-    try {
-      zetLabels(res.panden, await haalLabels(res.panden, opts));
-      res.labelsFout = null;
-      res.labelsLater = new Date().toISOString();
-    } catch (e) {
-      res.labelsFout = { tijd: new Date().toISOString(), melding: e.message || String(e) };
-      throw e;
-    }
-    return res;
+    return { gm: { code: gm.code, naam: gm.naam }, wijkJaar: wk.jaar, woonplaatsen: wps, panden: lijst, opgehaald: new Date().toISOString(), peil: W.peil, labelsPeil: W.labels, labelsFout };
   }
 
   // drempels voor de monumentkoppeling, in meters
@@ -1859,7 +1808,7 @@ footer { font-size: .8rem; color: var(--muted); }
     return { lijst: g.stop.length ? [] : g.lijst, ggm: g };
   }
 
-  root.LabelC = { analyse, labelsOpnieuw, gemeenten, classify, leesLijst, leesInvoer, herkenGGM, leesGGM, zaakWoord, ZAAK_WOORDEN, koppelLijst, GGM, STATUS, EIGEN_STATUS, KOPPELING, inGeom, bboxOf, distPtGeom, distGeomGeom };
+  root.LabelC = { analyse, laadWerkbank, gemeenten, classify, leesLijst, leesInvoer, herkenGGM, leesGGM, zaakWoord, ZAAK_WOORDEN, koppelLijst, GGM, STATUS, EIGEN_STATUS, KOPPELING, inGeom, bboxOf, distPtGeom, distGeomGeom };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 </script>
@@ -1867,7 +1816,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.7.4';
+  const VERSIE = '1.8';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -1927,7 +1876,7 @@ footer { font-size: .8rem; color: var(--muted); }
   }; });
 
   // ---------- ophalen ----------
-  const STEPS = ['woonplaatsen', 'vbo', 'pand', 'overig', 'monumenten', 'labels', 'wijken'];
+  const STEPS = ['bag', 'monumenten', 'wijken'];
   async function run(gm) {
     try { history.replaceState(null, '', '#' + gm.code); } catch (e) {}
     $('#intro').hidden = true;
@@ -1966,7 +1915,7 @@ footer { font-size: .8rem; color: var(--muted); }
     const P = $('#progress'); P.hidden = false; P.classList.add('err');
     $('#progTitle').textContent = 'Niet gelukt';
     $('#steps').innerHTML = '';
-    $('#progLog').innerHTML = `<p>${esc(msg)} Controleer of je netwerk deze domeinen toelaat: api.pdok.nl, service.pdok.nl, data.rivm.nl. Probeer het daarna opnieuw.</p><p class="muted">Technisch: ${esc(e && e.message || e)}</p>`;
+    $('#progLog').innerHTML = `<p>${esc(msg)} Controleer of je netwerk deze domeinen toelaat: josephinelinders.nl, api.pdok.nl, service.pdok.nl, api.linkeddata.cultureelerfgoed.nl. Probeer het daarna opnieuw.</p><p class="muted">Technisch: ${esc(e && e.message || e)}</p>`;
   }
 
   // ---------- tonen ----------
@@ -1981,7 +1930,8 @@ footer { font-size: .8rem; color: var(--muted); }
     drawMap(); renderAll(); renderMelding();
     $('#dossier').innerHTML = '<span class="eyebrow">Pand</span><p class="muted" style="margin:0">Klik een pand op de kaart of in de tabel om te zien waarom het zo is ingedeeld.</p>';
     const d = new Date(res.opgehaald);
-    $('#foot').innerHTML = `Opgehaald ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, via PDOK), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; maandelijks bijgewerkt, loopt doorgaans enkele weken achter op EP-Online${res.labelsFout ? '; bij ophalen niet bereikbaar' : res.labelsLater ? ', later opgehaald ' + new Date(res.labelsLater).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' }) : ''}), rijksmonumenten (RCE, via PDOK en monumentenregister), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK). Indicatief: geen juridische vaststelling.<span id="footEigen"></span><br><a href="./">Josephine Linders</a> · Label C-kantoren · versie ${VERSIE}`;
+    const dl = v => v ? new Date(v).toLocaleDateString('nl-NL', { dateStyle: 'long' }) : '–';
+    $('#foot').innerHTML = `Geladen ${d.toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' })}${res.duur ? ` in ${res.duur} s` : ''} · Bronnen: BAG (Kadaster, landelijke GeoPackage via PDOK, stand ${dl(res.peil)}), energielabels (RIVM Atlas Leefomgeving, afgeleid uit EP-Online van RVO; opgehaald ${dl(res.labelsPeil)}, loopt doorgaans enkele weken achter op EP-Online), beide vooraf per gemeente verwerkt in de <a href="bagwerkbank.html">BAG-werkbank</a>; rijksmonumenten (RCE, via PDOK en monumentenregister, live), wijkgrenzen ${res.wijkJaar || '–'} en gemeentegrenzen ${state.gemeenten.jaar} (CBS, via PDOK, live). Indicatief: geen juridische vaststelling.<span id="footEigen"></span><br><a href="./">Josephine Linders</a> · Label C-kantoren · versie ${VERSIE}`;
     eigenTekstElders();
   }
 
@@ -2020,20 +1970,13 @@ footer { font-size: .8rem; color: var(--muted); }
     const f = $('#footEigen'); if (f) f.textContent = tot ? ` Eigen gegevens: ${fmt(tot)} ${tot === 1 ? 'pand' : 'panden'} (${fmt(t.uit)} uitgezonderd, ${fmt(t.voldoet)} voldoet volgens gemeente, ${fmt(t.aant)} met aantekening), uit een lijst die in deze browser is ingevoerd (geen open data).` : '';
   }
   function renderMelding() {
-    const f = state.res.labelsFout;
-    $('#labelMelding').hidden = !f;
-    if (!f) return;
-    const t = new Date(f.tijd).toLocaleString('nl-NL', { dateStyle: 'long', timeStyle: 'short' });
-    $('#labelMeldingTekst').innerHTML = `<b>Energielabels niet beschikbaar.</b> De labeldienst van RIVM gaf op ${esc(t)} geen antwoord. De analyse van panden, kantoorfunctie en monumenten is compleet; panden onder de plicht staan voorlopig als <b>Label onbekend</b>. <span class="muted small">(${esc(f.melding)})</span>`;
+    // de werkbank wordt maandelijks ververst; is de stand ouder dan 45 dagen, dan zeggen we dat
+    const res = state.res, peil = res.peil ? new Date(res.peil) : null;
+    const oud = peil && (Date.now() - peil) / 864e5 > 45;
+    $('#labelMelding').hidden = !oud;
+    if (!oud) return;
+    $('#labelMeldingTekst').innerHTML = `<b>Oudere stand.</b> De kantoorpanden en energielabels op deze pagina zijn van ${esc(peil.toLocaleDateString('nl-NL', { dateStyle: 'long' }))}. Normaal worden ze elke maand ververst; de laatste verversing is uitgebleven.`;
   }
-  $('#labelRetry').onclick = async () => {
-    const b = $('#labelRetry'); const res = state.res;
-    b.disabled = true; b.textContent = 'Bezig met ophalen…';
-    try { await LabelC.labelsOpnieuw(res); } catch (e) { /* melding toont het nieuwe tijdstip */ }
-    b.disabled = false; b.textContent = 'Labels opnieuw ophalen';
-    if (state.res !== res) return;
-    show(res);
-  };
   $('#eigenBtn').onclick = () => {
     const t = $('#eigen').value;
     state.eigenLijst = leesEigen(t);
