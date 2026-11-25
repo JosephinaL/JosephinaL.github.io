@@ -355,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.31';
+  const VERSIE = '0.32';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2601,10 +2601,11 @@ main > * { min-width: 0; }
         { k: 'bereik', b: 'open', naam: 'Verduurzaamde koopwoningen met rijkssteun',
           def: 'Aandeel koopwoningen dat sinds 2021 een energiesubsidie of -lening van het Rijk kreeg: ISDE, Warmtefonds, de subsidie voor verenigingen van eigenaren en de lokale aanpak isolatie.',
           zegt: 'Hoeveel eigenaren de regelingen gebruiken, en of dat in de eigen gemeente achterblijft.',
-          niet: 'Hoeveel woningen echt verduurzaamd zijn: een woning kan meer subsidies hebben, en wie zonder subsidie isoleert, ontbreekt. Huurwoningen lopen via corporaties en verhuurders.',
+          niet: 'Hoeveel woningen echt verduurzaamd zijn: het telt toekenningen, geen uitgevoerde maatregelen, en wie zonder rijksregeling isoleert, ontbreekt. Corporaties verduurzamen grotendeels buiten deze regelingen.',
+          inst: ['energiearmoede.html', 'Energiearmoede per buurt'],
           niveau: 'Gemeente; 2021–2025, jaarlijks.',
           norm: 'Nationaal Isolatieprogramma; Nederland.', vgl: 'Ja.',
-          bron: () => 'CBS, dashboard Energiesubsidies woningen 2021–2025 (<a href="https://www.cbs.nl/nl-nl/maatwerk/2026/40/dashboard-energiesubsidies-woningen-2021-2025" target="_blank" rel="noopener">maatwerk, oktober 2026</a>), op gegevens van RVO en het Nationaal Warmtefonds.',
+          bron: () => 'CBS, dashboard Energiesubsidies woningen 2021–2025 (<a href="https://www.cbs.nl/nl-nl/maatwerk/2026/40/dashboard-energiesubsidies-woningen-2021-2025" target="_blank" rel="noopener">maatwerk, september 2026</a>), op gegevens van RVO en het Nationaal Warmtefonds.',
           herkomst: 'Landelijk programma (Nationaal Isolatieprogramma).' },
         { k: 'bereik', b: 'open', naam: 'ISDE naar maatregel',
           def: 'Toegekende ISDE-subsidies naar maatregel: isolatie, warmtepomp, zonneboiler, aansluiting op een warmtenet.',
