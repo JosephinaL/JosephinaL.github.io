@@ -1818,7 +1818,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.8.1';
+  const VERSIE = '1.8.2';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -1976,7 +1976,7 @@ footer { font-size: .8rem; color: var(--muted); }
     const res = state.res, peil = res.peil ? new Date(res.peil) : null;
     const dl = v => new Date(v).toLocaleDateString('nl-NL', { dateStyle: 'long' });
     const volgende = peil ? new Date(peil.getFullYear(), peil.getMonth() + 1, 1).toLocaleDateString('nl-NL', { month: 'long' }) : '';
-    $('#leadStand').textContent = peil ? `Stand: BAG ${dl(res.peil)}, energielabels opgehaald ${dl(res.labelsPeil)}. Elke maand ververst; de volgende stand begin ${volgende}.` : '';
+    $('#leadStand').textContent = peil ? `Stand: ${dl(res.peil)}. Elke maand ververst, de volgende stand begin ${volgende}.` : '';
     const oud = peil && (Date.now() - peil) / 864e5 > 45;
     $('#labelMelding').hidden = !oud;
     if (!oud) return;
