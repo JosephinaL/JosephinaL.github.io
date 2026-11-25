@@ -1339,7 +1339,13 @@ footer { font-size: .8rem; color: var(--muted); }
       p.overig = p.offMax <= 100 ? null : O.map(([vid, doel, opp]) => ({ id: lang(vid, '01'), gd: w.doel[doel], opp: opp || 0 }));
       return p;
     });
-    return { peil: d.peil, labels: d.labels, panden, woonplaatsen: [...wps].filter(Boolean).sort().map(naam => ({ id: naam, naam })) };
+    // monumentpunten naast een kantoorpand: in welk pand ze liggen (vooraf bepaald; sinds 1.8.3)
+    const mon = new Map((d.m || []).map(([id, pand, ringen]) => {
+      const polys = ringen.map(poly => poly.map(ringUit));
+      const geometry = !polys.length ? null : polys.length === 1 ? { type: 'Polygon', coordinates: polys[0] } : { type: 'MultiPolygon', coordinates: polys };
+      return [id, pand ? { properties: { identificatie: pand }, geometry } : null];
+    }));
+    return { peil: d.peil, labels: d.labels, panden, mon, woonplaatsen: [...wps].filter(Boolean).sort().map(naam => ({ id: naam, naam })) };
   }
 
   // ---------- hoofdanalyse ----------
@@ -1393,14 +1399,21 @@ footer { font-size: .8rem; color: var(--muted); }
     // 3. registerpunt naast een kantoorpand: ligt het in een ander pand, of in geen enkel pand?
     log(`${vrij.length} monumentpunten naast een kantoorpand nader bekijken`);
     done = 0;
-    await pool(vrij, conc, async v => {
+    // eerst uit de werkbank; alleen punten die daar niet in staan (nieuw sinds de stand) nog live bij PDOK
+    const live = [];
+    for (const v of vrij) {
+      if (W.mon.has(v.m.id)) { v.thuis = W.mon.get(v.m.id); v.ok = true; }
+      else live.push(v);
+    }
+    if (vrij.length) log(`${vrij.length - live.length} uit de werkbank, ${live.length} live bij PDOK`);
+    await pool(live, conc, async v => {
       const e = 0.00003;
       try {
         const f = await getAllPages(`${BAG}/pand/items?f=json&limit=100&bbox=${bboxParam([v.x - e, v.y - e, v.x + e, v.y + e])}`);
         v.thuis = f.find(x => !PAND_INACTIEF.has(x.properties.status) && inGeom(v.x, v.y, x.geometry)) || null;
         v.ok = true;
       } catch (err) { v.ok = false; }
-      opts.progress && opts.progress(++done / Math.max(1, vrij.length));
+      opts.progress && opts.progress(++done / Math.max(1, live.length));
     });
     let opAfstand = 0, nietBekeken = 0;
     for (const v of vrij) {
@@ -1818,7 +1831,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.8.2';
+  const VERSIE = '1.8.3';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
