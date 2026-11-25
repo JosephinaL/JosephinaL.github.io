@@ -355,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.33';
+  const VERSIE = '0.33.1';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2715,6 +2715,7 @@ main > * { min-width: 0; }
           niveau: 'Gemeente, per corporatie; per jaar.',
           norm: 'Eigen prestatieafspraken.', vgl: 'Beperkt.',
           bron: () => 'Prestatieafspraken van gemeente, corporaties en huurdersorganisaties (openbaar per gemeente, niet als data).',
+          ggm: 'Geen entiteit gevonden voor een prestatieafspraak of een woningcorporatie. Het energielabel staat in het GGM alleen bij het eigen vastgoed (<code>vastgoedobject</code>).',
           herkomst: 'Voorstel atelier.' },
         { k: 'bereik', b: 'intern', naam: 'Huishoudens geholpen met energieadvies of kleine maatregelen',
           def: 'Aantal huishoudens dat bezoek kreeg van een energiecoach, energiefixer of fixteam, of kleine maatregelen zoals radiatorfolie, tochtstrips en ledlampen, en het deel met een laag inkomen.',
@@ -2723,6 +2724,7 @@ main > * { min-width: 0; }
           niveau: 'Gemeente, wijk; per jaar.',
           norm: 'Eigen doel.', vgl: 'Beperkt.',
           bron: () => 'Eigen registratie of die van de uitvoerder (energieloket, stichting).',
+          ggm: 'Geen entiteit voor energieadvies, een huisbezoek of kleine maatregelen. Loopt het via een subsidie aan de uitvoerder, dan alleen op het niveau van <code>subsidie</code> en <code>subsidiebeschikking.beschiktbedrag</code>, niet per huishouden.',
           herkomst: 'Voorstel atelier.' },
         { k: 'uitkomst', b: 'keten', naam: 'Betalingsachterstanden en afsluitingen bij energie',
           def: 'Signalen van energieleveranciers over betalingsachterstanden, en afsluitingen van gas en stroom wegens wanbetaling.',
@@ -2731,6 +2733,7 @@ main > * { min-width: 0; }
           niveau: 'Vroegsignalen per gemeente, bij de gemeente zelf; afsluitingen alleen landelijk.',
           norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (drempels en werkwijze verschillen).',
           bron: () => 'Eigen registratie vroegsignalering (signalen van energieleveranciers); landelijke afsluitcijfers van Netbeheer Nederland; de Monitor Vroegsignalering van Divosa voor de deelnemende gemeenten.',
+          ggm: '<code>vroegsignaal.signaaldatum</code>, <code>.bedrag</code>, <code>.crisissignaal</code>, <code>.verzondendoor_rechtspersoon_id</code> (de energieleverancier); <code>vroegsignaalzaak.resultaat_enum_id</code>; <code>contactpoging.bereikt</code>. Een afsluiting zelf heeft geen entiteit.',
           herkomst: 'Wettelijke plicht (Wet gemeentelijke schuldhulpverlening) en het afsluitbeleid in de Energieregeling.' }
       ]
     },
