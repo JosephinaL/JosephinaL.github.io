@@ -771,6 +771,7 @@ header.top { display: flex; flex-wrap: wrap; align-items: flex-end; justify-cont
 
 /* kernzin + statusband */
 .lead { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 18px; }
+.lead .stand { flex-basis: 100%; }
 .lead .big { font-family: var(--f-display); font-stretch: 85%; font-size: 1.35rem; font-weight: 700; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px 6px 8px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); cursor: pointer; font-size: .9rem; }
@@ -945,6 +946,7 @@ footer { font-size: .8rem; color: var(--muted); }
       <div class="lead">
         <span class="big" id="leadBig"></span>
         <span class="muted" id="leadSub"></span>
+        <span class="muted small stand" id="leadStand"></span>
       </div>
       <div class="units" id="units" aria-label="Aandeel label C of beter in drie eenheden"></div>
       <div class="chiprow">
@@ -1816,7 +1818,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.8';
+  const VERSIE = '1.8.1';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -1972,6 +1974,9 @@ footer { font-size: .8rem; color: var(--muted); }
   function renderMelding() {
     // de werkbank wordt maandelijks ververst; is de stand ouder dan 45 dagen, dan zeggen we dat
     const res = state.res, peil = res.peil ? new Date(res.peil) : null;
+    const dl = v => new Date(v).toLocaleDateString('nl-NL', { dateStyle: 'long' });
+    const volgende = peil ? new Date(peil.getFullYear(), peil.getMonth() + 1, 1).toLocaleDateString('nl-NL', { month: 'long' }) : '';
+    $('#leadStand').textContent = peil ? `Stand: BAG ${dl(res.peil)}, energielabels opgehaald ${dl(res.labelsPeil)}. Elke maand ververst; de volgende stand begin ${volgende}.` : '';
     const oud = peil && (Date.now() - peil) / 864e5 > 45;
     $('#labelMelding').hidden = !oud;
     if (!oud) return;
