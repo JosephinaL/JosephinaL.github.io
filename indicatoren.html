@@ -355,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.34';
+  const VERSIE = '0.34.1';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2684,10 +2684,10 @@ main > * { min-width: 0; }
           uitTekst: 'Per gemeente, naar koop en huur, in Energiearmoede per buurt.',
           inst: ['energiearmoede.html', 'Energiearmoede per buurt'] },
         { k: 'bereik', b: 'open', naam: 'Aanvragen bij het Noodfonds Energie',
-          def: 'Aantal aanvragen bij het Tijdelijk Noodfonds Energie per 100 huishoudens, en het deel dat is goedgekeurd; per jaar, 2023–2025.',
+          def: 'Aantal aanvragen bij het Noodfonds Energie per 100 huishoudens, en het deel dat is toegekend. Tot en met 2025 heette het fonds Tijdelijk Noodfonds Energie.',
           zegt: 'Hoeveel huishoudens hun energierekening niet rond krijgen en zelf steun zoeken. Wie toestemming gaf, kan de gemeente sinds 2025 benaderen.',
           niet: 'Alle huishoudens met betaalproblemen: wie geen aanvraag doet of buiten de voorwaarden van het fonds valt, ontbreekt.',
-          niveau: 'Gemeente en wijk; per jaar, 2023–2025.',
+          niveau: 'Gemeente: 2025, met 2023 en 2024 als reeks. Wijk: 2025, in Energiearmoede per buurt.',
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja.',
           bron: () => 'Stichting Tijdelijk Noodfonds Energie, <a href="https://dashboard.noodfondsenergie.nl/" target="_blank" rel="noopener">dashboard van het Noodfonds Energie</a> (bijgewerkt 2 november 2026). Geen licentie vermeld; de aantallen per gemeente staan in de pagina, met de stichting als bron.',
           herkomst: 'Landelijke regeling (Sociale Zaken en Werkgelegenheid); vanaf 2027 een publieke regeling, uitgevoerd door de stichting in opdracht van het ministerie.',
