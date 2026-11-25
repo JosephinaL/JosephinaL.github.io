@@ -39,7 +39,7 @@ Ingedeeld naar de Iv3-hoofdtaakvelden: een instrument staat bij het taakveld waa
 | Bedrijvigheid per buurt *(in ontwikkeling)* | [bedrijvigheid.html](https://josephinelinders.nl/bedrijvigheid.html) | Hoe gemengd zijn wonen en werken per buurt? | CBS, BAG, Iv3 |
 | Gebied in beeld | [gebied.html](https://josephinelinders.nl/gebied.html) | Wat staat er op een bedrijventerrein of in een innovatiedistrict, en wat verandert er? | BAG, IBIS, CBS-buurten, RIVM |
 | **4 · Onderwijs** | | | |
-| Basisonderwijs per buurt | [onderwijs.html](https://josephinelinders.nl/onderwijs.html) | Waar krimpen en groeien basisscholen tot 2035? | DUO, BAG/PDOK, CBS |
+| Basisonderwijs per buurt | [onderwijs.html](https://josephinelinders.nl/onderwijs.html) | Waar krimpen en groeien basisscholen tot 2035, en welk schooladvies krijgt groep 8 naast de achterstandsscore per school? | DUO, BAG/PDOK, CBS |
 | Hoger onderwijs: studenten per gemeente | [studenten.html](https://josephinelinders.nl/studenten.html) | Waar wonen de studenten van een stad, en waar studeren de jongeren uit een gemeente? | DUO (studenten per woon- en studeergemeente), CBS, PDOK |
 | **6 · Sociaal domein** | | | |
 | Wmo per wijk | [wmo.html](https://josephinelinders.nl/wmo.html) | Hoeveel inwoners krijgen Wmo-ondersteuning, wie zijn dat, wat kost het en hoe verhoudt het zich per wijk tot de vergrijzing? | CBS (Wmo-cliënten, Regionale kerncijfers, Kerncijfers wijken en buurten), Iv3 (CBS), PDOK |
