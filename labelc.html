@@ -1022,7 +1022,7 @@ footer { font-size: .8rem; color: var(--muted); }
         <div class="card">
           <h2>Zo is ingedeeld</h2>
           <ul class="plain small">
-            <li><b>Plichtig</b>: meer dan 100 m² kantoorfunctie én minstens 50% van de gebruiksoppervlakte van het pand, geen monument.</li>
+            <li><b>Plichtig</b>: minstens 100 m² kantoorfunctie én minstens 50% van de gebruiksoppervlakte van het pand, geen monument.</li>
             <li><b>Onzeker</b>: een verblijfsobject heeft kantoor plus een andere functie. De BAG splitst die oppervlakte niet, dus de 50%- en 100 m²-toets zijn niet te maken. "Bedrijf" als industriefunctie meedoet, anders "gemengd".</li>
             <li><b>Label</b>: dominant label van het pand bij RIVM (afgeleid uit EP-Online). A t/m C voldoet.</li>
             <li><b>Onzeker: labels uiteen</b>: het dominante label is D of slechter, maar minstens één verblijfsobject in het pand heeft C of beter. Welk label voor het gebouw geldt, is uit open data niet vast te stellen. Deze panden tellen wel als plichtig, niet als voldoet.</li>
@@ -1335,8 +1335,8 @@ footer { font-size: .8rem; color: var(--muted); }
         label: L ? { dominant_label: L[0], hoogste_label: L[1], laagste_label: L[2], aant_labels: L[3] } : null, labelOnbekend: false };
       p.offMin = sum(kvbo.filter(v => v.gd === 'kantoorfunctie').map(v => v.opp));
       p.offMax = sum(kvbo.map(v => v.opp));
-      // tot 100 m² kantoor is het aandeel niet nodig (buiten de plicht); dan geen totaal, zoals tot en met 1.7.4
-      p.overig = p.offMax <= 100 ? null : O.map(([vid, doel, opp]) => ({ id: lang(vid, '01'), gd: w.doel[doel], opp: opp || 0 }));
+      // onder 100 m² kantoor is het aandeel niet nodig (buiten de plicht, Bbl 3.87 lid 3); dan geen totaal
+      p.overig = p.offMax < 100 ? null : O.map(([vid, doel, opp]) => ({ id: lang(vid, '01'), gd: w.doel[doel], opp: opp || 0 }));
       return p;
     });
     // monumentpunten naast een kantoorpand: in welk pand ze liggen (vooraf bepaald; sinds 1.8.3)
@@ -1525,9 +1525,9 @@ footer { font-size: .8rem; color: var(--muted); }
     const otherOpp = p.overig ? sum(p.overig.map(v => v.opp)) : null;
     p.totaal = otherOpp == null ? null : p.offMax + otherOpp;
     r.push(`${p.kvbo.length} verblijfsobject(en) met kantoorfunctie: ${fmt(p.offMin)} m² puur kantoor` + (amb.length ? `, ${fmt(p.offMax - p.offMin)} m² in objecten met meerdere functies (${uniq(amb.map(v => v.gd)).join('; ')})` : '') + '.');
-    if (p.offMax <= 100) {
+    if (p.offMax < 100) {
       p.plicht = 'nee'; p.status = 'buiten';
-      r.push(`Kantooroppervlakte hooguit ${fmt(p.offMax)} m²: niet meer dan 100 m², dus uitgezonderd.`);
+      r.push(`Kantooroppervlakte hooguit ${fmt(p.offMax)} m²: minder dan 100 m², dus uitgezonderd.`);
       p.redenering = r; return p;
     }
     if (p.totaal == null) {
@@ -1537,7 +1537,7 @@ footer { font-size: .8rem; color: var(--muted); }
       const sMin = p.offMin / p.totaal, sMax = p.offMax / p.totaal;
       r.push(`Totaal pand ${fmt(p.totaal)} m² in ${p.kvbo.length + p.overig.length} verblijfsobject(en); aandeel kantoor ${pct(sMin)}${sMax !== sMin ? '–' + pct(sMax) : ''}.`);
       if (sMax < 0.5) { p.plicht = 'nee'; p.status = 'buiten'; r.push('Kantoor is minder dan 50% van het pand, dus geen kantoorgebouw in de zin van de verplichting.'); p.redenering = r; return p; }
-      if (p.offMin > 100 && sMin >= 0.5) { p.plicht = 'ja'; r.push('Meer dan 100 m² kantoor en minstens 50% kantoor: valt onder de verplichting.'); }
+      if (p.offMin >= 100 && sMin >= 0.5) { p.plicht = 'ja'; r.push('Minstens 100 m² kantoor en minstens 50% kantoor: valt onder de verplichting.'); }
       else {
         p.plicht = 'onzeker';
         const bedrijf = amb.some(v => /industriefunctie/.test(v.gd));
@@ -1831,7 +1831,7 @@ footer { font-size: .8rem; color: var(--muted); }
 (function () {
   const $ = s => document.querySelector(s);
   const ST = LabelC.STATUS;
-  const VERSIE = '1.8.3';
+  const VERSIE = '1.8.4';
   const ES = LabelC.EIGEN_STATUS, ANN = ['in_behandeling', 'aangeschreven', 'niet_beoordeeld'];
   const ORDER = ['voldoet_niet', 'geen_label', 'label_onbekend', 'label_uiteen', 'voldoet_eigen', 'voldoet', 'onzeker_bedrijf', 'onzeker_gemengd', 'monument', 'eigen', 'buiten'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();

@@ -1065,7 +1065,7 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
           <h2>Signalen</h2>
           <ul class="plain small">
             <li><b>Niet (meer) in gebruik in de BAG</b>: verblijfsobject ingetrokken, niet gerealiseerd of buiten gebruik; pand gesloopt, buiten gebruik of met sloopvergunning.</li>
-            <li><b>Kantoor zonder label C</b>: het pand valt onder de label C-plicht (meer dan 100 m² en minstens de helft kantoor, geen rijksmonument) en heeft label D of slechter, of geen geregistreerd label. Volledige toets op <a href="labelc.html">Label C-kantoren</a>.</li>
+            <li><b>Kantoor zonder label C</b>: het pand valt onder de label C-plicht (minstens 100 m² en minstens de helft kantoor, geen rijksmonument) en heeft label D of slechter, of geen geregistreerd label. Volledige toets op <a href="labelc.html">Label C-kantoren</a>.</li>
             <li><b>Controleren</b>: het eigen gebruik past niet bij het gebruiksdoel in de BAG, de eigen oppervlakte is meer dan anderhalf keer de gebruiksoppervlakte in de BAG, het object ligt op een ander perceel dan de lijst noemt, of de eigen perceelgrootte wijkt meer dan 2% (minstens 5 m²) af van de kadastrale kaart. Minder oppervlakte is geen signaal: een regel kan een deel van een verblijfsobject zijn. Let op: verhuurbare (VVO) en bruto vloeroppervlakte (BVO) wijken van nature af van de BAG-gebruiksoppervlakte.</li>
             <li>Het eigen gebruik wordt herkend aan woorden (kantoor, school, sport, winkel, buurthuis, zorg, opslag, atelier, parkeren en dergelijke). Termen als "multifunctioneel" of "leegstandbeheer" worden niet getoetst.</li>
           </ul>
@@ -1751,9 +1751,9 @@ label.check { display: flex; gap: 8px; align-items: baseline; }
     const pc = x => Math.round(x * 100) + '%';
     const basis = `Kantoor in het pand ${Math.round(offMin)}${offMax !== offMin ? '–' + Math.round(offMax) : ''} m² van ${Math.round(tot)} m² (${tot ? pc(offMin / tot) + (offMax !== offMin ? '–' + pc(offMax / tot) : '') : '–'}).`;
     if (p.monument) return { plicht: 'nee', uitkomst: 'monument', tekst: basis + ' Rijksmonument: uitgezonderd van de label C-plicht.' };
-    if (offMax <= 100) return { plicht: 'nee', uitkomst: 'nvt', tekst: basis + ' Niet meer dan 100 m² kantoor: geen label C-plicht.' };
+    if (offMax < 100) return { plicht: 'nee', uitkomst: 'nvt', tekst: basis + ' Minder dan 100 m² kantoor: geen label C-plicht.' };
     if (tot && offMax / tot < 0.5) return { plicht: 'nee', uitkomst: 'nvt', tekst: basis + ' Minder dan de helft kantoor: geen kantoorgebouw in de zin van de plicht.' };
-    if (offMin > 100 && tot && offMin / tot >= 0.5) {
+    if (offMin >= 100 && tot && offMin / tot >= 0.5) {
       if (!L) return { plicht: 'ja', uitkomst: 'geen_label', tekst: basis + ' Valt onder de plicht; geen geregistreerd energielabel.' };
       return { plicht: 'ja', uitkomst: ok ? 'voldoet' : 'voldoet_niet', tekst: basis + ` Valt onder de plicht; dominant label ${L.dominant_label}: ${ok ? 'voldoet' : 'slechter dan C'}.` };
     }
@@ -2072,7 +2072,7 @@ TST-014;Testobject 14;Kantoor;;;;ZLE00;P;3600;2;;;;;Fictief kantoren;appartement
   const $ = s => document.querySelector(s);
   const E = window.EigenLijst;
   const ST = E.STATUS;
-  const VERSIE = '0.4.0';
+  const VERSIE = '0.4.1';
   const ORDER = ['bag', 'label_c', 'controleren', 'in_orde', 'niet'];
   const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const col = s => css('--st-' + s);
