@@ -355,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.35';
+  const VERSIE = '0.35.1';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1026,13 +1026,13 @@ main > * { min-width: 0; }
           bron: () => 'Startset JIKP in Mijn DUO: persoonsgegevens, alleen voor de eigen gemeente (grondslag Wet register onderwijsdeelnemers). Op deze pagina staat alleen de route, nooit de inhoud.',
           ggm: '<code>leerling.kwetsbarejongere</code>.',
           herkomst: 'Voorstel atelier; levering van DUO aan gemeenten.' },
-        { k: 'context', b: 'open', naam: 'Leerlingen in vso, praktijkonderwijs en entree',
+        { k: 'context', b: 'open', uitTekst: 'Geen cijfer per gemeente: tel in de DUO-bestanden de scholen in je gemeente op. Dat zijn scholen, geen inwoners. Entree (mbo niveau 1) staat wel naar woongemeente. De links staan bij de bron als je de indicator opent.', naam: 'Leerlingen in vso, praktijkonderwijs en entree',
           def: 'Aantal leerlingen in het voortgezet speciaal onderwijs, het praktijkonderwijs en de entreeopleidingen: de groep waaruit de JIKP-cohorten komen.',
           zegt: 'Hoe groot de instroom in de overstap is.',
-          niet: 'Hoe het hen daarna vergaat (zie Wat jongeren doen na de overstap). Er wordt per school geteld, niet per woonplaats, en scholen hebben vaak een regiofunctie.',
-          niveau: 'Vestiging en instelling. Jaarlijks, peildatum 1 oktober.',
+          niet: 'Hoe het hen daarna vergaat (zie Wat jongeren doen na de overstap). Vso en praktijkonderwijs worden per school geteld, niet per woonplaats, en scholen hebben vaak een regiofunctie.',
+          niveau: 'Vso en praktijkonderwijs per schoolvestiging; entree per woongemeente. Jaarlijks, peildatum 1 oktober.',
           norm: 'Eigen gemeente door de jaren.', vgl: 'Beperkt (regiofunctie van scholen).',
-          bron: () => '<a href="https://duo.nl/open_onderwijsdata/" target="_blank" rel="noopener">DUO Open Onderwijsdata</a>: leerlingen vo en (v)so per vestiging, studenten mbo per instelling en opleiding.',
+          bron: () => 'DUO Open Onderwijsdata: <a href="https://duo.nl/open_onderwijsdata/primair-onderwijs/aantal-leerlingen/leerlingen-onderwijssoort-cluster-leeftijd.jsp" target="_blank" rel="noopener">leerlingen (v)so per schoolvestiging</a> (kolom soort onderwijs, met de gemeente van de school); <a href="https://duo.nl/open_onderwijsdata/voortgezet-onderwijs/aantal-leerlingen/aantal-leerlingen.jsp" target="_blank" rel="noopener">leerlingen vo per vestiging naar onderwijstype</a> (praktijkonderwijs); <a href="https://duo.nl/open_onderwijsdata/middelbaar-beroepsonderwijs/aantal-studenten/aantal-mbo-studenten-sector-type-mbo.jsp" target="_blank" rel="noopener">mbo-studenten per type mbo, niveau en woongemeente</a> (entree is niveau 1).',
           herkomst: 'Voorstel atelier.' },
         { k: 'context', b: 'open', uitTekst: 'Per gemeente in het Excel-bestand van DUO. De link staat bij de bron als je de indicator opent.', naam: 'Schoolverzuim',
           def: 'Leerlingen met absoluut verzuim (leerplichtig, niet ingeschreven), relatief verzuim (16 uur of meer ongeoorloofd in vier lesweken) en langdurig relatief verzuim.',
@@ -1042,15 +1042,14 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Beperkt (meldgedrag per school en gemeente).',
           bron: () => '<a href="https://duo.nl/open_onderwijsdata/onderwijs-algemeen/verzuim/verzuim-gemeente.jsp" target="_blank" rel="noopener">DUO, Verzuim per gemeente</a> (Excel). De aantallen komen uit de opgave van gemeenten.',
           herkomst: 'BBV-verplicht (absoluut en relatief verzuim).' },
-        { k: 'context', b: 'open', naam: 'Jongeren met een uitkering, naar soort',
+        { k: 'context', b: 'open', uit: { b: 'jmuitk', w: r => { const t = r.T001410 && r.T001410.Jongeren15Tot27Jaar_1, a = r.A045274 && r.A045274.Jongeren15Tot27JaarRelatief_2; return t == null || a == null || t < 1000 ? null : a; }, f: 'pct', l: 'van de jongeren van 15 tot 27 jaar heeft een uitkering', leeg: 'minder dan 1.000 jongeren', x: (r, nl) => { const p = (row, k) => row && row[k] && row[k].Jongeren15Tot27JaarRelatief_2 != null ? row[k].Jongeren15Tot27JaarRelatief_2.toLocaleString('nl-NL', { maximumFractionDigits: 1, minimumFractionDigits: 1 }) + '%' : '–'; return `<span class="un">WW ${p(r, 'A045250')}, arbeidsongeschiktheid ${p(r, 'A048564')} (waarvan Wajong ${p(r, 'A048570')}), bijstand ${p(r, 'A048571')}. Op 31 december; aantallen afgerond op tientallen.</span>`; } }, naam: 'Jongeren met een uitkering, naar soort',
           def: 'Aandeel jongeren van 15 tot 27 jaar met een uitkering op 31 december, naar werkloosheid, arbeidsongeschiktheid (waaronder Wajong) en bijstand.',
           zegt: 'Hoeveel jongeren vroeg afhankelijk worden van een uitkering, en van welke.',
           niet: 'Of ze ook geen onderwijs volgen of werk zoeken. Telt op 31 december en wijkt daardoor af van de uitkeringen in de arbeidsmarkttabel, die naar de maand oktober kijkt.',
           niveau: 'Gemeente. Jaarlijks; laatste jaar 2025.',
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, bij kleine aantallen beperkt.',
           bron: () => `${jm('20397NED')}.`,
-          herkomst: 'Landelijke monitor (Jeugdmonitor).',
-          inst: ['werkeninkomen.html', 'Werk en inkomen per wijk'] },
+          herkomst: 'Landelijke monitor (Jeugdmonitor).' },
         { k: 'bereik', b: 'intern', naam: 'Van jeugdhulp naar volwassenenzorg rond de 18',
           def: 'Van de jongeren die op hun 18e jeugdhulp hadden: het aandeel dat een half jaar later verlengde jeugdhulp, Wmo-ondersteuning of een voorziening uit de Participatiewet heeft, of niets.',
           zegt: 'Of de 18e verjaardag een gat slaat. Rond die leeftijd stopt de jeugdhulp meestal en begint de volwassenenzorg.',
@@ -3262,6 +3261,7 @@ main > * { min-width: 0; }
     trajV: { api: CBSAPI, t: '85097NED', geo: 'RegioS', per: 'JJ', extra: "(VerwijzerJeugdzorg eq 'T001376' or VerwijzerJeugdzorg eq 'A044132')", samen: 1 },
     kost: { api: CBSAPI, t: '83454NED', geo: 'Regio', per: 'JJ', extra: "VormenVanJeugdzorg eq 'A045561'" },
     vsv: { api: CBSAPI, t: '84780NED', geo: 'Regiokenmerken', per: 'SJ', extra: "Geslacht eq 'T001038'" },
+    jmuitk: { api: JMAPI, t: '20397NED', geo: 'RegioS', per: 'JJ', dim: 'Uitkeringspositie', extra: "Woonsituatie eq 'T001290'" },
     neet: { api: CBSAPI, t: '86444NED', geo: 'RegioS', per: 'JJ', dim: 'Onderwijsvolgend', extra: "Uitkering eq 'T001410' and GeregistreerdWerkzoekendeBijUWV eq 'T001615' and ((Onderwijsvolgend eq 'T001144' and Arbeidskenmerken eq 'T001095') or (Onderwijsvolgend eq '2020252' and Arbeidskenmerken eq '3000805'))" },
     verh: { api: CBSAPI, t: '60048ned', geo: 'RegioS', per: 'JJ' },
     huw: { api: CBSAPI, t: '37890', geo: 'RegioS', per: 'JJ' },
