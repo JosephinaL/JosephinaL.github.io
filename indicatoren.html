@@ -355,7 +355,7 @@ main > * { min-width: 0; }
 <script>
 (function () {
   'use strict';
-  const VERSIE = '0.35.1';
+  const VERSIE = '0.35.2';
   const PRODUCT = 'Indicatoren belicht';
   const $ = s => document.querySelector(s);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1110,7 +1110,7 @@ main > * { min-width: 0; }
           norm: 'Nederland; eigen gemeente door de jaren.', vgl: 'Ja, bij kleine aantallen beperkt.',
           bron: () => `${cbs('84780NED')}; ${duoDash}.`,
           herkomst: 'BBV-verplicht; wettelijk streefcijfer van het regionaal programma 2026–2029 (nieuwe voortijdig schoolverlaters).' },
-        { k: 'uitkomst', b: 'open', uit: { b: 'neet', w: r => { const t = r.T001144 && r.T001144.Jongeren15Tot27Jaar_1, n = r['2020252'] && r['2020252'].Jongeren15Tot27Jaar_1; return t == null || n == null || t < 5000 ? null : 100 * n / t; }, f: 'pct', l: 'van de jongeren van 15 tot 27 jaar volgt geen onderwijs en werkt niet', vl: 1, leeg: 'minder dan 5.000 jongeren; het CBS rondt af op honderdtallen, te grof voor een aandeel', x: r => `<span class="un">Ongeveer ${r['2020252'].Jongeren15Tot27Jaar_1.toLocaleString('nl-NL')} jongeren, afgerond op honderdtallen. Een benadering van het streefcijfer: het CBS telt vanaf 15 jaar, en wie als zelfstandige werkt, werkt.</span>` }, naam: 'Jongeren zonder werk en onderwijs',
+        { k: 'uitkomst', b: 'open', uit: { b: 'neet', w: r => { const t = r['T001144|T001095'] && r['T001144|T001095'].Jongeren15Tot27Jaar_1, n = r['2020252|3000805'] && r['2020252|3000805'].Jongeren15Tot27Jaar_1; return t == null || n == null || t < 5000 ? null : 100 * n / t; }, f: 'pct', l: 'van de jongeren van 15 tot 27 jaar volgt geen onderwijs en werkt niet', vl: 1, leeg: 'minder dan 5.000 jongeren; het CBS rondt af op honderdtallen, te grof voor een aandeel', x: r => `<span class="un">Ongeveer ${r['2020252|3000805'].Jongeren15Tot27Jaar_1.toLocaleString('nl-NL')} jongeren, afgerond op honderdtallen. Een benadering van het streefcijfer: het CBS telt vanaf 15 jaar, en wie als zelfstandige werkt, werkt.</span>` }, naam: 'Jongeren zonder werk en onderwijs',
           def: 'Jongeren van 16 tot 27 jaar die op 1 oktober geen formeel onderwijs volgen, geen inkomen uit een dienstbetrekking hebben en niet als zelfstandige in de KvK staan (neet). Een uitkering sluit niet uit.',
           zegt: 'Hoe groot de groep is die buiten school en werk staat, ook na de JIKP-leeftijd.',
           niet: 'Of ze ondersteuning willen of nodig hebben: ook wie mantelzorgt, voor kinderen zorgt, een Wlz-indicatie heeft of een tussenjaar neemt, telt mee. Het DUO-dashboard werkt met een eigen inkomensgrens; noem die erbij als je het gebruikt.',
@@ -3262,7 +3262,7 @@ main > * { min-width: 0; }
     kost: { api: CBSAPI, t: '83454NED', geo: 'Regio', per: 'JJ', extra: "VormenVanJeugdzorg eq 'A045561'" },
     vsv: { api: CBSAPI, t: '84780NED', geo: 'Regiokenmerken', per: 'SJ', extra: "Geslacht eq 'T001038'" },
     jmuitk: { api: JMAPI, t: '20397NED', geo: 'RegioS', per: 'JJ', dim: 'Uitkeringspositie', extra: "Woonsituatie eq 'T001290'" },
-    neet: { api: CBSAPI, t: '86444NED', geo: 'RegioS', per: 'JJ', dim: 'Onderwijsvolgend', extra: "Uitkering eq 'T001410' and GeregistreerdWerkzoekendeBijUWV eq 'T001615' and ((Onderwijsvolgend eq 'T001144' and Arbeidskenmerken eq 'T001095') or (Onderwijsvolgend eq '2020252' and Arbeidskenmerken eq '3000805'))" },
+    neet: { api: CBSAPI, t: '86444NED', geo: 'RegioS', per: 'JJ', dim: 'Onderwijsvolgend', dim2: 'Arbeidskenmerken', extra: "Uitkering eq 'T001410' and GeregistreerdWerkzoekendeBijUWV eq 'T001615'" }, // geen geneste 'or': daarop geeft de CBS-dienst HTTP 500
     verh: { api: CBSAPI, t: '60048ned', geo: 'RegioS', per: 'JJ' },
     huw: { api: CBSAPI, t: '37890', geo: 'RegioS', per: 'JJ' },
     arm: { api: CBSAPI, t: '86131NED', geo: 'RegioS', per: 'JJ', extra: "PersoonsEnHuishoudenskenmerken eq 'T009002'" },
@@ -3307,7 +3307,7 @@ main > * { min-width: 0; }
         j.value.forEach(x => {
           const doel = String(x[u.geo]).trim() === (u.nl || 'NL01') ? nl : gmR, y = u.per ? +x.Perioden.slice(0, 4) : u.jaar;
           if (u.samen) { const v = String(x.VerwijzerJeugdzorg).trim(); if (v === 'A044132') { (doel[y] = doel[y] || {}).toegang = x.TotaalJeugdhulptrajectenInNatura_1; } else doel[y] = Object.assign(doel[y] || {}, x); }
-          else if (u.dim) (doel[y] = doel[y] || {})[String(x[u.dim]).trim()] = x; // meer rijen per jaar: per waarde van de dimensie
+          else if (u.dim) (doel[y] = doel[y] || {})[String(x[u.dim]).trim() + (u.dim2 ? '|' + String(x[u.dim2]).trim() : '')] = x; // meer rijen per jaar: per waarde van de dimensie (of twee dimensies, 'a|b')
           else doel[y] = x;
         });
         return { gm: gmR, nl };
